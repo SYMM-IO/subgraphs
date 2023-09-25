@@ -1,0 +1,20 @@
+type ResultPartyA @entity {
+  id: ID!
+  partyA: Bytes!
+  amount: BigInt!
+  timeStamp: BigInt!
+  blockNumber: BigInt!
+  trHash: Bytes!
+  liquidatePartyATimeStamp: BigInt
+}
+
+type ResultPartyB @entity {
+  id: ID!
+  amount: BigInt!
+  partyA: Bytes!
+  partyB: Bytes!
+  timeStamp: BigInt!
+  blockNumber: BigInt!
+  trHash: Bytes!
+  liquidatePartyBTimeStamp: BigInt
+}
