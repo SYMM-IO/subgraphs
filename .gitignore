@@ -10,3 +10,5 @@ package-lock.json
 .idea/
 pnpm-lock.yaml
 yarn-error.log
+analytics/src/contract_utils.ts
+*/abis/*
