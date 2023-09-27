@@ -17,14 +17,21 @@ def copy_abi_files(subgraph_dir, version):
 
     for file_name in files_to_copy:
         source = os.path.join(root_abis_dir, file_name)
-        destination = os.path.join(
+        destination_path = os.path.join(
             subgraph_abis_dir, file_name.replace(f"_{version}", "")
         )
 
-        shutil.copy(source, destination)
+        # Ensure destination directory exists
+        os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+
+        # Copy content from source to destination
+        with open(source, 'r') as src_file, open(destination_path, 'w') as dest_file:
+            content = src_file.read()
+            dest_file.write(content)
 
 
-def deploy_subgraph(subgraph_dir, config_file, deploy_url):
+
+def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
     print(f"Deploying {subgraph_dir} to {deploy_url} with config {config_file}")
 
     # Adjust the path for the config file when inside a subgraph directory
@@ -54,16 +61,21 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url):
 
     subprocess.run(["graph", "build"], check=True)
 
-    # Deploy the subgraph
-    subprocess.run(
-        ["graph", "deploy", "--product", "hosted-service", deploy_url], check=True
-    )
+    if not prepare_only:
+        subprocess.run(
+            ["graph", "deploy", "--product", "hosted-service", deploy_url], check=True
+        )
 
     # Change directory back to the root directory
     os.chdir("..")
 
 
 def main():
+    prepare_only = "--prepare-only" in sys.argv
+
+    if prepare_only:
+        sys.argv.remove("--prepare-only")
+
     if len(sys.argv) < 2:
         print(
             "Please provide the full path to the configuration file (e.g., configs/fix_review_test.json)"
@@ -85,7 +97,7 @@ def main():
         # Copy the ABI files to each subgraph directory
         copy_abi_files(subgraph, config["symmioVersion"])
 
-        deploy_subgraph(subgraph, config_file, config[f"{subgraph}DeployUrl"])
+        deploy_subgraph(subgraph, config_file, config[f"{subgraph}DeployUrl"], prepare_only)
 
         print(f"{subgraph} subgraph deployed")
 
