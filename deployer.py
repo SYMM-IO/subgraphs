@@ -30,7 +30,6 @@ def copy_abi_files(subgraph_dir, version):
             dest_file.write(content)
 
 
-
 def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
     print(f"Deploying {subgraph_dir} to {deploy_url} with config {config_file}")
 
