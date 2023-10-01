@@ -14,18 +14,19 @@ export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
     entity.symbolId = resultArr[2].toBigInt()
     entity.positionType = resultArr[3].toI32()
     entity.orderTypeOpen = resultArr[4].toI32()
-    entity.price = resultArr[6].toBigInt()
-    entity.marketPrice = resultArr[7].toBigInt()
-    entity.quantity = resultArr[8].toBigInt()
-    const initialLockedValues = resultArr[10].toTuple()
+    entity.price = resultArr[7].toBigInt()
+    entity.marketPrice = resultArr[8].toBigInt()
+    entity.quantity = resultArr[9].toBigInt()
+    const initialLockedValues = resultArr[11].toTuple()
     entity.cva = initialLockedValues[0].toBigInt()
-    entity.mm = initialLockedValues[1].toBigInt()
-    entity.lf = initialLockedValues[2].toBigInt()
-    entity.maxInterestRate = resultArr[12].toBigInt()
-    entity.partyA = resultArr[13].toAddress()
-    entity.quoteStatus = resultArr[15].toI32()
-    entity.timeStamp = resultArr[20].toBigInt()
-    entity.deadline = resultArr[22].toBigInt()
+    entity.lf = initialLockedValues[1].toBigInt()
+    entity.partyAmm = initialLockedValues[2].toBigInt()
+    entity.partyBmm = initialLockedValues[3].toBigInt()
+    entity.maxFundingRate = resultArr[13].toBigInt()
+    entity.partyA = resultArr[14].toAddress()
+    entity.quoteStatus = resultArr[16].toI32()
+    entity.timeStamp = resultArr[21].toBigInt()
+    entity.deadline = resultArr[24].toBigInt()
     return entity
 }
 
@@ -62,7 +63,7 @@ export function allocatedBalanceOfPartyB(partyB: Address, partyA: Address, contr
     }
 }
 
-export function getQuote(quoteId: BigInt, contractAddress: Address) : symmio__getQuoteResultValue0Struct{
+export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__getQuoteResultValue0Struct {
     let symmioContract = symmio.bind(contractAddress)
     return symmioContract.getQuote(quoteId)
 }

@@ -19,11 +19,12 @@ type ResultEntity @entity {
   price: BigInt
   quantity: BigInt
   cva: BigInt
-  mm: BigInt
+  partyAmm: BigInt
+  partyBmm: BigInt
   lf: BigInt
   leverage: BigInt
   requestedOpenLimitPrice: BigInt
-  maxInterestRate: BigInt
+  maxFundingRate: BigInt
   openedPrice: BigInt
   timeStamp: BigInt! #new
   marketPrice: BigInt
@@ -84,9 +85,10 @@ type InitialQuote @entity {
   price: BigInt!
   quantity: BigInt!
   cva: BigInt!
-  mm: BigInt!
+  partyAmm: BigInt
+  partyBmm: BigInt
   lf: BigInt!
-  maxInterestRate: BigInt!
+  maxFundingRate: BigInt!
   deadline: BigInt!
   quoteStatus: Int!
   marketPrice: BigInt!
