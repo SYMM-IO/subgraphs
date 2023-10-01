@@ -49,7 +49,7 @@ dataSources:
           handler: handleLiquidatePositionsPartyA
         - event: RequestToClosePosition(address,address,uint256,uint256,uint256,uint8,uint256,uint8)
           handler: handleRequestToClosePosition
-        - event: SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8)
+        - event: SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleSendQuote
         - event: ExpireQuote(uint8,uint256)
           handler: handleExpireQuote
