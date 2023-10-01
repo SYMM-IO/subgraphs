@@ -1,8 +1,8 @@
 {
   "network": "fantom",
-  "symmioAddress": "0x762407bEd807184F90F3eDcF2D7Ac9CB9d8901c6",
-  "symmioStartBlock": "57685538",
-  "symmioVersion": "8.0.0",
+  "symmioAddress": "0x155713e2F8E7bCeBB8aB107fa7377e9ca37A6F03",
+  "symmioStartBlock": "68411968",
+  "symmioVersion": "0.8.2",
   "multiAccounts": [
     {
       "symmioMultiAccountAddress": "0x0937bC09b8D073E4F1abE85470969475f714Ca6c",
