@@ -353,11 +353,12 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     entity.price = event.params.price
     entity.quantity = event.params.quantity
     entity.cva = event.params.cva
-    entity.mm = event.params.mm
+    entity.partyAmm = event.params.partyAmm
+    entity.partyBmm = event.params.partyBmm
+    entity.maxFundingRate = event.params.maxFundingRate
     entity.lf = event.params.lf
-    entity.maxInterestRate = event.params.maxInterestRate
     entity.deadline = event.params.deadline
-    entity.quoteStatus = event.params.quoteStatus
+    entity.quoteStatus = 0
     entity.marketPrice = event.params.marketPrice
     entity.averageClosedPrice = BigInt.fromI32(0)
     entity.closedAmount = BigInt.fromI32(0)
@@ -372,11 +373,12 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     initialEntity.price = event.params.price
     initialEntity.quantity = event.params.quantity
     initialEntity.cva = event.params.cva
-    initialEntity.mm = event.params.mm
+    entity.partyAmm = event.params.partyAmm
+    entity.partyBmm = event.params.partyBmm
+    entity.maxFundingRate = event.params.maxFundingRate
     initialEntity.lf = event.params.lf
-    initialEntity.maxInterestRate = event.params.maxInterestRate
     initialEntity.deadline = event.params.deadline
-    initialEntity.quoteStatus = event.params.quoteStatus
+    initialEntity.quoteStatus = 0
     initialEntity.marketPrice = event.params.marketPrice
 
     let symmioContract = symmio.bind(event.address)
@@ -538,7 +540,8 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
 
     let q = getQuote(event.params.quoteId, event.address);
     entity.cva = q.lockedValues.cva
-    entity.mm = q.lockedValues.mm
+    entity.partyAmm = q.lockedValues.partyAmm
+    entity.partyBmm = q.lockedValues.partyBmm
     entity.lf = q.lockedValues.lf
 
     entity.quoteId = event.params.quoteId
@@ -559,7 +562,7 @@ export function handleLockQuote(event: LockQuoteEvent): void {
 
         entity.quoteId = event.params.quoteId
         entity.partyB = event.params.partyB
-        entity.quoteStatus = event.params.quoteStatus
+        entity.quoteStatus = 1
         entity.timeStamp = event.block.timestamp
         entity.timestampsLockQuoteTimeStamp = event.block.timestamp
         entity.TrHashLockQuote = event.transaction.hash
@@ -584,7 +587,7 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
     entity.quoteId = event.params.quoteId
     entity.fillAmount = event.params.filledAmount
     entity.openedPrice = event.params.openedPrice
-    entity.quoteStatus = event.params.quoteStatus
+    entity.quoteStatus = 4
     entity.timeStamp = event.block.timestamp
     entity.timestampsOpenPositionTimeStamp = event.block.timestamp
     entity.TrHashOpenPosition = event.transaction.hash
@@ -607,14 +610,17 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
 
         let q = getQuote(event.params.quoteId, event.address);
         const newCva = q.lockedValues.cva
-        const newMM = q.lockedValues.mm
+        const newPartyAmm = q.lockedValues.partyAmm
+        const newPartyBmm = q.lockedValues.partyBmm
         const newLF = q.lockedValues.lf
 
         entity.cva = newCva
-        entity.mm = newMM
+        entity.partyAmm = newPartyAmm
+        entity.partyBmm = newPartyBmm
         entity.lf = newLF
         initialEntity.cva = newCva
-        initialEntity.mm = newMM
+        initialEntity.partyAmm = newPartyAmm
+        initialEntity.partyBmm = newPartyBmm
         initialEntity.lf = newLF
         initialEntity.quantity = event.params.filledAmount
         initialEntity.save()

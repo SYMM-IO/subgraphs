@@ -71,9 +71,9 @@ dataSources:
           handler: handleEmergencyClosePosition
         - event: FillCloseRequest(uint256,address,address,uint256,uint256,uint8)
           handler: handleFillCloseRequest
-        - event: LockQuote(address,uint256,uint8)
+        - event: LockQuote(address,uint256)
           handler: handleLockQuote
-        - event: OpenPosition(uint256,address,address,uint256,uint256,uint8)
+        - event: OpenPosition(uint256,address,address,uint256,uint256)
           handler: handleOpenPosition
         - event: UnlockQuote(address,uint256,uint8)
           handler: handleUnlockQuote
