@@ -47,7 +47,7 @@ dataSources:
           handler: handleRequestToCancelQuote
         - event: RequestToClosePosition(address,address,uint256,uint256,uint256,uint8,uint256,uint8)
           handler: handleRequestToClosePosition
-        - event: SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint8)
+        - event: SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleSendQuote
         - event: DiamondCut((address,uint8,bytes4[])[],address,bytes)
           handler: handleDiamondCut
@@ -61,15 +61,13 @@ dataSources:
           handler: handleAllocatePartyB
         - event: DeallocateForPartyB(address,address,uint256)
           handler: handleDeallocateForPartyB
-        - event: DepositForPartyB(address,uint256)
-          handler: handleDepositForPartyB
         - event: EmergencyClosePosition(uint256,address,address,uint256,uint256,uint8)
           handler: handleEmergencyClosePosition
         - event: FillCloseRequest(uint256,address,address,uint256,uint256,uint8)
           handler: handleFillCloseRequest
-        - event: LockQuote(address,uint256,uint8)
+        - event: LockQuote(address,uint256)
           handler: handleLockQuote
-        - event: OpenPosition(uint256,address,address,uint256,uint256,uint8)
+        - event: OpenPosition(uint256,address,address,uint256,uint256)
           handler: handleOpenPosition
         - event: TransferAllocation(uint256,address,address)
           handler: handleTransferAllocation
@@ -77,7 +75,7 @@ dataSources:
           handler: handleUnlockQuote
         - event: ActiveEmergencyMode()
           handler: handleActiveEmergencyMode
-        - event: AddSymbol(uint256,string,uint256,uint256,uint256)
+        - event: AddSymbol(uint256,string,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleAddSymbol
         - event: DeactiveEmergencyMode()
           handler: handleDeactiveEmergencyMode
@@ -139,8 +137,6 @@ dataSources:
           handler: handleUnpausePartyAActions
         - event: UnpausePartyBActions()
           handler: handleUnpausePartyBActions
-        - event: FullyLiquidatedPartyA(address)
-          handler: handleFullyLiquidatedPartyA
         - event: FullyLiquidatedPartyB(address,address)
           handler: handleFullyLiquidatedPartyB
         - event: LiquidatePartyA(address,address)
