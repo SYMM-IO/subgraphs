@@ -27,6 +27,7 @@ def copy_abi_files(subgraph_dir, version):
         # Copy content from source to destination
         with open(source, 'r') as src_file, open(destination_path, 'w') as dest_file:
             content = src_file.read()
+            print(f"Writing {src_file.name} to {dest_file.name}")
             dest_file.write(content)
 
 

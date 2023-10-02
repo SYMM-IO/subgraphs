@@ -11,7 +11,6 @@ import {
 	DeallocateForPartyB,
 	DeallocatePartyA,
 	Deposit,
-	DepositForPartyB,
 	DiamondCut,
 	EmergencyClosePosition,
 	ExpireQuote,
@@ -19,7 +18,6 @@ import {
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
 	ForceClosePosition,
-	FullyLiquidatedPartyA,
 	FullyLiquidatedPartyB,
 	LiquidatePartyA,
 	LiquidatePartyB,
@@ -162,10 +160,11 @@ export function handleSendQuote(event: SendQuote): void {
 	quote.deadline = event.params.deadline;
 	quote.quantity = event.params.quantity;
 	quote.cva = event.params.cva;
-	quote.mm = event.params.mm;
+	quote.partyAmm = event.params.partyAmm;
+	quote.partyBmm = event.params.partyBmm;
 	quote.lf = event.params.lf;
-	quote.maxInterestRate = event.params.maxInterestRate;
-	quote.quoteStatus = event.params.quoteStatus;
+	quote.maxFundingRate = event.params.maxFundingRate;
+	quote.quoteStatus = QuoteStatus.PENDING;
 	quote.account = account.id;
 	quote.closedAmount = BigInt.fromString("0");
 	quote.avgClosedPrice = BigInt.fromString("0");
@@ -223,17 +222,6 @@ export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
 	account.save();
 }
 
-export function handleDepositForPartyB(event: DepositForPartyB): void {
-	let account = AccountModel.load(event.params.partyB.toHexString());
-	if (account == null) {
-		let user = createNewUser(event.params.partyB.toHexString(), null, event.block, event.transaction);
-		account = createNewAccount(event.params.partyB.toHexString(), user, null, event.block, event.transaction);
-	}
-	account.deposit = account.deposit.plus(event.params.amount);
-	account.updateTimestamp = event.block.timestamp;
-	account.save();
-}
-
 export function handleEmergencyClosePosition(
 	event: EmergencyClosePosition
 ): void {
@@ -243,9 +231,9 @@ export function handleFillCloseRequest(event: FillCloseRequest): void {
 	let quote = QuoteModel.load(event.params.quoteId.toString())!;
 	quote.avgClosedPrice = quote.avgClosedPrice
 		.times(quote.closedAmount)
-		.plus(event.params.fillAmount.times(event.params.closedPrice))
-		.div(quote.closedAmount.plus(event.params.fillAmount));
-	quote.closedAmount = quote.closedAmount.plus(event.params.fillAmount);
+		.plus(event.params.filledAmount.times(event.params.closedPrice))
+		.div(quote.closedAmount.plus(event.params.filledAmount));
+	quote.closedAmount = quote.closedAmount.plus(event.params.filledAmount);
 	if (quote.closedAmount.equals(quote.quantity))
 		quote.quoteStatus = QuoteStatus.CLOSED;
 	quote.updateTimestamp = event.block.timestamp;
@@ -253,7 +241,7 @@ export function handleFillCloseRequest(event: FillCloseRequest): void {
 	let history = TradeHistoryModel.load(
 		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString()
 	)!;
-	const additionalVolume = event.params.fillAmount
+	const additionalVolume = event.params.filledAmount
 		.times(event.params.closedPrice)
 		.div(BigInt.fromString("10").pow(18));
 	history.volume = history.volume.plus(additionalVolume);
@@ -282,7 +270,7 @@ export function handleFillCloseRequest(event: FillCloseRequest): void {
 
 	updateDailyOpenInterest(
 		event.block.timestamp,
-		unDecimal(event.params.fillAmount.times(quote.openPrice!)),
+		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
 		false,
 		account.accountSource
 	);
@@ -309,7 +297,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 	history.blockNumber = event.block.number;
 	history.transaction = event.transaction.hash;
 	history.volume = unDecimal(
-		event.params.fillAmount.times(event.params.openedPrice)
+		event.params.filledAmount.times(event.params.openedPrice)
 	);
 	history.quoteStatus = QuoteStatus.OPENED;
 	history.quote = event.params.quoteId;
@@ -317,16 +305,13 @@ export function handleOpenPosition(event: OpenPosition): void {
 	history.save();
 
 	let quote = QuoteModel.load(event.params.quoteId.toString())!;
+	const chainQuote = getQuote(BigInt.fromString(quote.id))!;
 	quote.openPrice = event.params.openedPrice;
-	if (quote.orderType == 0) {
-		quote.cva = quote.cva.times(quote.openPrice!).div(quote.price);
-		quote.lf = quote.lf.times(quote.openPrice!).div(quote.price);
-		quote.mm = quote.mm.times(quote.openPrice!).div(quote.price);
-	}
-	quote.cva = quote.cva.times(event.params.fillAmount).div(quote.quantity);
-	quote.lf = quote.lf.times(event.params.fillAmount).div(quote.quantity);
-	quote.mm = quote.mm.times(event.params.fillAmount).div(quote.quantity);
-	quote.quantity = event.params.fillAmount;
+	quote.cva = chainQuote.lockedValues.cva;
+	quote.lf = chainQuote.lockedValues.lf;
+	quote.partyAmm = chainQuote.lockedValues.partyAmm;
+	quote.partyBmm = chainQuote.lockedValues.partyBmm;
+	quote.quantity = event.params.filledAmount;
 	quote.updateTimestamp = event.block.timestamp;
 	quote.quoteStatus = QuoteStatus.OPENED;
 	quote.save();
@@ -336,7 +321,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 	if (symbol == null)
 		return
 
-	let tradingFee = event.params.fillAmount
+	let tradingFee = event.params.filledAmount
 		.times(quote.openPrice!)
 		.times(symbol.tradingFee)
 		.div(BigInt.fromString("10").pow(36));
@@ -500,11 +485,6 @@ export function handleUnpausePartyAActions(event: UnpausePartyAActions): void {
 }
 
 export function handleUnpausePartyBActions(event: UnpausePartyBActions): void {
-}
-
-export function handleFullyLiquidatedPartyA(
-	event: FullyLiquidatedPartyA
-): void {
 }
 
 export function handleFullyLiquidatedPartyB(
