@@ -57,9 +57,10 @@ type Quote @entity {
     deadline: BigInt!
     quantity: BigInt!
     cva: BigInt!
-    mm: BigInt!
+    partyAmm: BigInt!
+    partyBmm: BigInt!
     lf: BigInt!
-    maxInterestRate: BigInt!
+    maxFundingRate: BigInt!
     quoteStatus: Int!
     blockNumber: BigInt!
     closedAmount: BigInt!

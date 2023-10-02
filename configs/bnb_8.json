@@ -2,7 +2,7 @@
   "network": "bsc",
   "symmioAddress": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
   "symmioStartBlock": "29380515",
-  "symmioVersion": "8.0.0",
+  "symmioVersion": "0.8.0",
   "multiAccounts": [
     {
       "symmioMultiAccountAddress": "0x058Ba7574d8bC66F1a1DCc44bb5B18894D4190e0",
