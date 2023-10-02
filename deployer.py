@@ -59,6 +59,7 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
             stdout=open("subgraph.yaml", "w"),
         )
 
+    subprocess.run(["graph", "codegen"], check=True)
     subprocess.run(["graph", "build"], check=True)
 
     if not prepare_only:
