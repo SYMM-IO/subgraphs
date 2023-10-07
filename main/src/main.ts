@@ -22,7 +22,8 @@ import {
     SendQuote as SendQuoteEvent,
     SetSymbolsPrices as SetSymbolsPricesEvent,
     symmio,
-    UnlockQuote as UnlockQuoteEvent
+    UnlockQuote as UnlockQuoteEvent,
+    ChargeFundingRate as ChargeFundingRateEvent
 } from "../generated/symmio/symmio"
 import {
     DebugEntity,
@@ -38,6 +39,15 @@ import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getQuote, initialHe
 
 // const FACTOR: BigInt = BigInt.fromI32(10).pow(18);
 
+export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
+    for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+        let qoutId = event.params.quoteIds[i]
+        let entity = ResultEntity.load(qoutId.toString())!
+        entity.lastFundingPaymentTimestamp = event.block.timestamp
+        entity.openedPrice = entity.openedPrice!.times(event.params.rates[i]).plus(entity.openedPrice!)
+        entity.save()
+    }
+}
 
 export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
     const listOFSymbols = event.params.symbolIds.slice(0)
@@ -592,21 +602,10 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
     entity.timestampsOpenPositionTimeStamp = event.block.timestamp
     entity.TrHashOpenPosition = event.transaction.hash
     entity.quantity = event.params.filledAmount
+    entity.initialOpenedPrice = event.params.openedPrice
 
     if (entity.orderTypeOpen === 0) {
         const initialEntity = InitialQuote.load(entity.initialData!)!
-        // const priceCoef = event.params.openedPrice.times(FACTOR).div(initialEntity.price)
-        // const quantityCoef = event.params.filledAmount.times(FACTOR).div(initialEntity.quantity)
-        // const newCva = entity.cva!.times(priceCoef.times(quantityCoef)).div(FACTOR.times(FACTOR))
-        // const newMM = entity.mm!.times(priceCoef.times(quantityCoef)).div(FACTOR.times(FACTOR))
-        // const newLF = entity.lf!.times(priceCoef.times(quantityCoef)).div(FACTOR.times(FACTOR))
-
-        // let debug = new DebugEntity(event.transaction.hash.toHexString());
-        // debug.type = event.params.quoteId.toString()
-        // debug.trigger = newCva
-        // debug.timestamp = event.block.timestamp
-        // debug.message = `openPosition:{openPrice:${event.params.openedPrice.toString()}, requestedPrice:${initialEntity.price.toString()}, fillAmount:${event.params.filledAmount.toString()}, quantity:${initialEntity.quantity.toString()},oldCva:${entity.cva!.toString()}, newCva:${newCva.toString()}}`
-        // debug.save()
 
         let q = getQuote(event.params.quoteId, event.address);
         const newCva = q.lockedValues.cva
