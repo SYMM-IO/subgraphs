@@ -1,4 +1,4 @@
-import {BigInt, Bytes} from "@graphprotocol/graph-ts";
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import {
 	AcceptCancelCloseRequest,
 	AcceptCancelRequest,
@@ -69,7 +69,7 @@ import {
 	Symbol,
 	TradeHistory as TradeHistoryModel,
 } from "./../generated/schema";
-import {getQuote} from "./contract_utils";
+import { getQuote } from "./contract_utils";
 import {
 	createNewAccount,
 	createNewUser,
@@ -270,7 +270,7 @@ export function handleFillCloseRequest(event: FillCloseRequest): void {
 
 	updateDailyOpenInterest(
 		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
+		unDecimal(event.params.filledAmount.times(quote.requestedOpenPrice!)),
 		false,
 		account.accountSource
 	);
@@ -306,7 +306,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 
 	let quote = QuoteModel.load(event.params.quoteId.toString())!;
 	const chainQuote = getQuote(BigInt.fromString(quote.id))!;
-	quote.openPrice = event.params.openedPrice;
+	quote.requestedOpenPrice = event.params.openedPrice;
 	quote.cva = chainQuote.lockedValues.cva;
 	quote.lf = chainQuote.lockedValues.lf;
 	quote.partyAmm = chainQuote.lockedValues.partyAmm;
@@ -322,7 +322,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 		return
 
 	let tradingFee = event.params.filledAmount
-		.times(quote.openPrice!)
+		.times(quote.requestedOpenPrice!)
 		.times(symbol.tradingFee)
 		.div(BigInt.fromString("10").pow(36));
 
@@ -553,7 +553,7 @@ export function handleLiquidatePositionsPartyA(
 
 		updateDailyOpenInterest(
 			event.block.timestamp,
-			unDecimal(liquidAmount.times(quote.openPrice!)),
+			unDecimal(liquidAmount.times(quote.requestedOpenPrice!)),
 			false,
 			account.accountSource
 		);
@@ -614,7 +614,7 @@ export function handleLiquidatePositionsPartyB(
 
 		updateDailyOpenInterest(
 			event.block.timestamp,
-			unDecimal(liquidAmount.times(quote.openPrice!)),
+			unDecimal(liquidAmount.times(quote.requestedOpenPrice!)),
 			false,
 			account.accountSource
 		);

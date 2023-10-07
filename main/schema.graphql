@@ -28,6 +28,7 @@ type ResultEntity @entity {
   openedPrice: BigInt
   timeStamp: BigInt! #new
   marketPrice: BigInt
+  initialOpenedPrice: BigInt
 
   averageClosedPrice: BigInt
   closedAmount: BigInt
@@ -36,6 +37,7 @@ type ResultEntity @entity {
   initialData: InitialQuote
 
   # timestamp
+  lastFundingPaymentTimestamp: BigInt
   timestampsExpireQuoteTimeStamp: BigInt
   timestampsAcceptCancelCloseRequestTimeStamp: BigInt
   timestampsAcceptCancelRequestTimeStamp: BigInt
