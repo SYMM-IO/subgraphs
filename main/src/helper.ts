@@ -14,7 +14,7 @@ export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
     entity.symbolId = resultArr[2].toBigInt()
     entity.positionType = resultArr[3].toI32()
     entity.orderTypeOpen = resultArr[4].toI32()
-    entity.price = resultArr[7].toBigInt()
+    entity.requestedOpenPrice = resultArr[7].toBigInt()
     entity.marketPrice = resultArr[8].toBigInt()
     entity.quantity = resultArr[9].toBigInt()
     const initialLockedValues = resultArr[11].toTuple()
