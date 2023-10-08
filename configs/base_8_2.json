@@ -1,7 +1,7 @@
 {
   "network": "base",
-  "symmioAddress": "0x155713e2F8E7bCeBB8aB107fa7377e9ca37A6F03",
-  "symmioStartBlock": "68411968",
+  "symmioAddress": "0x52e2230cDb80EDEBDaDafcf24033608C9A636D7D",
+  "symmioStartBlock": "2228875",
   "symmioVersion": "0.8.2",
   "multiAccounts": [
     {

@@ -16,7 +16,7 @@ type ResultEntity @entity {
   symbolId: BigInt
   symbol: String
   positionType: Int
-  price: BigInt
+  requestedOpenPrice: BigInt
   quantity: BigInt
   cva: BigInt
   partyAmm: BigInt
@@ -84,13 +84,13 @@ type InitialQuote @entity {
   partyA: Bytes!
   symbolId: BigInt!
   positionType: Int!
-  price: BigInt!
+  requestedOpenPrice: BigInt!
   quantity: BigInt!
   cva: BigInt!
   partyAmm: BigInt
-  partyBmm: BigInt
+  partyBmm: BigInt!
   lf: BigInt!
-  maxFundingRate: BigInt!
+  maxFundingRate: BigInt
   deadline: BigInt!
   quoteStatus: Int!
   marketPrice: BigInt!
@@ -131,7 +131,7 @@ type PartyASymbolPrice @entity {
   id: String!
   partyA: Bytes!
   symbolId: BigInt!
-  price: BigInt!
+  requestedOpenPrice: BigInt!
   timeStamp: BigInt!
   trHash: Bytes!
 }

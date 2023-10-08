@@ -59,7 +59,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
         }
         entity.symbolId = listOFSymbols[i]
         entity.partyA = event.params.partyA
-        entity.price = listOfPrices[i]
+        entity.requestedOpenPrice = listOfPrices[i]
         entity.timeStamp = event.block.timestamp
         entity.trHash = event.transaction.hash
         entity.save()
@@ -216,9 +216,9 @@ export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyAEv
         let callResult = symmioContract.try_getQuote(qoutId)
         let partyASymbolPriceEntity = PartyASymbolPrice.load(event.params.partyA.toHexString().concat('-').concat(entity.symbolId!.toHex()))
         if (partyASymbolPriceEntity) {
-            entity.liquidatePrice = partyASymbolPriceEntity.price
+            entity.liquidatePrice = partyASymbolPriceEntity.requestedOpenPrice
         } else {
-            log.debug(`Error in get entity liquidate price`, [])
+            log.debug(`Error in get entity liquidate requestedOpenPrice`, [])
         }
         entity.save()
     }
@@ -259,7 +259,6 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
         const indexA = temp.indexOf(event.params.quoteId)
         const removedPa = temp.splice(indexA, 1)
         partyAEntity.quoteUntilLiquid = temp.slice(0)
-        log.debug(`remove in expire quote party A = ${removedPa}\nnew list: ${temp.toString()} remove index: ${indexA}`, [])
         partyAEntity.save()
     } else if (entity.quoteStatus === 1) {
         let partyAPartyBEntity = PartyApartyB.load(entity.partyA.toHexString() + '-' + entity.partyB!.toHexString())!
@@ -360,7 +359,7 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     entity.partyA = event.params.partyA
     entity.symbolId = event.params.symbolId
     entity.positionType = event.params.positionType
-    entity.price = event.params.price
+    entity.requestedOpenPrice = event.params.price
     entity.quantity = event.params.quantity
     entity.cva = event.params.cva
     entity.partyAmm = event.params.partyAmm
@@ -380,12 +379,12 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     initialEntity.partyA = event.params.partyA
     initialEntity.symbolId = event.params.symbolId
     initialEntity.positionType = event.params.positionType
-    initialEntity.price = event.params.price
+    initialEntity.requestedOpenPrice = event.params.price
     initialEntity.quantity = event.params.quantity
     initialEntity.cva = event.params.cva
-    entity.partyAmm = event.params.partyAmm
-    entity.partyBmm = event.params.partyBmm
-    entity.maxFundingRate = event.params.maxFundingRate
+    initialEntity.partyAmm = event.params.partyAmm
+    initialEntity.partyBmm = event.params.partyBmm
+    initialEntity.maxFundingRate = event.params.maxFundingRate
     initialEntity.lf = event.params.lf
     initialEntity.deadline = event.params.deadline
     initialEntity.quoteStatus = 0
@@ -466,14 +465,12 @@ export function handleAcceptCancelRequest(
         const indexA = temp.indexOf(event.params.quoteId)
         const removedPa = temp.splice(indexA, 1)
         partyAEntity.quoteUntilLiquid = temp.slice(0)
-        log.debug(`remove in accept cancel request party A = ${removedPa}\nnew list: ${temp.toString()} remove index: ${indexA}`, [])
         partyAEntity.save()
         let partyAPartyBEntity = PartyApartyB.load(entity.partyA.toHexString() + '-' + entity.partyB!.toHexString())!
         temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
         const indexB = temp.indexOf(event.params.quoteId)
         const removedPb = temp.splice(indexB, 1)
         partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
-        log.debug(`remove in accept cancel request party B = ${removedPb}\nnew list: ${temp.toString()} remove index: ${indexB}`, [])
 
         partyAPartyBEntity.save()
 
@@ -493,12 +490,7 @@ export function handleAcceptCancelRequest(
             let Result = callResult.value as ethereum.Tuple
             let initialNewEntity = initialHelper(Result)
             if (initialNewEntity) {
-                const debugEntity = new DebugEntity(event.transaction.hash.toString().concat(event.logIndex.toString()))
-                debugEntity.trigger = initialNewEntity.cva
-                debugEntity.type = "bind"
-                debugEntity.timestamp = event.block.timestamp
-                debugEntity.message = `qouteId: ${event.params.quoteId}`
-                debugEntity.save()
+
                 const symbol = symbolIdToSymbolName(initialNewEntity.symbolId, event.address)
                 if (symbol) {
                     initialNewEntity.symbol = symbol
@@ -534,19 +526,6 @@ export function handleEmergencyClosePosition(
 export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
 
-    // let debug = new DebugEntity(event.transaction.hash.toHexString());
-    // debug.type = event.params.quoteId.toString()
-    // debug.timestamp = event.block.timestamp
-    // debug.message = `fillClose:{quantity:${entity.quantity!.toString()}, closedAmount:${entity.closedAmount!.toString()}, oldCva:${entity.cva!.toString()}`
-
-    // const openAmount = entity.quantity!.minus(entity.closedAmount!)
-    // const coef = openAmount.minus(event.params.filledAmount).times(FACTOR).div(openAmount)
-    // entity.cva = entity.cva!.times(coef).div(FACTOR)
-    // entity.mm = entity.mm!.times(coef).div(FACTOR)
-    // entity.lf = entity.lf!.times(coef).div(FACTOR)
-
-    // debug.message = debug.message! + `,newCva:${entity.cva!.toString()}}`
-    // debug.save()
 
     let q = getQuote(event.params.quoteId, event.address);
     entity.cva = q.lockedValues.cva
@@ -632,14 +611,12 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
     const indexA = temp.indexOf(event.params.quoteId)
     const removedPa = temp.splice(indexA, 1)
     partyAEntity.quoteUntilLiquid = temp.slice(0)
-    log.debug(`remove in open positions party A = ${removedPa}\nnew list: ${temp.toString()} remove index: ${indexA}`, [])
     partyAEntity.save()
     let partyAPartyBEntity = PartyApartyB.load(event.params.partyA.toHexString() + '-' + event.params.partyB.toHexString())!
     temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
     const indexB = temp.indexOf(event.params.quoteId)
     const removedPb = temp.splice(indexB, 1)
     partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
-    log.debug(`remove in open positions party B = ${removedPb}\nnew list: ${temp.toString()} remove index: ${indexB}`, [])
 
     partyAPartyBEntity.save()
 }
