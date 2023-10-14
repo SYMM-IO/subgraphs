@@ -37,6 +37,7 @@ type ResultEntity @entity {
   initialData: InitialQuote
 
   # timestamp
+  subgraphTimestamp: String
   lastFundingPaymentTimestamp: BigInt
   timestampsExpireQuoteTimeStamp: BigInt
   timestampsAcceptCancelCloseRequestTimeStamp: BigInt
