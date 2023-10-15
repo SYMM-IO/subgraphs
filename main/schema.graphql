@@ -23,7 +23,6 @@ type ResultEntity @entity {
   partyBmm: BigInt
   lf: BigInt
   leverage: BigInt
-  requestedOpenLimitPrice: BigInt
   maxFundingRate: BigInt
   openedPrice: BigInt
   timeStamp: BigInt! #new
@@ -135,6 +134,12 @@ type PartyASymbolPrice @entity {
   requestedOpenPrice: BigInt!
   timeStamp: BigInt!
   trHash: Bytes!
+}
+
+type SymbolInfo @entity {
+  id: String!
+  symbolId: BigInt!
+  tradingFee: BigInt!
 }
 
 type DebugEntity @entity {
