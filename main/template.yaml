@@ -36,6 +36,8 @@ dataSources:
         - LiquidatePendingPositionsPartyA
         - SetSymbolsPrices
         - ChargeFundingRate
+        - AddSymbol
+        - SetSymbolTradingFee
       abis:
         - name: symmio
           file: ./abis/symmio.json
@@ -84,4 +86,8 @@ dataSources:
           handler: handleSetSymbolsPrices
         - event: ChargeFundingRate(address,address,uint256[],int256[])
           handler: handleChargeFundingRate
+        - event: AddSymbol(uint256,string,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleAddSymbol
+        - event: SetSymbolTradingFee(uint256,uint256,uint256)
+          handler: handleSetSymbolTradingFee
       file: ./src/main.ts

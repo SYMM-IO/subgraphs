@@ -23,7 +23,9 @@ import {
     SetSymbolsPrices as SetSymbolsPricesEvent,
     symmio,
     UnlockQuote as UnlockQuoteEvent,
-    ChargeFundingRate as ChargeFundingRateEvent
+    ChargeFundingRate as ChargeFundingRateEvent,
+    AddSymbol as AddSymbolEvent,
+    SetSymbolTradingFee as SetSymbolTradingFeeEvent
 } from "../generated/symmio/symmio"
 import {
     DebugEntity,
@@ -32,12 +34,28 @@ import {
     PartyA,
     PartyApartyB,
     PartyASymbolPrice,
-    ResultEntity
+    ResultEntity,
+    SymbolInfo
 } from "../generated/schema"
-import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getQuote, initialHelper, symbolIdToSymbolName } from './helper'
+import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getQuote, initialHelper, symbolIdToSymbolName, } from './helper'
 
 
 // const FACTOR: BigInt = BigInt.fromI32(10).pow(18);
+
+
+export function handleAddSymbol(event: AddSymbolEvent): void {
+    let entity = new SymbolInfo(event.params.id.toString())
+    entity.symbolId = event.params.id
+    entity.tradingFee = event.params.tradingFee
+    entity.save()
+}
+export function handleSetSymbolTradingFee(event: SetSymbolTradingFeeEvent): void {
+    let entity = SymbolInfo.load(event.params.symbolId.toString())
+    if (entity) {
+        entity.tradingFee = event.params.tradingFee
+        entity.save()
+    }
+}
 
 export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
     for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
@@ -45,7 +63,7 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
         let entity = ResultEntity.load(qoutId.toString())!
         entity.lastFundingPaymentTimestamp = event.block.timestamp
         entity.openedPrice = entity.openedPrice!.times(event.params.rates[i]).plus(entity.openedPrice!)
-        entity.subgraphTimestamp = Date.now().toString();
+
         entity.save()
     }
 }
@@ -143,7 +161,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
             let entity = ResultEntity.load(quoteId.toString())!
             if (entity.quoteStatus <= 2 && entity.quoteStatus >= 0) {
                 entity.quoteStatus = 8
-                entity.subgraphTimestamp = Date.now().toString();
+
                 entity.save()
             } else {
                 log.error(`error in liquidate positions party B\nQuoteId: ${quoteId}\nQuote status: ${entity.quoteStatus}`, [])
@@ -199,7 +217,7 @@ export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyBEv
                 log.debug(`get total fill amount: ${getclosedAmount} , past total fill amount: ${entity.closedAmount!.toString()}\nQuoteId: ${entity.quoteId}`, [])
             }
         }
-        entity.subgraphTimestamp = Date.now().toString();
+
         entity.save()
     }
 }
@@ -223,7 +241,7 @@ export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyAEv
         } else {
             log.debug(`Error in get entity liquidate requestedOpenPrice`, [])
         }
-        entity.subgraphTimestamp = Date.now().toString();
+
         entity.save()
     }
 
@@ -243,7 +261,7 @@ export function handleRequestToClosePosition(event: RequestToClosePositionEvent)
     entity.TrHashRequestToClosePosition = event.transaction.hash
     entity.timeStamp = event.block.timestamp
 
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 }
 
@@ -275,7 +293,7 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
     }
 
     entity.quoteStatus = event.params.quoteStatus
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 }
 
@@ -289,7 +307,7 @@ export function handleForceCancelCloseRequest(
     entity.timestampsForceCancelCloseRequestTimeStamp = event.block.timestamp
     entity.TrHashForceCancelCloseRequest = event.transaction.hash
 
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 }
 
@@ -300,7 +318,7 @@ export function handleForceCancelQuote(event: ForceCancelQuoteEvent): void {
     entity.timeStamp = event.block.timestamp
     entity.timestampsForceCancelQuoteTimeStamp = event.block.timestamp
     entity.TrHashForceCancelQuote = event.transaction.hash
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 
 }
@@ -317,7 +335,7 @@ export function handleForceClosePosition(event: ForceClosePositionEvent): void {
     entity.timeStamp = event.block.timestamp
     entity.timestampsForceClosePositionTimeStamp = event.block.timestamp
     entity.TrHashForceClosePosition = event.transaction.hash
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 
 }
@@ -334,7 +352,7 @@ export function handleRequestToCancelCloseRequest(
     entity.timeStamp = event.block.timestamp
     entity.timestampsRequestToCancelCloseRequestTimeStamp = event.block.timestamp
     entity.TrHashRequestToCancelCloseRequest = event.transaction.hash
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 }
 
@@ -348,7 +366,7 @@ export function handleRequestToCancelQuote(
     entity.timeStamp = event.block.timestamp
     entity.timestampsRequestToCancelQuoteTimeStamp = event.block.timestamp
     entity.TrHashRequestToCancelQuote = event.transaction.hash
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 
     if (event.params.quoteStatus === 3) {
@@ -421,7 +439,7 @@ export function handleSendQuote(event: SendQuoteEvent): void {
         initialEntity.partyBsWhiteList = partyBsWhiteList
 
     }
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.timeStamp = event.block.timestamp
     initialEntity.timeStamp = event.block.timestamp
     entity.timestampsSendQuoteTimeStamp = event.block.timestamp
@@ -455,7 +473,7 @@ export function handleAcceptCancelCloseRequest(
     entity.quoteId = event.params.quoteId
     entity.quoteStatus = event.params.quoteStatus
 
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 }
 
@@ -470,7 +488,7 @@ export function handleAcceptCancelRequest(
         entity.timeStamp = event.block.timestamp
         entity.timestampsAcceptCancelCloseRequestTimeStamp = event.block.timestamp
         entity.TrHashAcceptCancelCloseRequest = event.transaction.hash
-        entity.subgraphTimestamp = Date.now().toString();
+
         entity.save()
 
 
@@ -514,7 +532,6 @@ export function handleAcceptCancelRequest(
             newEntity.partyA = initialNewEntity.partyA
             newEntity.initialData = initialNewEntity.id
         }
-        newEntity.subgraphTimestamp = Date.now().toString();
         newEntity.save()
     }
 }
@@ -534,7 +551,7 @@ export function handleEmergencyClosePosition(
     entity.timeStamp = event.block.timestamp
     entity.timestampsEmergencyClosePositionTimeStamp = event.block.timestamp
     entity.TrHashForceClosePosition = event.transaction.hash
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 }
 
@@ -558,7 +575,7 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
     entity.timeStamp = event.block.timestamp
     entity.timestampsFillCloseRequestTimeStamp = event.block.timestamp
     entity.TrHashFillCloseRequest = event.transaction.hash
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 }
 
@@ -572,7 +589,7 @@ export function handleLockQuote(event: LockQuoteEvent): void {
         entity.timeStamp = event.block.timestamp
         entity.timestampsLockQuoteTimeStamp = event.block.timestamp
         entity.TrHashLockQuote = event.transaction.hash
-        entity.subgraphTimestamp = Date.now().toString();
+
         entity.save()
         let partyAPartyBEntity = PartyApartyB.load(entity.partyA.toHexString() + '-' + event.params.partyB.toHexString())
         if (!partyAPartyBEntity) {
@@ -622,7 +639,7 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
         initialEntity.save()
     }
 
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
@@ -651,7 +668,7 @@ export function handleUnlockQuote(event: UnlockQuoteEvent): void {
     entity.timeStamp = event.block.timestamp
     entity.timestampsUnlockQuoteTimeStamp = event.block.timestamp
     entity.TrHashUnlockQuote = event.transaction.hash
-    entity.subgraphTimestamp = Date.now().toString();
+
     entity.save()
 
 }
