@@ -460,6 +460,7 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     entity.initialData = initialEntity.id
     entity.save()
 
+    entity.tradingFee = SymbolInfo.load(event.params.symbolId.toString())!.tradingFee!
     partyAEntity.save()
 
 }
