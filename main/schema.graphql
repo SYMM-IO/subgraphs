@@ -28,7 +28,7 @@ type ResultEntity @entity {
   timeStamp: BigInt! #new
   marketPrice: BigInt
   initialOpenedPrice: BigInt
-
+  tradingFee: BigInt!
   averageClosedPrice: BigInt
   closedAmount: BigInt
   liquidatePrice: BigInt
