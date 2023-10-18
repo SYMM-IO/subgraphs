@@ -364,7 +364,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 
 	let quote = QuoteModel.load(event.params.quoteId.toString())!;
 	const chainQuote = getQuote(event.address, BigInt.fromString(quote.id))!;
-	quote.requestedOpenPrice = event.params.openedPrice;
+	quote.openPrice = event.params.openedPrice;
 	quote.cva = chainQuote.lockedValues.cva;
 	quote.lf = chainQuote.lockedValues.lf;
 	quote.partyAmm = chainQuote.lockedValues.partyAmm;
@@ -376,10 +376,11 @@ export function handleOpenPosition(event: OpenPosition): void {
 
 	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
 	priceCheck.event = "OpenPosition"
-	priceCheck.symbolId = quote.symbolId;
+	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
 	priceCheck.givenPrice = event.params.openedPrice;
 	priceCheck.timestamp = event.block.timestamp;
 	priceCheck.transaction = event.transaction.hash;
+	priceCheck.additionalInfo = quote.id;
 	priceCheck.save();
 
 	const symbol = Symbol.load(quote.symbolId.toString());
@@ -388,7 +389,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 		return
 
 	let tradingFee = event.params.filledAmount
-		.times(quote.requestedOpenPrice!)
+		.times(quote.openPrice!)
 		.times(symbol.tradingFee)
 		.div(BigInt.fromString("10").pow(36));
 
@@ -467,10 +468,11 @@ export function handleFillCloseRequest(event: FillCloseRequest): void {
 
 	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
 	priceCheck.event = "FillCloseRequest"
-	priceCheck.symbolId = quote.symbolId;
+	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
 	priceCheck.givenPrice = event.params.closedPrice;
 	priceCheck.timestamp = event.block.timestamp;
 	priceCheck.transaction = event.transaction.hash;
+	priceCheck.additionalInfo = quote.id;
 	priceCheck.save();
 
 	let account = AccountModel.load(event.params.partyA.toHexString())!;
@@ -494,7 +496,7 @@ export function handleFillCloseRequest(event: FillCloseRequest): void {
 
 	updateDailyOpenInterest(
 		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.requestedOpenPrice!)),
+		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
 		false,
 		account.accountSource
 	);
@@ -527,10 +529,11 @@ export function handleEmergencyClosePosition(
 
 	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
 	priceCheck.event = "EmergencyClosePosition"
-	priceCheck.symbolId = quote.symbolId;
+	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
 	priceCheck.givenPrice = event.params.closedPrice;
 	priceCheck.timestamp = event.block.timestamp;
 	priceCheck.transaction = event.transaction.hash;
+	priceCheck.additionalInfo = quote.id;
 	priceCheck.save();
 
 	let account = AccountModel.load(event.params.partyA.toHexString())!;
@@ -554,7 +557,7 @@ export function handleEmergencyClosePosition(
 
 	updateDailyOpenInterest(
 		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.requestedOpenPrice!)),
+		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
 		false,
 		account.accountSource
 	);
@@ -585,10 +588,11 @@ export function handleForceClosePosition(event: ForceClosePosition): void {
 
 	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
 	priceCheck.event = "ForceClosePosition"
-	priceCheck.symbolId = quote.symbolId;
+	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
 	priceCheck.givenPrice = event.params.closedPrice;
 	priceCheck.timestamp = event.block.timestamp;
 	priceCheck.transaction = event.transaction.hash;
+	priceCheck.additionalInfo = quote.id;
 	priceCheck.save();
 
 	let account = AccountModel.load(event.params.partyA.toHexString())!;
@@ -612,7 +616,7 @@ export function handleForceClosePosition(event: ForceClosePosition): void {
 
 	updateDailyOpenInterest(
 		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.requestedOpenPrice!)),
+		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
 		false,
 		account.accountSource
 	);
@@ -674,7 +678,7 @@ export function handleLiquidatePositionsPartyA(
 
 		updateDailyOpenInterest(
 			event.block.timestamp,
-			unDecimal(liquidAmount.times(quote.requestedOpenPrice!)),
+			unDecimal(liquidAmount.times(quote.openPrice!)),
 			false,
 			account.accountSource
 		);
@@ -735,7 +739,7 @@ export function handleLiquidatePositionsPartyB(
 
 		updateDailyOpenInterest(
 			event.block.timestamp,
-			unDecimal(liquidAmount.times(quote.requestedOpenPrice!)),
+			unDecimal(liquidAmount.times(quote.openPrice!)),
 			false,
 			account.accountSource
 		);
