@@ -132,3 +132,13 @@ type OpenInterest @entity {
     accumulatedAmount: BigInt!
     timestamp: BigInt!
 }
+
+type PriceCheck @entity{
+    id: ID!
+    givenPrice: BigInt!
+    symbol: String!
+    event: String!
+    additionalInfo: String
+    timestamp: BigInt!
+    transaction: Bytes!
+}
