@@ -10,7 +10,7 @@
       "symmioMultiAccountName": "MultiAccount1"
     }
   ],
-  "analyticsDeployUrl": "symmiograph/analytics_contract_8_2",
-  "mainDeployUrl": "symmiograph/main_contract_8_2",
-  "partiesDeployUrl": "symmiograph/parties_contract_8_2"
+  "analyticsDeployUrl": "symmiograph/symmioanalytics_base_8_2",
+  "mainDeployUrl": "symmiograph/symmiomain_base_8_2",
+  "partiesDeployUrl": "symmiograph/symmioparties_base_8_2"
 }
