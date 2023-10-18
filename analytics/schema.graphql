@@ -53,7 +53,7 @@ type Quote @entity {
     orderType: Int!
     price: BigInt!
     marketPrice: BigInt!
-    requestedOpenPrice: BigInt
+    openPrice: BigInt
     deadline: BigInt!
     quantity: BigInt!
     cva: BigInt!
@@ -137,7 +137,8 @@ type OpenInterest @entity {
 type PriceCheck @entity{
     id: ID!
     givenPrice: BigInt!
-    symbolId: BigInt!
+    symbol: String!
+    additionalInfo: String!
     event: String!
     timestamp: BigInt!
     transaction: Bytes!
