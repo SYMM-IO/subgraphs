@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import subprocess
 import sys
 
@@ -39,26 +38,15 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
     # Set working directory to the specific subgraph's directory
     os.chdir(subgraph_dir)
 
-    # Prepare the subgraph
-    if subgraph_dir == "analytics":
-        subprocess.run(
-            ["mustache", adjusted_config_path, "template.yaml"],
-            check=True,
-            stdout=open("subgraph.yaml", "w"),
-        )
-        subprocess.run(
-            ["mustache", adjusted_config_path, "src/contract_utils.template.ts"],
-            check=True,
-            stdout=open("src/contract_utils.ts", "w"),
-        )
-    else:
-        subprocess.run(
-            ["mustache", adjusted_config_path, "template.yaml"],
-            check=True,
-            stdout=open("subgraph.yaml", "w"),
-        )
+    subprocess.run(
+        ["mustache", adjusted_config_path, "template.yaml"],
+        check=True,
+        stdout=open("subgraph.yaml", "w"),
+    )
 
-    # subprocess.run(["graph", "build"], check=True)
+    subprocess.run(["graph", "codegen"], check=True)
+
+    subprocess.run(["graph", "build"], check=True)
 
     if not prepare_only:
         subprocess.run(
