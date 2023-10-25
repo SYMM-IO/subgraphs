@@ -4,7 +4,8 @@ type ResultPartyA @entity {
   amount: BigInt!
   timeStamp: BigInt!
   blockNumber: BigInt!
-  trHash: Bytes!
+  trHash: Bytes
+  trHashLiquidate: Bytes
   liquidatePartyATimeStamp: BigInt
 }
 
@@ -15,6 +16,7 @@ type ResultPartyB @entity {
   partyB: Bytes!
   timeStamp: BigInt!
   blockNumber: BigInt!
-  trHash: Bytes!
+  trHash: Bytes
+  trHashLiquidate: Bytes
   liquidatePartyBTimeStamp: BigInt
 }
