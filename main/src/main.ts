@@ -458,10 +458,13 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     }
     initialEntity.save()
     entity.initialData = initialEntity.id
-    entity.save()
 
-    entity.tradingFee = SymbolInfo.load(event.params.symbolId.toString())!.tradingFee!
+    let symbolInfoEntity = SymbolInfo.load(event.params.symbolId.toString())
+    if (symbolInfoEntity) {
+        entity.tradingFee = symbolInfoEntity.tradingFee
+    }
     partyAEntity.save()
+    entity.save()
 
 }
 
