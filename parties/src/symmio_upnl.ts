@@ -7,7 +7,7 @@ import {
     LiquidatePartyA as LiquidatePartyAEvent,
     LiquidatePartyB as LiquidatePartyBEvent,
 } from "../generated/symmio/symmio"
-import {ResultPartyA, ResultPartyB,} from "../generated/schema"
+import { ResultPartyA, ResultPartyB, } from "../generated/schema"
 
 export function handleAllocatePartyA(
     event: AllocatePartyAEvent
@@ -121,7 +121,7 @@ export function handleLiquidatePartyA(
     let entity = ResultPartyA.load(event.params.partyA.toHex())
     if (entity) {
         entity.liquidatePartyATimeStamp = event.block.timestamp
-        entity.trHash = event.transaction.hash
+        entity.trHashLiquidate = event.transaction.hash
         entity.save()
     }
 
@@ -131,7 +131,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
     let entity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
     if (entity) {
         entity.liquidatePartyBTimeStamp = event.block.timestamp
-        entity.trHash = event.transaction.hash
+        entity.trHashLiquidate = event.transaction.hash
         entity.save()
     }
 }
