@@ -143,3 +143,19 @@ type PriceCheck @entity{
     timestamp: BigInt!
     transaction: Bytes!
 }
+
+type PartyALiquidation @entity{
+    id: ID!
+    partyA: Bytes!
+    liquidator: Bytes!
+    liquidationType: Int!
+    timestamp: BigInt!
+    transaction: Bytes!
+}
+
+type PartyALiquidationDisputed @entity{
+    id: ID!
+    partyA: Bytes!
+    timestamp: BigInt!
+    transaction: Bytes!
+}
