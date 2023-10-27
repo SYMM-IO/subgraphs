@@ -1,4 +1,4 @@
-import {BigInt, Bytes} from "@graphprotocol/graph-ts";
+import {BigInt, Bytes, ethereum} from "@graphprotocol/graph-ts";
 import {
 	AcceptCancelCloseRequest,
 	AcceptCancelRequest,
@@ -12,6 +12,7 @@ import {
 	DeallocatePartyA,
 	Deposit,
 	DiamondCut,
+	DisputeForLiquidation,
 	EmergencyClosePosition,
 	ExpireQuote,
 	FillCloseRequest,
@@ -52,6 +53,7 @@ import {
 	SetSuspendedAddress,
 	SetSymbolAcceptableValues,
 	SetSymbolMaxSlippage,
+	SetSymbolsPrices,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
 	TransferAllocation,
@@ -66,12 +68,14 @@ import {
 import {
 	Account as AccountModel,
 	BalanceChange,
+	PartyALiquidation,
+	PartyALiquidationDisputed,
 	PriceCheck,
 	Quote as QuoteModel,
 	Symbol,
 	TradeHistory as TradeHistoryModel,
 } from "./../generated/schema";
-import {getQuote} from "./contract_utils";
+import {getLiquidatedStateOfPartyA, getQuote} from "./contract_utils";
 import {
 	createNewAccount,
 	createNewUser,
@@ -441,246 +445,26 @@ export function handleAcceptCancelCloseRequest(
 	quote.save();
 }
 
-
 export function handleFillCloseRequest(event: FillCloseRequest): void {
-	let quote = QuoteModel.load(event.params.quoteId.toString())!;
-	quote.avgClosedPrice = quote.avgClosedPrice
-		.times(quote.closedAmount)
-		.plus(event.params.filledAmount.times(event.params.closedPrice))
-		.div(quote.closedAmount.plus(event.params.filledAmount));
-	quote.closedAmount = quote.closedAmount.plus(event.params.filledAmount);
-	if (quote.closedAmount.equals(quote.quantity))
-		quote.quoteStatus = QuoteStatus.CLOSED;
-	quote.updateTimestamp = event.block.timestamp;
-	quote.save();
-	let history = TradeHistoryModel.load(
-		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString()
-	)!;
-	const additionalVolume = event.params.filledAmount
-		.times(event.params.closedPrice)
-		.div(BigInt.fromString("10").pow(18));
-	history.volume = history.volume.plus(additionalVolume);
-	history.updateTimestamp = event.block.timestamp;
-	history.quoteStatus = quote.quoteStatus;
-	history.quote = event.params.quoteId;
-	history.save();
-
-	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
-	priceCheck.event = "FillCloseRequest"
-	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
-	priceCheck.givenPrice = event.params.closedPrice;
-	priceCheck.timestamp = event.block.timestamp;
-	priceCheck.transaction = event.transaction.hash;
-	priceCheck.additionalInfo = quote.id;
-	priceCheck.save();
-
-	let account = AccountModel.load(event.params.partyA.toHexString())!;
-
-	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource);
-	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume);
-	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume);
-	dh.updateTimestamp = event.block.timestamp;
-	dh.save();
-
-	const th = getTotalHistory(event.block.timestamp, account.accountSource);
-	th.tradeVolume = th.tradeVolume.plus(additionalVolume);
-	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume);
-	th.updateTimestamp = event.block.timestamp;
-	th.save();
-
-	let stv = getSymbolTradeVolume(quote.symbolId, event.block.timestamp, account.accountSource);
-	stv.volume = stv.volume.plus(additionalVolume);
-	stv.updateTimestamp = event.block.timestamp;
-	stv.save();
-
-	updateDailyOpenInterest(
-		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
-		false,
-		account.accountSource
-	);
+	handleClose(event, "FillCloseRequest")
 }
 
 export function handleEmergencyClosePosition(
 	event: EmergencyClosePosition
 ): void {
-	let quote = QuoteModel.load(event.params.quoteId.toString())!;
-	quote.avgClosedPrice = quote.avgClosedPrice
-		.times(quote.closedAmount)
-		.plus(event.params.filledAmount.times(event.params.closedPrice))
-		.div(quote.closedAmount.plus(event.params.filledAmount));
-	quote.closedAmount = quote.closedAmount.plus(event.params.filledAmount);
-	if (quote.closedAmount.equals(quote.quantity))
-		quote.quoteStatus = QuoteStatus.CLOSED;
-	quote.updateTimestamp = event.block.timestamp;
-	quote.save();
-	let history = TradeHistoryModel.load(
-		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString()
-	)!;
-	const additionalVolume = event.params.filledAmount
-		.times(event.params.closedPrice)
-		.div(BigInt.fromString("10").pow(18));
-	history.volume = history.volume.plus(additionalVolume);
-	history.updateTimestamp = event.block.timestamp;
-	history.quoteStatus = quote.quoteStatus;
-	history.quote = event.params.quoteId;
-	history.save();
-
-	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
-	priceCheck.event = "EmergencyClosePosition"
-	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
-	priceCheck.givenPrice = event.params.closedPrice;
-	priceCheck.timestamp = event.block.timestamp;
-	priceCheck.transaction = event.transaction.hash;
-	priceCheck.additionalInfo = quote.id;
-	priceCheck.save();
-
-	let account = AccountModel.load(event.params.partyA.toHexString())!;
-
-	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource);
-	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume);
-	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume);
-	dh.updateTimestamp = event.block.timestamp;
-	dh.save();
-
-	const th = getTotalHistory(event.block.timestamp, account.accountSource);
-	th.tradeVolume = th.tradeVolume.plus(additionalVolume);
-	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume);
-	th.updateTimestamp = event.block.timestamp;
-	th.save();
-
-	let stv = getSymbolTradeVolume(quote.symbolId, event.block.timestamp, account.accountSource);
-	stv.volume = stv.volume.plus(additionalVolume);
-	stv.updateTimestamp = event.block.timestamp;
-	stv.save();
-
-	updateDailyOpenInterest(
-		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
-		false,
-		account.accountSource
-	);
+	handleClose(event, "EmergencyClosePosition")
 }
 
 export function handleForceClosePosition(event: ForceClosePosition): void {
-	let quote = QuoteModel.load(event.params.quoteId.toString())!;
-	quote.avgClosedPrice = quote.avgClosedPrice
-		.times(quote.closedAmount)
-		.plus(event.params.filledAmount.times(event.params.closedPrice))
-		.div(quote.closedAmount.plus(event.params.filledAmount));
-	quote.closedAmount = quote.closedAmount.plus(event.params.filledAmount);
-	if (quote.closedAmount.equals(quote.quantity))
-		quote.quoteStatus = QuoteStatus.CLOSED;
-	quote.updateTimestamp = event.block.timestamp;
-	quote.save();
-	let history = TradeHistoryModel.load(
-		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString()
-	)!;
-	const additionalVolume = event.params.filledAmount
-		.times(event.params.closedPrice)
-		.div(BigInt.fromString("10").pow(18));
-	history.volume = history.volume.plus(additionalVolume);
-	history.updateTimestamp = event.block.timestamp;
-	history.quoteStatus = quote.quoteStatus;
-	history.quote = event.params.quoteId;
-	history.save();
-
-	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
-	priceCheck.event = "ForceClosePosition"
-	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
-	priceCheck.givenPrice = event.params.closedPrice;
-	priceCheck.timestamp = event.block.timestamp;
-	priceCheck.transaction = event.transaction.hash;
-	priceCheck.additionalInfo = quote.id;
-	priceCheck.save();
-
-	let account = AccountModel.load(event.params.partyA.toHexString())!;
-
-	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource);
-	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume);
-	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume);
-	dh.updateTimestamp = event.block.timestamp;
-	dh.save();
-
-	const th = getTotalHistory(event.block.timestamp, account.accountSource);
-	th.tradeVolume = th.tradeVolume.plus(additionalVolume);
-	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume);
-	th.updateTimestamp = event.block.timestamp;
-	th.save();
-
-	let stv = getSymbolTradeVolume(quote.symbolId, event.block.timestamp, account.accountSource);
-	stv.volume = stv.volume.plus(additionalVolume);
-	stv.updateTimestamp = event.block.timestamp;
-	stv.save();
-
-	updateDailyOpenInterest(
-		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
-		false,
-		account.accountSource
-	);
+	handleClose(event, "ForceClosePosition")
 }
-
 
 export function handleLiquidatePositionsPartyA(
 	event: LiquidatePositionsPartyA
 ): void {
 	for (let i = 0; i < event.params.quoteIds.length; i++) {
 		const qId = event.params.quoteIds[i];
-		let history = TradeHistoryModel.load(
-			event.params.partyA.toHexString() + "-" + qId.toString()
-		)!;
-		const quote = QuoteModel.load(qId.toString())!;
-		quote.quoteStatus = QuoteStatus.LIQUIDATED;
-		quote.updateTimestamp = event.block.timestamp;
-		quote.liquidatedSide = 0
-		quote.save();
-		const chainQuote = getQuote(event.address, qId);
-		if (chainQuote == null)
-			continue;
-		const liquidAmount = quote.quantity.minus(quote.closedAmount);
-		const liquidPrice = chainQuote.avgClosedPrice
-			.times(quote.quantity)
-			.minus(
-				quote.avgClosedPrice
-					.times(quote.closedAmount)
-			)
-			.div(liquidAmount);
-		const additionalVolume = liquidAmount
-			.times(liquidPrice)
-			.div(BigInt.fromString("10").pow(18));
-		history.volume = history.volume.plus(additionalVolume);
-		history.quoteStatus = QuoteStatus.LIQUIDATED;
-		history.updateTimestamp = event.block.timestamp;
-		history.quote = qId;
-		history.save();
-
-		quote.avgClosedPrice = chainQuote.avgClosedPrice;
-		quote.save();
-
-		let account = AccountModel.load(quote.account)!;
-
-		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource);
-		dh.tradeVolume = dh.tradeVolume.plus(additionalVolume);
-		dh.updateTimestamp = event.block.timestamp;
-		dh.save();
-
-		const th = getTotalHistory(event.block.timestamp, account.accountSource);
-		th.tradeVolume = th.tradeVolume.plus(additionalVolume);
-		th.updateTimestamp = event.block.timestamp;
-		th.save();
-
-		let stv = getSymbolTradeVolume(quote.symbolId, event.block.timestamp, account.accountSource);
-		stv.volume = stv.volume.plus(additionalVolume);
-		stv.updateTimestamp = event.block.timestamp;
-		stv.save();
-
-		updateDailyOpenInterest(
-			event.block.timestamp,
-			unDecimal(liquidAmount.times(quote.openPrice!)),
-			false,
-			account.accountSource
-		);
+		handleLiquidatePosition(event, qId);
 	}
 }
 
@@ -689,62 +473,152 @@ export function handleLiquidatePositionsPartyB(
 ): void {
 	for (let i = 0; i < event.params.quoteIds.length; i++) {
 		const qId = event.params.quoteIds[i];
-		let history = TradeHistoryModel.load(
-			event.params.partyA.toHexString() + "-" + qId.toString()
-		)!;
-		const quote = QuoteModel.load(qId.toString())!;
-		quote.quoteStatus = QuoteStatus.LIQUIDATED;
-		quote.updateTimestamp = event.block.timestamp;
-		quote.liquidatedSide = 1
-		quote.save();
-		const chainQuote = getQuote(event.address, qId);
-		if (chainQuote == null)
-			continue;
-		const liquidAmount = quote.quantity.minus(quote.closedAmount);
-		const liquidPrice = chainQuote.avgClosedPrice
-			.times(quote.quantity)
-			.minus(
-				quote.avgClosedPrice
-					.times(quote.closedAmount)
-			)
-			.div(liquidAmount);
-		const additionalVolume = liquidAmount
-			.times(liquidPrice)
-			.div(BigInt.fromString("10").pow(18));
-		history.volume = history.volume.plus(additionalVolume);
-		history.quoteStatus = QuoteStatus.LIQUIDATED;
-		history.updateTimestamp = event.block.timestamp;
-		history.quote = qId;
-		history.save();
-
-		quote.avgClosedPrice = chainQuote.avgClosedPrice;
-		quote.save();
-		let account = AccountModel.load(quote.account)!;
-
-		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource);
-		dh.tradeVolume = dh.tradeVolume.plus(additionalVolume);
-		dh.updateTimestamp = event.block.timestamp;
-		dh.save();
-
-		const th = getTotalHistory(event.block.timestamp, account.accountSource);
-		th.tradeVolume = th.tradeVolume.plus(additionalVolume);
-		th.updateTimestamp = event.block.timestamp;
-		th.save();
-
-		let stv = getSymbolTradeVolume(quote.symbolId, event.block.timestamp, account.accountSource);
-		stv.volume = stv.volume.plus(additionalVolume);
-		stv.updateTimestamp = event.block.timestamp;
-		stv.save();
-
-		updateDailyOpenInterest(
-			event.block.timestamp,
-			unDecimal(liquidAmount.times(quote.openPrice!)),
-			false,
-			account.accountSource
-		);
+		handleLiquidatePosition(event, qId);
 	}
 }
 
+function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
+	const event = changetype<LiquidatePositionsPartyA>(_event);
+	let history = TradeHistoryModel.load(
+		event.params.partyA.toHexString() + "-" + qId.toString()
+	)!;
+	const quote = QuoteModel.load(qId.toString())!;
+	quote.quoteStatus = QuoteStatus.LIQUIDATED;
+	quote.updateTimestamp = event.block.timestamp;
+	quote.liquidatedSide = 1
+	quote.save();
+	const chainQuote = getQuote(event.address, qId);
+	if (chainQuote == null)
+		return;
+	const liquidAmount = quote.quantity.minus(quote.closedAmount);
+	const liquidPrice = chainQuote.avgClosedPrice
+		.times(quote.quantity)
+		.minus(
+			quote.avgClosedPrice
+				.times(quote.closedAmount)
+		)
+		.div(liquidAmount);
+	const additionalVolume = liquidAmount
+		.times(liquidPrice)
+		.div(BigInt.fromString("10").pow(18));
+	history.volume = history.volume.plus(additionalVolume);
+	history.quoteStatus = QuoteStatus.LIQUIDATED;
+	history.updateTimestamp = event.block.timestamp;
+	history.quote = qId;
+	history.save();
+
+	quote.avgClosedPrice = chainQuote.avgClosedPrice;
+	quote.save();
+	let account = AccountModel.load(quote.account)!;
+
+	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource);
+	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume);
+	dh.updateTimestamp = event.block.timestamp;
+	dh.save();
+
+	const th = getTotalHistory(event.block.timestamp, account.accountSource);
+	th.tradeVolume = th.tradeVolume.plus(additionalVolume);
+	th.updateTimestamp = event.block.timestamp;
+	th.save();
+
+	let stv = getSymbolTradeVolume(quote.symbolId, event.block.timestamp, account.accountSource);
+	stv.volume = stv.volume.plus(additionalVolume);
+	stv.updateTimestamp = event.block.timestamp;
+	stv.save();
+
+	updateDailyOpenInterest(
+		event.block.timestamp,
+		unDecimal(liquidAmount.times(quote.openPrice!)),
+		false,
+		account.accountSource
+	);
+}
+
+
+function handleClose(_event: ethereum.Event, name: string): void {
+	const event = changetype<FillCloseRequest>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
+	let quote = QuoteModel.load(event.params.quoteId.toString())!;
+	quote.avgClosedPrice = quote.avgClosedPrice
+		.times(quote.closedAmount)
+		.plus(event.params.filledAmount.times(event.params.closedPrice))
+		.div(quote.closedAmount.plus(event.params.filledAmount));
+	quote.closedAmount = quote.closedAmount.plus(event.params.filledAmount);
+	if (quote.closedAmount.equals(quote.quantity))
+		quote.quoteStatus = QuoteStatus.CLOSED;
+	quote.updateTimestamp = event.block.timestamp;
+	quote.save();
+	let history = TradeHistoryModel.load(
+		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString()
+	)!;
+	const additionalVolume = event.params.filledAmount
+		.times(event.params.closedPrice)
+		.div(BigInt.fromString("10").pow(18));
+	history.volume = history.volume.plus(additionalVolume);
+	history.updateTimestamp = event.block.timestamp;
+	history.quoteStatus = quote.quoteStatus;
+	history.quote = event.params.quoteId;
+	history.save();
+
+	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString());
+	priceCheck.event = name
+	priceCheck.symbol = Symbol.load(quote.symbolId.toString())!.name;
+	priceCheck.givenPrice = event.params.closedPrice;
+	priceCheck.timestamp = event.block.timestamp;
+	priceCheck.transaction = event.transaction.hash;
+	priceCheck.additionalInfo = quote.id;
+	priceCheck.save();
+
+	let account = AccountModel.load(event.params.partyA.toHexString())!;
+
+	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource);
+	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume);
+	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume);
+	dh.updateTimestamp = event.block.timestamp;
+	dh.save();
+
+	const th = getTotalHistory(event.block.timestamp, account.accountSource);
+	th.tradeVolume = th.tradeVolume.plus(additionalVolume);
+	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume);
+	th.updateTimestamp = event.block.timestamp;
+	th.save();
+
+	let stv = getSymbolTradeVolume(quote.symbolId, event.block.timestamp, account.accountSource);
+	stv.volume = stv.volume.plus(additionalVolume);
+	stv.updateTimestamp = event.block.timestamp;
+	stv.save();
+
+	updateDailyOpenInterest(
+		event.block.timestamp,
+		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
+		false,
+		account.accountSource
+	);
+}
+
+export function handleSetSymbolsPrices(
+	event: SetSymbolsPrices
+): void {
+	const liquidationDetail = getLiquidatedStateOfPartyA(event.address, event.params.partyA);
+	if (liquidationDetail == null)
+		return;
+	let model = new PartyALiquidation(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
+	model.partyA = event.params.partyA;
+	model.liquidator = event.params.liquidator;
+	model.liquidationType = liquidationDetail.liquidationType;
+	model.timestamp = event.block.timestamp;
+	model.transaction = event.transaction.hash;
+	model.save();
+}
+
+export function handleLiquidationDisputed(
+	event: DisputeForLiquidation
+): void {
+	let model = new PartyALiquidationDisputed(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
+	model.partyA = event.params.partyA;
+	model.timestamp = event.block.timestamp;
+	model.transaction = event.transaction.hash;
+	model.save();
+}
 
 // //////////////////////////////////// UnUsed ////////////////////////////////////////
 
