@@ -26,7 +26,6 @@ def copy_abi_files(subgraph_dir, version):
         # Copy content from source to destination
         with open(source, 'r') as src_file, open(destination_path, 'w') as dest_file:
             content = src_file.read()
-            print(f"Writing {src_file.name} to {dest_file.name}")
             dest_file.write(content)
 
 
@@ -40,12 +39,13 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
     os.chdir(subgraph_dir)
 
     subprocess.run(
-        ["npx", "mustache", adjusted_config_path, "template.yaml"],
+        ["mustache", adjusted_config_path, "template.yaml"],
         check=True,
         stdout=open("subgraph.yaml", "w"),
     )
 
     subprocess.run(["graph", "codegen"], check=True)
+
     subprocess.run(["graph", "build"], check=True)
 
     if not prepare_only:
@@ -59,17 +59,32 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
 
 def main():
     prepare_only = "--prepare-only" in sys.argv
+    deploy_all = "--all" in sys.argv
 
     if prepare_only:
         sys.argv.remove("--prepare-only")
 
+    if deploy_all:
+        sys.argv.remove("--all")
+
     if len(sys.argv) < 2:
         print(
-            "Please provide the full path to the configuration file (e.g., configs/fix_review_test.json)"
+            "Please provide the full path to the configuration file (e.g., configs/bnb_8.json) followed by which subgraphs to deploy or use --all to deploy all."
         )
         sys.exit(1)
 
     config_file = sys.argv[1]
+
+    if deploy_all:
+        subgraphs_to_deploy = ["analytics", "main", "parties"]
+    else:
+        subgraphs_to_deploy = sys.argv[2:]
+
+    if not subgraphs_to_deploy:
+        print(
+            "Please specify which subgraphs to deploy (e.g., main, parties, analytics) or use --all to deploy all."
+        )
+        sys.exit(1)
 
     # Check if the configuration file exists
     if not os.path.exists(config_file):
@@ -80,13 +95,13 @@ def main():
     with open(config_file, "r") as f:
         config = json.load(f)
 
-    for subgraph in ["analytics", "main", "parties"]:
+    for subgraph in subgraphs_to_deploy:
         # Copy the ABI files to each subgraph directory
         copy_abi_files(subgraph, config["symmioVersion"])
 
         deploy_subgraph(subgraph, config_file, config[f"{subgraph}DeployUrl"], prepare_only)
 
-        print(f"{subgraph} subgraph deployed")
+        print(f"{subgraph} subgraph deployed ---------------------------------------------------")
 
     print("Done")
 
