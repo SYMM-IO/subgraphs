@@ -39,7 +39,7 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
     os.chdir(subgraph_dir)
 
     subprocess.run(
-        ["mustache", adjusted_config_path, "template.yaml"],
+        ["npx", "mustache", adjusted_config_path, "template.yaml"],
         check=True,
         stdout=open("subgraph.yaml", "w"),
     )
