@@ -1,0 +1,16 @@
+{
+  "network": "bsc",
+  "symmioAddress": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
+  "symmioStartBlock": "29380515",
+  "symmioVersion": "0.8.2",
+  "multiAccounts": [
+    {
+      "symmioMultiAccountAddress": "0x75c539eFB5300234e5DaA684502735Fc3886e8b4",
+      "symmioMultiAccountStartBlock": "31651896",
+      "symmioMultiAccountName": "MultiAccount1"
+    }
+  ],
+  "analyticsDeployUrl": "symmiograph/symmioanalytics_bnb8_2",
+  "mainDeployUrl": "symmiograph/symmiomain_bnb_8_2",
+  "partiesDeployUrl": "symmiograph/symmioparties_bnb_8_2"
+}
