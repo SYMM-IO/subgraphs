@@ -1,7 +1,7 @@
 {
   "network": "matic",
-  "symmioAddress": "0x6b0d9FA54CeC03E83a6b08400228c2AFD291A83d",
-  "symmioStartBlock": "48752503",
+  "symmioAddress": "0x7Bdc80663f25d4852a237247E4fb32c5FFbc808B",
+  "symmioStartBlock": "49333141",
   "symmioVersion": "0.8.2",
   "multiAccounts": [
     {
