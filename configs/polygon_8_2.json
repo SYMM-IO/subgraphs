@@ -1,12 +1,12 @@
 {
   "network": "matic",
-  "symmioAddress": "0x6b0d9FA54CeC03E83a6b08400228c2AFD291A83d",
-  "symmioStartBlock": "48752503",
+  "symmioAddress": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
+  "symmioStartBlock": "49420747",
   "symmioVersion": "0.8.2",
   "multiAccounts": [
     {
-      "symmioMultiAccountAddress": "0x3adc81CC43d9e1636de9cbac764Afcb1F3ae6cde",
-      "symmioMultiAccountStartBlock": "48776789",
+      "symmioMultiAccountAddress": "0xffE2C25404525D2D4351D75177B92F18D9DaF4Af",
+      "symmioMultiAccountStartBlock": "49420747",
       "symmioMultiAccountName": "MultiAccount1"
     }
   ],
