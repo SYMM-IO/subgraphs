@@ -27,6 +27,7 @@ type BalanceChange @entity {
     type: String!
     account: String!
     amount: BigInt!
+    collateral: Bytes!
     timestamp: BigInt!
     blockNumber: BigInt!
     transaction: Bytes!
@@ -65,11 +66,12 @@ type Quote @entity {
     blockNumber: BigInt!
     closedAmount: BigInt!
     avgClosedPrice: BigInt!
+    partyB: Bytes
+    collateral: Bytes!
+    liquidatedSide: Int
     timestamp: BigInt!
     updateTimestamp: BigInt!
     transaction: Bytes!
-    partyB: Bytes
-    liquidatedSide: Int
 }
 
 type DailyHistory @entity {
@@ -158,4 +160,11 @@ type PartyALiquidationDisputed @entity{
     partyA: Bytes!
     timestamp: BigInt!
     transaction: Bytes!
+}
+
+type Configuration @entity{
+    id: ID!
+    collateral: Bytes!
+    updateTimestamp: BigInt!
+    updateTransaction: Bytes!
 }
