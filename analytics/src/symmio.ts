@@ -34,7 +34,7 @@ import {
 	RegisterPartyB,
 	RequestToCancelCloseRequest,
 	RequestToCancelQuote,
-	RequestToClosePosition,
+	RequestToClosePosition, RoleGranted, RoleRevoked,
 	SendQuote,
 	SetCollateral,
 	SetDeallocateCooldown,
@@ -66,7 +66,7 @@ import {
 } from "../generated/symmio/symmio"
 import {
 	Account as AccountModel,
-	BalanceChange,
+	BalanceChange, GrantedRole,
 	PartyALiquidation,
 	PartyALiquidationDisputed,
 	PriceCheck,
@@ -100,6 +100,18 @@ export enum QuoteStatus {
 	EXPIRED,
 }
 
+let rolesNames = new Map<string, string>()
+rolesNames.set('0x1effbbff9c66c5e59634f24fe842750c60d18891155c32dd155fc2d661a4c86d', 'DEFAULT_ADMIN_ROLE')
+rolesNames.set('0xb048589f9ee6ae43a7d6093c04bc48fc93d622d76009b51a2c566fc7cda84ce7', 'MUON_SETTER_ROLE')
+rolesNames.set('0xddf732565ddd4d1d3a527786b8b1e425a602b603d457c0a999938869f38049b0', 'SYMBOL_MANAGER_ROLE')
+rolesNames.set('0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda', 'SETTER_ROLE')
+rolesNames.set('0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a', 'PAUSER_ROLE')
+rolesNames.set('0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a', 'UNPAUSER_ROLE')
+rolesNames.set('0x23288e74cb14deb13fd69e749986e8975f19aa3efb14b2fe5e9b512d772f19b3', 'PARTY_B_MANAGER_ROLE')
+rolesNames.set('0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c16', 'LIQUIDATOR_ROLE')
+rolesNames.set('0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84', 'SUSPENDER_ROLE')
+rolesNames.set('0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4', 'DISPUTE_ROLE')
+
 // //////////////////////////////////// CONTROL ////////////////////////////////////////
 export function handleAddSymbol(event: AddSymbol): void {
 	let symbol = new Symbol(event.params.id.toString())
@@ -117,7 +129,25 @@ export function handleSetSymbolTradingFee(event: SetSymbolTradingFee): void {
 	symbol.save()
 }
 
+export function handleRoleGranted(event: RoleGranted): void {
+	let gr = new GrantedRole(rolesNames.get(event.params.role.toHexString()) + "_" + event.params.user.toHexString())
+	gr.role = rolesNames.get(event.params.role.toHexString()) || event.params.role.toHexString()
+	gr.user = event.params.user
+	gr.grantTransaction = event.transaction.hash
+	gr.revokeTransaction = null
+	gr.save()
+}
 
+export function handleRoleRevoked(event: RoleRevoked): void {
+	let gr = GrantedRole.load(rolesNames.get(event.params.role.toHexString()) + "_" + event.params.user.toHexString())
+	if (gr == null) {
+		gr = new GrantedRole(rolesNames.get(event.params.role.toHexString()) + "_" + event.params.user.toHexString())
+		gr.role = rolesNames.get(event.params.role.toHexString()) || event.params.role.toHexString()
+		gr.user = event.params.user
+	}
+	gr.revokeTransaction = event.transaction.hash
+	gr.save()
+}
 // //////////////////////////////////// Accounting ////////////////////////////////////////
 export function handleAllocatePartyA(event: AllocatePartyA): void {
 	let account = AccountModel.load(event.params.user.toHexString())!

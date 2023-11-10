@@ -90,8 +90,9 @@ export function getSymbolTradeVolume(symbol: BigInt, timestamp: BigInt, accountS
 	return stv
 }
 
-export function getOpenInterest(timestamp: BigInt): OpenInterest {
-	const id = "OpenInterestId"
+
+export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null): OpenInterest {
+	const id = "OpenInterest_" + (accountSource === null ? "null" : accountSource.toHexString())
 	let oi = OpenInterest.load(id)
 	if (oi == null) {
 		oi = new OpenInterest(id)
@@ -128,7 +129,7 @@ export function updateDailyOpenInterest(
 	increase: boolean,
 	accountSource: Bytes | null
 ): void {
-	let oi = getOpenInterest(blockTimestamp)
+	let oi = getOpenInterest(blockTimestamp, accountSource)
 	let dh = getDailyHistoryForTimestamp(blockTimestamp, accountSource)
 
 	const startOfDay = BigInt.fromString(
