@@ -139,6 +139,7 @@ export function handleRoleGranted(event: RoleGranted): void {
 	gr.user = event.params.user
 	gr.grantTransaction = event.transaction.hash
 	gr.revokeTransaction = null
+	gr.updateTimestamp = event.block.timestamp
 	gr.save()
 }
 
@@ -149,6 +150,7 @@ export function handleRoleRevoked(event: RoleRevoked): void {
 		gr.role = rolesNames.get(event.params.role.toHexString()) || event.params.role.toHexString()
 		gr.user = event.params.user
 	}
+	gr.updateTimestamp = event.block.timestamp
 	gr.revokeTransaction = event.transaction.hash
 	gr.save()
 }
