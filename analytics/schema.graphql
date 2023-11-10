@@ -168,3 +168,11 @@ type Configuration @entity{
     updateTimestamp: BigInt!
     updateTransaction: Bytes!
 }
+
+type GrantedRole @entity{
+    id: ID!
+    role: String!
+    user: Bytes!
+    grantTransaction: Bytes
+    revokeTransaction: Bytes
+}
