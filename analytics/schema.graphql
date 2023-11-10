@@ -175,4 +175,5 @@ type GrantedRole @entity{
     user: Bytes!
     grantTransaction: Bytes
     revokeTransaction: Bytes
+    updateTimestamp: BigInt!
 }
