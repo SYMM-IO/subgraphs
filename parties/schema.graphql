@@ -7,6 +7,9 @@ type ResultPartyA @entity {
   trHash: Bytes
   trHashLiquidate: Bytes
   liquidatePartyATimeStamp: BigInt
+  allocatedBalance:BigInt
+  cva:BigInt
+  lf:BigInt
 }
 
 type ResultPartyB @entity {
@@ -19,4 +22,7 @@ type ResultPartyB @entity {
   trHash: Bytes
   trHashLiquidate: Bytes
   liquidatePartyBTimeStamp: BigInt
+  allocatedBalance:BigInt
+  cva:BigInt
+  lf:BigInt
 }
