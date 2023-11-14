@@ -555,11 +555,13 @@ function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
 
 	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
 	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume)
+	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume)
 	dh.updateTimestamp = event.block.timestamp
 	dh.save()
 
 	const th = getTotalHistory(event.block.timestamp, account.accountSource)
 	th.tradeVolume = th.tradeVolume.plus(additionalVolume)
+	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume)
 	th.updateTimestamp = event.block.timestamp
 	th.save()
 
