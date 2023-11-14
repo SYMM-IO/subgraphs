@@ -34,7 +34,9 @@ import {
 	RegisterPartyB,
 	RequestToCancelCloseRequest,
 	RequestToCancelQuote,
-	RequestToClosePosition, RoleGranted, RoleRevoked,
+	RequestToClosePosition,
+	RoleGranted,
+	RoleRevoked,
 	SendQuote,
 	SetCollateral,
 	SetDeallocateCooldown,
@@ -66,7 +68,8 @@ import {
 } from "../generated/symmio/symmio"
 import {
 	Account as AccountModel,
-	BalanceChange, GrantedRole,
+	BalanceChange,
+	GrantedRole,
 	PartyALiquidation,
 	PartyALiquidationDisputed,
 	PriceCheck,
@@ -150,6 +153,7 @@ export function handleRoleRevoked(event: RoleRevoked): void {
 	gr.revokeTransaction = event.transaction.hash
 	gr.save()
 }
+
 // //////////////////////////////////// Accounting ////////////////////////////////////////
 export function handleAllocatePartyA(event: AllocatePartyA): void {
 	let account = AccountModel.load(event.params.user.toHexString())!
@@ -577,11 +581,13 @@ function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
 
 	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
 	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume)
+	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume)
 	dh.updateTimestamp = event.block.timestamp
 	dh.save()
 
 	const th = getTotalHistory(event.block.timestamp, account.accountSource)
 	th.tradeVolume = th.tradeVolume.plus(additionalVolume)
+	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume)
 	th.updateTimestamp = event.block.timestamp
 	th.save()
 
