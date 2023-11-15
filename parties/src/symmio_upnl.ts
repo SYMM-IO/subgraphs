@@ -128,6 +128,8 @@ export function handleLiquidatePartyA(
         entity.allocatedBalance = balanceInfoOfPartyA.value0
         entity.cva = balanceInfoOfPartyA.value1
         entity.lf = balanceInfoOfPartyA.value2
+        entity.pendingCva = balanceInfoOfPartyA.value5
+        entity.pendingLf = balanceInfoOfPartyA.value6
         entity.save()
     }
 }
@@ -142,6 +144,8 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
         entity.allocatedBalance = balanceInfoOfPartyB.value0
         entity.cva = balanceInfoOfPartyB.value1
         entity.lf = balanceInfoOfPartyB.value2
+        entity.pendingCva = balanceInfoOfPartyB.value5
+        entity.pendingLf = balanceInfoOfPartyB.value6
         entity.save()
     }
 }
