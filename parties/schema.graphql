@@ -9,7 +9,9 @@ type ResultPartyA @entity {
   liquidatePartyATimeStamp: BigInt
   allocatedBalance:BigInt
   cva:BigInt
+  pendingCva:BigInt
   lf:BigInt
+  pendingLf:BigInt
 }
 
 type ResultPartyB @entity {
@@ -24,5 +26,7 @@ type ResultPartyB @entity {
   liquidatePartyBTimeStamp: BigInt
   allocatedBalance:BigInt
   cva:BigInt
+  pendingCva:BigInt
   lf:BigInt
+  pendingLf:BigInt
 }
