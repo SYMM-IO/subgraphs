@@ -6,6 +6,7 @@ import {
     DeallocatePartyA as DeallocatePartyAEvent,
     LiquidatePartyA as LiquidatePartyAEvent,
     LiquidatePartyB as LiquidatePartyBEvent,
+    symmio as symmio
 } from "../generated/symmio/symmio"
 import { ResultPartyA, ResultPartyB, } from "../generated/schema"
 
@@ -120,8 +121,14 @@ export function handleLiquidatePartyA(
 ): void {
     let entity = ResultPartyA.load(event.params.partyA.toHex())
     if (entity) {
+        const balanceInfoOfPartyA = symmio.bind(event.address).balanceInfoOfPartyA(event.params.partyA)
         entity.liquidatePartyATimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
+        entity.allocatedBalance = balanceInfoOfPartyA.value0
+        entity.cva = balanceInfoOfPartyA.value1
+        entity.lf = balanceInfoOfPartyA.value3
+        entity.pendingCva = balanceInfoOfPartyA.value5
+        entity.pendingLf = balanceInfoOfPartyA.value7
         entity.save()
     }
 
@@ -130,8 +137,16 @@ export function handleLiquidatePartyA(
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
     let entity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
     if (entity) {
+        const balanceInfoOfPartyB = symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB,event.params.partyA)
         entity.liquidatePartyBTimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
+        entity.allocatedBalance = balanceInfoOfPartyB.value0
+        entity.cva = balanceInfoOfPartyB.value1
+        entity.lf = balanceInfoOfPartyB.value3
+        entity.pendingCva = balanceInfoOfPartyB.value5
+        entity.pendingLf = balanceInfoOfPartyB.value7
         entity.save()
     }
 }
+
+
