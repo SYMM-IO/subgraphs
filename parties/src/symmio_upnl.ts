@@ -127,7 +127,7 @@ export function handleLiquidatePartyA(
         entity.trHashLiquidate = event.transaction.hash
         entity.allocatedBalance = balanceInfoOfPartyA.value0
         entity.cva = balanceInfoOfPartyA.value1
-        entity.lf = balanceInfoOfPartyA.value3
+        entity.lf = balanceInfoOfPartyA.value2
         entity.save()
     }
 }
@@ -141,7 +141,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
         entity.trHashLiquidate = event.transaction.hash
         entity.allocatedBalance = balanceInfoOfPartyB.value0
         entity.cva = balanceInfoOfPartyB.value1
-        entity.lf = balanceInfoOfPartyB.value3
+        entity.lf = balanceInfoOfPartyB.value2
         entity.save()
     }
 }
