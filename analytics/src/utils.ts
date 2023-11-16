@@ -169,11 +169,14 @@ export function updateActivityTimestamps(
 	account.lastActivityTimestamp = timestamp
 	account.save()
 	let ua = getUserActivity(account.user, account.accountSource, timestamp)
-	if (!isSameDay(timestamp, ua.updateTimestamp)) {
+	let uaTimestamp = ua.updateTimestamp === null ? BigInt.fromString("0") : ua.updateTimestamp!
+	if (!isSameDay(timestamp, uaTimestamp)) {
 		let dh = getDailyHistoryForTimestamp(timestamp, account.accountSource)
 		dh.activeUsers = dh.activeUsers.plus(BigInt.fromString("1"))
 		dh.save()
 	}
+	ua.updateTimestamp = timestamp
+	ua.save()
 }
 
 export function getUserActivity(user: string, accountSource: Bytes | null, timestamp: BigInt): UserActivity {
@@ -184,9 +187,8 @@ export function getUserActivity(user: string, accountSource: Bytes | null, times
 		ua.user = user
 		ua.accountSource = accountSource
 		ua.timestamp = timestamp
+		ua.save()
 	}
-	ua.updateTimestamp = timestamp
-	ua.save()
 	return ua
 }
 

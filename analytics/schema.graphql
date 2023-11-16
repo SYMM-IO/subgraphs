@@ -9,7 +9,7 @@ type UserActivity @entity {
     user: String!
     accountSource: Bytes
     timestamp: BigInt!
-    updateTimestamp: BigInt!
+    updateTimestamp: BigInt
 }
 
 type Account @entity {
