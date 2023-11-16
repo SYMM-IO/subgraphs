@@ -1,8 +1,15 @@
 type User @entity {
     id: ID!
     timestamp: BigInt!
-    lastActivityTimestamp: BigInt!
     transaction: Bytes!
+}
+
+type UserActivity @entity {
+    id: ID!
+    user: String!
+    accountSource: Bytes
+    timestamp: BigInt!
+    updateTimestamp: BigInt!
 }
 
 type Account @entity {

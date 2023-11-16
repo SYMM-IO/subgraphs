@@ -131,7 +131,6 @@ export function handleLiquidatePartyA(
         entity.pendingLf = balanceInfoOfPartyA.value7
         entity.save()
     }
-
 }
 
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
