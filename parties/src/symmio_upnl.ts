@@ -124,11 +124,11 @@ export function handleLiquidatePartyA(
         const balanceInfoOfPartyA = symmio.bind(event.address).balanceInfoOfPartyA(event.params.partyA)
         entity.liquidatePartyATimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
-        entity.allocatedBalance = balanceInfoOfPartyA.value0
-        entity.cva = balanceInfoOfPartyA.value1
-        entity.lf = balanceInfoOfPartyA.value3
-        entity.pendingCva = balanceInfoOfPartyA.value5
-        entity.pendingLf = balanceInfoOfPartyA.value7
+        entity.liquidateAllocatedBalance = balanceInfoOfPartyA.value0
+        entity.liquidateCva = balanceInfoOfPartyA.value1
+        entity.liquidateLf = balanceInfoOfPartyA.value3
+        entity.liquidatePendingCva = balanceInfoOfPartyA.value5
+        entity.liquidatePendingLf = balanceInfoOfPartyA.value7
         entity.save()
     }
 
@@ -140,11 +140,11 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
         const balanceInfoOfPartyB = symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB,event.params.partyA)
         entity.liquidatePartyBTimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
-        entity.allocatedBalance = balanceInfoOfPartyB.value0
-        entity.cva = balanceInfoOfPartyB.value1
-        entity.lf = balanceInfoOfPartyB.value3
-        entity.pendingCva = balanceInfoOfPartyB.value5
-        entity.pendingLf = balanceInfoOfPartyB.value7
+        entity.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
+        entity.liquidateCva = balanceInfoOfPartyB.value1
+        entity.liquidateLf = balanceInfoOfPartyB.value3
+        entity.liquidatePendingCva = balanceInfoOfPartyB.value5
+        entity.liquidatePendingLf = balanceInfoOfPartyB.value7
         entity.save()
     }
 }
