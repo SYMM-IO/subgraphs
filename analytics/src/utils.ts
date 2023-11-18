@@ -8,7 +8,7 @@ import {
 	SymbolTradeVolume,
 	TotalHistory,
 	User as UserModel,
-	User
+	User, UserActivity
 } from "../generated/schema"
 
 import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum"
@@ -105,14 +105,20 @@ export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null):
 }
 
 export function isSameDay(timestamp1: BigInt, timestamp2: BigInt): boolean {
-	const date1 = new Date(timestamp1.toI64() * 1000)
-	const date2 = new Date(timestamp2.toI64() * 1000)
+	return getDateFromTimeStamp(timestamp1)
+		.getTime()
+		.toString() == getDateFromTimeStamp(timestamp2)
+		.getTime()
+		.toString()
 
-	return (
-		date1.getUTCFullYear() === date2.getUTCFullYear() &&
-		date1.getUTCMonth() === date2.getUTCMonth() &&
-		date1.getUTCDate() === date2.getUTCDate()
-	)
+	// const date1 = new Date(timestamp1.toI64() * 1000)
+	// const date2 = new Date(timestamp2.toI64() * 1000)
+	//
+	// return (
+	// 	date1.getUTCFullYear() === date2.getUTCFullYear() &&
+	// 	date1.getUTCMonth() === date2.getUTCMonth() &&
+	// 	date1.getUTCDate() === date2.getUTCDate()
+	// )
 }
 
 export function unDecimal(value: BigInt): BigInt {
@@ -157,26 +163,40 @@ export function updateDailyOpenInterest(
 	dh.save()
 }
 
+
 export function updateActivityTimestamps(
 	account: Account,
-	blockTimestamp: BigInt
+	timestamp: BigInt
 ): void {
-	account.lastActivityTimestamp = blockTimestamp
+	account.lastActivityTimestamp = timestamp
 	account.save()
-	let user = User.load(account.user)!
-	if (!isSameDay(blockTimestamp, user.lastActivityTimestamp)) {
-		user.lastActivityTimestamp = blockTimestamp
-		user.save()
-		let dh = getDailyHistoryForTimestamp(blockTimestamp, account.accountSource)
+	let ua = getUserActivity(account.user, account.accountSource, timestamp)
+	let uaTimestamp = ua.updateTimestamp === null ? BigInt.fromString("0") : ua.updateTimestamp!
+	if (!isSameDay(timestamp, uaTimestamp)) {
+		let dh = getDailyHistoryForTimestamp(timestamp, account.accountSource)
 		dh.activeUsers = dh.activeUsers.plus(BigInt.fromString("1"))
 		dh.save()
 	}
+	ua.updateTimestamp = timestamp
+	ua.save()
+}
+
+export function getUserActivity(user: string, accountSource: Bytes | null, timestamp: BigInt): UserActivity {
+	const id = user + "_" + (accountSource === null ? "null" : accountSource.toHexString())
+	let ua = UserActivity.load(id)
+	if (ua == null) {
+		ua = new UserActivity(id)
+		ua.user = user
+		ua.accountSource = accountSource
+		ua.timestamp = timestamp
+		ua.save()
+	}
+	return ua
 }
 
 export function createNewUser(address: string, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction): UserModel {
 	let user = new UserModel(address)
 	user.timestamp = block.timestamp
-	user.lastActivityTimestamp = block.timestamp
 	user.transaction = transaction.hash
 	user.save()
 	const dh = getDailyHistoryForTimestamp(block.timestamp, accountSource)
@@ -187,6 +207,7 @@ export function createNewUser(address: string, accountSource: Bytes | null, bloc
 	th.save()
 	return user
 }
+
 
 export function createNewAccount(address: string, user: UserModel, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction, name: string | null = null): AccountModel {
 	let account = new AccountModel(address)
