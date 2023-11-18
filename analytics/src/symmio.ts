@@ -57,6 +57,7 @@ import {
 	SetSymbolsPrices,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
+	symmio,
 	TransferAllocation,
 	UnlockQuote,
 	UnpauseAccounting,
@@ -527,11 +528,20 @@ export function handleSetSymbolsPrices(
 	if (liquidationDetail == null)
 		return
 	let model = new PartyALiquidation(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
+	const balanceInfoOfPartyA = symmio.bind(event.address).balanceInfoOfPartyA(event.params.partyA)
+
 	model.partyA = event.params.partyA
 	model.liquidator = event.params.liquidator
 	model.liquidationType = liquidationDetail.liquidationType
 	model.timestamp = event.block.timestamp
 	model.transaction = event.transaction.hash
+
+	model.allocatedBalance = balanceInfoOfPartyA.value0
+	model.cva = balanceInfoOfPartyA.value1
+	model.lf = balanceInfoOfPartyA.value2
+	model.pendingCva = balanceInfoOfPartyA.value5
+	model.pendingLf = balanceInfoOfPartyA.value6
+
 	model.save()
 }
 
