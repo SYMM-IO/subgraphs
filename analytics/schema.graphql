@@ -152,6 +152,25 @@ type PartyALiquidation @entity{
     liquidationType: Int!
     timestamp: BigInt!
     transaction: Bytes!
+    allocatedBalance:BigInt
+    cva:BigInt
+    pendingCva:BigInt
+    lf:BigInt
+    pendingLf:BigInt
+}
+
+type PartyBLiquidation @entity{
+    id: ID!
+    partyB: Bytes!
+    liquidator: Bytes!
+    liquidationType: Int!
+    timestamp: BigInt!
+    transaction: Bytes!
+    allocatedBalance:BigInt
+    cva:BigInt
+    pendingCva:BigInt
+    lf:BigInt
+    pendingLf:BigInt
 }
 
 type PartyALiquidationDisputed @entity{
