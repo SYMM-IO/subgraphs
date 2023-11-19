@@ -79,7 +79,7 @@ import {
 	Symbol,
 	TradeHistory as TradeHistoryModel,
 } from "./../generated/schema"
-import {getLiquidatedStateOfPartyA, getQuote} from "./contract_utils"
+import {getBalanceInfoOfPartyA, getLiquidatedStateOfPartyA, getQuote} from "./contract_utils"
 import {
 	createNewAccount,
 	createNewUser,
@@ -644,10 +644,10 @@ export function handleSetSymbolsPrices(
 	event: SetSymbolsPrices
 ): void {
 	const liquidationDetail = getLiquidatedStateOfPartyA(event.address, event.params.partyA)
-	if (liquidationDetail == null)
+	const balanceInfoOfPartyA = getBalanceInfoOfPartyA(event.address,event.params.partyA)
+	if (liquidationDetail == null || balanceInfoOfPartyA == null)
 		return
 	let model = new PartyALiquidation(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
-	const balanceInfoOfPartyA = symmio.bind(event.address).balanceInfoOfPartyA(event.params.partyA)
 
 	model.partyA = event.params.partyA
 	model.liquidator = event.params.liquidator
