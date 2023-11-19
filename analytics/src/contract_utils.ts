@@ -3,7 +3,8 @@ import {
 	symmio,
 	symmio__getLiquidatedStateOfPartyAResultValue0Struct,
 	symmio__getQuoteResultValue0Struct,
-	symmio__balanceInfoOfPartyAResult
+	symmio__balanceInfoOfPartyAResult,
+	symmio__balanceInfoOfPartyBResult
 
 } from "../generated/symmio/symmio";
 
@@ -22,5 +23,11 @@ export function getLiquidatedStateOfPartyA(address: Address, partyA: Address): s
 export function getBalanceInfoOfPartyA(address:Address,partyA: Address):symmio__balanceInfoOfPartyAResult|null{
 	const contract = symmio.bind(address);
 	let result = contract.try_balanceInfoOfPartyA(partyA);
+	return result.reverted ? null : result.value;
+}
+
+export function getBalanceInfoOfPartyB(address:Address,partyA: Address,partyB: Address):symmio__balanceInfoOfPartyBResult|null{
+	const contract = symmio.bind(address);
+	let result = contract.try_balanceInfoOfPartyB(partyB,partyA);
 	return result.reverted ? null : result.value;
 }
