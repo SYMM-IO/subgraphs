@@ -655,11 +655,11 @@ export function handleSetSymbolsPrices(
 	model.timestamp = event.block.timestamp
 	model.transaction = event.transaction.hash
 
-	model.allocatedBalance = balanceInfoOfPartyA.value0
-	model.cva = balanceInfoOfPartyA.value1
-	model.lf = balanceInfoOfPartyA.value3
-	model.pendingCva = balanceInfoOfPartyA.value5
-	model.pendingLf = balanceInfoOfPartyA.value7
+	model.liquidateAllocatedBalance = balanceInfoOfPartyA.value0
+	model.liquidateCva = balanceInfoOfPartyA.value1
+	model.liquidateLf = balanceInfoOfPartyA.value3
+	model.liquidatePendingCva = balanceInfoOfPartyA.value5
+	model.liquidatePendingLf = balanceInfoOfPartyA.value7
 	
 	model.save()
 }
