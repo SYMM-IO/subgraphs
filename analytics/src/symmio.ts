@@ -79,7 +79,7 @@ import {
 	Symbol,
 	TradeHistory as TradeHistoryModel,
 } from "./../generated/schema"
-import {getLiquidatedStateOfPartyA, getQuote} from "./contract_utils"
+import {getBalanceInfoOfPartyA, getLiquidatedStateOfPartyA, getQuote} from "./contract_utils"
 import {
 	createNewAccount,
 	createNewUser,
@@ -644,10 +644,10 @@ export function handleSetSymbolsPrices(
 	event: SetSymbolsPrices
 ): void {
 	const liquidationDetail = getLiquidatedStateOfPartyA(event.address, event.params.partyA)
-	if (liquidationDetail == null)
+	const balanceInfoOfPartyA = getBalanceInfoOfPartyA(event.address,event.params.partyA)
+	if (liquidationDetail == null || balanceInfoOfPartyA == null)
 		return
 	let model = new PartyALiquidation(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
-	const balanceInfoOfPartyA = symmio.bind(event.address).balanceInfoOfPartyA(event.params.partyA)
 
 	model.partyA = event.params.partyA
 	model.liquidator = event.params.liquidator
@@ -655,11 +655,11 @@ export function handleSetSymbolsPrices(
 	model.timestamp = event.block.timestamp
 	model.transaction = event.transaction.hash
 
-	model.allocatedBalance = balanceInfoOfPartyA.value0
-	model.cva = balanceInfoOfPartyA.value1
-	model.lf = balanceInfoOfPartyA.value3
-	model.pendingCva = balanceInfoOfPartyA.value5
-	model.pendingLf = balanceInfoOfPartyA.value7
+	model.liquidateAllocatedBalance = balanceInfoOfPartyA.value0
+	model.liquidateCva = balanceInfoOfPartyA.value1
+	model.liquidateLf = balanceInfoOfPartyA.value3
+	model.liquidatePendingCva = balanceInfoOfPartyA.value5
+	model.liquidatePendingLf = balanceInfoOfPartyA.value7
 	
 	model.save()
 }
