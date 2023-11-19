@@ -125,11 +125,11 @@ export function handleLiquidatePartyA(
 
         entity.liquidatePartyATimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
-        entity.allocatedBalance = balanceInfoOfPartyA.value0
-        entity.cva = balanceInfoOfPartyA.value1
-        entity.lf = balanceInfoOfPartyA.value2
-        entity.pendingCva = balanceInfoOfPartyA.value5
-        entity.pendingLf = balanceInfoOfPartyA.value6
+        entity.liquidateAllocatedBalance = balanceInfoOfPartyA.value0
+        entity.liquidateCva = balanceInfoOfPartyA.value1
+        entity.liquidateLf = balanceInfoOfPartyA.value2
+        entity.liquidatePendingCva = balanceInfoOfPartyA.value5
+        entity.liquidatePendingLf = balanceInfoOfPartyA.value6
         entity.save()
     }
 }
@@ -141,11 +141,11 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
 
         entity.liquidatePartyBTimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
-        entity.allocatedBalance = balanceInfoOfPartyB.value0
-        entity.cva = balanceInfoOfPartyB.value1
-        entity.lf = balanceInfoOfPartyB.value2
-        entity.pendingCva = balanceInfoOfPartyB.value5
-        entity.pendingLf = balanceInfoOfPartyB.value6
+        entity.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
+        entity.liquidateCva = balanceInfoOfPartyB.value1
+        entity.liquidateLf = balanceInfoOfPartyB.value2
+        entity.liquidatePendingCva = balanceInfoOfPartyB.value5
+        entity.liquidatePendingLf = balanceInfoOfPartyB.value6
         entity.save()
     }
 }
