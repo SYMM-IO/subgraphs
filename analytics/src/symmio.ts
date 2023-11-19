@@ -693,6 +693,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyB): void {
 	model.liquidatePendingCva = balanceInfoOfPartyB.value5
 	model.liquidatePendingLf = balanceInfoOfPartyB.value7
 
+	model.save()
 }
 
 // //////////////////////////////////// UnUsed ////////////////////////////////////////
