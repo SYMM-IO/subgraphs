@@ -73,12 +73,13 @@ import {
 	GrantedRole,
 	PartyALiquidation,
 	PartyALiquidationDisputed,
+	PartyBLiquidation,
 	PriceCheck,
 	Quote as QuoteModel,
 	Symbol,
 	TradeHistory as TradeHistoryModel,
 } from "./../generated/schema"
-import {getBalanceInfoOfPartyA, getLiquidatedStateOfPartyA, getQuote} from "./contract_utils"
+import {getBalanceInfoOfPartyA, getBalanceInfoOfPartyB, getLiquidatedStateOfPartyA, getQuote} from "./contract_utils"
 import {
 	createNewAccount,
 	createNewUser,
@@ -674,6 +675,26 @@ function handleClose(_event: ethereum.Event, name: string): void {
 	)
 }
 
+export function handleLiquidatePartyB(event: LiquidatePartyB): void {
+	const balanceInfoOfPartyB = getBalanceInfoOfPartyB(event.address,event.params.partyA,event.params.partyB)
+	if (balanceInfoOfPartyB == null)
+		return
+	let model = new PartyBLiquidation(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
+
+	model.partyA = event.params.partyA
+	model.partyB = event.params.partyB
+	model.liquidator = event.params.liquidator
+	model.timestamp = event.block.timestamp
+	model.transaction = event.transaction.hash
+
+	model.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
+	model.liquidateCva = balanceInfoOfPartyB.value1
+	model.liquidateLf = balanceInfoOfPartyB.value2
+	model.liquidatePendingCva = balanceInfoOfPartyB.value5
+	model.liquidatePendingLf = balanceInfoOfPartyB.value6
+
+	model.save()
+}
 
 // //////////////////////////////////// UnUsed ////////////////////////////////////////
 
@@ -814,9 +835,6 @@ export function handleFullyLiquidatedPartyB(
 }
 
 export function handleLiquidatePartyA(event: LiquidatePartyA): void {
-}
-
-export function handleLiquidatePartyB(event: LiquidatePartyB): void {
 }
 
 // let lastActionTimestamp: BigInt = BigInt.zero();

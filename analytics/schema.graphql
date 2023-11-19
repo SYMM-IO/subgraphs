@@ -160,6 +160,20 @@ type PartyALiquidation @entity{
     liquidatePendingLf:BigInt
 }
 
+type PartyBLiquidation @entity{
+    id: ID!
+    partyA: Bytes!
+    partyB: Bytes!
+    liquidator: Bytes!
+    timestamp: BigInt!
+    transaction: Bytes!
+    liquidateAllocatedBalance:BigInt
+    liquidateCva:BigInt
+    liquidatePendingCva:BigInt
+    liquidateLf:BigInt
+    liquidatePendingLf:BigInt
+}
+
 type PartyALiquidationDisputed @entity{
     id: ID!
     partyA: Bytes!
