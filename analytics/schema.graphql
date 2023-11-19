@@ -153,11 +153,11 @@ type PartyALiquidation @entity{
     liquidationType: Int!
     timestamp: BigInt!
     transaction: Bytes!
-    allocatedBalance:BigInt
-    cva:BigInt
-    pendingCva:BigInt
-    lf:BigInt
-    pendingLf:BigInt
+    liquidateAllocatedBalance:BigInt
+    liquidateCva:BigInt
+    liquidatePendingCva:BigInt
+    liquidateLf:BigInt
+    liquidatePendingLf:BigInt
 }
 
 type PartyALiquidationDisputed @entity{
