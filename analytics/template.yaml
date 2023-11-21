@@ -159,6 +159,10 @@ dataSources:
           handler: handleSetSymbolsPrices
         - event: LiquidationDisputed(address)
           handler: handleLiquidationDisputed
+        - event: RoleGranted(bytes32,address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(bytes32,address)
+          handler: handleRoleRevoked
       file: ./src/symmio.ts
 
   - kind: ethereum
