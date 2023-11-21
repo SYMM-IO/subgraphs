@@ -1,8 +1,15 @@
 type User @entity {
     id: ID!
     timestamp: BigInt!
-    lastActivityTimestamp: BigInt!
     transaction: Bytes!
+}
+
+type UserActivity @entity {
+    id: ID!
+    user: String!
+    accountSource: Bytes
+    timestamp: BigInt!
+    updateTimestamp: BigInt
 }
 
 type Account @entity {
@@ -27,6 +34,7 @@ type BalanceChange @entity {
     type: String!
     account: String!
     amount: BigInt!
+    collateral: Bytes!
     timestamp: BigInt!
     blockNumber: BigInt!
     transaction: Bytes!
@@ -65,11 +73,12 @@ type Quote @entity {
     blockNumber: BigInt!
     closedAmount: BigInt!
     avgClosedPrice: BigInt!
+    partyB: Bytes
+    collateral: Bytes!
+    liquidatedSide: Int
     timestamp: BigInt!
     updateTimestamp: BigInt!
     transaction: Bytes!
-    partyB: Bytes
-    liquidatedSide: Int
 }
 
 type DailyHistory @entity {
@@ -151,6 +160,25 @@ type PartyALiquidation @entity{
     liquidationType: Int!
     timestamp: BigInt!
     transaction: Bytes!
+    liquidateAllocatedBalance:BigInt
+    liquidateCva:BigInt
+    liquidatePendingCva:BigInt
+    liquidateLf:BigInt
+    liquidatePendingLf:BigInt
+}
+
+type PartyBLiquidation @entity{
+    id: ID!
+    partyA: Bytes!
+    partyB: Bytes!
+    liquidator: Bytes!
+    timestamp: BigInt!
+    transaction: Bytes!
+    liquidateAllocatedBalance:BigInt
+    liquidateCva:BigInt
+    liquidatePendingCva:BigInt
+    liquidateLf:BigInt
+    liquidatePendingLf:BigInt
 }
 
 type PartyALiquidationDisputed @entity{
@@ -158,4 +186,20 @@ type PartyALiquidationDisputed @entity{
     partyA: Bytes!
     timestamp: BigInt!
     transaction: Bytes!
+}
+
+type Configuration @entity{
+    id: ID!
+    collateral: Bytes!
+    updateTimestamp: BigInt!
+    updateTransaction: Bytes!
+}
+
+type GrantedRole @entity{
+    id: ID!
+    role: String!
+    user: Bytes!
+    grantTransaction: Bytes
+    revokeTransaction: Bytes
+    updateTimestamp: BigInt!
 }
