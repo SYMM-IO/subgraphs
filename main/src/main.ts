@@ -65,10 +65,10 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
             let pendingEntity = ResultEntity.load(quoteId.toString())!
             if (pendingEntity.quoteStatus <= 2 && pendingEntity.quoteStatus >= 0) {
                 pendingEntity.quoteStatus = 8
-                pendingEntity.save()
             } else {
-                log.error(`error in liquidate positions party A\nQuoteId: ${quoteId}\nQuote status: ${pendingEntity.quoteStatus}`, [])
+                pendingEntity.quoteStatus = 3
             }
+            pendingEntity.save()
         }
 
         let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toHexString()))
