@@ -40,7 +40,7 @@ import {
 import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getQuote, initialHelper, symbolIdToSymbolName, } from './helper'
 
 
-// const FACTOR: BigInt = BigInt.fromI32(10).pow(18);
+const FACTOR: BigInt = BigInt.fromI32(10).pow(18);
 
 
 export function handleAddSymbol(event: AddSymbolEvent): void {
@@ -62,7 +62,12 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
         let qoutId = event.params.quoteIds[i]
         let entity = ResultEntity.load(qoutId.toString())!
         entity.lastFundingPaymentTimestamp = event.block.timestamp
-        entity.openedPrice = entity.openedPrice!.times(event.params.rates[i]).plus(entity.openedPrice!)
+        if (entity.positionType) { // SHORT position
+            entity.openedPrice = entity.openedPrice!.minus(entity.openedPrice!.times(event.params.rates[i]).div(FACTOR))
+        } else {
+            entity.openedPrice = entity.openedPrice!.plus(entity.openedPrice!.times(event.params.rates[i]).div(FACTOR))
+        }
+
 
         entity.save()
     }
