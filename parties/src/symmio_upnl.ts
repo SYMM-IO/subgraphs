@@ -6,12 +6,12 @@ import {
     DeallocatePartyA as DeallocatePartyAEvent,
     LiquidatePartyA as LiquidatePartyAEvent,
     LiquidatePartyB as LiquidatePartyBEvent,
-    symmio as symmio
+    symmio as symmio,
 } from "../generated/symmio/symmio"
-import { ResultPartyA, ResultPartyB, } from "../generated/schema"
+import {ResultPartyA, ResultPartyB} from "../generated/schema"
 
 export function handleAllocatePartyA(
-    event: AllocatePartyAEvent
+    event: AllocatePartyAEvent,
 ): void {
     let allocateEntity = ResultPartyA.load(event.params.user.toHex())
     if (allocateEntity) {
@@ -33,7 +33,7 @@ export function handleAllocatePartyA(
 }
 
 export function handleDeallocatePartyA(
-    event: DeallocatePartyAEvent
+    event: DeallocatePartyAEvent,
 ): void {
     let allocateEntity = ResultPartyA.load(event.params.user.toHex())
     if (allocateEntity) {
@@ -55,7 +55,7 @@ export function handleDeallocatePartyA(
 
 
 export function handleAllocatePartyB(
-    event: AllocatePartyBEvent
+    event: AllocatePartyBEvent,
 ): void {
 
     let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
@@ -79,7 +79,7 @@ export function handleAllocatePartyB(
 
 
 export function handleAllocateForPartyB(
-    event: AllocateForPartyBEvent
+    event: AllocateForPartyBEvent,
 ): void {
     let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
     if (allocateEntity) {
@@ -101,7 +101,7 @@ export function handleAllocateForPartyB(
 }
 
 export function handleDeallocateForPartyB(
-    event: DeallocateForPartyBEvent
+    event: DeallocateForPartyBEvent,
 ): void {
     let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
     if (allocateEntity) {
@@ -117,7 +117,7 @@ export function handleDeallocateForPartyB(
 
 
 export function handleLiquidatePartyA(
-    event: LiquidatePartyAEvent
+    event: LiquidatePartyAEvent,
 ): void {
     let entity = ResultPartyA.load(event.params.partyA.toHex())
     if (entity) {
@@ -129,6 +129,7 @@ export function handleLiquidatePartyA(
         entity.liquidateLf = balanceInfoOfPartyA.value3
         entity.liquidatePendingCva = balanceInfoOfPartyA.value5
         entity.liquidatePendingLf = balanceInfoOfPartyA.value7
+        entity.timeStamp = event.block.timestamp
         entity.save()
     }
 }
@@ -136,7 +137,7 @@ export function handleLiquidatePartyA(
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
     let entity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
     if (entity) {
-        const balanceInfoOfPartyB = symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB,event.params.partyA)
+        const balanceInfoOfPartyB = symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB, event.params.partyA)
         entity.liquidatePartyBTimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
         entity.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
@@ -144,6 +145,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
         entity.liquidateLf = balanceInfoOfPartyB.value3
         entity.liquidatePendingCva = balanceInfoOfPartyB.value5
         entity.liquidatePendingLf = balanceInfoOfPartyB.value7
+        entity.timeStamp = event.block.timestamp
         entity.save()
     }
 }
