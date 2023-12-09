@@ -130,6 +130,7 @@ export function handleLiquidatePartyA(
         entity.liquidateLf = balanceInfoOfPartyA.value2
         entity.liquidatePendingCva = balanceInfoOfPartyA.value5
         entity.liquidatePendingLf = balanceInfoOfPartyA.value6
+        entity.timeStamp = event.block.timestamp
         entity.save()
     }
 }
@@ -146,6 +147,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
         entity.liquidateLf = balanceInfoOfPartyB.value2
         entity.liquidatePendingCva = balanceInfoOfPartyB.value5
         entity.liquidatePendingLf = balanceInfoOfPartyB.value6
+        entity.timeStamp = event.block.timestamp
         entity.save()
     }
 }
