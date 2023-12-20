@@ -7,12 +7,12 @@
     {
       "symmioMultiAccountAddress": "0x5dE6949717F3AA8E0Fbed5Ce8B611Ebcf1e44AE9",
       "symmioMultiAccountStartBlock": "2230256",
-      "symmioMultiAccountName": "MultiAccount1"
+      "symmioMultiAccountName": "based_multi_account"
     },
     {
       "symmioMultiAccountAddress": "0x724796d2e9143920B1b58651B04e1Ed201b8cC98",
       "symmioMultiAccountStartBlock": "5897272",
-      "symmioMultiAccountName": "IntentX"
+      "symmioMultiAccountName": "intentx_multi_account"
     }
   ],
   "analyticsDeployUrl": "symmiograph/symmioanalytics_base_8",
