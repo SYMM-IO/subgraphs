@@ -4,8 +4,14 @@ type ResultPartyA @entity {
   amount: BigInt!
   timeStamp: BigInt!
   blockNumber: BigInt!
-  trHash: Bytes!
+  trHash: Bytes
+  trHashLiquidate: Bytes
   liquidatePartyATimeStamp: BigInt
+  liquidateAllocatedBalance:BigInt
+  liquidateCva:BigInt
+  liquidatePendingCva:BigInt
+  liquidateLf:BigInt
+  liquidatePendingLf:BigInt
 }
 
 type ResultPartyB @entity {
@@ -15,6 +21,12 @@ type ResultPartyB @entity {
   partyB: Bytes!
   timeStamp: BigInt!
   blockNumber: BigInt!
-  trHash: Bytes!
+  trHash: Bytes
+  trHashLiquidate: Bytes
   liquidatePartyBTimeStamp: BigInt
+  liquidateAllocatedBalance:BigInt
+  liquidateCva:BigInt
+  liquidatePendingCva:BigInt
+  liquidateLf:BigInt
+  liquidatePendingLf:BigInt
 }
