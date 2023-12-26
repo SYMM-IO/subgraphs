@@ -24,7 +24,7 @@ def copy_abi_files(subgraph_dir, version):
         os.makedirs(os.path.dirname(destination_path), exist_ok=True)
 
         # Copy content from source to destination
-        with open(source, 'r') as src_file, open(destination_path, 'w') as dest_file:
+        with open(source, "r") as src_file, open(destination_path, "w") as dest_file:
             content = src_file.read()
             dest_file.write(content)
 
@@ -98,9 +98,13 @@ def main():
         # Copy the ABI files to each subgraph directory
         copy_abi_files(subgraph, config["symmioVersion"])
 
-        deploy_subgraph(subgraph, config_file, config[f"{subgraph}DeployUrl"], prepare_only)
+        deploy_subgraph(
+            subgraph, config_file, config[f"{subgraph}DeployUrl"], prepare_only
+        )
 
-        print(f"{subgraph} subgraph deployed ---------------------------------------------------")
+        print(
+            f"{subgraph} subgraph deployed ---------------------------------------------------"
+        )
 
     print("Done")
 
