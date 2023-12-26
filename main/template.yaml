@@ -42,9 +42,9 @@ dataSources:
         - name: symmio
           file: ./abis/symmio.json
       eventHandlers:
-        - event: LiquidatePartyA(address,address)
+        - event: LiquidatePartyA(address,address,uint256,int256,int256)
           handler: handleLiquidatePartyA
-        - event: LiquidatePartyB(address,address,address)
+        - event: LiquidatePartyB(address,address,address,uint256,int256)
           handler: handleLiquidatePartyB
         - event: LiquidatePositionsPartyB(address,address,address,uint256[])
           handler: handleLiquidatePositionsPartyB
