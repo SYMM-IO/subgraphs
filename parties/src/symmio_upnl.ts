@@ -131,6 +131,7 @@ export function handleLiquidatePartyA(
         entity.liquidatePendingCva = balanceInfoOfPartyA.value5
         entity.liquidatePendingLf = balanceInfoOfPartyA.value6
         entity.timeStamp = event.block.timestamp
+        entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
         entity.save()
     }
 }
@@ -138,7 +139,7 @@ export function handleLiquidatePartyA(
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
     let entity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
     if (entity) {
-        const balanceInfoOfPartyB= symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB,event.params.partyA)
+        const balanceInfoOfPartyB = symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB, event.params.partyA)
 
         entity.liquidatePartyBTimeStamp = event.block.timestamp
         entity.trHashLiquidate = event.transaction.hash
@@ -147,6 +148,8 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
         entity.liquidateLf = balanceInfoOfPartyB.value2
         entity.liquidatePendingCva = balanceInfoOfPartyB.value5
         entity.liquidatePendingLf = balanceInfoOfPartyB.value6
+        entity.partyBAllocatedBalance = event.params.partyBAllocatedBalance
+        entity.upnl = event.params.upnl
         entity.timeStamp = event.block.timestamp
         entity.save()
     }
