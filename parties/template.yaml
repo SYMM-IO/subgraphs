@@ -35,8 +35,8 @@ dataSources:
           handler: handleAllocatePartyA
         - event: DeallocatePartyA(address,uint256)
           handler: handleDeallocatePartyA
-        - event: LiquidatePartyA(address,address)
+        - event: LiquidatePartyA(address,address,uint256,int256,int256)
           handler: handleLiquidatePartyA
-        - event: LiquidatePartyB(address,address,address)
+        - event: LiquidatePartyB(address,address,address,uint256,int256)
           handler: handleLiquidatePartyB
       file: ./src/symmio_upnl.ts

@@ -387,6 +387,8 @@ export function handleRequestToCancelQuote(
 
 export function handleSendQuote(event: SendQuoteEvent): void {
     let entity = new ResultEntity(event.params.quoteId.toString())
+    let symmioContract = symmio.bind(event.address)
+    event.params.tradingFee
 
     entity.quoteId = event.params.quoteId
     entity.orderTypeOpen = event.params.orderType
@@ -398,13 +400,14 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     entity.cva = event.params.cva
     entity.partyAmm = event.params.partyAmm
     entity.partyBmm = event.params.partyBmm
-    entity.maxFundingRate = event.params.maxFundingRate
+    // entity.maxFundingRate = event.params.maxFundingRate
     entity.lf = event.params.lf
     entity.deadline = event.params.deadline
     entity.quoteStatus = 0
     entity.marketPrice = event.params.marketPrice
     entity.averageClosedPrice = BigInt.fromI32(0)
     entity.closedAmount = BigInt.fromI32(0)
+    entity.tradingFee = event.params.tradingFee
 
 
     let initialEntity = new InitialQuote(event.params.quoteId.toString())
@@ -418,13 +421,24 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     initialEntity.cva = event.params.cva
     initialEntity.partyAmm = event.params.partyAmm
     initialEntity.partyBmm = event.params.partyBmm
-    initialEntity.maxFundingRate = event.params.maxFundingRate
+    // initialEntity.maxFundingRate = event.params.maxFundingRate
     initialEntity.lf = event.params.lf
     initialEntity.deadline = event.params.deadline
     initialEntity.quoteStatus = 0
     initialEntity.marketPrice = event.params.marketPrice
 
-    let symmioContract = symmio.bind(event.address)
+    let callResultGetQuote = symmioContract.try_getQuote(event.params.quoteId)
+    if (callResultGetQuote.reverted) {
+        log.error('accept cancel bind crashed!', [])
+    } else {
+        let Result = callResultGetQuote.value as ethereum.Tuple
+        let initialNewEntity = initialHelper(Result)
+        if (initialNewEntity) {
+            entity.maxFundingRate = initialNewEntity.maxFundingRate
+            initialEntity.maxFundingRate = initialNewEntity.maxFundingRate
+        }
+    }
+
     let callResult = symmioContract.try_symbolNameByQuoteId([event.params.quoteId])
     if (callResult.reverted) {
         log.error("error in symbol bind", [])
@@ -464,10 +478,8 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     initialEntity.save()
     entity.initialData = initialEntity.id
 
-    let symbolInfoEntity = SymbolInfo.load(event.params.symbolId.toString())
-    if (symbolInfoEntity) {
-        entity.tradingFee = symbolInfoEntity.tradingFee
-    }
+
+
     partyAEntity.save()
     entity.save()
 
