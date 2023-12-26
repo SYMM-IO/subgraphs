@@ -3715,6 +3715,24 @@
         "internalType": "address",
         "name": "partyA",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "allocatedBalance",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "upnl",
+        "type": "int256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "totalUnrealizedLoss",
+        "type": "int256"
       }
     ],
     "name": "LiquidatePartyA",
@@ -3740,6 +3758,18 @@
         "internalType": "address",
         "name": "partyA",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "partyBAllocatedBalance",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "upnl",
+        "type": "int256"
       }
     ],
     "name": "LiquidatePartyB",
@@ -4564,7 +4594,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "maxFundingRate",
+        "name": "tradingFee",
         "type": "uint256"
       },
       {
