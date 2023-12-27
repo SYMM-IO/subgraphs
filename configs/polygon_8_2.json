@@ -12,5 +12,6 @@
   ],
   "analyticsDeployUrl": "symmiograph/symmioanalytics_polygon_8_2",
   "mainDeployUrl": "symmiograph/symmiomain_polygon_8_2",
-  "partiesDeployUrl": "symmiograph/symmioparties_polygon_8_2"
+  "partiesDeployUrl": "symmiograph/symmioparties_polygon_8_2",
+  "eventsDeployUrl": "symmiograph/symmioevents_polygon_8_2"
 }

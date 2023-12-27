@@ -12,5 +12,6 @@
   ],
   "analyticsDeployUrl": "symmiograph/symmioanalytics_bnb_8_2",
   "mainDeployUrl": "symmiograph/symmiomain_bnb_8_2",
-  "partiesDeployUrl": "symmiograph/symmioparties_bnb_8_2"
+  "partiesDeployUrl": "symmiograph/symmioparties_bnb_8_2",
+  "eventsDeployUrl": "symmiograph/symmioevents_bnb_8_2"
 }
