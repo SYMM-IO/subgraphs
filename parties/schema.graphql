@@ -13,6 +13,8 @@ type ResultPartyA @entity {
   liquidateLf: BigInt
   liquidatePendingLf: BigInt
   totalUnrealizedLoss: BigInt
+  upnl: BigInt
+  allocatedBalance: BigInt
 }
 
 type ResultPartyB @entity {

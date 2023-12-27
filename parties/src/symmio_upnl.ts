@@ -132,6 +132,8 @@ export function handleLiquidatePartyA(
         entity.liquidatePendingLf = balanceInfoOfPartyA.value6
         entity.timeStamp = event.block.timestamp
         entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
+        entity.upnl = event.params.upnl
+        entity.allocatedBalance = event.params.allocatedBalance
         entity.save()
     }
 }
