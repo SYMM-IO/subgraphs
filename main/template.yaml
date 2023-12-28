@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "{{ symmioAddress }}"
       abi: symmio
-      startBlock: {{ symmioStartBlock }}
+      startBlock: {{symmioStartBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
