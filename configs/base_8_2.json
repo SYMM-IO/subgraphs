@@ -1,0 +1,17 @@
+{
+  "network": "base",
+  "symmioAddress": "0x52e2230cDb80EDEBDaDafcf24033608C9A636D7D",
+  "symmioStartBlock": "2228875",
+  "symmioVersion": "0.8.2",
+  "multiAccounts": [
+    {
+      "symmioMultiAccountAddress": "0x5dE6949717F3AA8E0Fbed5Ce8B611Ebcf1e44AE9",
+      "symmioMultiAccountStartBlock": "2230256",
+      "symmioMultiAccountName": "alpha_multi_account_v3"
+    }
+  ],
+  "analyticsDeployUrl": "symmiograph/symmioanalytics_base_8_2",
+  "mainDeployUrl": "symmiograph/symmiomain_base_8_2",
+  "partiesDeployUrl": "symmiograph/symmioparties_base_8_2",
+  "eventsDeployUrl": "symmiograph/symmioevents_base_8_2"
+}
