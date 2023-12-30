@@ -331,7 +331,6 @@ export function handleSendQuote(event: SendQuote): void {
 	quote.partyAmm = event.params.partyAmm
 	quote.partyBmm = event.params.partyBmm
 	quote.lf = event.params.lf
-	quote.maxFundingRate = event.params.maxFundingRate
 	quote.quoteStatus = QuoteStatus.PENDING
 	quote.account = account.id
 	quote.closedAmount = BigInt.fromString("0")
