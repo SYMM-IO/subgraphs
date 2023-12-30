@@ -68,7 +68,6 @@ type Quote @entity {
     partyAmm: BigInt!
     partyBmm: BigInt!
     lf: BigInt!
-    maxFundingRate: BigInt!
     quoteStatus: Int!
     blockNumber: BigInt!
     closedAmount: BigInt!
