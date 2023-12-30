@@ -75,13 +75,13 @@ def main():
     config_file = sys.argv[1]
 
     if deploy_all:
-        subgraphs_to_deploy = ["analytics", "main", "parties"]
+        subgraphs_to_deploy = ["analytics", "main", "parties", "events"]
     else:
         subgraphs_to_deploy = sys.argv[2:]
 
     if not subgraphs_to_deploy:
         print(
-            "Please specify which subgraphs to deploy (e.g., main, parties, analytics) or use --all to deploy all."
+            "Please specify which subgraphs to deploy (e.g., main, parties, analytics, events) or use --all to deploy all."
         )
         sys.exit(1)
 
