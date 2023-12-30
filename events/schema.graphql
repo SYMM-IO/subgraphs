@@ -528,9 +528,9 @@ type LiquidatePartyA @entity(immutable: true) {
   action: String!
   liquidator: Bytes! # address
   partyA: Bytes! # address
-  totalUnrealizedLoss: BigInt!
-  upnl: BigInt!
-  allocatedBalance: BigInt!
+  totalUnrealizedLoss: BigInt
+  upnl: BigInt
+  allocatedBalance: BigInt
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -545,8 +545,8 @@ type LiquidatePartyB @entity(immutable: true) {
   liquidator: Bytes! # address
   partyB: Bytes! # address
   partyA: Bytes! # address
-  upnl: BigInt!
-  partyBAllocatedBalance: BigInt!
+  upnl: BigInt
+  partyBAllocatedBalance: BigInt
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
@@ -758,7 +758,7 @@ type SendQuote @entity(immutable: true) {
   lf: BigInt! # uint256
   partyAmm: BigInt! # uint256
   partyBmm: BigInt! # uint256
-  tradingFee: BigInt! # uint256
+  tradingFee: BigInt # uint256
   deadline: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!

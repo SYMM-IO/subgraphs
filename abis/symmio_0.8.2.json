@@ -3750,6 +3750,25 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      }
+    ],
+    "name": "LiquidatePartyA",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "partyB",
         "type": "address"
       },
@@ -3770,6 +3789,31 @@
         "internalType": "int256",
         "name": "upnl",
         "type": "int256"
+      }
+    ],
+    "name": "LiquidatePartyB",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
       }
     ],
     "name": "LiquidatePartyB",
