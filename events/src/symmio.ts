@@ -40,7 +40,9 @@ import {
   DisputeForLiquidation as DisputeForLiquidationEvent,
   FullyLiquidatedPartyB as FullyLiquidatedPartyBEvent,
   LiquidatePartyA as LiquidatePartyAEvent,
+  LiquidatePartyA1 as LiquidatePartyAOldEvent,
   LiquidatePartyB as LiquidatePartyBEvent,
+  LiquidatePartyB1 as LiquidatePartyBOldEvent,
   LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyAEvent,
   LiquidatePositionsPartyA as LiquidatePositionsPartyAEvent,
   LiquidatePositionsPartyB as LiquidatePositionsPartyBEvent,
@@ -148,6 +150,7 @@ import {
   CounterId
 } from "../generated/schema"
 import { bigIntToArr, bytesToArr } from "./helper"
+import { BigInt } from "@graphprotocol/graph-ts"
 export function handleActiveEmergencyMode(
   event: ActiveEmergencyModeEvent
 ): void {
@@ -330,7 +333,7 @@ export function handlePausePartyAActions(event: PausePartyAActionsEvent): void {
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "PausePartyAActionsE"
+  entity.action = "PausePartyAActions"
   entity.counterId = cId.eventId
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -352,7 +355,7 @@ export function handlePausePartyBActions(event: PausePartyBActionsEvent): void {
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "PausePartyBActionsE"
+  entity.action = "PausePartyBActions"
   entity.counterId = cId.eventId
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -736,7 +739,7 @@ export function handleSetMuonIds(event: SetMuonIdsEvent): void {
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "SetMuonIdsE"
+  entity.action = "SetMuonIds"
   entity.counterId = cId.eventId
   entity.muonAppId = event.params.muonAppId
   entity.gateway = event.params.gateway
@@ -765,7 +768,7 @@ export function handleSetPartyBEmergencyStatus(
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "SetPartyBEmergencyStatusE"
+  entity.action = "SetPartyBEmergencyStatus"
   entity.counterId = cId.eventId
   entity.partyB = event.params.partyB
   entity.status = event.params.status
@@ -819,7 +822,7 @@ export function handleSetSuspendedAddress(
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "SetSuspendedAddressE"
+  entity.action = "SetSuspendedAddress"
   entity.counterId = cId.eventId
   entity.user = event.params.user
   entity.isSuspended = event.params.isSuspended
@@ -846,7 +849,7 @@ export function handleSetSymbolAcceptableValues(
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "SetSymbolAcceptableValuesE"
+  entity.action = "SetSymbolAcceptableValues"
   entity.counterId = cId.eventId
   entity.symbolId = event.params.symbolId
   entity.oldMinAcceptableQuoteValue = event.params.oldMinAcceptableQuoteValue
@@ -1085,7 +1088,7 @@ export function handleUnpausePartyAActions(
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "UnpausePartyAActionsE"
+  entity.action = "UnpausePartyAActions"
   entity.counterId = cId.eventId
 
   entity.blockNumber = event.block.number
@@ -1110,7 +1113,7 @@ export function handleUnpausePartyBActions(
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "UnpausePartyBActionsE"
+  entity.action = "UnpausePartyBActions"
   entity.counterId = cId.eventId
 
   entity.blockNumber = event.block.number
@@ -1204,6 +1207,32 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
   entity.save()
 }
 
+export function handleLiquidatePartyAOld(event: LiquidatePartyAOldEvent): void {
+  let entity = new LiquidatePartyA(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "LiquidatePartyA"
+  entity.counterId = cId.eventId
+  entity.liquidator = event.params.liquidator
+  entity.partyA = event.params.partyA
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
   let entity = new LiquidatePartyB(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -1222,6 +1251,32 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
   entity.partyA = event.params.partyA
   entity.upnl = event.params.upnl
   entity.partyBAllocatedBalance = event.params.partyBAllocatedBalance
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleLiquidatePartyBOld(event: LiquidatePartyBOldEvent): void {
+  let entity = new LiquidatePartyB(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "LiquidatePartyB"
+  entity.counterId = cId.eventId
+  entity.liquidator = event.params.liquidator
+  entity.partyB = event.params.partyB
+  entity.partyA = event.params.partyA
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1354,7 +1409,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
   }
   cId.eventId += 1;
   cId.save()
-  entity.action = "SetSymbolsPricesE"
+  entity.action = "SetSymbolsPrices"
   entity.counterId = cId.eventId
   entity.liquidator = event.params.liquidator
   entity.partyA = event.params.partyA
@@ -1620,7 +1675,6 @@ export function handleSendQuote(event: SendQuoteEvent): void {
   entity.lf = event.params.lf
   entity.partyAmm = event.params.partyAmm
   entity.partyBmm = event.params.partyBmm
-  entity.tradingFee = event.params.tradingFee
   entity.deadline = event.params.deadline
 
   entity.blockNumber = event.block.number
@@ -1629,6 +1683,11 @@ export function handleSendQuote(event: SendQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+
+  if (event.block.number.ge(BigInt.fromI32(34693893))) {
+    entity.tradingFee = event.params.tradingFee
+  }
+
   entity.save()
 }
 
