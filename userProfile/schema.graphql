@@ -48,6 +48,7 @@ type Quote @entity {
     timestamp: BigInt!
     pnl: BigInt!
     fundingPaid: BigInt!
+    fundingReceived: BigInt!
     updateTimestamp: BigInt!
     transaction: Bytes!
 }
