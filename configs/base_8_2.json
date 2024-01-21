@@ -5,9 +5,14 @@
   "symmioVersion": "0.8.2",
   "multiAccounts": [
     {
-      "symmioMultiAccountAddress": "0x5dE6949717F3AA8E0Fbed5Ce8B611Ebcf1e44AE9",
-      "symmioMultiAccountStartBlock": "2230256",
-      "symmioMultiAccountName": "alpha_multi_account_v3"
+      "symmioMultiAccountAddress": "0x8Ab178C07184ffD44F0ADfF4eA2ce6cFc33F3b86",
+      "symmioMultiAccountStartBlock": "8616108",
+      "symmioMultiAccountName": "intentx_multi_account_v2"
+    },
+    {
+      "symmioMultiAccountAddress": "0x1c03B6480a4efC2d4123ba90d7857f0e1878B780",
+      "symmioMultiAccountStartBlock": "8616108",
+      "symmioMultiAccountName": "based_multi_account_v2"
     }
   ],
   "analyticsDeployUrl": "symmiograph/symmioanalytics_base_8_2",

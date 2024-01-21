@@ -1,35 +1,14 @@
-import { BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
+import {BigInt} from '@graphprotocol/graph-ts'
 
 import {
-    AcceptCancelCloseRequest as AcceptCancelCloseRequestEvent,
-    AcceptCancelRequest as AcceptCancelRequestEvent,
+    ChargeFundingRate as ChargeFundingRateEvent,
     EmergencyClosePosition as EmergencyClosePositionEvent,
-    ExpireQuote as ExpireQuoteEvent,
     FillCloseRequest as FillCloseRequestEvent,
-    ForceCancelCloseRequest as ForceCancelCloseRequestEvent,
-    ForceCancelQuote as ForceCancelQuoteEvent,
     ForceClosePosition as ForceClosePositionEvent,
-    LiquidatePartyA as LiquidatePartyAEvent,
-    LiquidatePartyB as LiquidatePartyBEvent,
-    LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyAEvent,
-    LiquidatePositionsPartyA as LiquidatePositionsPartyAEvent,
-    LiquidatePositionsPartyB as LiquidatePositionsPartyBEvent,
-    LockQuote as LockQuoteEvent,
     OpenPosition as OpenPositionEvent,
-    RequestToCancelCloseRequest as RequestToCancelCloseRequestEvent,
-    RequestToCancelQuote as RequestToCancelQuoteEvent,
-    RequestToClosePosition as RequestToClosePositionEvent,
     SendQuote as SendQuoteEvent,
-    SetSymbolsPrices as SetSymbolsPricesEvent,
-    symmio,
-    UnlockQuote as UnlockQuoteEvent,
-    ChargeFundingRate as ChargeFundingRateEvent
 } from "../generated/symmio/symmio"
-import {
-    DebugEntity,
-    ResultEntity,
-    GlobalFee
-} from "../generated/schema"
+import {GlobalFee, ResultEntity} from "../generated/schema"
 
 
 const FACTOR: BigInt = BigInt.fromString(`1000000000000000000`);
@@ -61,8 +40,6 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
         globalEntity.globalFee = globalEntity.globalFee.plus(fee)
         globalEntity.latestTimeStamp = event.block.timestamp
         globalEntity.save()
-
-
     }
 }
 
@@ -76,7 +53,6 @@ export function handleForceClosePosition(event: ForceClosePositionEvent): void {
     entity.closedAmount = entity.closedAmount!.plus(event.params.filledAmount)
     entity.timeStamp = event.block.timestamp
     entity.save()
-
 }
 
 
@@ -91,7 +67,6 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
 }
 export function handleSendQuote(event: SendQuoteEvent): void {
     let entity = new ResultEntity(event.params.quoteId.toString())
-
     entity.quoteId = event.params.quoteId
     entity.partyA = event.params.partyA
     entity.symbolId = event.params.symbolId
@@ -106,13 +81,8 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     entity.closedAmount = BigInt.fromI32(0)
     entity.initialQuantity = event.params.quantity
     entity.fee = BigInt.fromI32(0)
-
     entity.timeStamp = event.block.timestamp
-
-
     entity.save()
-
-
 }
 
 
@@ -129,8 +99,6 @@ export function handleEmergencyClosePosition(
 }
 
 
-
-
 export function handleOpenPosition(event: OpenPositionEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
     entity.quoteId = event.params.quoteId
@@ -140,17 +108,5 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
     entity.timeStamp = event.block.timestamp
     entity.quantity = event.params.filledAmount
     entity.initialOpenedPrice = event.params.openedPrice
-
-
     entity.save()
-
 }
-
-
-
-
-
-
-
-
-
