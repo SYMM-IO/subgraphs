@@ -188,8 +188,10 @@ dataSources:
           handler: handleLiquidationDisputed
         - event: SetSymbolsPrices(address,address,uint256[],uint256[])
           handler: handleSetSymbolsPrices
-        - event: SettlePartyALiquidation(address,address[])
+        - event: SettlePartyALiquidation(address,address[],int256[])
           handler: handleSettlePartyALiquidation
+        - event: SettlePartyALiquidation(address,address[])
+          handler: handleOldSettlePartyALiquidation
         - event: ExpireQuote(uint8,uint256)
           handler: handleExpireQuote
         - event: ForceCancelCloseRequest(uint256,uint8)

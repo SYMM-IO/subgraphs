@@ -22,7 +22,7 @@ export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
     entity.lf = initialLockedValues[1].toBigInt()
     entity.partyAmm = initialLockedValues[2].toBigInt()
     entity.partyBmm = initialLockedValues[3].toBigInt()
-    entity.maxFundingRate = resultArr[13].toBigInt()
+    entity.tradingFee = resultArr[13].toBigInt()
     entity.partyA = resultArr[14].toAddress()
     entity.quoteStatus = resultArr[16].toI32()
     entity.timeStamp = resultArr[21].toBigInt()

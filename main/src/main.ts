@@ -388,7 +388,6 @@ export function handleRequestToCancelQuote(
 export function handleSendQuote(event: SendQuoteEvent): void {
     let entity = new ResultEntity(event.params.quoteId.toString())
     let symmioContract = symmio.bind(event.address)
-    event.params.tradingFee
 
     entity.quoteId = event.params.quoteId
     entity.orderTypeOpen = event.params.orderType
@@ -434,8 +433,8 @@ export function handleSendQuote(event: SendQuoteEvent): void {
         let Result = callResultGetQuote.value as ethereum.Tuple
         let initialNewEntity = initialHelper(Result)
         if (initialNewEntity) {
-            entity.maxFundingRate = initialNewEntity.maxFundingRate
-            initialEntity.maxFundingRate = initialNewEntity.maxFundingRate
+            entity.maxFundingRate = initialNewEntity.tradingFee
+            initialEntity.tradingFee = initialNewEntity.tradingFee
         }
     }
 
@@ -503,7 +502,6 @@ export function handleAcceptCancelRequest(
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())
     if (entity) {
-
         entity.quoteId = event.params.quoteId
         entity.quoteStatus = event.params.quoteStatus
         entity.timeStamp = event.block.timestamp
@@ -551,6 +549,7 @@ export function handleAcceptCancelRequest(
             }
             initialNewEntity.save()
             newEntity.partyA = initialNewEntity.partyA
+            newEntity.tradingFee = initialNewEntity.tradingFee!
             newEntity.initialData = initialNewEntity.id
         }
         newEntity.save()
