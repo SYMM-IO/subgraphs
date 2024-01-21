@@ -83,7 +83,14 @@ def main():
     config_file = sys.argv[1]
 
     if deploy_all:
-        subgraphs_to_deploy = ["analytics", "main", "parties", "events", "fundingrate"]
+        subgraphs_to_deploy = [
+            "analytics",
+            "main",
+            "parties",
+            "events",
+            "fundingrate",
+            "userProfile",
+        ]
     else:
         subgraphs_to_deploy = sys.argv[2:]
 
