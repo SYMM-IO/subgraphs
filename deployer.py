@@ -24,12 +24,12 @@ def copy_abi_files(subgraph_dir, version):
         os.makedirs(os.path.dirname(destination_path), exist_ok=True)
 
         # Copy content from source to destination
-        with open(source, 'r') as src_file, open(destination_path, 'w') as dest_file:
+        with open(source, "r") as src_file, open(destination_path, "w") as dest_file:
             content = src_file.read()
             dest_file.write(content)
 
 
-def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
+def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only, studio):
     print(f"Deploying {subgraph_dir} to {deploy_url} with config {config_file}")
 
     # Adjust the path for the config file when inside a subgraph directory
@@ -48,17 +48,25 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only):
     subprocess.run(["graph", "build"], check=True)
 
     if not prepare_only:
-        subprocess.run(
-            ["graph", "deploy", "--product", "hosted-service", deploy_url], check=True
-        )
+        if studio:
+            subprocess.run(["graph", "deploy", "--studio", deploy_url], check=True)
+        else:
+            subprocess.run(
+                ["graph", "deploy", "--product", "hosted-service", deploy_url],
+                check=True,
+            )
 
     # Change directory back to the root directory
     os.chdir("..")
 
 
 def main():
+    studio = "--studio" in sys.argv
     prepare_only = "--prepare-only" in sys.argv
     deploy_all = "--all" in sys.argv
+
+    if studio:
+        sys.argv.remove("--studio")
 
     if prepare_only:
         sys.argv.remove("--prepare-only")
@@ -75,7 +83,7 @@ def main():
     config_file = sys.argv[1]
 
     if deploy_all:
-        subgraphs_to_deploy = ["analytics", "main", "parties", "events"]
+        subgraphs_to_deploy = ["analytics", "main", "parties", "events", "fundingrate"]
     else:
         subgraphs_to_deploy = sys.argv[2:]
 
@@ -98,9 +106,15 @@ def main():
         # Copy the ABI files to each subgraph directory
         copy_abi_files(subgraph, config["symmioVersion"])
 
-        deploy_subgraph(subgraph, config_file, config[f"{subgraph}DeployUrl"], prepare_only)
+        if studio:
+            deploy_url = config[f"studio-{subgraph}"]
+        else:
+            deploy_url = config[f"{subgraph}DeployUrl"]
+        deploy_subgraph(subgraph, config_file, deploy_url, prepare_only, studio)
 
-        print(f"{subgraph} subgraph deployed ---------------------------------------------------")
+        print(
+            f"{subgraph} subgraph deployed ---------------------------------------------------"
+        )
 
     print("Done")
 

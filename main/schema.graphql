@@ -90,7 +90,7 @@ type InitialQuote @entity {
   partyAmm: BigInt
   partyBmm: BigInt!
   lf: BigInt!
-  maxFundingRate: BigInt
+  tradingFee: BigInt
   deadline: BigInt!
   quoteStatus: Int!
   marketPrice: BigInt!

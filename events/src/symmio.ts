@@ -49,6 +49,7 @@ import {
   LiquidationDisputed as LiquidationDisputedEvent,
   SetSymbolsPrices as SetSymbolsPricesEvent,
   SettlePartyALiquidation as SettlePartyALiquidationEvent,
+  SettlePartyALiquidation1 as newSettlePartyALiquidationEvent,
   ExpireQuote as ExpireQuoteEvent,
   ForceCancelCloseRequest as ForceCancelCloseRequestEvent,
   ForceCancelQuote as ForceCancelQuoteEvent,
@@ -1425,7 +1426,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
   entity.save()
 }
 
-export function handleSettlePartyALiquidation(
+export function handleOldSettlePartyALiquidation(
   event: SettlePartyALiquidationEvent
 ): void {
   let entity = new SettlePartyALiquidation(
@@ -1442,6 +1443,34 @@ export function handleSettlePartyALiquidation(
   entity.counterId = cId.eventId
   entity.partyA = event.params.partyA
   entity.partyBs = bytesToArr(event.params.partyBs)
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleSettlePartyALiquidation(
+  event: newSettlePartyALiquidationEvent
+): void {
+  let entity = new SettlePartyALiquidation(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "SettlePartyALiquidation"
+  entity.counterId = cId.eventId
+  entity.partyA = event.params.partyA
+  entity.partyBs = bytesToArr(event.params.partyBs)
+  entity.amounts = bigIntToArr(event.params.amounts)
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp

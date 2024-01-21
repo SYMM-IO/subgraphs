@@ -629,6 +629,7 @@ type SettlePartyALiquidation @entity(immutable: true) {
   action: String!
   partyA: Bytes! # address
   partyBs: [Bytes!]! # address[]
+  amounts: [BigInt!]
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!

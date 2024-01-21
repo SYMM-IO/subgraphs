@@ -14,5 +14,11 @@
   "mainDeployUrl": "symmiograph/symmiomain_bnb_8_2",
   "partiesDeployUrl": "symmiograph/symmioparties_bnb_8_2",
   "eventsDeployUrl": "symmiograph/symmioevents_bnb_8_2",
-  "fundingrateDeployUrl": "symmiograph/symmiofundingrate_bnb_8_2"
+  "fundingrateDeployUrl": "symmiograph/symmiofundingrate_bnb_8_2",
+
+  "studio-analytics": "analytics_bnb_8_2",
+  "studio-main": "main_bnb_8_2",
+  "studio-parties": "parties_bnb_8_2",
+  "studio-events": "events_bnb_8_2",
+  "studio-fundingrate": "fundingrate_bnb_8_2"
 }
