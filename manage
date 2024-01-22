@@ -1,0 +1,39 @@
+#!/bin/bash -ex
+
+help_message="Usage: $(basename $0) [-h] [-g] [-c] [-b] [-d name]
+Options:
+  -h		Prints help message
+  -c		Generates AssemblyScript types for a subgraph
+  -b		Builds a subgraph.
+  -d <NAME>	Registers a subgraph name and deploys it to a Graph node.
+		"
+while getopts 'hcbd:' OPTION; do
+	case "$OPTION" in
+		h)
+		echo "$help_message"
+		exit
+		;;
+		c)
+			echo codegen
+			graph codegen
+			;;
+		b)
+			echo graph build
+			graph build
+			;;
+		d)
+			name="$OPTARG"
+			graph_node_host="${GRAPH_HOST:-localhost}"
+			graph_admin_port="${GRAPH_ADMIN_PORT:-8020}"
+			ipfs_port="${IPFS_PORT:-5001}"
+			echo graph create
+			graph create --node http://$graph_node_host:$graph_admin_port/ $name
+			echo graph deploy
+			graph deploy -l v1 --node http://$graph_node_host:$graph_admin_port/ --ipfs http://"${IPFS_HOST:-localhost}:${IPFS_PORT:-5001}" $name
+			;;
+		?)
+			echo "$help_message" >&2
+			exit 1
+			;;
+	esac
+done
