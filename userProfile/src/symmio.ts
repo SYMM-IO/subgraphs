@@ -500,7 +500,7 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
         } else {
             newPrice = quote.openPrice!.minus(unDecimal(quote.openPrice!.times(rate)))
         }
-        const funding = unDecimal(quote.openPrice!.times(rate).times(openAmount), 36)
+        const funding = unDecimal(unDecimal(quote.openPrice!.times(rate).times(openAmount)))
         if (funding.gt(BigInt.zero()))
             quote.fundingPaid = quote.fundingPaid.plus(funding)
         else

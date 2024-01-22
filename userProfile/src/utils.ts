@@ -73,7 +73,7 @@ export function getTotalHistory(timestamp: BigInt, account: Bytes, accountSource
     return th
 }
 
-export function unDecimal(value: BigInt, power: number = 18): BigInt {
+export function unDecimal(value: BigInt): BigInt {
     return value.div(BigInt.fromString("10").pow(18))
 }
 

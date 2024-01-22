@@ -163,6 +163,8 @@ dataSources:
           handler: handleRoleGranted
         - event: RoleRevoked(bytes32,address)
           handler: handleRoleRevoked
+        - event: ChargeFundingRate(address,address,uint256[],int256[])
+          handler: handleChargeFundingRate
       file: ./src/symmio.ts
 
   - kind: ethereum

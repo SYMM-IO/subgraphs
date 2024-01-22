@@ -1,10 +1,5 @@
 {
   "name": "subgraph",
-  "workspaces": [
-    "main",
-    "parties",
-    "analytics"
-  ],
   "devDependencies": {
     "matchstick-as": "^0.5.0",
     "mustache": "^4.2.0",
