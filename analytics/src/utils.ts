@@ -8,7 +8,7 @@ import {
 	SymbolTradeVolume,
 	TotalHistory,
 	User as UserModel,
-	User, UserActivity
+	UserActivity,
 } from "../generated/schema"
 
 import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum"
@@ -45,6 +45,8 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.newAccounts = BigInt.zero()
 		dh.platformFee = BigInt.zero()
 		dh.openInterest = BigInt.zero()
+		dh.fundingPaid = BigInt.zero()
+		dh.fundingReceived = BigInt.zero()
 		dh.accountSource = accountSource
 		dh.save()
 	}
@@ -133,26 +135,26 @@ export function updateDailyOpenInterest(
 	blockTimestamp: BigInt,
 	value: BigInt,
 	increase: boolean,
-	accountSource: Bytes | null
+	accountSource: Bytes | null,
 ): void {
 	let oi = getOpenInterest(blockTimestamp, accountSource)
 	let dh = getDailyHistoryForTimestamp(blockTimestamp, accountSource)
 
 	const startOfDay = BigInt.fromString(
-		(getDateFromTimeStamp(blockTimestamp).getTime() / 1000).toString()
+		(getDateFromTimeStamp(blockTimestamp).getTime() / 1000).toString(),
 	)
 
 	if (isSameDay(blockTimestamp, oi.timestamp)) {
 		oi.accumulatedAmount = oi.accumulatedAmount.plus(
-			diffInSeconds(blockTimestamp, oi.timestamp).times(oi.amount)
+			diffInSeconds(blockTimestamp, oi.timestamp).times(oi.amount),
 		)
 		dh.openInterest = oi.accumulatedAmount.div(
-			diffInSeconds(blockTimestamp, startOfDay)
+			diffInSeconds(blockTimestamp, startOfDay),
 		)
 	} else {
 		dh.openInterest = oi.accumulatedAmount.div(BigInt.fromString("86400"))
 		oi.accumulatedAmount = diffInSeconds(blockTimestamp, startOfDay).times(
-			oi.amount
+			oi.amount,
 		)
 	}
 	oi.amount = increase ? oi.amount.plus(value) : oi.amount.minus(value)
@@ -166,12 +168,12 @@ export function updateDailyOpenInterest(
 
 export function updateActivityTimestamps(
 	account: Account,
-	timestamp: BigInt
+	timestamp: BigInt,
 ): void {
 	account.lastActivityTimestamp = timestamp
 	account.save()
 	let ua = getUserActivity(account.user, account.accountSource, timestamp)
-	let uaTimestamp = ua.updateTimestamp === null ? BigInt.fromString("0") : ua.updateTimestamp!
+	let uaTimestamp = ua.updateTimestamp === null ? BigInt.zero() : ua.updateTimestamp!
 	if (!isSameDay(timestamp, uaTimestamp)) {
 		let dh = getDailyHistoryForTimestamp(timestamp, account.accountSource)
 		dh.activeUsers = dh.activeUsers.plus(BigInt.fromString("1"))

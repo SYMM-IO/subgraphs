@@ -7,6 +7,7 @@ import {
 	AllocateForPartyB,
 	AllocatePartyA,
 	AllocatePartyB,
+	ChargeFundingRate,
 	DeactiveEmergencyMode,
 	DeallocateForPartyB,
 	DeallocatePartyA,
@@ -57,7 +58,6 @@ import {
 	SetSymbolsPrices,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
-	symmio,
 	TransferAllocation,
 	UnlockQuote,
 	UnpauseAccounting,
@@ -164,7 +164,7 @@ export function handleAllocatePartyA(event: AllocatePartyA): void {
 	account.save()
 	updateActivityTimestamps(account, event.block.timestamp)
 	let allocate = new BalanceChange(
-		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString()
+		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString(),
 	)
 	allocate.type = "ALLOCATE_PARTY_A"
 	allocate.timestamp = event.block.timestamp
@@ -195,7 +195,7 @@ export function handleDeallocatePartyA(event: DeallocatePartyA): void {
 	account.save()
 	updateActivityTimestamps(account, event.block.timestamp)
 	let deallocate = new BalanceChange(
-		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString()
+		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString(),
 	)
 	deallocate.type = "DEALLOCATE_PARTY_A"
 	deallocate.timestamp = event.block.timestamp
@@ -227,7 +227,7 @@ export function handleDeposit(event: Deposit): void {
 	account.save()
 	updateActivityTimestamps(account, event.block.timestamp)
 	let deposit = new BalanceChange(
-		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString()
+		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString(),
 	)
 	deposit.type = "DEPOSIT"
 	deposit.timestamp = event.block.timestamp
@@ -260,7 +260,7 @@ export function handleWithdraw(event: Withdraw): void {
 	account.save()
 	updateActivityTimestamps(account, event.block.timestamp)
 	let withdraw = new BalanceChange(
-		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString()
+		event.transaction.hash.toHex() + "-" + event.logIndex.toHexString(),
 	)
 	withdraw.type = "WITHDRAW"
 	withdraw.timestamp = event.block.timestamp
@@ -333,8 +333,10 @@ export function handleSendQuote(event: SendQuote): void {
 	quote.lf = event.params.lf
 	quote.quoteStatus = QuoteStatus.PENDING
 	quote.account = account.id
-	quote.closedAmount = BigInt.fromString("0")
-	quote.avgClosedPrice = BigInt.fromString("0")
+	quote.closedAmount = BigInt.zero()
+	quote.avgClosedPrice = BigInt.zero()
+	quote.fundingReceived = BigInt.zero()
+	quote.fundingPaid = BigInt.zero()
 	quote.collateral = getConfiguration(event).collateral
 	quote.save()
 
@@ -395,14 +397,14 @@ export function handleOpenPosition(event: OpenPosition): void {
 	account.updateTimestamp = event.block.timestamp
 	account.save()
 	let history = new TradeHistoryModel(
-		account.id + "-" + event.params.quoteId.toString()
+		account.id + "-" + event.params.quoteId.toString(),
 	)
 	history.account = account.id
 	history.timestamp = event.block.timestamp
 	history.blockNumber = event.block.number
 	history.transaction = event.transaction.hash
 	history.volume = unDecimal(
-		event.params.filledAmount.times(event.params.openedPrice)
+		event.params.filledAmount.times(event.params.openedPrice),
 	)
 	history.quoteStatus = QuoteStatus.OPENED
 	history.quote = event.params.quoteId
@@ -463,7 +465,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 }
 
 export function handleRequestToClosePosition(
-	event: RequestToClosePosition
+	event: RequestToClosePosition,
 ): void {
 	let account = AccountModel.load(event.params.partyA.toHexString())!
 	updateActivityTimestamps(account, event.block.timestamp)
@@ -475,14 +477,14 @@ export function handleRequestToClosePosition(
 }
 
 export function handleRequestToCancelCloseRequest(
-	event: RequestToCancelCloseRequest
+	event: RequestToCancelCloseRequest,
 ): void {
 	let account = AccountModel.load(event.params.partyA.toHexString())!
 	updateActivityTimestamps(account, event.block.timestamp)
 }
 
 export function handleAcceptCancelCloseRequest(
-	event: AcceptCancelCloseRequest
+	event: AcceptCancelCloseRequest,
 ): void {
 	let quote = QuoteModel.load(event.params.quoteId.toString())!
 	quote.quoteStatus = QuoteStatus.OPENED
@@ -494,7 +496,7 @@ export function handleFillCloseRequest(event: FillCloseRequest): void {
 }
 
 export function handleEmergencyClosePosition(
-	event: EmergencyClosePosition
+	event: EmergencyClosePosition,
 ): void {
 	handleClose(event, "EmergencyClosePosition")
 }
@@ -504,7 +506,7 @@ export function handleForceClosePosition(event: ForceClosePosition): void {
 }
 
 export function handleLiquidatePositionsPartyA(
-	event: LiquidatePositionsPartyA
+	event: LiquidatePositionsPartyA,
 ): void {
 	for (let i = 0; i < event.params.quoteIds.length; i++) {
 		const qId = event.params.quoteIds[i]
@@ -513,7 +515,7 @@ export function handleLiquidatePositionsPartyA(
 }
 
 export function handleLiquidatePositionsPartyB(
-	event: LiquidatePositionsPartyB
+	event: LiquidatePositionsPartyB,
 ): void {
 	for (let i = 0; i < event.params.quoteIds.length; i++) {
 		const qId = event.params.quoteIds[i]
@@ -522,10 +524,10 @@ export function handleLiquidatePositionsPartyB(
 }
 
 export function handleSetSymbolsPrices(
-	event: SetSymbolsPrices
+	event: SetSymbolsPrices,
 ): void {
 	const liquidationDetail = getLiquidatedStateOfPartyA(event.address, event.params.partyA)
-	const balanceInfoOfPartyA = getBalanceInfoOfPartyA(event.address,event.params.partyA)
+	const balanceInfoOfPartyA = getBalanceInfoOfPartyA(event.address, event.params.partyA)
 	if (liquidationDetail == null || balanceInfoOfPartyA == null)
 		return
 	let model = new PartyALiquidation(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
@@ -546,7 +548,7 @@ export function handleSetSymbolsPrices(
 }
 
 export function handleLiquidationDisputed(
-	event: LiquidationDisputed
+	event: LiquidationDisputed,
 ): void {
 	let model = new PartyALiquidationDisputed(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
 	model.partyA = event.params.partyA
@@ -558,7 +560,7 @@ export function handleLiquidationDisputed(
 function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
 	const event = changetype<LiquidatePositionsPartyA>(_event)
 	let history = TradeHistoryModel.load(
-		event.params.partyA.toHexString() + "-" + qId.toString()
+		event.params.partyA.toHexString() + "-" + qId.toString(),
 	)!
 	const quote = QuoteModel.load(qId.toString())!
 	quote.quoteStatus = QuoteStatus.LIQUIDATED
@@ -573,7 +575,7 @@ function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
 		.times(quote.quantity)
 		.minus(
 			quote.avgClosedPrice
-				.times(quote.closedAmount)
+				.times(quote.closedAmount),
 		)
 		.div(liquidAmount)
 	const additionalVolume = liquidAmount
@@ -610,7 +612,7 @@ function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
 		event.block.timestamp,
 		unDecimal(liquidAmount.times(quote.openPrice!)),
 		false,
-		account.accountSource
+		account.accountSource,
 	)
 }
 
@@ -627,7 +629,7 @@ function handleClose(_event: ethereum.Event, name: string): void {
 	quote.updateTimestamp = event.block.timestamp
 	quote.save()
 	let history = TradeHistoryModel.load(
-		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString()
+		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString(),
 	)!
 	const additionalVolume = event.params.filledAmount
 		.times(event.params.closedPrice)
@@ -670,12 +672,12 @@ function handleClose(_event: ethereum.Event, name: string): void {
 		event.block.timestamp,
 		unDecimal(event.params.filledAmount.times(quote.openPrice!)),
 		false,
-		account.accountSource
+		account.accountSource,
 	)
 }
 
 export function handleLiquidatePartyB(event: LiquidatePartyB): void {
-	const balanceInfoOfPartyB = getBalanceInfoOfPartyB(event.address,event.params.partyA,event.params.partyB)
+	const balanceInfoOfPartyB = getBalanceInfoOfPartyB(event.address, event.params.partyA, event.params.partyB)
 	if (balanceInfoOfPartyB == null)
 		return
 	let model = new PartyBLiquidation(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
@@ -695,6 +697,46 @@ export function handleLiquidatePartyB(event: LiquidatePartyB): void {
 	model.save()
 }
 
+export function handleChargeFundingRate(event: ChargeFundingRate): void {
+	for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+		let quoteId = event.params.quoteIds[i]
+		const rate = event.params.rates[i]
+		let quote = QuoteModel.load(quoteId.toString())!
+		let account = AccountModel.load(quote.account)!
+		const openAmount = quote.quantity.minus(quote.closedAmount)
+		let newPrice: BigInt
+		if (quote.positionType == 0) { //Long
+			newPrice = quote.openPrice!.plus(unDecimal(quote.openPrice!.times(rate)))
+		} else {
+			newPrice = quote.openPrice!.minus(unDecimal(quote.openPrice!.times(rate)))
+		}
+		const funding = unDecimal(unDecimal(quote.openPrice!.times(rate).times(openAmount)))
+		if (funding.gt(BigInt.zero()))
+			quote.fundingPaid = quote.fundingPaid.plus(funding)
+		else
+			quote.fundingReceived = quote.fundingReceived.plus(funding)
+		quote.openPrice = newPrice
+		quote.save()
+
+		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
+		if (funding.gt(BigInt.zero()))
+			dh.fundingPaid = dh.fundingPaid.plus(funding)
+		else
+			dh.fundingReceived = dh.fundingReceived.plus(funding)
+		dh.updateTimestamp = event.block.timestamp
+		dh.save()
+
+		const th = getTotalHistory(event.block.timestamp, account.accountSource)
+		if (funding.gt(BigInt.zero()))
+			th.fundingPaid = th.fundingPaid.plus(funding)
+		else
+			th.fundingReceived = th.fundingReceived.plus(funding)
+		th.updateTimestamp = event.block.timestamp
+		th.save()
+	}
+}
+
+
 // //////////////////////////////////// UnUsed ////////////////////////////////////////
 
 export function handleTransferAllocation(event: TransferAllocation): void {
@@ -705,7 +747,7 @@ export function handleActiveEmergencyMode(event: ActiveEmergencyMode): void {
 
 
 export function handleDeactiveEmergencyMode(
-	event: DeactiveEmergencyMode
+	event: DeactiveEmergencyMode,
 ): void {
 }
 
@@ -734,7 +776,7 @@ export function handleSetCollateral(event: SetCollateral): void {
 }
 
 export function handleSetDeallocateCooldown(
-	event: SetDeallocateCooldown
+	event: SetDeallocateCooldown,
 ): void {
 }
 
@@ -742,27 +784,27 @@ export function handleSetFeeCollector(event: SetFeeCollector): void {
 }
 
 export function handleSetForceCancelCloseCooldown(
-	event: SetForceCancelCloseCooldown
+	event: SetForceCancelCloseCooldown,
 ): void {
 }
 
 export function handleSetForceCancelCooldown(
-	event: SetForceCancelCooldown
+	event: SetForceCancelCooldown,
 ): void {
 }
 
 export function handleSetForceCloseCooldown(
-	event: SetForceCloseCooldown
+	event: SetForceCloseCooldown,
 ): void {
 }
 
 export function handleSetForceCloseGapRatio(
-	event: SetForceCloseGapRatio
+	event: SetForceCloseGapRatio,
 ): void {
 }
 
 export function handleSetLiquidationTimeout(
-	event: SetLiquidationTimeout
+	event: SetLiquidationTimeout,
 ): void {
 }
 
@@ -776,12 +818,12 @@ export function handleSetMuonIds(event: SetMuonIds): void {
 }
 
 export function handleSetPartyBEmergencyStatus(
-	event: SetPartyBEmergencyStatus
+	event: SetPartyBEmergencyStatus,
 ): void {
 }
 
 export function handleSetPendingQuotesValidLength(
-	event: SetPendingQuotesValidLength
+	event: SetPendingQuotesValidLength,
 ): void {
 }
 
@@ -789,7 +831,7 @@ export function handleSetSuspendedAddress(event: SetSuspendedAddress): void {
 }
 
 export function handleSetSymbolAcceptableValues(
-	event: SetSymbolAcceptableValues
+	event: SetSymbolAcceptableValues,
 ): void {
 }
 
@@ -798,7 +840,7 @@ export function handleSetSymbolMaxSlippage(event: SetSymbolMaxSlippage): void {
 
 
 export function handleForceCancelCloseRequest(
-	event: ForceCancelCloseRequest
+	event: ForceCancelCloseRequest,
 ): void {
 }
 
@@ -809,7 +851,7 @@ export function handleDiamondCut(event: DiamondCut): void {
 }
 
 export function handleSetSymbolValidationState(
-	event: SetSymbolValidationState
+	event: SetSymbolValidationState,
 ): void {
 }
 
@@ -829,7 +871,7 @@ export function handleUnpausePartyBActions(event: UnpausePartyBActions): void {
 }
 
 export function handleFullyLiquidatedPartyB(
-	event: FullyLiquidatedPartyB
+	event: FullyLiquidatedPartyB,
 ): void {
 }
 

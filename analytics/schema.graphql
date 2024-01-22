@@ -75,6 +75,8 @@ type Quote @entity {
     partyB: Bytes
     collateral: Bytes!
     liquidatedSide: Int
+    fundingPaid: BigInt!
+    fundingReceived: BigInt!
     timestamp: BigInt!
     updateTimestamp: BigInt!
     transaction: Bytes!
@@ -95,6 +97,8 @@ type DailyHistory @entity {
     newAccounts: BigInt!
     platformFee: BigInt!
     openInterest: BigInt!
+    fundingPaid: BigInt!
+    fundingReceived: BigInt!
     accountSource: Bytes
     updateTimestamp: BigInt!
     timestamp: BigInt!
@@ -113,6 +117,8 @@ type TotalHistory @entity {
     users: BigInt!
     accounts: BigInt!
     platformFee: BigInt!
+    fundingPaid: BigInt!
+    fundingReceived: BigInt!
     accountSource: Bytes
     updateTimestamp: BigInt!
     timestamp: BigInt!
