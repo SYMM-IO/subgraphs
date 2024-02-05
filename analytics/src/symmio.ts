@@ -415,6 +415,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 	let quote = QuoteModel.load(event.params.quoteId.toString())!
 	const chainQuote = getQuote(event.address, BigInt.fromString(quote.id))!
 	quote.openPrice = event.params.openedPrice
+	quote.openedPrice = event.params.openedPrice
 	quote.cva = chainQuote.lockedValues.cva
 	quote.lf = chainQuote.lockedValues.lf
 	quote.partyAmm = chainQuote.lockedValues.partyAmm

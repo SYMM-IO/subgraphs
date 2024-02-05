@@ -61,6 +61,7 @@ type Quote @entity {
     orderType: Int!
     price: BigInt!
     marketPrice: BigInt!
+    openedPrice: BigInt
     openPrice: BigInt
     deadline: BigInt!
     quantity: BigInt!
