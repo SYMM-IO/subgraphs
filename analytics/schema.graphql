@@ -60,6 +60,7 @@ type Quote @entity {
     symbolName: String!
     positionType: Int!
     orderType: Int!
+    openOrderType: Int!
     price: BigInt!
     marketPrice: BigInt!
     openedPrice: BigInt

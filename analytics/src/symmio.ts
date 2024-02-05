@@ -324,6 +324,7 @@ export function handleSendQuote(event: SendQuote): void {
 	quote.symbolName = Symbol.load(quote.symbolId.toString())!.name
 	quote.positionType = event.params.positionType
 	quote.orderType = event.params.orderType
+	quote.openOrderType = event.params.orderType
 	quote.price = event.params.price
 	quote.marketPrice = event.params.marketPrice
 	quote.deadline = event.params.deadline
@@ -472,7 +473,6 @@ export function handleRequestToClosePosition(
 ): void {
 	let account = AccountModel.load(event.params.partyA.toHexString())!
 	updateActivityTimestamps(account, event.block.timestamp)
-
 	let quote = QuoteModel.load(event.params.quoteId.toString())!
 	quote.quoteStatus = QuoteStatus.CLOSE_PENDING
 	quote.updateTimestamp = event.block.timestamp
