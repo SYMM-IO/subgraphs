@@ -712,6 +712,7 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 		else
 			quote.fundingReceived = quote.fundingReceived.plus(funding)
 		quote.openPrice = chainQuote.openedPrice
+		quote.updateTimestamp = event.block.timestamp
 		quote.save()
 
 		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
