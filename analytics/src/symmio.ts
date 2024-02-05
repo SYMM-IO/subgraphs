@@ -321,6 +321,7 @@ export function handleSendQuote(event: SendQuote): void {
 		quote.partyBsWhiteList = partyBsWhiteList
 	}
 	quote.symbolId = event.params.symbolId
+	quote.symbolName = Symbol.load(quote.symbolId.toString())!.name
 	quote.positionType = event.params.positionType
 	quote.orderType = event.params.orderType
 	quote.price = event.params.price

@@ -57,6 +57,7 @@ type Quote @entity {
     account: String!
     partyBsWhiteList: [Bytes!]
     symbolId: BigInt!
+    symbolName: String!
     positionType: Int!
     orderType: Int!
     price: BigInt!
