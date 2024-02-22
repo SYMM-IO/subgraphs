@@ -9,7 +9,7 @@ import {BigInt} from "@graphprotocol/graph-ts"
 export function handleAddAccount(event: AddAccountEvent): void {
 	let user = User.load(event.params.user.toHexString())
 	if (user == null) {
-		user = createNewUser(event.params.user.toHexString(), event.address, event.block, event.transaction)
+		user = createNewUser(event.params.user, event.address, event.block, event.transaction)
 	} else {
 		const dh = getDailyHistoryForTimestamp(event.block.timestamp, event.address)
 		dh.newUsers = dh.newUsers.plus(BigInt.fromString("1"))
@@ -18,7 +18,7 @@ export function handleAddAccount(event: AddAccountEvent): void {
 		th.users = th.users.plus(BigInt.fromString("1"))
 		th.save()
 	}
-	createNewAccount(event.params.account.toHexString(), user, event.address, event.block, event.transaction, event.params.name)
+	createNewAccount(event.params.account, user, event.address, event.block, event.transaction, event.params.name)
 }
 
 export function handleEditAccountName(event: EditAccountNameEvent): void {

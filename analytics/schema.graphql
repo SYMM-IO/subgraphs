@@ -1,12 +1,13 @@
 type User @entity {
     id: ID!
+    address: Bytes!
     timestamp: BigInt!
     transaction: Bytes!
 }
 
 type UserActivity @entity {
     id: ID!
-    user: String!
+    user: Bytes!
     accountSource: Bytes
     timestamp: BigInt!
     updateTimestamp: BigInt
@@ -14,7 +15,7 @@ type UserActivity @entity {
 
 type Account @entity {
     id: ID!
-    user: String!
+    user: Bytes!
     timestamp: BigInt!
     name: String
     quotesCount: BigInt!
@@ -32,7 +33,7 @@ type Account @entity {
 type BalanceChange @entity {
     id: ID!
     type: String!
-    account: String!
+    account: Bytes!
     amount: BigInt!
     collateral: Bytes!
     timestamp: BigInt!
@@ -42,7 +43,7 @@ type BalanceChange @entity {
 
 type TradeHistory @entity {
     id: ID!
-    account: String!
+    account: Bytes!
     volume: BigInt!
     timestamp: BigInt!
     updateTimestamp: BigInt!
@@ -54,7 +55,7 @@ type TradeHistory @entity {
 
 type Quote @entity {
     id: ID!
-    account: String!
+    account: Bytes!
     partyBsWhiteList: [Bytes!]
     symbolId: BigInt!
     symbolName: String!
