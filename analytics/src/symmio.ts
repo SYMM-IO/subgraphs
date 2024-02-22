@@ -171,7 +171,7 @@ export function handleAllocatePartyA(event: AllocatePartyA): void {
 	allocate.blockNumber = event.block.number
 	allocate.transaction = event.transaction.hash
 	allocate.amount = event.params.amount
-	allocate.account = account.id
+	allocate.account = event.params.user
 	allocate.collateral = getConfiguration(event).collateral
 	allocate.save()
 
@@ -202,7 +202,7 @@ export function handleDeallocatePartyA(event: DeallocatePartyA): void {
 	deallocate.blockNumber = event.block.number
 	deallocate.transaction = event.transaction.hash
 	deallocate.amount = event.params.amount
-	deallocate.account = account.id
+	deallocate.account = event.params.user
 	deallocate.collateral = getConfiguration(event).collateral
 	deallocate.save()
 
@@ -220,8 +220,8 @@ export function handleDeallocatePartyA(event: DeallocatePartyA): void {
 export function handleDeposit(event: Deposit): void {
 	let account = AccountModel.load(event.params.user.toHexString())
 	if (account == null) {
-		let user = createNewUser(event.params.user.toHexString(), null, event.block, event.transaction)
-		account = createNewAccount(event.params.user.toHexString(), user, null, event.block, event.transaction)
+		let user = createNewUser(event.params.user, null, event.block, event.transaction)
+		account = createNewAccount(event.params.user, user, null, event.block, event.transaction)
 	}
 	account.deposit = account.deposit.plus(event.params.amount)
 	account.save()
@@ -234,7 +234,7 @@ export function handleDeposit(event: Deposit): void {
 	deposit.blockNumber = event.block.number
 	deposit.transaction = event.transaction.hash
 	deposit.amount = event.params.amount
-	deposit.account = account.id
+	deposit.account = event.params.user
 	deposit.collateral = getConfiguration(event).collateral
 	deposit.save()
 
@@ -252,8 +252,8 @@ export function handleDeposit(event: Deposit): void {
 export function handleWithdraw(event: Withdraw): void {
 	let account = AccountModel.load(event.params.sender.toHexString())
 	if (account == null) {
-		let user = createNewUser(event.params.sender.toHexString(), null, event.block, event.transaction)
-		account = createNewAccount(event.params.sender.toHexString(), user, null, event.block, event.transaction)
+		let user = createNewUser(event.params.sender, null, event.block, event.transaction)
+		account = createNewAccount(event.params.sender, user, null, event.block, event.transaction)
 	}
 	account.withdraw = account.withdraw.plus(event.params.amount)
 	account.updateTimestamp = event.block.timestamp
@@ -267,7 +267,7 @@ export function handleWithdraw(event: Withdraw): void {
 	withdraw.blockNumber = event.block.number
 	withdraw.transaction = event.transaction.hash
 	withdraw.amount = event.params.amount
-	withdraw.account = account.id
+	withdraw.account = event.params.user
 	withdraw.collateral = getConfiguration(event).collateral
 	withdraw.save()
 
@@ -334,7 +334,7 @@ export function handleSendQuote(event: SendQuote): void {
 	quote.partyBmm = event.params.partyBmm
 	quote.lf = event.params.lf
 	quote.quoteStatus = QuoteStatus.PENDING
-	quote.account = account.id
+	quote.account = event.params.partyA
 	quote.closedAmount = BigInt.zero()
 	quote.avgClosedPrice = BigInt.zero()
 	quote.fundingReceived = BigInt.zero()
@@ -402,7 +402,7 @@ export function handleOpenPosition(event: OpenPosition): void {
 	let history = new TradeHistoryModel(
 		account.id + "-" + event.params.quoteId.toString(),
 	)
-	history.account = account.id
+	history.account = event.params.partyA
 	history.timestamp = event.block.timestamp
 	history.blockNumber = event.block.number
 	history.transaction = event.transaction.hash
@@ -592,7 +592,7 @@ function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
 
 	quote.avgClosedPrice = chainQuote.avgClosedPrice
 	quote.save()
-	let account = AccountModel.load(quote.account)!
+	let account = AccountModel.load(quote.account.toHexString())!
 
 	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
 	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume)
@@ -705,7 +705,7 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 		let quoteId = event.params.quoteIds[i]
 		const rate = event.params.rates[i]
 		let quote = QuoteModel.load(quoteId.toString())!
-		let account = AccountModel.load(quote.account)!
+		let account = AccountModel.load(quote.account.toHexString())!
 		const openAmount = quote.quantity.minus(quote.closedAmount)
 		const chainQuote = getQuote(event.address, BigInt.fromString(quote.id))!
 		const funding = unDecimal(unDecimal(quote.openPrice!.times(rate).times(openAmount)))

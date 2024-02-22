@@ -1,4 +1,4 @@
-import {BigInt, Bytes} from "@graphprotocol/graph-ts"
+import {Address, BigInt, Bytes} from "@graphprotocol/graph-ts"
 import {
 	Account as AccountModel,
 	Account,
@@ -185,8 +185,8 @@ export function updateActivityTimestamps(
 	ua.save()
 }
 
-export function getUserActivity(user: string, accountSource: Bytes | null, timestamp: BigInt): UserActivity {
-	const id = user + "_" + (accountSource === null ? "null" : accountSource.toHexString())
+export function getUserActivity(user: Bytes, accountSource: Bytes | null, timestamp: BigInt): UserActivity {
+	const id = user.toHexString() + "_" + (accountSource === null ? "null" : accountSource.toHexString())
 	let ua = UserActivity.load(id)
 	if (ua == null) {
 		ua = new UserActivity(id)
@@ -198,10 +198,11 @@ export function getUserActivity(user: string, accountSource: Bytes | null, times
 	return ua
 }
 
-export function createNewUser(address: string, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction): UserModel {
-	let user = new UserModel(address)
+export function createNewUser(address: Bytes, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction): UserModel {
+	let user = new UserModel(address.toHexString())
 	user.timestamp = block.timestamp
 	user.transaction = transaction.hash
+	user.address = address
 	user.save()
 	const dh = getDailyHistoryForTimestamp(block.timestamp, accountSource)
 	dh.newUsers = dh.newUsers.plus(BigInt.fromString("1"))
@@ -213,8 +214,8 @@ export function createNewUser(address: string, accountSource: Bytes | null, bloc
 }
 
 
-export function createNewAccount(address: string, user: UserModel, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction, name: string | null = null): AccountModel {
-	let account = new AccountModel(address)
+export function createNewAccount(address: Bytes, user: UserModel, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction, name: string | null = null): AccountModel {
+	let account = new AccountModel(address.toHexString())
 	account.lastActivityTimestamp = block.timestamp
 	account.timestamp = block.timestamp
 	account.transaction = transaction.hash
@@ -224,7 +225,7 @@ export function createNewAccount(address: string, user: UserModel, accountSource
 	account.deallocated = BigInt.zero()
 	account.quotesCount = BigInt.zero()
 	account.positionsCount = BigInt.zero()
-	account.user = user.id
+	account.user = user.address
 	account.updateTimestamp = block.timestamp
 	account.accountSource = accountSource
 	account.name = name
