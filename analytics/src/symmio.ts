@@ -250,10 +250,10 @@ export function handleDeposit(event: Deposit): void {
 }
 
 export function handleWithdraw(event: Withdraw): void {
-	let account = AccountModel.load(event.params.sender.toHexString())
+	let account = AccountModel.load(event.params.user.toHexString())
 	if (account == null) {
-		let user = createNewUser(event.params.sender, null, event.block, event.transaction)
-		account = createNewAccount(event.params.sender, user, null, event.block, event.transaction)
+		let user = createNewUser(event.params.user, null, event.block, event.transaction)
+		account = createNewAccount(event.params.user, user, null, event.block, event.transaction)
 	}
 	account.withdraw = account.withdraw.plus(event.params.amount)
 	account.updateTimestamp = event.block.timestamp
