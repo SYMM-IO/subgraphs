@@ -339,7 +339,6 @@ export function handleSendQuote(event: SendQuote): void {
 	quote.avgClosedPrice = BigInt.zero()
 	quote.fundingReceived = BigInt.zero()
 	quote.fundingPaid = BigInt.zero()
-	quote.fundingReceived = BigInt.zero()
 	quote.collateral = getConfiguration(event).collateral
 	quote.save()
 
