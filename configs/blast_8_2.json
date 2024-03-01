@@ -1,5 +1,5 @@
 {
-  "network": "blast",
+  "network": "blast-mainnet",
   "symmioAddress": "0x3d17f073cCb9c3764F105550B0BCF9550477D266",
   "symmioStartBlock": "236513",
   "symmioVersion": "0.8.2",
