@@ -89,7 +89,7 @@ def main():
             "parties",
             "events",
             "fundingrate",
-            "userProfile",
+            "userprofile",
         ]
     else:
         subgraphs_to_deploy = sys.argv[2:]
@@ -112,7 +112,6 @@ def main():
     for subgraph in subgraphs_to_deploy:
         # Copy the ABI files to each subgraph directory
         copy_abi_files(subgraph, config["symmioVersion"])
-
         if studio:
             deploy_url = config[f"studio-{subgraph}"]
         else:

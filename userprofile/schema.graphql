@@ -21,7 +21,6 @@ type Account @entity {
     accountSource: Bytes
 }
 
-
 type Quote @entity {
     id: ID!
     account: String!
@@ -53,6 +52,42 @@ type Quote @entity {
     transaction: Bytes!
 }
 
+
+type DailySymbolTradesHistory @entity {
+    id: ID! # account_source + account + symbolId
+    updateTimestamp: BigInt!
+    account: Bytes!
+    accountSource: Bytes
+    symbolId: BigInt!
+    totalTrades: BigInt!
+    fundingReceived: BigInt!
+    fundingPaid: BigInt!
+    platformFeePaid: BigInt!
+}
+
+type TotalSymbolTradesHistory @entity {
+    id: ID! # account_source + account + symbolId
+    updateTimestamp: BigInt!
+    account: Bytes!
+    accountSource: Bytes
+    symbolId: BigInt!
+    totalTrades: BigInt!
+    fundingReceived: BigInt!
+    fundingPaid: BigInt!
+    platformFeePaid: BigInt!
+}
+
+type BalanceChange @entity {
+    id: ID!
+    type: String!
+    account: String!
+    amount: BigInt!
+    collateral: Bytes!
+    timestamp: BigInt!
+    blockNumber: BigInt!
+    transaction: Bytes!
+}
+
 type DailyHistory @entity {
     id: ID!
     account: Bytes!
@@ -63,6 +98,8 @@ type DailyHistory @entity {
     withdraw: BigInt!
     allocate: BigInt!
     deallocate: BigInt!
+    accAllocate: BigInt!
+    accDeallocate: BigInt!
     platformFeePaid: BigInt!
     fundingPaid: BigInt!
     fundingReceived: BigInt!
@@ -101,7 +138,7 @@ type Symbol @entity {
     updateTimestamp: BigInt!
 }
 
-type Configuration @entity{
+type Configuration @entity {
     id: ID!
     collateral: Bytes!
     updateTimestamp: BigInt!
