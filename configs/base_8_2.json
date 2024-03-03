@@ -20,10 +20,12 @@
   "partiesDeployUrl": "symmiograph/symmioparties_base_8_2",
   "eventsDeployUrl": "symmiograph/symmioevents_base_8_2",
   "fundingrateDeployUrl": "symmiograph/symmiofundingrate_base_8_2",
+  "userProfileDeployUrl": "symmiograph/symmiouserprofile_base_8_2",
 
   "studio-analytics": "analytics_base_8_2",
   "studio-main": "main_base_8_2",
   "studio-parties": "parties_base_8_2",
   "studio-events": "events_base_8_2",
-  "studio-fundingrate": "fundingrate_base_8_2"
+  "studio-fundingrate": "fundingrate_base_8_2",
+  "studio-userprofile": "userprofile_base_8_2"
 }
