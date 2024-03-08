@@ -619,8 +619,9 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 		let account = AccountModel.load(quote.account)!
 		const openAmount = quote.quantity.minus(quote.closedAmount)
 		const chainQuote = getQuote(event.address, BigInt.fromString(quote.id))!
-		const funding = unDecimal(unDecimal(quote.openPrice!.times(rate).times(openAmount)))
-		if (funding.gt(BigInt.zero()))
+		const paid = rate.gt(BigInt.zero())
+		const funding = unDecimal((chainQuote.openedPrice.minus(quote.openPrice!).abs()).times(openAmount))
+		if (paid)
 			quote.fundingPaid = quote.fundingPaid.plus(funding)
 		else
 			quote.fundingReceived = quote.fundingReceived.plus(funding)
@@ -634,7 +635,7 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 			account.accountSource,
 		)
 
-		if (funding.gt(BigInt.zero()))
+		if (paid)
 			dh.fundingPaid = dh.fundingPaid.plus(funding)
 		else dh.fundingReceived = dh.fundingReceived.plus(funding)
 		dh.updateTimestamp = event.block.timestamp
@@ -645,7 +646,7 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 			event.params.partyA,
 			account.accountSource,
 		)
-		if (funding.gt(BigInt.zero()))
+		if (paid)
 			th.fundingPaid = th.fundingPaid.plus(funding)
 		else th.fundingReceived = th.fundingReceived.plus(funding)
 		th.updateTimestamp = event.block.timestamp
@@ -657,7 +658,7 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 			account.accountSource,
 			quote.symbolId,
 		)
-		if (funding.gt(BigInt.zero()))
+		if (paid)
 			dailySymbolTradesHistory.fundingPaid = dailySymbolTradesHistory.fundingPaid.plus(funding)
 		else dailySymbolTradesHistory.fundingReceived = dailySymbolTradesHistory.fundingReceived.plus(funding)
 		dailySymbolTradesHistory.save()
@@ -668,7 +669,7 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 			account.accountSource,
 			quote.symbolId,
 		)
-		if (funding.gt(BigInt.zero()))
+		if (paid)
 			totalSymbolTradesHistory.fundingPaid = totalSymbolTradesHistory.fundingPaid.plus(funding)
 		else totalSymbolTradesHistory.fundingReceived = totalSymbolTradesHistory.fundingReceived.plus(funding)
 		totalSymbolTradesHistory.save()
