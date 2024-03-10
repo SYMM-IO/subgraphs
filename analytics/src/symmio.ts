@@ -707,15 +707,15 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 		let account = AccountModel.load(quote.account.toHexString())!
 		const openAmount = quote.quantity.minus(quote.closedAmount)
 		const chainQuote = getQuote(event.address, BigInt.fromString(quote.id))!
-		const funding = unDecimal(unDecimal(quote.openPrice!.times(rate).times(openAmount)))
-		if (funding.gt(BigInt.zero()))
+		const paid = rate.gt(BigInt.zero())
+		const funding = unDecimal((chainQuote.openedPrice.minus(quote.openPrice!).abs()).times(openAmount))
+		if (paid)
 			quote.fundingPaid = quote.fundingPaid.plus(funding)
 		else
 			quote.fundingReceived = quote.fundingReceived.plus(funding)
 		quote.openPrice = chainQuote.openedPrice
 		quote.updateTimestamp = event.block.timestamp
 		quote.save()
-
 		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
 		if (funding.gt(BigInt.zero()))
 			dh.fundingPaid = dh.fundingPaid.plus(funding)
