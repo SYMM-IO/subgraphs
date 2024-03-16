@@ -218,6 +218,7 @@ export function createNewAccount(address: Bytes, user: UserModel, accountSource:
 	let account = new AccountModel(address.toHexString())
 	account.lastActivityTimestamp = block.timestamp
 	account.timestamp = block.timestamp
+	account.blockNumber = block.number
 	account.transaction = transaction.hash
 	account.deposit = BigInt.zero()
 	account.withdraw = BigInt.zero()
