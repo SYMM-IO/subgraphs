@@ -17,6 +17,7 @@ type Account @entity {
     id: ID!
     user: Bytes!
     timestamp: BigInt!
+    blockNumber: BigInt!
     name: String
     quotesCount: BigInt!
     positionsCount: BigInt!
@@ -133,6 +134,7 @@ type Symbol @entity {
     name: String!
     tradingFee: BigInt!
     timestamp: BigInt!
+    blockNumber: BigInt!
     updateTimestamp: BigInt!
 }
 

@@ -124,6 +124,7 @@ export function handleAddSymbol(event: AddSymbol): void {
 	symbol.tradingFee = event.params.tradingFee
 	symbol.timestamp = event.block.timestamp
 	symbol.updateTimestamp = event.block.timestamp
+	symbol.blockNumber = event.block.number
 	symbol.save()
 }
 
