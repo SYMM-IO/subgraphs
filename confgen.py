@@ -62,7 +62,7 @@ def main():
     with open(config_file, "r") as f:
         config = json.load(f)
 
-    for subgraph in ["main", "parties", "fundingrate"]:
+    for subgraph in ["main", "parties", "fundingrate", "events"]:
         # Copy the ABI files to each subgraph directory
         copy_abi_files(subgraph, config["symmioVersion"])
 
