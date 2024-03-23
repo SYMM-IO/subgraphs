@@ -61,12 +61,7 @@ export function getTotalSymbolTradesHistory(
 	accountSource: Bytes | null,
 	symbolId: BigInt,
 ): TotalSymbolTradesHistory {
-	const dateStr = getDateFromTimeStamp(timestamp)
-		.getTime()
-		.toString()
 	const id =
-		dateStr +
-		"_" +
 		(accountSource === null ? "null" : accountSource.toHexString()) +
 		"_" +
 		account.toHexString() +
