@@ -3814,6 +3814,18 @@
         "internalType": "address",
         "name": "partyA",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "partyBAllocatedBalance",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "upnl",
+        "type": "int256"
       }
     ],
     "name": "LiquidatePartyB",
