@@ -1,0 +1,15 @@
+networks.json
+subgraph.yaml
+build/
+generated/
+node_modules/
+*/tests
+package-lock.json
+
+*/subgraph.yaml
+.idea/
+pnpm-lock.yaml
+yarn-error.log
+*/abis/*
+
+.env
