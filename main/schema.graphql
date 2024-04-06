@@ -75,6 +75,8 @@ type ResultEntity @entity {
   TrHashRequestToClosePosition: Bytes
   TrHashLiquidatePositionsPartyA: Bytes
   TrHashLiquidatePositionsPartyB: Bytes
+
+  GlobalCounter: BigInt!
 }
 
 type InitialQuote @entity {
@@ -103,11 +105,13 @@ type PartyA @entity {
   id: String!
   partyB: Bytes
   quoteUntilLiquid: [BigInt!]
+  GlobalCounter: BigInt!
 }
 
 type PartyApartyB @entity {
   id: String!
   quoteUntilLiquid: [BigInt!]
+  GlobalCounter: BigInt!
 }
 
 type LiquidTransaction @entity {
@@ -119,6 +123,7 @@ type LiquidTransaction @entity {
   partyA: Bytes!
   partyB: Bytes
   timeStamp: BigInt!
+  GlobalCounter: BigInt!
 }
 
 enum LiquidMode {
@@ -134,12 +139,19 @@ type PartyASymbolPrice @entity {
   requestedOpenPrice: BigInt!
   timeStamp: BigInt!
   trHash: Bytes!
+  GlobalCounter: BigInt!
 }
 
 type SymbolInfo @entity {
   id: String!
   symbolId: BigInt!
   tradingFee: BigInt!
+  GlobalCounter: BigInt!
+}
+
+type GlobalCounter @entity {
+  id: String!
+  GlobalCounter: BigInt!
 }
 
 type DebugEntity @entity {
