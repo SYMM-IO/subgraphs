@@ -1,6 +1,18 @@
 import { Address, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { symmio, symmio__getQuoteResultValue0Struct } from "../generated/symmio/symmio"
-import { InitialQuote } from "../generated/schema"
+import { InitialQuote, GlobalCounter } from "../generated/schema"
+
+export function getGlobalCounterAndInc(): BigInt {
+    let entity = GlobalCounter.load("GLOBAL")
+    if (!entity) {
+        entity = new GlobalCounter("GLOBAL")
+        entity.GlobalCounter = BigInt.fromI32(0)
+    } else {
+        entity.GlobalCounter = entity.GlobalCounter.plus(BigInt.fromI32(1))
+    }
+    entity.save()
+    return entity.GlobalCounter
+}
 
 export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
     let entity = new InitialQuote(resultArr[0].toBigInt().toString())

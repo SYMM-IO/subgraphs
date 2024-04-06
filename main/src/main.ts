@@ -37,7 +37,7 @@ import {
     ResultEntity,
     SymbolInfo
 } from "../generated/schema"
-import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getQuote, initialHelper, symbolIdToSymbolName, } from './helper'
+import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getGlobalCounterAndInc, getQuote, initialHelper, symbolIdToSymbolName, } from './helper'
 
 
 const FACTOR: BigInt = BigInt.fromI32(10).pow(18);
@@ -47,6 +47,7 @@ export function handleAddSymbol(event: AddSymbolEvent): void {
     let entity = new SymbolInfo(event.params.id.toString())
     entity.symbolId = event.params.id
     entity.tradingFee = event.params.tradingFee
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.save()
 }
 export function handleSetSymbolTradingFee(event: SetSymbolTradingFeeEvent): void {
@@ -61,6 +62,7 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
     for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
         let qoutId = event.params.quoteIds[i]
         let entity = ResultEntity.load(qoutId.toString())!
+        entity.GlobalCounter = getGlobalCounterAndInc()
         entity.lastFundingPaymentTimestamp = event.block.timestamp
         if (entity.positionType) { // SHORT position
             entity.openedPrice = entity.openedPrice!.minus(entity.openedPrice!.times(event.params.rates[i]).div(FACTOR))
@@ -97,6 +99,7 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
         for (let i = 0, lenQ = list.length; i < lenQ; i++) {
             const quoteId = list[i]
             let pendingEntity = ResultEntity.load(quoteId.toString())!
+            pendingEntity.GlobalCounter = getGlobalCounterAndInc()
             if (pendingEntity.quoteStatus <= 2 && pendingEntity.quoteStatus >= 0) {
                 pendingEntity.quoteStatus = 8
                 pendingEntity.save()
@@ -106,6 +109,7 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
         }
 
         let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toHexString()))
+        liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
         liquidTrEntity.mode = "Pending"
         const balance = allocatedBalanceOfPartyA(event.params.partyA, event.address)
         if (balance) {
@@ -127,6 +131,7 @@ export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPos
         for (let i = 0, lenQ = list.length; i < lenQ; i++) {
             const quoteId = list[i]
             let pendingEntity = ResultEntity.load(quoteId.toString())!
+            pendingEntity.GlobalCounter = getGlobalCounterAndInc()
             if (pendingEntity.quoteStatus <= 2 && pendingEntity.quoteStatus >= 0) {
                 pendingEntity.quoteStatus = 8
                 pendingEntity.save()
@@ -141,6 +146,7 @@ export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPos
         }
 
         let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toHexString()))
+        liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
         liquidTrEntity.mode = "Pending"
         const balance = allocatedBalanceOfPartyA(event.params.partyA, event.address)
         if (balance) {
@@ -166,7 +172,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
             let entity = ResultEntity.load(quoteId.toString())!
             if (entity.quoteStatus <= 2 && entity.quoteStatus >= 0) {
                 entity.quoteStatus = 8
-
+                entity.GlobalCounter = getGlobalCounterAndInc()
                 entity.save()
             } else {
                 log.error(`error in liquidate positions party B\nQuoteId: ${quoteId}\nQuote status: ${entity.quoteStatus}`, [])
@@ -175,6 +181,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
 
 
         let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString())
+        liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
         liquidTrEntity.mode = "PartyB"
         const balance = allocatedBalanceOfPartyB(event.params.partyB, event.params.partyA, event.address)
         if (balance) {
@@ -201,6 +208,7 @@ export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyBEv
     for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
         let qoutId = event.params.quoteIds[i]
         let entity = ResultEntity.load(qoutId.toString())!
+        entity.GlobalCounter = getGlobalCounterAndInc()
         entity.timeStampLiquidatePositionsPartyBTimeStamp = event.block.timestamp
         entity.TrHashLiquidatePositionsPartyB = event.transaction.hash
         entity.timeStamp = event.block.timestamp
@@ -231,6 +239,7 @@ export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyAEv
     for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
         let qoutId = event.params.quoteIds[i]
         let entity = ResultEntity.load(qoutId.toString())!
+        entity.GlobalCounter = getGlobalCounterAndInc()
         entity.timeStampLiquidatePositionsPartyATimeStamp = event.block.timestamp
         entity.TrHashLiquidatePositionsPartyA = event.transaction.hash
         entity.timeStamp = event.block.timestamp
@@ -254,6 +263,7 @@ export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyAEv
 
 export function handleRequestToClosePosition(event: RequestToClosePositionEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.closePrice = event.params.closePrice
     entity.deadline = event.params.deadline
     entity.orderTypeClose = event.params.orderType
@@ -272,6 +282,7 @@ export function handleRequestToClosePosition(event: RequestToClosePositionEvent)
 
 export function handleExpireQuote(event: ExpireQuoteEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     if (entity.quoteStatus === 2) {
         log.debug(`Quote id: ${entity.quoteId} , expire tr hash: ${event.transaction.hash}`, [])
     }
@@ -306,6 +317,7 @@ export function handleForceCancelCloseRequest(
     event: ForceCancelCloseRequestEvent
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.quoteStatus = event.params.quoteStatus
     entity.timeStamp = event.block.timestamp
@@ -318,6 +330,7 @@ export function handleForceCancelCloseRequest(
 
 export function handleForceCancelQuote(event: ForceCancelQuoteEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.quoteStatus = event.params.quoteStatus
     entity.timeStamp = event.block.timestamp
@@ -331,6 +344,7 @@ export function handleForceCancelQuote(event: ForceCancelQuoteEvent): void {
 
 export function handleForceClosePosition(event: ForceClosePositionEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.fillAmount = event.params.filledAmount
     entity.closedPrice = event.params.closedPrice
@@ -349,6 +363,7 @@ export function handleRequestToCancelCloseRequest(
     event: RequestToCancelCloseRequestEvent
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
 
     entity.partyA = event.params.partyA
@@ -365,6 +380,7 @@ export function handleRequestToCancelQuote(
     event: RequestToCancelQuoteEvent
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.partyA = event.params.partyA
     entity.quoteStatus = event.params.quoteStatus
@@ -387,6 +403,7 @@ export function handleRequestToCancelQuote(
 
 export function handleSendQuote(event: SendQuoteEvent): void {
     let entity = new ResultEntity(event.params.quoteId.toString())
+    entity.GlobalCounter = getGlobalCounterAndInc()
     let symmioContract = symmio.bind(event.address)
     entity.quoteId = event.params.quoteId
     entity.orderTypeOpen = event.params.orderType
@@ -432,9 +449,9 @@ export function handleSendQuote(event: SendQuoteEvent): void {
         let Result = callResultGetQuote.value as ethereum.Tuple
         let initialNewEntity = initialHelper(Result)
         if (initialNewEntity) {
+            event.params.tradingFee
+            entity.maxFundingRate = initialNewEntity.tradingFee
             initialEntity.tradingFee = initialNewEntity.tradingFee
-            entity.maxFundingRate = initialNewEntity.maxFundingRate
-            initialEntity.maxFundingRate = initialNewEntity.maxFundingRate
         }
     }
 
@@ -488,7 +505,7 @@ export function handleAcceptCancelCloseRequest(
     event: AcceptCancelCloseRequestEvent
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
-
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.quoteStatus = event.params.quoteStatus
 
@@ -501,6 +518,7 @@ export function handleAcceptCancelRequest(
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())
     if (entity) {
+        entity.GlobalCounter = getGlobalCounterAndInc()
         entity.quoteId = event.params.quoteId
         entity.quoteStatus = event.params.quoteStatus
         entity.timeStamp = event.block.timestamp
@@ -527,6 +545,7 @@ export function handleAcceptCancelRequest(
 
     } else {
         let newEntity = new ResultEntity(event.params.quoteId.toString())
+        newEntity.GlobalCounter = getGlobalCounterAndInc()
         newEntity.quoteId = event.params.quoteId
         newEntity.quoteStatus = event.params.quoteStatus
         newEntity.timeStamp = event.block.timestamp
@@ -559,7 +578,7 @@ export function handleEmergencyClosePosition(
     event: EmergencyClosePositionEvent
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
-
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.fillAmount = event.params.filledAmount
     entity.closedPrice = event.params.closedPrice
@@ -577,7 +596,7 @@ export function handleEmergencyClosePosition(
 
 export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
-
+    entity.GlobalCounter = getGlobalCounterAndInc()
 
     let q = getQuote(event.params.quoteId, event.address);
     entity.cva = q.lockedValues.cva
@@ -601,7 +620,7 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
 export function handleLockQuote(event: LockQuoteEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())
     if (entity) {
-
+        entity.GlobalCounter = getGlobalCounterAndInc()
         entity.quoteId = event.params.quoteId
         entity.partyB = event.params.partyB
         entity.quoteStatus = 1
@@ -627,6 +646,7 @@ export function handleLockQuote(event: LockQuoteEvent): void {
 
 export function handleOpenPosition(event: OpenPositionEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.fillAmount = event.params.filledAmount
     entity.openedPrice = event.params.openedPrice
@@ -679,7 +699,7 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
 
 export function handleUnlockQuote(event: UnlockQuoteEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
-
+    entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.partyB = null
     entity.quoteStatus = event.params.quoteStatus
