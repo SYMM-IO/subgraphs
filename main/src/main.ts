@@ -54,6 +54,7 @@ export function handleSetSymbolTradingFee(event: SetSymbolTradingFeeEvent): void
     let entity = SymbolInfo.load(event.params.symbolId.toString())
     if (entity) {
         entity.tradingFee = event.params.tradingFee
+        entity.GlobalCounter = getGlobalCounterAndInc()
         entity.save()
     }
 }
@@ -88,6 +89,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
         entity.requestedOpenPrice = listOfPrices[i]
         entity.timeStamp = event.block.timestamp
         entity.trHash = event.transaction.hash
+        entity.GlobalCounter = getGlobalCounterAndInc()
         entity.save()
     }
 }
@@ -95,6 +97,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
 export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())
     if (partyAEntity) {
+        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
         const list = partyAEntity.quoteUntilLiquid!.slice(0)
         for (let i = 0, lenQ = list.length; i < lenQ; i++) {
             const quoteId = list[i]
@@ -127,6 +130,7 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
 export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPositionsPartyAEvent): void {
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())
     if (partyAEntity) {
+        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
         const list = partyAEntity.quoteUntilLiquid!.slice(0)
         for (let i = 0, lenQ = list.length; i < lenQ; i++) {
             const quoteId = list[i]
@@ -137,6 +141,7 @@ export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPos
                 pendingEntity.save()
                 if (pendingEntity.partyB) {
                     let partyAPartyBEntity = PartyApartyB.load(event.params.partyA.toHexString() + '-' + pendingEntity.partyB!.toHexString())!
+                    partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
                     partyAPartyBEntity.quoteUntilLiquid = []
                     partyAPartyBEntity.save()
                 }
@@ -167,6 +172,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
     let partyAPartyBEntity = PartyApartyB.load(event.params.partyA.toHexString() + '-' + event.params.partyB.toHexString())!
     const list = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
     if (partyAPartyBEntity) {
+        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
         for (let i = 0, lenQ = list.length; i < lenQ; i++) {
             const quoteId = list[i]
             let entity = ResultEntity.load(quoteId.toString())!
@@ -195,6 +201,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
         liquidTrEntity.save()
 
         let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
+        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
         partyAPartyBEntity.quoteUntilLiquid = []
         partyAEntity.quoteUntilLiquid = []
         partyAEntity.save()
@@ -247,8 +254,6 @@ export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyAEv
         let LiquidateAmount = entity.quantity!.minus(entity.closedAmount!)
         entity.liquidateAmount = LiquidateAmount
 
-        let symmioContract = symmio.bind(event.address)
-        let callResult = symmioContract.try_getQuote(qoutId)
         let partyASymbolPriceEntity = PartyASymbolPrice.load(event.params.partyA.toHexString().concat('-').concat(entity.symbolId!.toHex()))
         if (partyASymbolPriceEntity) {
             entity.liquidatePrice = partyASymbolPriceEntity.requestedOpenPrice
@@ -294,6 +299,7 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
 
     if (entity.quoteStatus === 0) {
         let partyAEntity = PartyA.load(entity.partyA.toHexString())!
+        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
         let temp = partyAEntity.quoteUntilLiquid!.slice(0)
         const indexA = temp.indexOf(event.params.quoteId)
         const removedPa = temp.splice(indexA, 1)
@@ -301,6 +307,7 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
         partyAEntity.save()
     } else if (entity.quoteStatus === 1) {
         let partyAPartyBEntity = PartyApartyB.load(entity.partyA.toHexString() + '-' + entity.partyB!.toHexString())!
+        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
         let temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
         const indexB = temp.indexOf(event.params.quoteId)
         const removedPb = temp.splice(indexB, 1)
@@ -392,6 +399,7 @@ export function handleRequestToCancelQuote(
 
     if (event.params.quoteStatus === 3) {
         let partyAEntity = PartyA.load(entity.partyA.toHexString())!
+        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
         let temp = partyAEntity.quoteUntilLiquid!.slice(0)
         const indexA = temp.indexOf(event.params.quoteId)
         temp.splice(indexA, 1)
@@ -493,8 +501,7 @@ export function handleSendQuote(event: SendQuoteEvent): void {
     initialEntity.save()
     entity.initialData = initialEntity.id
 
-
-
+    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
     partyAEntity.save()
     entity.save()
 
@@ -529,12 +536,14 @@ export function handleAcceptCancelRequest(
 
 
         let partyAEntity = PartyA.load(entity.partyA.toHexString())!
+        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
         let temp = partyAEntity.quoteUntilLiquid!.slice(0)
         const indexA = temp.indexOf(event.params.quoteId)
         const removedPa = temp.splice(indexA, 1)
         partyAEntity.quoteUntilLiquid = temp.slice(0)
         partyAEntity.save()
         let partyAPartyBEntity = PartyApartyB.load(entity.partyA.toHexString() + '-' + entity.partyB!.toHexString())!
+        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
         temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
         const indexB = temp.indexOf(event.params.quoteId)
         const removedPb = temp.splice(indexB, 1)
@@ -638,6 +647,7 @@ export function handleLockQuote(event: LockQuoteEvent): void {
             temp.push(event.params.quoteId)
             partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
         }
+        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
         partyAPartyBEntity.save()
 
     }
@@ -682,12 +692,14 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
     entity.save()
 
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
+    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
     let temp = partyAEntity.quoteUntilLiquid!.slice(0)
     const indexA = temp.indexOf(event.params.quoteId)
     const removedPa = temp.splice(indexA, 1)
     partyAEntity.quoteUntilLiquid = temp.slice(0)
     partyAEntity.save()
     let partyAPartyBEntity = PartyApartyB.load(event.params.partyA.toHexString() + '-' + event.params.partyB.toHexString())!
+    partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
     temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
     const indexB = temp.indexOf(event.params.quoteId)
     const removedPb = temp.splice(indexB, 1)
