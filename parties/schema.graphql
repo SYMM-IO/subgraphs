@@ -15,6 +15,7 @@ type ResultPartyA @entity {
   totalUnrealizedLoss: BigInt
   upnl: BigInt
   allocatedBalance: BigInt
+  GlobalCounter: BigInt!
 }
 
 type ResultPartyB @entity {
@@ -34,4 +35,10 @@ type ResultPartyB @entity {
   liquidatePendingLf: BigInt
   partyBAllocatedBalance: BigInt
   upnl: BigInt
+  GlobalCounter: BigInt!
+}
+
+type GlobalCounter @entity {
+  id: String!
+  GlobalCounter: BigInt!
 }
