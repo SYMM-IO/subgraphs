@@ -13,3 +13,7 @@ yarn-error.log
 */abis/*
 
 .env
+
+UniGraph/UniConfig.json
+UniGraph/subgraph.yaml
+UniGraph/schema.graphql

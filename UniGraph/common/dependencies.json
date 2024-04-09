@@ -1,0 +1,11 @@
+{
+  "Quote": [
+    "SendQuote",
+    "LockQuote",
+    "UnlockQuote"
+  ],
+  "User": [
+    "SendQuote",
+    "AddAccount"
+  ]
+}

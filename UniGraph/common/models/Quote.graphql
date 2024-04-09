@@ -1,0 +1,114 @@
+type Quote @entity {
+    id: String!
+    globalCounter: BigInt!
+    quoteId: BigInt!
+    quoteStatus: Int
+    partyA: Bytes!
+    partyB: Bytes
+
+    # open request
+    requestedOpenPrice: BigInt
+    marketPrice: BigInt
+    orderTypeOpen: Int
+    quantity: BigInt
+    cva: BigInt
+    lf: BigInt
+    partyBmm: BigInt
+    partyAmm: BigInt
+    symbolId: BigInt
+    symbol: String
+    positionType: Int
+    openDeadline: BigInt
+    partyBsWhiteList: [Bytes!]
+    maxFundingRate: BigInt
+
+    # open
+    fillAmount: BigInt
+    openedPrice: BigInt
+    tradingFee: BigInt!
+
+    # initial
+    initialOpenedPrice: BigInt
+    initialData: InitialQuote
+
+    # close request
+    closePrice: BigInt # request
+    orderTypeClose: Int
+    closedPrice: BigInt # done
+    closeDeadline: BigInt
+    quantityToClose: BigInt
+
+    # closed
+    closedAmount: BigInt
+    leverage: BigInt
+    averageClosedPrice: BigInt
+
+    # liquidation
+    liquidatePrice: BigInt
+    liquidateAmount: BigInt
+
+    # timestamps
+    timeStamp: BigInt!
+    subgraphTimestamp: String
+    lastFundingPaymentTimestamp: BigInt
+    timestampsExpireQuoteTimeStamp: BigInt
+    timestampsAcceptCancelCloseRequestTimeStamp: BigInt
+    timestampsAcceptCancelRequestTimeStamp: BigInt
+    timestampsEmergencyClosePositionTimeStamp: BigInt
+    timestampsForceCancelCloseRequestTimeStamp: BigInt
+    timestampsFillCloseRequestTimeStamp: BigInt
+    timestampsForceCancelQuoteTimeStamp: BigInt
+    timestampsForceClosePositionTimeStamp: BigInt
+    timestampsLockQuoteTimeStamp: BigInt
+    timestampsRequestToCancelCloseRequestTimeStamp: BigInt
+    timestampsOpenPositionTimeStamp: BigInt
+    timestampsRequestToCancelQuoteTimeStamp: BigInt
+    timestampsSendQuoteTimeStamp: BigInt
+    timestampsRequestToLimitClosePositionTimeStamp: BigInt
+    timestampsUnlockQuoteTimeStamp: BigInt
+    timestampsRequestToClosePositionTimeStamp: BigInt
+    timeStampLiquidatePositionsPartyATimeStamp: BigInt
+    timeStampLiquidatePositionsPartyBTimeStamp: BigInt
+
+    # transaction hashes
+    TrHashExpireQuote: Bytes
+    TrHashAcceptCancelCloseRequest: Bytes
+    TrHashAcceptCancelRequest: Bytes
+    TrHashEmergencyClosePosition: Bytes
+    TrHashForceCancelCloseRequest: Bytes
+    TrHashFillCloseRequest: Bytes
+    TrHashForceCancelQuote: Bytes
+    TrHashForceClosePosition: Bytes
+    TrHashLockQuote: Bytes
+    TrHashRequestToCancelCloseRequest: Bytes
+    TrHashOpenPosition: Bytes
+    TrHashRequestToCancelQuote: Bytes
+    TrHashSendQuote: Bytes
+    TrHashRequestToLimitClosePosition: Bytes
+    TrHashUnlockQuote: Bytes
+    TrHashRequestToClosePosition: Bytes
+    TrHashLiquidatePositionsPartyA: Bytes
+    TrHashLiquidatePositionsPartyB: Bytes
+}
+
+type InitialQuote @entity {
+    id: ID!
+    quoteId: BigInt!
+    orderTypeOpen: Int!
+    partyA: Bytes!
+    symbolId: BigInt!
+    positionType: Int!
+    requestedOpenPrice: BigInt!
+    quantity: BigInt!
+    cva: BigInt!
+    partyAmm: BigInt
+    partyBmm: BigInt!
+    lf: BigInt!
+    tradingFee: BigInt
+    deadline: BigInt!
+    quoteStatus: Int!
+    marketPrice: BigInt!
+    symbol: String!
+    partyBsWhiteList: [Bytes!]
+    timeStamp: BigInt!
+}
