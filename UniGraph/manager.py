@@ -90,7 +90,7 @@ export class {handler_class_name} extends Common{handler_class_name} {{
     }}
 
     handle(): void {{
-
+		super.handle()
     }}
 }}
 """)
@@ -216,7 +216,7 @@ if __name__ == "__main__":
 
 	target_module_name = input("Enter the target module name: ")
 	create_src_file = input("Should I create the src.ts file? (y/N): ")
-	create_handler_files = input("Should I create the handler files? (y/N) ")
+	create_handler_files = input("Should I create the handler files? (y/N): ")
 	prepare_module(
 		config, target_module_name, create_src_file == "y", create_handler_files == "y"
 	)
