@@ -79,7 +79,6 @@ type InitialQuote @entity {
 
 type EventsTimestamp @entity {
   id: ID!
-
   lastFundingPayment: BigInt
   ExpireQuote: BigInt
   AcceptCancelCloseRequest: BigInt
@@ -102,6 +101,7 @@ type EventsTimestamp @entity {
 }
 
 type TransactionsHash @entity {
+  id: ID!
   ExpireQuote: Bytes
   AcceptCancelCloseRequest: Bytes
   AcceptCancelRequest: Bytes

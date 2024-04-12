@@ -1,9 +1,9 @@
-import {BaseHandler} from "./BaseHandler"
-import {SendQuote} from "../../generated/symmio/symmio"
-import {getGlobalCounterAndInc, initialHelper} from "result-quote/src/helper"
-import {symmio} from "result-quote/generated/symmio/symmio"
-import {BigInt, Bytes, ethereum, log} from "@graphprotocol/graph-ts"
-import {InitialQuote, Quote} from "../../generated/schema"
+import { BaseHandler } from "./BaseHandler"
+import { SendQuote } from "../../generated/symmio/symmio"
+import { getGlobalCounterAndInc, initialHelper } from "result-quote/src/helper"
+import { symmio } from "result-quote/generated/symmio/symmio"
+import { BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts"
+import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
 
 export class SendQuoteHandler extends BaseHandler {
 	private event: SendQuote
@@ -27,7 +27,7 @@ export class SendQuoteHandler extends BaseHandler {
 		quote.partyAmm = this.event.params.partyAmm
 		quote.partyBmm = this.event.params.partyBmm
 		quote.lf = this.event.params.lf
-		// quote.deadline = this.event.params.deadline
+		quote.openDeadline = this.event.params.deadline
 		quote.quoteStatus = 0
 		quote.marketPrice = this.event.params.marketPrice
 		quote.averageClosedPrice = BigInt.fromI32(0)
@@ -35,6 +35,7 @@ export class SendQuoteHandler extends BaseHandler {
 		quote.tradingFee = this.event.params.tradingFee
 
 		let initialQuote = new InitialQuote(this.event.params.quoteId.toString())
+		quote.initialData = initialQuote.id
 		initialQuote.quoteId = this.event.params.quoteId
 		initialQuote.orderTypeOpen = this.event.params.orderType
 		initialQuote.partyA = this.event.params.partyA
@@ -58,7 +59,6 @@ export class SendQuoteHandler extends BaseHandler {
 			let Result = callResultGetQuote.value as ethereum.Tuple
 			let initialNewEntity = initialHelper(Result)
 			if (initialNewEntity) {
-				this.event.params.tradingFee
 				quote.maxFundingRate = initialNewEntity.tradingFee
 				initialQuote.tradingFee = initialNewEntity.tradingFee
 			}
@@ -85,9 +85,18 @@ export class SendQuoteHandler extends BaseHandler {
 		initialQuote.save()
 
 		quote.timeStamp = this.event.block.timestamp
-		quote.timestampsSendQuoteTimeStamp = this.event.block.timestamp
-		quote.TrHashSendQuote = this.event.transaction.hash
-		quote.initialData = initialQuote.id
+		let EventTimestampEntity = new EventsTimestamp(this.event.params.quoteId.toString())
+		quote.EventsTimestamp = EventTimestampEntity.id
+		let TransactionsHashEntity = new TransactionsHash(this.event.params.quoteId.toString())
+		quote.TransactionsHash = TransactionsHashEntity.id
+
 		quote.save()
+
+		EventTimestampEntity.SendQuote = this.event.block.timestamp
+		EventTimestampEntity.save()
+		TransactionsHashEntity.SendQuote = this.event.transaction.hash
+		TransactionsHashEntity.save()
+
+
 	}
 }
