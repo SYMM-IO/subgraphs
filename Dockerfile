@@ -21,7 +21,7 @@ LABEL org.build.Date=${BUILD_DATE}
 ######################################################################
 # BUILD STAGE
 ######################################################################
-RUN npm install -g @graphprotocol/graph-cli@0.60.0
+RUN npm install -g @graphprotocol/graph-cli@0.69.2
 
 RUN mkdir /subgraph
 COPY package.json /subgraph
