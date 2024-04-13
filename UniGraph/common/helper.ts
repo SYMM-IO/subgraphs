@@ -83,6 +83,7 @@ export function getGlobalCounterAndInc(): BigInt {
 export function setEventTimestampAndTransactionHash(id: string, timestamp: BigInt, eventName: string, trHash: Bytes): void {
     let timestampEntity = EventsTimestamp.load(id)!
     timestampEntity[eventName] = timestamp
+    timestampEntity.setBigInt(eventName, timestamp)
     timestampEntity.save()
 
     let trHashEntity = TransactionsHash.load(id)!

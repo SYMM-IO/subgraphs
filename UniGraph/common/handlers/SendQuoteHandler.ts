@@ -86,9 +86,9 @@ export class SendQuoteHandler extends BaseHandler {
 
 		quote.timeStamp = this.event.block.timestamp
 		let EventTimestampEntity = new EventsTimestamp(this.event.params.quoteId.toString())
-		quote.EventsTimestamp = EventTimestampEntity.id
+		quote.eventsTimestamp = EventTimestampEntity.id
 		let TransactionsHashEntity = new TransactionsHash(this.event.params.quoteId.toString())
-		quote.TransactionsHash = TransactionsHashEntity.id
+		quote.transactionsHash = TransactionsHashEntity.id
 
 		quote.save()
 

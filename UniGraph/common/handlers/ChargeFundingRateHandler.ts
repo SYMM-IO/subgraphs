@@ -23,7 +23,7 @@ export class ChargeFundingRateHandler extends BaseHandler {
 				quote.openedPrice = quote.openedPrice!.plus(quote.openedPrice!.times(this.event.params.rates[i]).div(FACTOR))
 			}
 			quote.save()
-			setEventTimestampAndTransactionHash(quote.EventsTimestamp, this.event.block.timestamp,
+			setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
 				'ChargeFundingRate', this.event.transaction.hash)
 		}
 
