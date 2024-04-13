@@ -1,5 +1,8 @@
-import {BaseHandler} from "./BaseHandler"
-import {ChargeFundingRate} from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
+import { ChargeFundingRate } from "../../generated/symmio/symmio"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
+import { Quote } from "../../generated/schema"
+import { FACTOR } from "result-quote/src/helper"
 
 export class ChargeFundingRateHandler extends BaseHandler {
 	private event: ChargeFundingRate
@@ -10,6 +13,19 @@ export class ChargeFundingRateHandler extends BaseHandler {
 	}
 
 	handle(): void {
-		// TODO
+		for (let i = 0, lenQ = this.event.params.quoteIds.length; i < lenQ; i++) {
+			let qoutId = this.event.params.quoteIds[i]
+			let quote = Quote.load(qoutId.toString())!
+			quote.globalCounter = getGlobalCounterAndInc()
+			if (quote.positionType) { // SHORT position
+				quote.openedPrice = quote.openedPrice!.minus(quote.openedPrice!.times(this.event.params.rates[i]).div(FACTOR))
+			} else {
+				quote.openedPrice = quote.openedPrice!.plus(quote.openedPrice!.times(this.event.params.rates[i]).div(FACTOR))
+			}
+			quote.save()
+			setEventTimestampAndTransactionHash(quote.EventsTimestamp, this.event.block.timestamp,
+				'ChargeFundingRate', this.event.transaction.hash)
+		}
+
 	}
 }
