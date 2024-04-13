@@ -18,7 +18,7 @@ export class AcceptCancelRequestHandler extends BaseHandler {
 		quote.timeStamp = this.event.block.timestamp
 		quote.save()
 
-		setEventTimestampAndTransactionHash(quote.EventsTimestamp, this.event.block.timestamp,
+		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
 			'AcceptCancelRequest', this.event.transaction.hash)
 	}
 }
