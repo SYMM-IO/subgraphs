@@ -2,6 +2,10 @@ import { Address, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { symmio, symmio__getQuoteResultValue0Struct } from "../generated/symmio/symmio"
 import { InitialQuote, GlobalCounter } from "../generated/schema"
 
+
+export const FACTOR: BigInt = BigInt.fromI32(10).pow(18);
+
+
 export function getGlobalCounterAndInc(): BigInt {
     let entity = GlobalCounter.load("GLOBAL")
     if (!entity) {

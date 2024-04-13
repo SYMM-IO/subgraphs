@@ -1,9 +1,10 @@
-import {BaseHandler} from "./BaseHandler"
+import { FillCloseRequest } from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
 
 export class FillCloseRequestHandler extends BaseHandler {
-	private event: FillCloseRequestEvent
+	private event: FillCloseRequest
 
-	constructor(event: FillCloseRequestEvent) {
+	constructor(event: FillCloseRequest) {
 		super(event)
 		this.event = event
 	}

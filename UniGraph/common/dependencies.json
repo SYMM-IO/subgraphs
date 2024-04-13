@@ -2,10 +2,25 @@
   "Quote": [
     "SendQuote",
     "LockQuote",
-    "UnlockQuote"
+    "UnlockQuote",
+    "ChargeFundingRate",
+    "LiquidatePartyA",
+    "LiquidatePendingPositionsPartyA",
+    "LiquidatePartyB",
+    "LiquidatePositionsPartyB",
+    "LiquidatePositionsPartyA",
+    "RequestToClosePosition",
+    "ExpireQuote",
+    "handleForceCancelCloseRe",
+    "ForceCancelQuote",
+    "ForceClosePosition",
+    "RequestToCancelCloseRequest",
+    "RequestToCancelQuote",
+    "RequestToCancelQuote",
+    "AcceptCancelRequest",
+    "EmergencyClosePosition",
+    "FillCloseRequest",
+    "OpenPosition"
   ],
-  "User": [
-    "SendQuote",
-    "AddAccount"
-  ]
+  "User": ["SendQuote", "AddAccount"]
 }

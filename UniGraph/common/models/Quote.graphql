@@ -49,10 +49,10 @@ type Quote @entity {
 
   # timestamps
   timeStamp: BigInt!
-  EventsTimestamp: EventsTimestamp!
+  eventsTimestamp: EventsTimestamp!
 
   # transaction hashes
-  TransactionsHash: TransactionsHash
+  transactionsHash: TransactionsHash
 }
 
 type InitialQuote @entity {
