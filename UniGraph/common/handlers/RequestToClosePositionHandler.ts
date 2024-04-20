@@ -1,5 +1,7 @@
-import {BaseHandler} from "./BaseHandler"
-import {RequestToClosePosition} from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
+import { RequestToClosePosition } from "../../generated/symmio/symmio"
+import { Quote } from "../../generated/schema"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
 
 export class RequestToClosePositionHandler extends BaseHandler {
 	private event: RequestToClosePosition
@@ -10,6 +12,19 @@ export class RequestToClosePositionHandler extends BaseHandler {
 	}
 
 	handle(): void {
-		// TODO
+		let quote = Quote.load(this.event.params.quoteId.toString())!
+		quote.globalCounter = getGlobalCounterAndInc()
+		quote.closePrice = this.event.params.closePrice
+		quote.closeDeadline = this.event.params.deadline
+		quote.orderTypeClose = this.event.params.orderType
+		quote.partyA = this.event.params.partyA
+		quote.partyB = this.event.params.partyB
+		quote.quantityToClose = this.event.params.quantityToClose
+		quote.quoteId = this.event.params.quoteId
+		quote.quoteStatus = this.event.params.quoteStatus
+		quote.timeStamp = this.event.block.timestamp
+		quote.save()
+		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
+			'LiquidatePositionsPartyB', this.event.transaction.hash)
 	}
 }

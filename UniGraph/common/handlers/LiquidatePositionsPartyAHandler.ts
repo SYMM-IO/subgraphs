@@ -1,5 +1,7 @@
-import {BaseHandler} from "./BaseHandler"
-import {LiquidatePositionsPartyA} from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
+import { LiquidatePositionsPartyA } from "../../generated/symmio/symmio"
+import { Quote } from "../../generated/schema"
+import { getGlobalCounterAndInc } from "../helper"
 
 export class LiquidatePositionsPartyAHandler extends BaseHandler {
 	private event: LiquidatePositionsPartyA

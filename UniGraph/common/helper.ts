@@ -87,7 +87,7 @@ export function setEventTimestampAndTransactionHash(id: string, timestamp: BigIn
     timestampEntity.save()
 
     let trHashEntity = TransactionsHash.load(id)!
-    trHashEntity[eventName] = trHash
+    trHashEntity.setBytes(eventName, trHash)
     trHashEntity.save()
 
 }

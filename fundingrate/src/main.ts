@@ -1,4 +1,4 @@
-import {BigInt} from '@graphprotocol/graph-ts'
+import { BigInt } from '@graphprotocol/graph-ts'
 
 import {
     ChargeFundingRate as ChargeFundingRateEvent,
@@ -8,7 +8,8 @@ import {
     OpenPosition as OpenPositionEvent,
     SendQuote as SendQuoteEvent,
 } from "../generated/symmio/symmio"
-import {GlobalFee, ResultEntity} from "../generated/schema"
+import { GlobalFee, ResultEntity } from "../generated/schema"
+import { DebugEntity } from 'result-quote/generated/schema';
 
 
 const FACTOR: BigInt = BigInt.fromString(`1000000000000000000`);
