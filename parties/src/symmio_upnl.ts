@@ -121,6 +121,8 @@ export function handleLiquidatePartyA(
     entity.liquidatePendingCva = balanceInfoOfPartyA.value5
     entity.liquidatePendingLf = balanceInfoOfPartyA.value6
     entity.timeStamp = event.block.timestamp
+    entity.blockNumber = event.block.number
+    entity.trHash = event.transaction.hash
     entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
     entity.upnl = event.params.upnl
     entity.allocatedBalance = event.params.allocatedBalance
@@ -144,6 +146,8 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
     entity.partyBAllocatedBalance = event.params.partyBAllocatedBalance
     entity.upnl = event.params.upnl
     entity.timeStamp = event.block.timestamp
+    entity.blockNumber = event.block.number
+    entity.trHash = event.transaction.hash
     entity.GlobalCounter = getGlobalCounterAndInc()
     entity.save()
 
