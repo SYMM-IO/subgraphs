@@ -15,18 +15,20 @@ export function handleAllocatePartyA(
     event: AllocatePartyAEvent
 ): void {
     let allocateEntity = ResultPartyA.load(event.params.user.toHex())
+    let globalCounter = getGlobalCounterAndInc()
     if (allocateEntity) {
 
         allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
     } else {
         allocateEntity = new ResultPartyA(event.params.user.toHex())
+        allocateEntity.index = globalCounter
         allocateEntity.partyA = event.params.user
         allocateEntity.amount = event.params.amount
     }
     allocateEntity.timeStamp = event.block.timestamp
     allocateEntity.trHash = event.transaction.hash
     allocateEntity.blockNumber = event.block.number
-    allocateEntity.GlobalCounter = getGlobalCounterAndInc()
+    allocateEntity.GlobalCounter = globalCounter
     allocateEntity.save()
 }
 
@@ -34,17 +36,19 @@ export function handleDeallocatePartyA(
     event: DeallocatePartyAEvent
 ): void {
     let deAllocateEntity = ResultPartyA.load(event.params.user.toHex())
+    let globalCounter = getGlobalCounterAndInc()
     if (deAllocateEntity) {
         deAllocateEntity.amount = deAllocateEntity.amount.minus(event.params.amount)
     } else {
         deAllocateEntity = new ResultPartyA(event.params.user.toHex())
+        deAllocateEntity.index = globalCounter
         deAllocateEntity.partyA = event.params.user
         deAllocateEntity.amount = event.params.amount
     }
     deAllocateEntity.timeStamp = event.block.timestamp
     deAllocateEntity.trHash = event.transaction.hash
     deAllocateEntity.blockNumber = event.block.number
-    deAllocateEntity.GlobalCounter = getGlobalCounterAndInc()
+    deAllocateEntity.GlobalCounter = globalCounter
     deAllocateEntity.save()
 }
 
@@ -54,6 +58,7 @@ export function handleAllocatePartyB(
 ): void {
 
     let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+    let globalCounter = getGlobalCounterAndInc()
     if (allocateEntity) {
         allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
         allocateEntity.timeStamp = event.block.timestamp
@@ -61,6 +66,7 @@ export function handleAllocatePartyB(
         allocateEntity.blockNumber = event.block.number
     } else {
         allocateEntity = new ResultPartyB(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+        allocateEntity.index = globalCounter
         allocateEntity.amount = event.params.amount
         allocateEntity.partyA = event.params.partyA
         allocateEntity.partyB = event.params.partyB
@@ -68,7 +74,7 @@ export function handleAllocatePartyB(
     allocateEntity.timeStamp = event.block.timestamp
     allocateEntity.trHash = event.transaction.hash
     allocateEntity.blockNumber = event.block.number
-    allocateEntity.GlobalCounter = getGlobalCounterAndInc()
+    allocateEntity.GlobalCounter = globalCounter
     allocateEntity.save()
 }
 
@@ -77,10 +83,12 @@ export function handleAllocateForPartyB(
     event: AllocateForPartyBEvent
 ): void {
     let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+    let globalCounter = getGlobalCounterAndInc()
     if (allocateEntity) {
         allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
     } else {
         allocateEntity = new ResultPartyB(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+        allocateEntity.index = globalCounter
         allocateEntity.amount = event.params.amount
         allocateEntity.partyA = event.params.partyA
         allocateEntity.partyB = event.params.partyB
@@ -88,7 +96,7 @@ export function handleAllocateForPartyB(
     allocateEntity.timeStamp = event.block.timestamp
     allocateEntity.trHash = event.transaction.hash
     allocateEntity.blockNumber = event.block.number
-    allocateEntity.GlobalCounter = getGlobalCounterAndInc()
+    allocateEntity.GlobalCounter = globalCounter
     allocateEntity.save()
 }
 
