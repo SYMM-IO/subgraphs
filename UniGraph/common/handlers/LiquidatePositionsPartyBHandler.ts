@@ -1,7 +1,7 @@
 import { BaseHandler } from "./BaseHandler"
 import { LiquidatePositionsPartyB, symmio } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 
 export class LiquidatePositionsPartyBHandler extends BaseHandler {
@@ -38,7 +38,7 @@ export class LiquidatePositionsPartyBHandler extends BaseHandler {
 			}
 
 			quote.save()
-			setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 				'LiquidatePositionsPartyB', this.event.transaction.hash)
 		}
 	}

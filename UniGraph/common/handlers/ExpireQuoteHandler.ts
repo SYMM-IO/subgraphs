@@ -1,7 +1,7 @@
 import { BaseHandler } from "./BaseHandler"
 import { ExpireQuote } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class ExpireQuoteHandler extends BaseHandler {
 	private event: ExpireQuote
@@ -17,7 +17,7 @@ export class ExpireQuoteHandler extends BaseHandler {
 		quote.quoteId = this.event.params.quoteId
 		quote.timeStamp = this.event.block.timestamp
 		quote.quoteStatus = this.event.params.quoteStatus
-		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 			'ExpireQuote', this.event.transaction.hash)
 		quote.save()
 	}

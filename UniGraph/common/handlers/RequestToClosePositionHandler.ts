@@ -1,7 +1,7 @@
 import { BaseHandler } from "./BaseHandler"
 import { RequestToClosePosition } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class RequestToClosePositionHandler extends BaseHandler {
 	private event: RequestToClosePosition
@@ -24,7 +24,7 @@ export class RequestToClosePositionHandler extends BaseHandler {
 		quote.quoteStatus = this.event.params.quoteStatus
 		quote.timeStamp = this.event.block.timestamp
 		quote.save()
-		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 			'LiquidatePositionsPartyB', this.event.transaction.hash)
 	}
 }
