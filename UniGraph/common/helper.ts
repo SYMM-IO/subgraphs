@@ -1,6 +1,6 @@
 import { Address, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { symmio, symmio__getQuoteResultValue0Struct } from "../generated/symmio/symmio"
-import { EventsTimestamp, GlobalCounter, InitialQuote, TransactionsHash } from "../generated/schema"
+import { EventsTimestamp, GlobalCounter, InitialQuote, Quote, TransactionsHash } from "../generated/schema"
 
 export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
     let entity = new InitialQuote(resultArr[0].toBigInt().toString())
@@ -80,9 +80,8 @@ export function getGlobalCounterAndInc(): BigInt {
     return entity.counter
 }
 
-export function setEventTimestampAndTransactionHash(id: string, timestamp: BigInt, eventName: string, trHash: Bytes): void {
+export function setEventTimestampAndTransactionHashAndAction(id: string, timestamp: BigInt, eventName: string, trHash: Bytes): void {
     let timestampEntity = EventsTimestamp.load(id)!
-    timestampEntity[eventName] = timestamp
     timestampEntity.setBigInt(eventName, timestamp)
     timestampEntity.save()
 
@@ -90,4 +89,7 @@ export function setEventTimestampAndTransactionHash(id: string, timestamp: BigIn
     trHashEntity.setBytes(eventName, trHash)
     trHashEntity.save()
 
+    let quote = Quote.load(id)!
+    quote.action = eventName
+    quote.save()
 }
