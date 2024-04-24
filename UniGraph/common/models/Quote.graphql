@@ -122,3 +122,16 @@ type TransactionsHash @entity {
   LiquidatePositionsPartyA: Bytes
   LiquidatePositionsPartyB: Bytes
 }
+type PartyA @entity {
+  id: String!
+  partyB: Bytes
+  quoteUntilLiquid: [BigInt!]
+  GlobalCounter: BigInt!
+}
+
+type PartyBPartyA @entity {
+  id: String!
+  partyB: Bytes
+  quoteUntilLiquid: [BigInt!]
+  GlobalCounter: BigInt!
+}
