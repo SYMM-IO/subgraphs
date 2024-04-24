@@ -1,7 +1,7 @@
 import { BaseHandler } from "./BaseHandler"
 import { AcceptCancelCloseRequest } from "../../generated/symmio/symmio"
-import { EventsTimestamp, Quote, TransactionsHash } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
+import { Quote, } from "../../generated/schema"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class AcceptCancelCloseRequestHandler extends BaseHandler {
 	private event: AcceptCancelCloseRequest
@@ -18,7 +18,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 		quote.timeStamp = this.event.block.timestamp
 		quote.save()
 
-		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 			'AcceptCancelCloseRequest', this.event.transaction.hash)
 	}
 }

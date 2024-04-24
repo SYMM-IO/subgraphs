@@ -5,6 +5,7 @@ type Quote @entity {
   quoteStatus: Int
   partyA: Bytes!
   partyB: Bytes
+  action: String!
 
   # open request
   requestedOpenPrice: BigInt

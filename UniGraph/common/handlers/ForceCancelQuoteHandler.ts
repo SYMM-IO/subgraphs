@@ -1,5 +1,7 @@
-import {BaseHandler} from "./BaseHandler"
-import {ForceCancelQuote} from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
+import { ForceCancelQuote } from "../../generated/symmio/symmio"
+import { Quote } from "../../generated/schema"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
 
 export class ForceCancelQuoteHandler extends BaseHandler {
 	private event: ForceCancelQuote
@@ -10,6 +12,14 @@ export class ForceCancelQuoteHandler extends BaseHandler {
 	}
 
 	handle(): void {
-		// TODO
+		let quote = Quote.load(this.event.params.quoteId.toString())!
+		quote.globalCounter = getGlobalCounterAndInc()
+		quote.quoteId = this.event.params.quoteId
+		quote.quoteStatus = this.event.params.quoteStatus
+		quote.timeStamp = this.event.block.timestamp
+		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
+			'ForceCancelQuote', this.event.transaction.hash)
+
+		quote.save()
 	}
 }

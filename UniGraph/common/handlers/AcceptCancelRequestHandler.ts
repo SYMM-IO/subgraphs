@@ -1,7 +1,7 @@
 import { BaseHandler } from "./BaseHandler"
 import { AcceptCancelRequest } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class AcceptCancelRequestHandler extends BaseHandler {
 	private event: AcceptCancelRequest
@@ -12,13 +12,16 @@ export class AcceptCancelRequestHandler extends BaseHandler {
 	}
 
 	handle(): void {
-		let quote = Quote.load(this.event.params.quoteId.toString())!
-		quote.globalCounter = getGlobalCounterAndInc()
-		quote.quoteStatus = this.event.params.quoteStatus
-		quote.timeStamp = this.event.block.timestamp
-		quote.save()
+		let quote = Quote.load(this.event.params.quoteId.toString())
+		if (quote) {
 
-		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
-			'AcceptCancelRequest', this.event.transaction.hash)
+			quote.globalCounter = getGlobalCounterAndInc()
+			quote.quoteStatus = this.event.params.quoteStatus
+			quote.timeStamp = this.event.block.timestamp
+			quote.save()
+
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
+				'AcceptCancelRequest', this.event.transaction.hash)
+		}
 	}
 }
