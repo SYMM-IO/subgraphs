@@ -1,5 +1,6 @@
 type ResultPartyA @entity {
   id: ID!
+  index: BigInt!
   partyA: Bytes!
   amount: BigInt!
   timeStamp: BigInt!
@@ -20,6 +21,7 @@ type ResultPartyA @entity {
 
 type ResultPartyB @entity {
   id: ID!
+  index: BigInt!
   amount: BigInt!
   partyA: Bytes!
   partyB: Bytes!
