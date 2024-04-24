@@ -4,7 +4,7 @@ import { Quote } from "../../generated/schema"
 import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class OpenPositionHandler extends BaseHandler {
-	private event: OpenPosition
+	protected event: OpenPosition
 
 	constructor(event: OpenPosition) {
 		super(event)

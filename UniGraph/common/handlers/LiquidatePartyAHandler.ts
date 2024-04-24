@@ -1,8 +1,8 @@
-import {BaseHandler} from "./BaseHandler"
-import {LiquidatePartyA} from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
+import { LiquidatePartyA } from "../../generated/symmio/symmio"
 
 export class LiquidatePartyAHandler extends BaseHandler {
-	private event: LiquidatePartyA
+	protected event: LiquidatePartyA
 
 	constructor(event: LiquidatePartyA) {
 		super(event)

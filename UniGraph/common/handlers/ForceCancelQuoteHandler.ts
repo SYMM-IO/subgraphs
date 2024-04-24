@@ -4,7 +4,7 @@ import { Quote } from "../../generated/schema"
 import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class ForceCancelQuoteHandler extends BaseHandler {
-	private event: ForceCancelQuote
+	protected event: ForceCancelQuote
 
 	constructor(event: ForceCancelQuote) {
 		super(event)

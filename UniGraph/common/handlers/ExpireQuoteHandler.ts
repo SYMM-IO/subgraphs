@@ -4,7 +4,7 @@ import { Quote } from "../../generated/schema"
 import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class ExpireQuoteHandler extends BaseHandler {
-	private event: ExpireQuote
+	protected event: ExpireQuote
 
 	constructor(event: ExpireQuote) {
 		super(event)

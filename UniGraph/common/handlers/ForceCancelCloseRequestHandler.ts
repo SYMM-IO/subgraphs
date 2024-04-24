@@ -4,7 +4,7 @@ import { Quote } from "../../generated/schema"
 import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
 
 export class ForceCancelCloseRequestHandler extends BaseHandler {
-	private event: ForceCancelCloseRequest
+	protected event: ForceCancelCloseRequest
 
 	constructor(event: ForceCancelCloseRequest) {
 		super(event)

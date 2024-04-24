@@ -6,7 +6,7 @@ import { BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts"
 import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
 
 export class SendQuoteHandler extends BaseHandler {
-	private event: SendQuote
+	protected event: SendQuote
 
 	constructor(event: SendQuote) {
 		super(event)

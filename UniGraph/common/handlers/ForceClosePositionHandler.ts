@@ -4,7 +4,7 @@ import { Quote } from "../../generated/schema"
 import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class ForceClosePositionHandler extends BaseHandler {
-	private event: ForceClosePosition
+	protected event: ForceClosePosition
 
 	constructor(event: ForceClosePosition) {
 		super(event)

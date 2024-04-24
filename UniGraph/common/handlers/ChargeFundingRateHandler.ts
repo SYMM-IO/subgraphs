@@ -5,7 +5,7 @@ import { Quote } from "../../generated/schema"
 import { FACTOR } from "result-quote/src/helper"
 
 export class ChargeFundingRateHandler extends BaseHandler {
-	private event: ChargeFundingRate
+	protected event: ChargeFundingRate
 
 	constructor(event: ChargeFundingRate) {
 		super(event)
