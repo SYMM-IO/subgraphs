@@ -5,7 +5,7 @@ import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } 
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 
 export class LiquidatePositionsPartyBHandler extends BaseHandler {
-	private event: LiquidatePositionsPartyB
+	protected event: LiquidatePositionsPartyB
 
 	constructor(event: LiquidatePositionsPartyB) {
 		super(event)

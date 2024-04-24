@@ -1,8 +1,8 @@
-import {BaseHandler} from "./BaseHandler"
-import {SetSymbolTradingFee} from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
+import { SetSymbolTradingFee } from "../../generated/symmio/symmio"
 
 export class SetSymbolTradingFeeHandler extends BaseHandler {
-	private event: SetSymbolTradingFee
+	protected event: SetSymbolTradingFee
 
 	constructor(event: SetSymbolTradingFee) {
 		super(event)

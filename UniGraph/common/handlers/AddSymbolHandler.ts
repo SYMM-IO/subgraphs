@@ -1,8 +1,8 @@
-import {BaseHandler} from "./BaseHandler"
-import {AddSymbol} from "../../generated/symmio/symmio"
+import { BaseHandler } from "./BaseHandler"
+import { AddSymbol } from "../../generated/symmio/symmio"
 
 export class AddSymbolHandler extends BaseHandler {
-	private event: AddSymbol
+	protected event: AddSymbol
 
 	constructor(event: AddSymbol) {
 		super(event)

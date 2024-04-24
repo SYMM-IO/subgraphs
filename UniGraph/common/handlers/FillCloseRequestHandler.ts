@@ -4,7 +4,7 @@ import { getGlobalCounterAndInc, getQuote, setEventTimestampAndTransactionHashAn
 import { BaseHandler } from "./BaseHandler"
 
 export class FillCloseRequestHandler extends BaseHandler {
-	private event: FillCloseRequest
+	protected event: FillCloseRequest
 
 	constructor(event: FillCloseRequest) {
 		super(event)
