@@ -1,14 +1,15 @@
 
-import {ChargeFundingRateHandler as CommonChargeFundingRateHandler} from "../../common/handlers/ChargeFundingRateHandler"
-import {ChargeFundingRate} from "../../generated/symmio/symmio"
+import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../common/handlers/ChargeFundingRateHandler"
+import { ChargeFundingRate } from "../../generated/symmio/symmio"
 
 export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 
-    constructor(event: ChargeFundingRate) {
-        super(event)
-    }
+  constructor(event: ChargeFundingRate) {
+    super(event)
+  }
 
-    handle(): void {
-		super.handle()
-    }
+  handle(): void {
+    super.handle()
+    super.handleQuote()
+  }
 }

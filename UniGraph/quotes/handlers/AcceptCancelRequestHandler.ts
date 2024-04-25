@@ -10,5 +10,6 @@ export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler
 
   handle(): void {
     super.handle()
+    super.handleQuote()
   }
 }
