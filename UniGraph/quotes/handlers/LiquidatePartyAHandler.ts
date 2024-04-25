@@ -16,7 +16,7 @@ export class LiquidatePartyAHandler extends CommonLiquidatePartyAHandler {
     super.handleQuote()
 
     let partyAEntity = PartyA.load(this.event.params.partyA.toHexString())!
-    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
+    partyAEntity.globalCounter = getGlobalCounterAndInc()
     const list = partyAEntity.quoteUntilLiquid!.slice(0)
     for (let i = 0, lenQ = list.length; i < lenQ; i++) {
       const quoteId = list[i]

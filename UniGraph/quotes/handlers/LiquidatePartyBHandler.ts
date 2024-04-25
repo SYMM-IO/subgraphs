@@ -17,7 +17,7 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
 
     let partyBpartyA = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + this.event.params.partyB.toHexString())!
     const list = partyBpartyA.quoteUntilLiquid!.slice(0)
-    partyBpartyA.GlobalCounter = getGlobalCounterAndInc()
+    partyBpartyA.globalCounter = getGlobalCounterAndInc()
     for (let i = 0, lenQ = list.length; i < lenQ; i++) {
       const quoteId = list[i]
       let entity = Quote.load(quoteId.toString())!
