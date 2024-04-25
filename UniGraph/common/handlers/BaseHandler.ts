@@ -1,4 +1,4 @@
-import {ethereum} from "@graphprotocol/graph-ts"
+import { ethereum } from "@graphprotocol/graph-ts"
 
 export class BaseHandler {
 	_event: ethereum.Event
@@ -7,7 +7,8 @@ export class BaseHandler {
 		this._event = event
 	}
 
-	handle(): void {
+	handle(): void { }
+	handleQuote(): void {
 		// This is a generic handler. Specific event handlers will override this method.
 	}
 }

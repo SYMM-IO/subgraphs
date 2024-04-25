@@ -1,14 +1,15 @@
 
-import {RequestToCancelQuoteHandler as CommonRequestToCancelQuoteHandler} from "../../common/handlers/RequestToCancelQuoteHandler"
-import {RequestToCancelQuote} from "../../generated/symmio/symmio"
+import { RequestToCancelQuoteHandler as CommonRequestToCancelQuoteHandler } from "../../common/handlers/RequestToCancelQuoteHandler"
+import { RequestToCancelQuote } from "../../generated/symmio/symmio"
 
 export class RequestToCancelQuoteHandler extends CommonRequestToCancelQuoteHandler {
 
-    constructor(event: RequestToCancelQuote) {
-        super(event)
-    }
+  constructor(event: RequestToCancelQuote) {
+    super(event)
+  }
 
-    handle(): void {
-		super.handle()
-    }
+  handle(): void {
+    super.handle()
+    super.handleQuote()
+  }
 }

@@ -11,7 +11,8 @@ export class LockQuoteHandler extends BaseHandler {
 		this.event = event
 	}
 
-	handle(): void {
+	handle(): void { }
+	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
 		quote.quoteId = this.event.params.quoteId
