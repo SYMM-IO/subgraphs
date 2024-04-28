@@ -2,7 +2,7 @@
 import { log } from "@graphprotocol/graph-ts"
 import { LiquidatePartyBHandler as CommonLiquidatePartyBHandler } from "../../common/handlers/LiquidatePartyBHandler"
 import { getGlobalCounterAndInc } from "../../common/helper"
-import { PartyBPartyA, Quote } from "../../generated/schema"
+import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
 import { LiquidatePartyB } from "../../generated/symmio/symmio"
 
 export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
@@ -29,5 +29,12 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
         log.error(`error in liquidate positions party B\nQuoteId: ${quoteId}\nQuote status: ${entity.quoteStatus}`, [])
       }
     }
+    let partyA = PartyA.load(this.event.params.partyA.toHexString())!
+    partyA.globalCounter = getGlobalCounterAndInc()
+    partyBpartyA.quoteUntilLiquid = []
+    partyA.quoteUntilLiquid = []
+    partyA.save()
+    partyBpartyA.save()
+
   }
 }

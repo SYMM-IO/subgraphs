@@ -20,7 +20,8 @@
     "AcceptCancelRequest",
     "EmergencyClosePosition",
     "FillCloseRequest",
-    "OpenPosition"
+    "OpenPosition",
+    "SetSymbolsPricesEvent"
   ],
   "User": ["SendQuote", "AddAccount"]
 }
