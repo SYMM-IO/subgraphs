@@ -13,6 +13,7 @@
     "ExpireQuote",
     "handleForceCancelCloseRe",
     "ForceCancelQuote",
+    "ForceCancelCloseRequest",
     "ForceClosePosition",
     "RequestToCancelCloseRequest",
     "RequestToCancelQuote",

@@ -1,7 +1,7 @@
 import { BaseHandler } from "./BaseHandler"
 import { ForceCancelCloseRequest } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHash } from "../helper"
+import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
 
 export class ForceCancelCloseRequestHandler extends BaseHandler {
 	protected event: ForceCancelCloseRequest
@@ -18,7 +18,7 @@ export class ForceCancelCloseRequestHandler extends BaseHandler {
 		quote.quoteId = this.event.params.quoteId
 		quote.quoteStatus = this.event.params.quoteStatus
 		quote.timeStamp = this.event.block.timestamp
-		setEventTimestampAndTransactionHash(quote.eventsTimestamp, this.event.block.timestamp,
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 			'ForceCancelCloseRequest', this.event.transaction.hash)
 	}
 }
