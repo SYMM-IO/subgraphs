@@ -20,7 +20,6 @@ export class LiquidatePositionsPartyBHandler extends BaseHandler {
 			quote.globalCounter = getGlobalCounterAndInc()
 			quote.timeStamp = this.event.block.timestamp
 			quote.quoteStatus = 8
-
 			let symmioContract = symmio.bind(this.event.address)
 			let callResult = symmioContract.try_getQuote(qoutId)
 			if (callResult.reverted) {
@@ -37,7 +36,6 @@ export class LiquidatePositionsPartyBHandler extends BaseHandler {
 					log.debug(`get total fill amount: ${getclosedAmount} , past total fill amount: ${quote.closedAmount!.toString()}\nQuoteId: ${quote.quoteId}`, [])
 				}
 			}
-
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 				'LiquidatePositionsPartyB', this.event.transaction.hash)

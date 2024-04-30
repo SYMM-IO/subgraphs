@@ -7,8 +7,7 @@ export class BaseHandler {
 		this._event = event
 	}
 
-	handle(): void { }
-	handleQuote(): void {
+	handle(): void {
 		// This is a generic handler. Specific event handlers will override this method.
 	}
 }
