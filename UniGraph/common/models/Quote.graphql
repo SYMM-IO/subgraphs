@@ -48,6 +48,10 @@ type Quote @entity {
   liquidatePrice: BigInt
   liquidateAmount: BigInt
 
+  # funding rate
+  fundingRateFee: BigInt
+  fundingRateOpenedPrice: BigInt
+
   # timestamps
   timeStamp: BigInt!
   eventsTimestamp: EventsTimestamp!
@@ -144,4 +148,10 @@ type PartyASymbolPrice @entity {
   timeStamp: BigInt!
   trHash: Bytes!
   GlobalCounter: BigInt!
+}
+
+type GlobalFee @entity {
+  id: ID!
+  globalFee: BigInt!
+  latestTimestamp: BigInt!
 }

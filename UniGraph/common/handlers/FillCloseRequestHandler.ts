@@ -15,13 +15,11 @@ export class FillCloseRequestHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
-
 		let q = getQuote(this.event.params.quoteId, this.event.address);
 		quote.cva = q.lockedValues.cva
 		quote.partyAmm = q.lockedValues.partyAmm
 		quote.partyBmm = q.lockedValues.partyBmm
 		quote.lf = q.lockedValues.lf
-
 		quote.quoteId = this.event.params.quoteId
 		quote.fillAmount = this.event.params.filledAmount
 		quote.closedPrice = this.event.params.closedPrice

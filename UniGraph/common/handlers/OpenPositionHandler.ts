@@ -22,6 +22,7 @@ export class OpenPositionHandler extends BaseHandler {
 		quote.timeStamp = this.event.block.timestamp
 		quote.quantity = this.event.params.filledAmount
 		quote.initialOpenedPrice = this.event.params.openedPrice
+		quote.fundingRateOpenedPrice = this.event.params.openedPrice
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 			'OpenPosition', this.event.transaction.hash)
 		if (quote.orderTypeOpen === 0) {
