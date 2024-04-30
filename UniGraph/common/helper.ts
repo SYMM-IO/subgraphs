@@ -2,6 +2,8 @@ import { Address, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { symmio, symmio__getQuoteResultValue0Struct } from "../generated/symmio/symmio"
 import { EventsTimestamp, GlobalCounter, InitialQuote, Quote, TransactionsHash } from "../generated/schema"
 
+
+export const FACTOR: BigInt = BigInt.fromString(`1000000000000000000`);
 export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
     let entity = new InitialQuote(resultArr[0].toBigInt().toString())
     entity.quoteId = resultArr[0].toBigInt()
