@@ -1,9 +1,8 @@
 import { BaseHandler } from "./BaseHandler"
-import { SendQuote } from "../../generated/symmio/symmio"
-import { getGlobalCounterAndInc, initialHelper } from "result-quote/src/helper"
-import { symmio } from "result-quote/generated/symmio/symmio"
+import { SendQuote, symmio } from "../../generated/symmio/symmio"
 import { BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts"
 import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
+import { getGlobalCounterAndInc, initialHelper } from "../helper"
 
 export class SendQuoteHandler extends BaseHandler {
 	protected event: SendQuote
