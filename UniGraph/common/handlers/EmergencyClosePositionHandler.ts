@@ -23,7 +23,7 @@ export class EmergencyClosePositionHandler extends BaseHandler {
 		quote.closedAmount = quote.closedAmount!.plus(this.event.params.filledAmount)
 		quote.timeStamp = this.event.block.timestamp
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'AcceptCancelRequest', this.event.transaction.hash)
+			'EmergencyClosePosition', this.event.transaction.hash)
 		quote.save()
 	}
 }

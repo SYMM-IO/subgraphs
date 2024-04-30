@@ -1,5 +1,7 @@
 {
   "Quote": [
+    "AcceptCancelRequest",
+    "AcceptCancelCloseRequest",
     "SendQuote",
     "LockQuote",
     "UnlockQuote",
@@ -18,7 +20,6 @@
     "RequestToCancelCloseRequest",
     "RequestToCancelQuote",
     "RequestToCancelQuote",
-    "AcceptCancelRequest",
     "EmergencyClosePosition",
     "FillCloseRequest",
     "OpenPosition",
