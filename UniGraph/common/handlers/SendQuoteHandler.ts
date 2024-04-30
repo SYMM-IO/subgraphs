@@ -33,6 +33,7 @@ export class SendQuoteHandler extends BaseHandler {
 		quote.averageClosedPrice = BigInt.fromI32(0)
 		quote.closedAmount = BigInt.fromI32(0)
 		quote.tradingFee = this.event.params.tradingFee
+		quote.fundingRateFee = BigInt.fromI32(0)
 
 		let initialQuote = new InitialQuote(this.event.params.quoteId.toString())
 		quote.initialData = initialQuote.id
