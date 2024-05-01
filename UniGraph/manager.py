@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 import re
@@ -215,19 +216,25 @@ def prepare_module(
 
 
 if __name__ == "__main__":
-    config_file = sys.argv[1]
+    parser = argparse.ArgumentParser(description="Module preparation script.")
+    parser.add_argument("config_file", type=str, help="Configuration file path")
+    parser.add_argument("module_name", type=str, help="Target module name")
+    parser.add_argument(
+        "--create-src", action="store_true", help="Create the src.ts file"
+    )
+    parser.add_argument(
+        "--create-handlers", action="store_true", help="Create the handler files"
+    )
+
+    args = parser.parse_args()
+
     # Check if the configuration file exists
-    if not os.path.exists(config_file):
-        print(f"Configuration file {config_file} does not exist!")
+    if not os.path.exists(args.config_file):
+        print(f"Configuration file {args.config_file} does not exist!")
         sys.exit(1)
 
     # Load the configuration file
-    with open(config_file, "r") as f:
+    with open(args.config_file, "r") as f:
         config = json.load(f)
 
-    target_module_name = input("Enter the target module name: ")
-    create_src_file = input("Should I create the src.ts file? (y/N): ")
-    create_handler_files = input("Should I create the handler files? (y/N): ")
-    prepare_module(
-        config, target_module_name, create_src_file == "y", create_handler_files == "y"
-    )
+    prepare_module(config, args.module_name, args.create_src, args.create_handlers)
