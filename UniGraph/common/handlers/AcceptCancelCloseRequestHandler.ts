@@ -1,6 +1,6 @@
 import { BaseHandler } from "./BaseHandler"
 import { AcceptCancelCloseRequest, symmio } from "../../generated/symmio/symmio"
-import { Quote, } from "../../generated/schema"
+import { Quote } from "../../generated/schema"
 import { getGlobalCounterAndInc, initialHelper, setEventTimestampAndTransactionHashAndAction, symbolIdToSymbolName } from "../helper"
 import { ethereum, log } from "@graphprotocol/graph-ts"
 
@@ -12,7 +12,9 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 		this.event = event
 	}
 
-	handle(): void { }
+	handle(): void {
+	}
+
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())
 		if (quote) {

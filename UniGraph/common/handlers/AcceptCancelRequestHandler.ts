@@ -11,7 +11,9 @@ export class AcceptCancelRequestHandler extends BaseHandler {
 		this.event = event
 	}
 
-	handle(): void { }
+	handle(): void {
+	}
+
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())
 		if (quote) {
