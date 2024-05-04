@@ -25,5 +25,8 @@
     "OpenPosition",
     "SetSymbolsPricesEvent"
   ],
-  "User": ["SendQuote", "AddAccount"]
+  "User": [
+    "SendQuote",
+    "AddAccount"
+  ]
 }

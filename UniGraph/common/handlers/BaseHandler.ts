@@ -10,4 +10,16 @@ export class BaseHandler {
 	handle(): void {
 		// This is a generic handler. Specific event handlers will override this method.
 	}
+
+	handleGlobalCounter(): void {
+	}
+
+	handleSymbol(): void {
+	}
+
+	handleUser(): void {
+	}
+
+	handleAccount(): void {
+	}
 }

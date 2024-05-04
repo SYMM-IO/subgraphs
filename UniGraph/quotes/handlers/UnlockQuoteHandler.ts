@@ -1,15 +1,14 @@
-
 import { UnlockQuoteHandler as CommonUnlockQuoteHandler } from "../../common/handlers/UnlockQuoteHandler"
 import { UnlockQuote } from "../../generated/symmio/symmio"
 
 export class UnlockQuoteHandler extends CommonUnlockQuoteHandler {
 
-  constructor(event: UnlockQuote) {
-    super(event)
-  }
+	constructor(event: UnlockQuote) {
+		super(event)
+	}
 
-  handle(): void {
-    super.handle()
-    super.handleQuote()
-  }
+	handle(): void {
+		super.handle()
+		super.handleQuote()
+	}
 }

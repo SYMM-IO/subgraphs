@@ -11,7 +11,9 @@ export class ChargeFundingRateHandler extends BaseHandler {
 		this.event = event
 	}
 
-	handle(): void { }
+	handle(): void {
+	}
+
 	handleQuote(): void {
 		for (let i = 0, lenQ = this.event.params.quoteIds.length; i < lenQ; i++) {
 			let qoutId = this.event.params.quoteIds[i]

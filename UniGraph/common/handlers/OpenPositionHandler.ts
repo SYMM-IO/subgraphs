@@ -11,7 +11,9 @@ export class OpenPositionHandler extends BaseHandler {
 		this.event = event
 	}
 
-	handle(): void { }
+	handle(): void {
+	}
+
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
@@ -28,7 +30,7 @@ export class OpenPositionHandler extends BaseHandler {
 		if (quote.orderTypeOpen === 0) {
 			const initialEntity = InitialQuote.load(quote.initialData!)!
 
-			let q = getQuote(this.event.params.quoteId, this.event.address);
+			let q = getQuote(this.event.params.quoteId, this.event.address)
 			const newCva = q.lockedValues.cva
 			const newPartyAmm = q.lockedValues.partyAmm
 			const newPartyBmm = q.lockedValues.partyBmm

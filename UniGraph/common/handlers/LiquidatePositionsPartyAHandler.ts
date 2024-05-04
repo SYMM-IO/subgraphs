@@ -1,7 +1,5 @@
 import { BaseHandler } from "./BaseHandler"
 import { LiquidatePositionsPartyA } from "../../generated/symmio/symmio"
-import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc } from "../helper"
 
 export class LiquidatePositionsPartyAHandler extends BaseHandler {
 	protected event: LiquidatePositionsPartyA
@@ -11,7 +9,9 @@ export class LiquidatePositionsPartyAHandler extends BaseHandler {
 		this.event = event
 	}
 
-	handle(): void { }
+	handle(): void {
+	}
+
 	handleQuote(): void {
 		// TODO
 	}
