@@ -1,0 +1,19 @@
+{
+  "network": "arbitrum-one",
+  "symmioAddress": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+  "symmioStartBlock": "210771536",
+  "symmioVersion": "0.8.2",
+  "multiAccounts": [
+    {
+      "symmioMultiAccountAddress": "0x6273242a7E88b3De90822b31648C212215caaFE4",
+      "symmioMultiAccountStartBlock": "210771536",
+      "symmioMultiAccountName": "multi_account_0"
+    }
+  ],
+  "studio-analytics": "analytics_arbitrum_8_2",
+  "studio-main": "main_arbitrum_8_2",
+  "studio-parties": "parties_arbitrum_8_2",
+  "studio-events": "events_arbitrum_8_2",
+  "studio-fundingrate": "fundingrate_arbitrum_8_2",
+  "studio-userprofile": "userprofile_arbitrum_8_2"
+}
