@@ -11,6 +11,10 @@ export class ForceCancelQuoteHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): ForceCancelQuote {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

@@ -1,7 +1,8 @@
 import { BaseHandler } from "./BaseHandler"
 import { OpenPosition } from "../../generated/symmio/symmio"
-import { InitialQuote, Quote } from "../../generated/schema"
+import { Account, InitialQuote, Quote } from "../../generated/schema"
 import { getGlobalCounterAndInc, getQuote, setEventTimestampAndTransactionHashAndAction } from "../helper"
+import { BigInt } from "@graphprotocol/graph-ts"
 
 export class OpenPositionHandler extends BaseHandler {
 	protected event: OpenPosition
@@ -9,6 +10,10 @@ export class OpenPositionHandler extends BaseHandler {
 	constructor(event: OpenPosition) {
 		super(event)
 		this.event = event
+	}
+
+	protected getEvent(): OpenPosition {
+		return this.event
 	}
 
 	handle(): void {
@@ -48,5 +53,14 @@ export class OpenPositionHandler extends BaseHandler {
 			initialEntity.save()
 		}
 		quote.save()
+	}
+
+	handleAccount(): void {
+		super.handleAccount()
+		const event = this.event
+		let account = Account.load(event.params.partyA.toHexString())!
+		account.positionsCount = account.positionsCount.plus(BigInt.fromString("1"))
+		account.updateTimestamp = event.block.timestamp
+		account.save()
 	}
 }

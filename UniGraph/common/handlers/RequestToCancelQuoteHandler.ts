@@ -11,6 +11,10 @@ export class RequestToCancelQuoteHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): RequestToCancelQuote {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

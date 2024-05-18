@@ -8,6 +8,10 @@ export class AddSymbolHandler extends BaseHandler {
 		super(event)
 		this.event = event
 	}
+	
+	protected getEvent(): AddSymbol {
+		return this.event
+	}
 
 	handle(): void {
 	}

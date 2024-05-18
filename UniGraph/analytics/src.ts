@@ -2,8 +2,10 @@ import { LiquidatePartyAHandler } from "./handlers/LiquidatePartyAHandler"
 import {
 	AcceptCancelCloseRequest,
 	AcceptCancelRequest,
+	AllocateForPartyB,
 	AllocatePartyA,
 	ChargeFundingRate,
+	DeallocateForPartyB,
 	DeallocatePartyA,
 	Deposit,
 	EmergencyClosePosition,
@@ -26,6 +28,7 @@ import {
 	RoleGranted,
 	RoleRevoked,
 	SendQuote,
+	SetCollateral,
 	SetSymbolsPrices,
 	UnlockQuote,
 	Withdraw,
@@ -86,6 +89,9 @@ import { SendQuoteHandler } from "./handlers/SendQuoteHandler"
 import { LiquidationDisputedHandler } from "./handlers/LiquidationDisputedHandler"
 
 import { AllocatePartyAHandler } from "./handlers/AllocatePartyAHandler"
+import { AllocateForPartyBHandler } from "./handlers/AllocateForPartyBHandler"
+import { DeallocateForPartyBHandler } from "./handlers/DeallocateForPartyBHandler"
+import { SetCollateralHandler } from "./handlers/SetCollateralHandler"
 
 export function handleLiquidatePartyA(event: LiquidatePartyA): void {
 	let handler = new LiquidatePartyAHandler(event)
@@ -104,6 +110,16 @@ export function handleExpireQuote(event: ExpireQuote): void {
 
 export function handleWithdraw(event: Withdraw): void {
 	let handler = new WithdrawHandler(event)
+	handler.handle()
+}
+
+export function handleAllocateForPartyB(event: AllocateForPartyB): void {
+	let handler = new AllocateForPartyBHandler(event)
+	handler.handle()
+}
+
+export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
+	let handler = new DeallocateForPartyBHandler(event)
 	handler.handle()
 }
 
@@ -139,6 +155,11 @@ export function handleLockQuote(event: LockQuote): void {
 
 export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
 	let handler = new SetSymbolsPricesHandler(event)
+	handler.handle()
+}
+
+export function handleSetCollateral(event: SetCollateral): void {
+	let handler = new SetCollateralHandler(event)
 	handler.handle()
 }
 

@@ -9,6 +9,10 @@ export class LiquidatePositionsPartyAHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): LiquidatePositionsPartyA {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

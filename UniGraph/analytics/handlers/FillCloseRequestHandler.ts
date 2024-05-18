@@ -1,5 +1,6 @@
 import { FillCloseRequestHandler as CommonFillCloseRequestHandler } from "../../common/handlers/FillCloseRequestHandler"
 import { FillCloseRequest } from "../../generated/symmio/symmio"
+import { handleClose } from "./utils"
 
 export class FillCloseRequestHandler extends CommonFillCloseRequestHandler {
 
@@ -14,5 +15,7 @@ export class FillCloseRequestHandler extends CommonFillCloseRequestHandler {
 		super.handleSymbol()
 		super.handleUser()
 		super.handleAccount()
+
+		handleClose(this.getEvent(), "FillCloseRequest")
 	}
 }

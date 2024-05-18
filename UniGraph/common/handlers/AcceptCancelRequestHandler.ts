@@ -11,6 +11,10 @@ export class AcceptCancelRequestHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): AcceptCancelRequest {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

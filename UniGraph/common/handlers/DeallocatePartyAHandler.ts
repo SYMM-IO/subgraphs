@@ -9,6 +9,10 @@ export class DeallocatePartyAHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): DeallocatePartyA {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

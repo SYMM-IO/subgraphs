@@ -11,6 +11,10 @@ export class LockQuoteHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): LockQuote {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

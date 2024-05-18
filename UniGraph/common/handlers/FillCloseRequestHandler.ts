@@ -11,6 +11,10 @@ export class FillCloseRequestHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): FillCloseRequest {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

@@ -11,6 +11,10 @@ export class ForceClosePositionHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): ForceClosePosition {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

@@ -9,9 +9,11 @@ export class RoleGrantedHandler extends BaseHandler {
 		this.event = event
 	}
 
-	handle(): void {
+	protected getEvent(): RoleGranted {
+		return this.event
 	}
 
-	handleQuote(): void {
-	}
+	handle(): void {}
+
+	handleQuote(): void {}
 }
