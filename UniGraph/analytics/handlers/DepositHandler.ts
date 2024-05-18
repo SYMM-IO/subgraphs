@@ -1,7 +1,7 @@
 import { DepositHandler as CommonDepositHandler } from "../../common/handlers/DepositHandler"
 import { Deposit } from "../../generated/symmio/symmio"
 import { Account, BalanceChange } from "../../generated/schema"
-import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "./utils"
+import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "../utils"
 
 export class DepositHandler extends CommonDepositHandler {
 

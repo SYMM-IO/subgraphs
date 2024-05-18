@@ -1,7 +1,7 @@
 import { OpenPositionHandler as CommonOpenPositionHandler } from "../../common/handlers/OpenPositionHandler"
 import { OpenPosition } from "../../generated/symmio/symmio"
 import { Account, PriceCheck, Quote, Symbol, TradeHistory } from "../../generated/schema"
-import { getDailyHistoryForTimestamp, getSymbolTradeVolume, getTotalHistory, QuoteStatus, unDecimal, updateDailyOpenInterest } from "./utils"
+import { getDailyHistoryForTimestamp, getSymbolTradeVolume, getTotalHistory, QuoteStatus, unDecimal, updateDailyOpenInterest } from "../utils"
 import { BigInt } from "@graphprotocol/graph-ts"
 
 export class OpenPositionHandler extends CommonOpenPositionHandler {

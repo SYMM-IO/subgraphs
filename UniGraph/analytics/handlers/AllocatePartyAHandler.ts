@@ -1,7 +1,7 @@
 import { AllocatePartyAHandler as CommonAllocatePartyAHandler } from "../../common/handlers/AllocatePartyAHandler"
 import { AllocatePartyA } from "../../generated/symmio/symmio"
 import { Account, BalanceChange } from "../../generated/schema"
-import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "./utils"
+import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "../utils"
 
 export class AllocatePartyAHandler extends CommonAllocatePartyAHandler {
 

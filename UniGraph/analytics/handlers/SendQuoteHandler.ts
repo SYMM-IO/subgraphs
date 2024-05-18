@@ -1,7 +1,7 @@
 import { SendQuoteHandler as CommonSendQuoteHandler } from "../../common/handlers/SendQuoteHandler"
 import { SendQuote } from "../../generated/symmio/symmio"
 import { Account } from "../../generated/schema"
-import { getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "./utils"
+import { getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "../utils"
 import { BigInt } from "@graphprotocol/graph-ts"
 
 export class SendQuoteHandler extends CommonSendQuoteHandler {

@@ -1,7 +1,7 @@
 import { RoleRevokedHandler as CommonRoleRevokedHandler } from "../../common/handlers/RoleRevokedHandlerMultiAccount"
 import { RoleRevoked } from "../../generated/symmioMultiAccount_0/symmioMultiAccount"
 import { GrantedRole } from "../../generated/schema"
-import { rolesNames } from "./utils"
+import { rolesNames } from "../utils"
 
 export class RoleRevokedHandler extends CommonRoleRevokedHandler {
 	constructor(event: RoleRevoked) {
