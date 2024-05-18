@@ -1,7 +1,7 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Account as AccountModel, User as UserModel } from "../generated/schema"
-import { getDailyHistoryForTimestamp, getTotalHistory } from "../analytics/handlers/utils"
+import { getDailyHistoryForTimestamp, getTotalHistory } from "../analytics/utils"
 
 export function createNewUser(address: Bytes, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction): UserModel {
 	let user = new UserModel(address.toHexString())

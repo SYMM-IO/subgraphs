@@ -5,13 +5,44 @@ import {
 	Configuration,
 	DailyHistory,
 	OpenInterest,
+	PriceCheck,
+	Quote,
+	Symbol,
 	SymbolTradeVolume,
 	TotalHistory,
+	TradeHistory,
 	User as UserModel,
 	UserActivity,
 } from "../generated/schema"
 
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
+import { FillCloseRequest, LiquidatePositionsPartyA } from "../generated/symmio/symmio"
+import { getQuote } from "./contract_utils"
+
+export let rolesNames = new Map<string, string>()
+rolesNames.set('0x1effbbff9c66c5e59634f24fe842750c60d18891155c32dd155fc2d661a4c86d', 'DEFAULT_ADMIN_ROLE')
+rolesNames.set('0xb048589f9ee6ae43a7d6093c04bc48fc93d622d76009b51a2c566fc7cda84ce7', 'MUON_SETTER_ROLE')
+rolesNames.set('0xddf732565ddd4d1d3a527786b8b1e425a602b603d457c0a999938869f38049b0', 'SYMBOL_MANAGER_ROLE')
+rolesNames.set('0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda', 'SETTER_ROLE')
+rolesNames.set('0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a', 'PAUSER_ROLE')
+rolesNames.set('0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a', 'UNPAUSER_ROLE')
+rolesNames.set('0x23288e74cb14deb13fd69e749986e8975f19aa3efb14b2fe5e9b512d772f19b3', 'PARTY_B_MANAGER_ROLE')
+rolesNames.set('0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c16', 'LIQUIDATOR_ROLE')
+rolesNames.set('0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84', 'SUSPENDER_ROLE')
+rolesNames.set('0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4', 'DISPUTE_ROLE')
+
+export enum QuoteStatus {
+	PENDING,
+	LOCKED,
+	CANCEL_PENDING,
+	CANCELED,
+	OPENED,
+	CLOSE_PENDING,
+	CANCEL_CLOSE_PENDING,
+	CLOSED,
+	LIQUIDATED,
+	EXPIRED,
+}
 
 export function getDateFromTimeStamp(timestamp: BigInt): Date {
 	let date = new Date(timestamp.toI64() * 1000)
@@ -198,48 +229,6 @@ export function getUserActivity(user: Bytes, accountSource: Bytes | null, timest
 	return ua
 }
 
-export function createNewUser(address: Bytes, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction): UserModel {
-	let user = new UserModel(address.toHexString())
-	user.timestamp = block.timestamp
-	user.transaction = transaction.hash
-	user.address = address
-	user.save()
-	const dh = getDailyHistoryForTimestamp(block.timestamp, accountSource)
-	dh.newUsers = dh.newUsers.plus(BigInt.fromString("1"))
-	dh.save()
-	const th = getTotalHistory(block.timestamp, accountSource)
-	th.users = th.users.plus(BigInt.fromString("1"))
-	th.save()
-	return user
-}
-
-
-export function createNewAccount(address: Bytes, user: UserModel, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction, name: string | null = null): AccountModel {
-	let account = new AccountModel(address.toHexString())
-	account.lastActivityTimestamp = block.timestamp
-	account.timestamp = block.timestamp
-	account.blockNumber = block.number
-	account.transaction = transaction.hash
-	account.deposit = BigInt.zero()
-	account.withdraw = BigInt.zero()
-	account.allocated = BigInt.zero()
-	account.deallocated = BigInt.zero()
-	account.quotesCount = BigInt.zero()
-	account.positionsCount = BigInt.zero()
-	account.user = user.address
-	account.updateTimestamp = block.timestamp
-	account.accountSource = accountSource
-	account.name = name
-	account.save()
-	const dh = getDailyHistoryForTimestamp(block.timestamp, accountSource)
-	dh.newAccounts = dh.newAccounts.plus(BigInt.fromString("1"))
-	dh.save()
-	const th = getTotalHistory(block.timestamp, accountSource)
-	th.accounts = th.accounts.plus(BigInt.fromString("1"))
-	th.save()
-	return account
-}
-
 export function getConfiguration(event: ethereum.Event): Configuration {
 	let configuration = Configuration.load("0")
 	if (configuration == null) {
@@ -250,4 +239,108 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 		configuration.save()
 	}
 	return configuration
+}
+
+export function handleClose(_event: ethereum.Event, name: string): void {
+	const event = changetype<FillCloseRequest>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
+	let quote = Quote.load(event.params.quoteId.toString())!
+	let history = TradeHistory.load(
+		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString(),
+	)!
+	const additionalVolume = event.params.filledAmount
+		.times(event.params.closedPrice)
+		.div(BigInt.fromString("10").pow(18))
+	history.volume = history.volume.plus(additionalVolume)
+	history.updateTimestamp = event.block.timestamp
+	history.quoteStatus = quote.quoteStatus
+	history.quote = event.params.quoteId
+	history.save()
+
+	let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
+	priceCheck.event = name
+	priceCheck.symbol = Symbol.load(quote.symbolId!.toString())!.name
+	priceCheck.givenPrice = event.params.closedPrice
+	priceCheck.timestamp = event.block.timestamp
+	priceCheck.transaction = event.transaction.hash
+	priceCheck.additionalInfo = quote.id
+	priceCheck.save()
+
+	let account = Account.load(event.params.partyA.toHexString())!
+
+	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
+	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume)
+	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume)
+	dh.updateTimestamp = event.block.timestamp
+	dh.save()
+
+	const th = getTotalHistory(event.block.timestamp, account.accountSource)
+	th.tradeVolume = th.tradeVolume.plus(additionalVolume)
+	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume)
+	th.updateTimestamp = event.block.timestamp
+	th.save()
+
+	let stv = getSymbolTradeVolume(quote.symbolId!, event.block.timestamp, account.accountSource)
+	stv.volume = stv.volume.plus(additionalVolume)
+	stv.updateTimestamp = event.block.timestamp
+	stv.save()
+
+	updateDailyOpenInterest(
+		event.block.timestamp,
+		unDecimal(event.params.filledAmount.times(quote.openedPrice!)),
+		false,
+		account.accountSource,
+	)
+}
+
+export function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
+	const event = changetype<LiquidatePositionsPartyA>(_event)
+	let history = TradeHistory.load(
+		event.params.partyA.toHexString() + "-" + qId.toString(),
+	)!
+	const quote = Quote.load(qId.toString())!
+	const chainQuote = getQuote(event.address, qId)
+	if (chainQuote == null)
+		return
+	const liquidAmount = quote.quantity!.minus(quote.closedAmount!)
+	const liquidPrice = chainQuote.avgClosedPrice
+		.times(quote.quantity!)
+		.minus(
+			quote.averageClosedPrice!
+				.times(quote.closedAmount!),
+		)
+		.div(liquidAmount)
+	const additionalVolume = liquidAmount
+		.times(liquidPrice)
+		.div(BigInt.fromString("10").pow(18))
+	history.volume = history.volume.plus(additionalVolume)
+	history.quoteStatus = QuoteStatus.LIQUIDATED
+	history.updateTimestamp = event.block.timestamp
+	history.quote = qId
+	history.save()
+
+	let account = Account.load(quote.partyA.toHexString())!
+
+	const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
+	dh.tradeVolume = dh.tradeVolume.plus(additionalVolume)
+	dh.closeTradeVolume = dh.closeTradeVolume.plus(additionalVolume)
+	dh.updateTimestamp = event.block.timestamp
+	dh.save()
+
+	const th = getTotalHistory(event.block.timestamp, account.accountSource)
+	th.tradeVolume = th.tradeVolume.plus(additionalVolume)
+	th.closeTradeVolume = th.closeTradeVolume.plus(additionalVolume)
+	th.updateTimestamp = event.block.timestamp
+	th.save()
+
+	let stv = getSymbolTradeVolume(quote.symbolId!, event.block.timestamp, account.accountSource)
+	stv.volume = stv.volume.plus(additionalVolume)
+	stv.updateTimestamp = event.block.timestamp
+	stv.save()
+
+	updateDailyOpenInterest(
+		event.block.timestamp,
+		unDecimal(liquidAmount.times(quote.openedPrice!)),
+		false,
+		account.accountSource,
+	)
 }

@@ -1,2 +1,54 @@
 {
+  "DailySymbolTradesHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition",
+    "ChargeFundingRate",
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw"
+  ],
+  "TotalSymbolTradesHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition",
+    "ChargeFundingRate",
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw"
+  ],
+  "DailyHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition",
+    "ChargeFundingRate",
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw"
+  ],
+  "TotalHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition",
+    "ChargeFundingRate",
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw"
+  ]
 }

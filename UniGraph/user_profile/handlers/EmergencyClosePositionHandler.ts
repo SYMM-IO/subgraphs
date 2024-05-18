@@ -1,6 +1,5 @@
 import { EmergencyClosePositionHandler as CommonEmergencyClosePositionHandler } from "../../common/handlers/EmergencyClosePositionHandler"
 import { EmergencyClosePosition } from "../../generated/symmio/symmio"
-import { handleClose } from "../utils"
 
 export class EmergencyClosePositionHandler extends CommonEmergencyClosePositionHandler {
 
@@ -15,7 +14,5 @@ export class EmergencyClosePositionHandler extends CommonEmergencyClosePositionH
 		super.handleSymbol()
 		super.handleUser()
 		super.handleAccount()
-
-		handleClose(this.getEvent(), "EmergencyClosePosition")
 	}
 }

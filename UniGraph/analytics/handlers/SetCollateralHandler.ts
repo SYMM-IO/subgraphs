@@ -1,6 +1,6 @@
 import { SetCollateralHandler as CommonSetCollateralHandler } from "../../common/handlers/SetCollateralHandler"
 import { SetCollateral } from "../../generated/symmio/symmio"
-import { getConfiguration } from "./utils"
+import { getConfiguration } from "../utils"
 
 export class SetCollateralHandler extends CommonSetCollateralHandler {
 	protected event: SetCollateral

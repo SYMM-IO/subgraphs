@@ -2,7 +2,7 @@ import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../.
 import { ChargeFundingRate } from "../../generated/symmio/symmio"
 import { Account, Quote } from "../../generated/schema"
 import { BigInt } from "@graphprotocol/graph-ts"
-import { getDailyHistoryForTimestamp, getTotalHistory, unDecimal } from "./utils"
+import { getDailyHistoryForTimestamp, getTotalHistory, unDecimal } from "../utils"
 import { getQuote } from "../contract_utils"
 
 export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {

@@ -85,7 +85,7 @@ def create_handler_classes(target_module, target_config, events, filename_postfi
 
 		super_calls = []
 		for model in target_config["importModels"]:
-			super_calls.append(f"super.handle{model}()")
+			super_calls.append(f"		super.handle{model}()")
 		super_calls_str = "\n".join(super_calls)
 
 		with open(handler_file_path, "w") as handler_file:
@@ -102,7 +102,7 @@ export class {handler_class_name} extends Common{handler_class_name} {{
 
     handle(): void {{
 		super.handle()
-		{super_calls_str}
+{super_calls_str}
     }}
 }}
 """

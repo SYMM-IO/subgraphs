@@ -1,7 +1,7 @@
 import { RoleGrantedHandler as CommonRoleGrantedHandler } from "../../common/handlers/RoleGrantedHandlerMultiAccount"
 import { GrantedRole } from "../../generated/schema"
 import { RoleGranted } from "../../generated/symmioMultiAccount_0/symmioMultiAccount"
-import { rolesNames } from "./utils"
+import { rolesNames } from "../utils"
 
 export class RoleGrantedHandler extends CommonRoleGrantedHandler {
 	constructor(event: RoleGranted) {

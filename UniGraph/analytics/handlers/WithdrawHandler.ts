@@ -1,7 +1,7 @@
 import { WithdrawHandler as CommonWithdrawHandler } from "../../common/handlers/WithdrawHandler"
 import { Withdraw } from "../../generated/symmio/symmio"
 import { Account, BalanceChange } from "../../generated/schema"
-import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "./utils"
+import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "../utils"
 
 export class WithdrawHandler extends CommonWithdrawHandler {
 
