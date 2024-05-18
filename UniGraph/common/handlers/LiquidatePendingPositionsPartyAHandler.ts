@@ -9,6 +9,10 @@ export class LiquidatePendingPositionsPartyAHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): LiquidatePendingPositionsPartyA {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

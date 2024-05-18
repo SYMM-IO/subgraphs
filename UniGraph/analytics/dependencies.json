@@ -81,6 +81,9 @@
   "PartyALiquidationDisputed": [
     "LiquidationDisputed"
   ],
+  "Configuration": [
+    "SetCollateral"
+  ],
   "GrantedRole": [
     "RoleGranted",
     "RoleRevoked"

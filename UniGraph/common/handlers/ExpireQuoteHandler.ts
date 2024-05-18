@@ -11,6 +11,10 @@ export class ExpireQuoteHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): ExpireQuote {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

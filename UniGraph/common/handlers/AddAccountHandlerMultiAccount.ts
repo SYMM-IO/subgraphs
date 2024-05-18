@@ -8,6 +8,10 @@ export class AddAccountHandler extends BaseHandler {
 		super(event)
 		this.event = event
 	}
+	
+	protected getEvent(): AddAccount {
+		return this.event
+	}
 
 	handle(): void {
 	}

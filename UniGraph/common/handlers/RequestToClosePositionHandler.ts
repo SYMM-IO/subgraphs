@@ -11,6 +11,10 @@ export class RequestToClosePositionHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): RequestToClosePosition {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

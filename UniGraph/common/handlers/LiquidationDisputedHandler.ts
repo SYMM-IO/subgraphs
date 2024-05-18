@@ -9,6 +9,10 @@ export class LiquidationDisputedHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): LiquidationDisputed {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

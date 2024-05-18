@@ -1,7 +1,7 @@
 import { BaseHandler } from "./BaseHandler"
 import { SendQuote, symmio } from "../../generated/symmio/symmio"
 import { BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts"
-import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
+import { Account, EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
 import { getGlobalCounterAndInc, initialHelper } from "../helper"
 
 export class SendQuoteHandler extends BaseHandler {
@@ -10,6 +10,10 @@ export class SendQuoteHandler extends BaseHandler {
 	constructor(event: SendQuote) {
 		super(event)
 		this.event = event
+	}
+
+	protected getEvent(): SendQuote {
+		return this.event
 	}
 
 	handle(): void {
@@ -99,7 +103,13 @@ export class SendQuoteHandler extends BaseHandler {
 		EventTimestampEntity.save()
 		TransactionsHashEntity.SendQuote = this.event.transaction.hash
 		TransactionsHashEntity.save()
+	}
 
-
+	handleAccount(): void {
+		super.handleAccount()
+		let event = this.getEvent()
+		let account = Account.load(event.params.partyA.toHexString())!
+		account.quotesCount = account.quotesCount.plus(BigInt.fromString("1"))
+		account.save()
 	}
 }

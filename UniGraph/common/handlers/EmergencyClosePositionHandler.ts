@@ -11,6 +11,10 @@ export class EmergencyClosePositionHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): EmergencyClosePosition {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

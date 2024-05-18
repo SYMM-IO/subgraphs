@@ -11,6 +11,10 @@ export class ChargeFundingRateHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): ChargeFundingRate {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

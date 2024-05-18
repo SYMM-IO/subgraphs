@@ -9,6 +9,10 @@ export class SetSymbolTradingFeeHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): SetSymbolTradingFee {
+		return this.event
+	}
+
 	handle(): void {
 	}
 

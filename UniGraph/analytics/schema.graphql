@@ -143,6 +143,7 @@ type GrantedRole @entity{
     id: ID!
     role: String!
     user: Bytes!
+    contract: Bytes
     grantTransaction: Bytes
     revokeTransaction: Bytes
     updateTimestamp: BigInt!

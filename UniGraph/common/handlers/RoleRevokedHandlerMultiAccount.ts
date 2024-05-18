@@ -8,6 +8,10 @@ export class RoleRevokedHandler extends BaseHandler {
 		super(event)
 		this.event = event
 	}
+	
+	protected getEvent(): RoleRevoked {
+		return this.event
+	}
 
 	handle(): void {
 	}

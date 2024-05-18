@@ -207,7 +207,7 @@ def prepare_module(
 
 	# build subgraph.yaml
 	subprocess.run(
-		["npx", "mustache", "UniConfig.json", "template.yaml"],
+		["npx", "mustache", "UniConfig.json", "template.mustache"],
 		check=True,
 		stdout=open("subgraph.yaml", "w"),
 	)

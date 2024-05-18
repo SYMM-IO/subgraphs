@@ -11,6 +11,10 @@ export class ForceCancelCloseRequestHandler extends BaseHandler {
 		this.event = event
 	}
 
+	protected getEvent(): ForceCancelCloseRequest {
+		return this.event
+	}
+
 	handle(): void {
 	}
 
