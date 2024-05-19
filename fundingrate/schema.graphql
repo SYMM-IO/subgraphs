@@ -25,11 +25,13 @@ type ResultEntity @entity {
   initialQuantity: BigInt!
   closedAmount: BigInt
   fee: BigInt
+  globalCounter: BigInt!
 }
 type GlobalFee @entity {
   id: String!
   globalFee: BigInt!
   latestTimeStamp: BigInt!
+  globalCounter: BigInt!
 }
 
 type DebugEntity @entity {
@@ -38,4 +40,9 @@ type DebugEntity @entity {
   trigger: BigInt
   type: String
   message: String
+}
+
+type GlobalCounter @entity {
+  id: String!
+  GlobalCounter: BigInt!
 }

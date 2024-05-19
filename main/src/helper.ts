@@ -75,7 +75,12 @@ export function allocatedBalanceOfPartyB(partyB: Address, partyA: Address, contr
     }
 }
 
-export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__getQuoteResultValue0Struct {
+export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__getQuoteResultValue0Struct | null {
     let symmioContract = symmio.bind(contractAddress)
-    return symmioContract.getQuote(quoteId)
+    let callResult = symmioContract.try_getQuote(quoteId)
+    if (callResult.reverted) {
+        log.error("error in get quote calling", [])
+        return null
+    }
+    return callResult.value
 }

@@ -22,9 +22,9 @@
   "studio-events": "events_mantle_8_2",
   "studio-fundingrate": "fundingrate_mantle_8_2",
 
-  "mantle-analytics": "analytics_mantle_8_2",
-  "mantle-main": "main_mantle_8_2",
-  "mantle-parties": "parties_mantle_8_2",
-  "mantle-events": "events_mantle_8_2",
-  "mantle-fundingrate": "fundingrate_mantle_8_2"
+  "mantle-analytics": "analytics_mantle_8_2_0",
+  "mantle-main": "main_mantle_8_2_0",
+  "mantle-parties": "parties_mantle_8_2_0",
+  "mantle-events": "events_mantle_8_2_0",
+  "mantle-fundingrate": "fundingrate_mantle_8_2_0"
 }
