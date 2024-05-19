@@ -1,4 +1,4 @@
-import {BigInt} from '@graphprotocol/graph-ts'
+import { BigInt } from '@graphprotocol/graph-ts'
 
 import {
     ChargeFundingRate as ChargeFundingRateEvent,
@@ -8,16 +8,27 @@ import {
     OpenPosition as OpenPositionEvent,
     SendQuote as SendQuoteEvent,
 } from "../generated/symmio/symmio"
-import {GlobalFee, ResultEntity} from "../generated/schema"
+import { GlobalCounter, GlobalFee, ResultEntity } from "../generated/schema"
 
 
 const FACTOR: BigInt = BigInt.fromString(`1000000000000000000`);
-
+function getGlobalCounterAndInc(): BigInt {
+    let entity = GlobalCounter.load("GLOBAL")
+    if (!entity) {
+        entity = new GlobalCounter("GLOBAL")
+        entity.GlobalCounter = BigInt.fromI32(0)
+    } else {
+        entity.GlobalCounter = entity.GlobalCounter.plus(BigInt.fromI32(1))
+    }
+    entity.save()
+    return entity.GlobalCounter
+}
 export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
     for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
         let qoutId = event.params.quoteIds[i]
         const rate = event.params.rates[i]
         let entity = ResultEntity.load(qoutId.toString())!
+        entity.globalCounter = getGlobalCounterAndInc()
         const openQuantityUntilNow = entity.quantity!.minus(entity.closedAmount!)
         let newPrice: BigInt;
         if (entity.positionType === 0) { //Long
@@ -37,6 +48,7 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
             globalEntity = new GlobalFee("GlobalEntity")
             globalEntity.globalFee = BigInt.fromI32(0)
         }
+        globalEntity.globalCounter = getGlobalCounterAndInc()
         globalEntity.globalFee = globalEntity.globalFee.plus(fee)
         globalEntity.latestTimeStamp = event.block.timestamp
         globalEntity.save()
@@ -47,6 +59,7 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
 
 export function handleForceClosePosition(event: ForceClosePositionEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.globalCounter = getGlobalCounterAndInc()
     entity.fillAmount = event.params.filledAmount
     entity.closedPrice = event.params.closedPrice
     entity.quoteStatus = event.params.quoteStatus
@@ -58,6 +71,7 @@ export function handleForceClosePosition(event: ForceClosePositionEvent): void {
 
 export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.globalCounter = getGlobalCounterAndInc()
     entity.fillAmount = event.params.filledAmount
     entity.closedPrice = event.params.closedPrice
     entity.quoteStatus = event.params.quoteStatus
@@ -67,6 +81,7 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
 }
 export function handleSendQuote(event: SendQuoteEvent): void {
     let entity = new ResultEntity(event.params.quoteId.toString())
+    entity.globalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.partyA = event.params.partyA
     entity.symbolId = event.params.symbolId
@@ -90,6 +105,7 @@ export function handleEmergencyClosePosition(
     event: EmergencyClosePositionEvent
 ): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.globalCounter = getGlobalCounterAndInc()
     entity.fillAmount = event.params.filledAmount
     entity.closedPrice = event.params.closedPrice
     entity.quoteStatus = event.params.quoteStatus
@@ -101,6 +117,7 @@ export function handleEmergencyClosePosition(
 
 export function handleOpenPosition(event: OpenPositionEvent): void {
     let entity = ResultEntity.load(event.params.quoteId.toString())!
+    entity.globalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.fillAmount = event.params.filledAmount
     entity.openedPrice = event.params.openedPrice

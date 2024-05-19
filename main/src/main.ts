@@ -608,10 +608,13 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
     entity.GlobalCounter = getGlobalCounterAndInc()
 
     let q = getQuote(event.params.quoteId, event.address);
-    entity.cva = q.lockedValues.cva
-    entity.partyAmm = q.lockedValues.partyAmm
-    entity.partyBmm = q.lockedValues.partyBmm
-    entity.lf = q.lockedValues.lf
+    if (q) {
+
+        entity.cva = q.lockedValues.cva
+        entity.partyAmm = q.lockedValues.partyAmm
+        entity.partyBmm = q.lockedValues.partyBmm
+        entity.lf = q.lockedValues.lf
+    }
 
     entity.quoteId = event.params.quoteId
     entity.fillAmount = event.params.filledAmount
@@ -671,21 +674,24 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
         const initialEntity = InitialQuote.load(entity.initialData!)!
 
         let q = getQuote(event.params.quoteId, event.address);
-        const newCva = q.lockedValues.cva
-        const newPartyAmm = q.lockedValues.partyAmm
-        const newPartyBmm = q.lockedValues.partyBmm
-        const newLF = q.lockedValues.lf
+        if (q) {
 
-        entity.cva = newCva
-        entity.partyAmm = newPartyAmm
-        entity.partyBmm = newPartyBmm
-        entity.lf = newLF
-        initialEntity.cva = newCva
-        initialEntity.partyAmm = newPartyAmm
-        initialEntity.partyBmm = newPartyBmm
-        initialEntity.lf = newLF
-        initialEntity.quantity = event.params.filledAmount
-        initialEntity.save()
+            const newCva = q.lockedValues.cva
+            const newPartyAmm = q.lockedValues.partyAmm
+            const newPartyBmm = q.lockedValues.partyBmm
+            const newLF = q.lockedValues.lf
+
+            entity.cva = newCva
+            entity.partyAmm = newPartyAmm
+            entity.partyBmm = newPartyBmm
+            entity.lf = newLF
+            initialEntity.cva = newCva
+            initialEntity.partyAmm = newPartyAmm
+            initialEntity.partyBmm = newPartyBmm
+            initialEntity.lf = newLF
+            initialEntity.quantity = event.params.filledAmount
+            initialEntity.save()
+        }
     }
 
 
