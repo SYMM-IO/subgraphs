@@ -65,6 +65,7 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
         let entity = ResultEntity.load(qoutId.toString())!
         entity.GlobalCounter = getGlobalCounterAndInc()
         entity.lastFundingPaymentTimestamp = event.block.timestamp
+        entity.timeStamp = event.block.timestamp
         if (entity.positionType) { // SHORT position
             entity.openedPrice = entity.openedPrice!.minus(entity.openedPrice!.times(event.params.rates[i]).div(FACTOR))
         } else {
