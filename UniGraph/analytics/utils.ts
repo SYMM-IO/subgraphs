@@ -1,4 +1,4 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
 	Account as AccountModel,
 	Account,
@@ -16,8 +16,9 @@ import {
 } from "../generated/schema"
 
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
-import { FillCloseRequest, LiquidatePositionsPartyA } from "../generated/symmio/symmio"
+import { Deposit, FillCloseRequest, LiquidatePositionsPartyA, Withdraw } from "../generated/symmio/symmio"
 import { getQuote } from "./contract_utils"
+import { AddAccount } from "../generated/symmioMultiAccount_0/symmioMultiAccount"
 
 export let rolesNames = new Map<string, string>()
 rolesNames.set('0x1effbbff9c66c5e59634f24fe842750c60d18891155c32dd155fc2d661a4c86d', 'DEFAULT_ADMIN_ROLE')
@@ -42,6 +43,59 @@ export enum QuoteStatus {
 	CLOSED,
 	LIQUIDATED,
 	EXPIRED,
+}
+
+export function newUserAndAccount(userAddress: Address, block: ethereum.Block, transaction: ethereum.Transaction): void {
+
+	let account = Account.load(userAddress.toHexString())
+	if (account == null) {
+		let user = createNewUser(userAddress, null, block, transaction)
+		account = createNewAccount(userAddress, user, null, block, transaction)
+	}
+
+}
+
+
+function createNewUser(address: Bytes, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction): UserModel {
+	let user = new UserModel(address.toHexString())
+	user.timestamp = block.timestamp
+	user.transaction = transaction.hash
+	user.address = address
+	user.save()
+	const dh = getDailyHistoryForTimestamp(block.timestamp, accountSource)
+	dh.newUsers = dh.newUsers.plus(BigInt.fromString("1"))
+	dh.save()
+	const th = getTotalHistory(block.timestamp, accountSource)
+	th.users = th.users.plus(BigInt.fromString("1"))
+	th.save()
+	return user
+}
+
+
+function createNewAccount(address: Bytes, user: UserModel, accountSource: Bytes | null, block: ethereum.Block, transaction: ethereum.Transaction, name: string | null = null): AccountModel {
+	let account = new AccountModel(address.toHexString())
+	account.lastActivityTimestamp = block.timestamp
+	account.timestamp = block.timestamp
+	account.blockNumber = block.number
+	account.transaction = transaction.hash
+	account.deposit = BigInt.zero()
+	account.withdraw = BigInt.zero()
+	account.allocated = BigInt.zero()
+	account.deallocated = BigInt.zero()
+	account.quotesCount = BigInt.zero()
+	account.positionsCount = BigInt.zero()
+	account.user = user.address
+	account.updateTimestamp = block.timestamp
+	account.accountSource = accountSource
+	account.name = name
+	account.save()
+	const dh = getDailyHistoryForTimestamp(block.timestamp, accountSource)
+	dh.newAccounts = dh.newAccounts.plus(BigInt.fromString("1"))
+	dh.save()
+	const th = getTotalHistory(block.timestamp, accountSource)
+	th.accounts = th.accounts.plus(BigInt.fromString("1"))
+	th.save()
+	return account
 }
 
 export function getDateFromTimeStamp(timestamp: BigInt): Date {
@@ -143,8 +197,8 @@ export function isSameDay(timestamp1: BigInt, timestamp2: BigInt): boolean {
 	return getDateFromTimeStamp(timestamp1)
 		.getTime()
 		.toString() == getDateFromTimeStamp(timestamp2)
-		.getTime()
-		.toString()
+			.getTime()
+			.toString()
 
 	// const date1 = new Date(timestamp1.toI64() * 1000)
 	// const date2 = new Date(timestamp2.toI64() * 1000)
