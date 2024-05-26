@@ -1,5 +1,6 @@
-import { AddAccountHandlerMultiAccount as CommonAddAccountHandler } from "../../common/handlers/AddAccountHandlerMultiAccount"
+import { AddAccountHandler as CommonAddAccountHandler } from "../../common/handlers/AddAccountHandlerMultiAccount"
 import { AddAccount } from "../../generated/symmioMultiAccount_0/symmioMultiAccount"
+import { newUserAndAccount } from "../utils"
 
 export class AddAccountHandler extends CommonAddAccountHandler {
 
@@ -10,9 +11,8 @@ export class AddAccountHandler extends CommonAddAccountHandler {
 	handle(): void {
 		super.handle()
 		super.handleGlobalCounter()
-		super.handleQuote()
-		super.handleSymbol()
-		super.handleUser()
-		super.handleAccount()
+
+		let event = super.getEvent()
+		newUserAndAccount(event.params.user, event.block, event.transaction)
 	}
 }

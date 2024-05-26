@@ -1,7 +1,7 @@
 import { WithdrawHandler as CommonWithdrawHandler } from "../../common/handlers/WithdrawHandler"
 import { Withdraw } from "../../generated/symmio/symmio"
 import { Account, BalanceChange } from "../../generated/schema"
-import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "../utils"
+import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, newUserAndAccount, updateActivityTimestamps } from "../utils"
 
 export class WithdrawHandler extends CommonWithdrawHandler {
 
@@ -15,9 +15,9 @@ export class WithdrawHandler extends CommonWithdrawHandler {
 		super.handleQuote()
 		super.handleSymbol()
 		super.handleUser()
-		super.handleAccount()
 
 		let event = super.getEvent()
+		newUserAndAccount(event.params.user, event.block, event.transaction)
 
 		let account = Account.load(event.params.sender.toHexString())!
 		account.withdraw = account.withdraw.plus(event.params.amount)

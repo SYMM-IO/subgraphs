@@ -1,7 +1,7 @@
 import { DepositHandler as CommonDepositHandler } from "../../common/handlers/DepositHandler"
 import { Deposit } from "../../generated/symmio/symmio"
 import { Account, BalanceChange } from "../../generated/schema"
-import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps } from "../utils"
+import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, newUserAndAccount, updateActivityTimestamps } from "../utils"
 
 export class DepositHandler extends CommonDepositHandler {
 
@@ -15,9 +15,9 @@ export class DepositHandler extends CommonDepositHandler {
 		super.handleQuote()
 		super.handleSymbol()
 		super.handleUser()
-		super.handleAccount()
 
 		let event = super.getEvent()
+		newUserAndAccount(event.params.user, event.block, event.transaction)
 
 		let account = Account.load(event.params.user.toHexString())!
 		account.deposit = account.deposit.plus(event.params.amount)
