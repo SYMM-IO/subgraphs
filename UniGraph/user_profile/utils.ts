@@ -1,5 +1,19 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { DailyHistory, DailySymbolTradesHistory, TotalHistory, TotalSymbolTradesHistory } from "../generated/schema"
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { DailyHistory, DailySymbolTradesHistory, TotalHistory, TotalSymbolTradesHistory, User as UserModel, Account as AccountModel } from "../generated/schema"
+
+
+export enum QuoteStatus {
+	PENDING,
+	LOCKED,
+	CANCEL_PENDING,
+	CANCELED,
+	OPENED,
+	CLOSE_PENDING,
+	CANCEL_CLOSE_PENDING,
+	CLOSED,
+	LIQUIDATED,
+	EXPIRED,
+}
 
 export function getDateFromTimeStamp(timestamp: BigInt): Date {
 	let date = new Date(timestamp.toI64() * 1000)
