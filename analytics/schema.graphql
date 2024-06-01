@@ -1,34 +1,9 @@
-type User @entity {
-    id: ID!
-    address: Bytes!
-    timestamp: BigInt!
-    transaction: Bytes!
-}
-
 type UserActivity @entity {
     id: ID!
     user: Bytes!
     accountSource: Bytes
     timestamp: BigInt!
     updateTimestamp: BigInt
-}
-
-type Account @entity {
-    id: ID!
-    user: Bytes!
-    timestamp: BigInt!
-    blockNumber: BigInt!
-    name: String
-    quotesCount: BigInt!
-    positionsCount: BigInt!
-    lastActivityTimestamp: BigInt!
-    deposit: BigInt!
-    withdraw: BigInt!
-    allocated: BigInt!
-    deallocated: BigInt!
-    transaction: Bytes!
-    updateTimestamp: BigInt!
-    accountSource: Bytes
 }
 
 type BalanceChange @entity {
@@ -52,39 +27,6 @@ type TradeHistory @entity {
     transaction: Bytes!
     quoteStatus: Int!
     quote: BigInt!
-}
-
-type Quote @entity {
-    id: ID!
-    account: Bytes!
-    partyBsWhiteList: [Bytes!]
-    symbolId: BigInt!
-    symbolName: String!
-    positionType: Int!
-    orderType: Int!
-    openOrderType: Int!
-    price: BigInt!
-    marketPrice: BigInt!
-    openedPrice: BigInt
-    openPrice: BigInt
-    deadline: BigInt!
-    quantity: BigInt!
-    cva: BigInt!
-    partyAmm: BigInt!
-    partyBmm: BigInt!
-    lf: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    closedAmount: BigInt!
-    avgClosedPrice: BigInt!
-    partyB: Bytes
-    collateral: Bytes!
-    liquidatedSide: Int
-    fundingPaid: BigInt!
-    fundingReceived: BigInt!
-    timestamp: BigInt!
-    updateTimestamp: BigInt!
-    transaction: Bytes!
 }
 
 type DailyHistory @entity {
@@ -127,15 +69,6 @@ type TotalHistory @entity {
     accountSource: Bytes
     updateTimestamp: BigInt!
     timestamp: BigInt!
-}
-
-type Symbol @entity {
-    id: ID!
-    name: String!
-    tradingFee: BigInt!
-    timestamp: BigInt!
-    blockNumber: BigInt!
-    updateTimestamp: BigInt!
 }
 
 type SymbolTradeVolume @entity {
@@ -210,6 +143,7 @@ type GrantedRole @entity{
     id: ID!
     role: String!
     user: Bytes!
+    contract: Bytes
     grantTransaction: Bytes
     revokeTransaction: Bytes
     updateTimestamp: BigInt!
