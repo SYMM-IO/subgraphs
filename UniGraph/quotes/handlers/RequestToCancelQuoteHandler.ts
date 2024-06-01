@@ -1,5 +1,6 @@
 import { RequestToCancelQuoteHandler as CommonRequestToCancelQuoteHandler } from "../../common/handlers/RequestToCancelQuoteHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+import { getGlobalCounterAndInc } from "../../common/utils"
+
 import { PartyA, Quote } from "../../generated/schema"
 import { RequestToCancelQuote } from "../../generated/symmio/symmio"
 

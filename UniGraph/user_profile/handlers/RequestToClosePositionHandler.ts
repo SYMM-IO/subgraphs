@@ -1,5 +1,5 @@
 import { RequestToClosePositionHandler as CommonRequestToClosePositionHandler } from "../../common/handlers/RequestToClosePositionHandler"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 import { Quote } from "../../generated/schema"
 import { RequestToClosePosition } from "../../generated/symmio/symmio"
 import { QuoteStatus } from "../utils"

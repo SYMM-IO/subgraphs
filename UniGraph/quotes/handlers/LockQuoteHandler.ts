@@ -1,5 +1,6 @@
 import { LockQuoteHandler as CommonLockQuoteHandler } from "../../common/handlers/LockQuoteHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+import { getGlobalCounterAndInc } from "../../common/utils"
+
 import { PartyBPartyA, Quote } from "../../generated/schema"
 import { LockQuote } from "../../generated/symmio/symmio"
 

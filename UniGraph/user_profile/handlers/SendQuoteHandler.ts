@@ -3,7 +3,7 @@ import { SendQuoteHandler as CommonSendQuoteHandler } from "../../common/handler
 import { Account, Quote, QuoteFundingDetails } from "../../generated/schema"
 import { SendQuote } from "../../generated/symmio/symmio"
 import { QuoteStatus, getConfiguration, getDailyHistoryForTimestamp, getTotalHistory } from "../utils"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 
 export class SendQuoteHandler extends CommonSendQuoteHandler {
 

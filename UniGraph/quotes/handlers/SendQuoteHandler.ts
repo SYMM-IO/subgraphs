@@ -1,5 +1,6 @@
 import { SendQuoteHandler as CommonSendQuoteHandler } from "../../common/handlers/SendQuoteHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+import { getGlobalCounterAndInc } from "../../common/utils"
+
 import { PartyA } from "../../generated/schema"
 import { SendQuote } from "../../generated/symmio/symmio"
 

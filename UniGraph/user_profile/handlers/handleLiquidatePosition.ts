@@ -2,7 +2,8 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { LiquidatePositionsPartyA } from "../../generated/symmio/symmio"
 import { Account, Quote, QuoteFundingDetails } from "../../generated/schema"
 import { QuoteStatus, getDailyHistoryForTimestamp, getTotalHistory, unDecimal } from "../utils"
-import { getQuote, setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
+import { getQuote } from "../../common/utils"
 
 export function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt, eventName: string): void {
     const event = changetype<LiquidatePositionsPartyA>(_event)

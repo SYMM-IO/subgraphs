@@ -1,8 +1,9 @@
 import { log } from "@graphprotocol/graph-ts"
 import { ExpireQuoteHandler as CommonExpireQuoteHandler } from "../../common/handlers/ExpireQuoteHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+
 import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
 import { ExpireQuote } from "../../generated/symmio/symmio"
+import { getGlobalCounterAndInc } from "../../common/utils"
 
 export class ExpireQuoteHandler extends CommonExpireQuoteHandler {
 

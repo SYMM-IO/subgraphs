@@ -2,7 +2,8 @@
 import { LiquidatePartyAHandler as CommonLiquidatePartyAHandler } from "../../common/handlers/LiquidatePartyAHandler"
 import { LiquidatePartyA } from "../../generated/symmio/symmio"
 import { LiquidTransaction, PartyA } from "../../generated/schema"
-import { allocatedBalanceOfPartyA, getGlobalCounterAndInc } from "../../common/helper"
+import { allocatedBalanceOfPartyA } from "../../common/utils"
+import { getGlobalCounterAndInc } from '../../common/utils'
 
 export class LiquidatePartyAHandler extends CommonLiquidatePartyAHandler {
 

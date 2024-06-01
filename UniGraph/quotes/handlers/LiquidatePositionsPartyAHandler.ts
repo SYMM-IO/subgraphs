@@ -1,8 +1,9 @@
 import { log } from "@graphprotocol/graph-ts"
 import { LiquidatePositionsPartyAHandler as CommonLiquidatePositionsPartyAHandler } from "../../common/handlers/LiquidatePositionsPartyAHandler"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 import { PartyASymbolPrice, Quote } from "../../generated/schema"
 import { LiquidatePositionsPartyA } from "../../generated/symmio/symmio"
+import { getGlobalCounterAndInc } from "../../common/utils"
 
 export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPartyAHandler {
 

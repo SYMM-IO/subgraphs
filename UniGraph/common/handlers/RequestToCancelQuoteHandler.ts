@@ -1,7 +1,8 @@
 import { BaseHandler } from "./BaseHandler"
 import { RequestToCancelQuote } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
+import { getGlobalCounterAndInc } from "../utils"
 
 export class RequestToCancelQuoteHandler extends BaseHandler {
 	protected event: RequestToCancelQuote

@@ -1,8 +1,9 @@
 import { BaseHandler } from "./BaseHandler"
 import { LiquidatePositionsPartyB, symmio } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
+import { getGlobalCounterAndInc } from "../utils"
 
 export class LiquidatePositionsPartyBHandler extends BaseHandler {
 	protected event: LiquidatePositionsPartyB

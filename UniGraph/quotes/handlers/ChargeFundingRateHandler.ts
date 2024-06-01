@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../common/handlers/ChargeFundingRateHandler"
-import { FACTOR } from "../../common/helper"
+import { FACTOR } from "../../common/utils"
 import { GlobalFee, Quote } from "../../generated/schema"
 import { ChargeFundingRate } from "../../generated/symmio/symmio"
 

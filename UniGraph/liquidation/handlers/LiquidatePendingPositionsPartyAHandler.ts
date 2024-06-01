@@ -1,6 +1,7 @@
 
 import { LiquidatePendingPositionsPartyAHandler as CommonLiquidatePendingPositionsPartyAHandler } from "../../common/handlers/LiquidatePendingPositionsPartyAHandler"
-import { allocatedBalanceOfPartyA, getGlobalCounterAndInc } from "../../common/helper"
+import { allocatedBalanceOfPartyA } from "../../common/utils"
+import { getGlobalCounterAndInc } from '../../common/utils'
 import { LiquidTransaction, PartyA } from "../../generated/schema"
 import { LiquidatePendingPositionsPartyA } from "../../generated/symmio/symmio"
 

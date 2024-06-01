@@ -2,7 +2,7 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { FillCloseRequest } from "../../generated/symmio/symmio"
 import { Account, Quote, QuoteFundingDetails } from "../../generated/schema"
 import { QuoteStatus, getDailyHistoryForTimestamp, getTotalHistory, unDecimal } from "../utils"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 
 
 export function handleClose(_event: ethereum.Event, eventName: string): void {

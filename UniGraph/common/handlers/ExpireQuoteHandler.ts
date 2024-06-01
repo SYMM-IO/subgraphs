@@ -1,7 +1,8 @@
 import { BaseHandler } from "./BaseHandler"
 import { ExpireQuote } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
+import { getGlobalCounterAndInc } from "../utils"
 
 export class ExpireQuoteHandler extends BaseHandler {
 	protected event: ExpireQuote

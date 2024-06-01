@@ -1,7 +1,8 @@
 import { BaseHandler } from "./BaseHandler"
 import { ForceCancelCloseRequest } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
+import { getGlobalCounterAndInc } from "../utils"
 
 export class ForceCancelCloseRequestHandler extends BaseHandler {
 	protected event: ForceCancelCloseRequest
