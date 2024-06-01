@@ -1,6 +1,23 @@
 import { Address, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { symmio, symmio__getQuoteResultValue0Struct } from "../generated/symmio/symmio"
-import { EventsTimestamp, GlobalCounter, InitialQuote, Quote, TransactionsHash } from "../generated/schema"
+// import { EventsTimestamp, GlobalCounter, InitialQuote, Quote, TransactionsHash } from "../generated/schema"
+import * as module from "../generated/schema";
+let EventsTimestamp: any, GlobalCounter: any, InitialQuote: any, Quote: any, TransactionsHash: any
+if ('EventsTimestamp' in module) {
+	const EventsTimestamp = module.EventsTimestamp
+}
+if ('GlobalCounter' in module) {
+	const GlobalCounter = module.GlobalCounter
+}
+if ('InitialQuote' in module) {
+	const InitialQuote = module.InitialQuote
+}
+if ('Quote' in module) {
+	const Quote = module.Quote
+}
+if ('TransactionsHash' in module) {
+	const TransactionsHash = module.TransactionsHash
+}
 
 
 export const FACTOR: BigInt = BigInt.fromString(`1000000000000000000`)
@@ -71,17 +88,7 @@ export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__get
 	return symmioContract.getQuote(quoteId)
 }
 
-export function getGlobalCounterAndInc(): BigInt {
-	let entity = GlobalCounter.load("GLOBAL")
-	if (!entity) {
-		entity = new GlobalCounter("GLOBAL")
-		entity.counter = BigInt.fromI32(0)
-	} else {
-		entity.counter = entity.counter.plus(BigInt.fromI32(1))
-	}
-	entity.save()
-	return entity.counter
-}
+
 
 export function setEventTimestampAndTransactionHashAndAction(id: string, timestamp: BigInt, eventName: string, trHash: Bytes): void {
 	let timestampEntity = EventsTimestamp.load(id)
@@ -101,4 +108,16 @@ export function setEventTimestampAndTransactionHashAndAction(id: string, timesta
 	let quote = Quote.load(id)!
 	quote.action = eventName
 	quote.save()
+}
+
+export function getGlobalCounterAndInc(): BigInt {
+	let entity = GlobalCounter.load("GLOBAL")
+	if (!entity) {
+		entity = new GlobalCounter("GLOBAL")
+		entity.counter = BigInt.fromI32(0)
+	} else {
+		entity.counter = entity.counter.plus(BigInt.fromI32(1))
+	}
+	entity.save()
+	return entity.counter
 }
