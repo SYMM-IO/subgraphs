@@ -1,32 +1,21 @@
 {
-  "Quote": [
-    "AcceptCancelRequest",
-    "AcceptCancelCloseRequest",
-    "SendQuote",
-    "LockQuote",
-    "UnlockQuote",
-    "ChargeFundingRate",
-    "LiquidatePartyA",
-    "LiquidatePendingPositionsPartyA",
-    "LiquidatePartyB",
-    "LiquidatePositionsPartyB",
-    "LiquidatePositionsPartyA",
-    "RequestToClosePosition",
-    "ExpireQuote",
-    "handleForceCancelCloseRe",
-    "ForceCancelQuote",
-    "ForceCancelCloseRequest",
-    "ForceClosePosition",
-    "RequestToCancelCloseRequest",
-    "RequestToCancelQuote",
-    "RequestToCancelQuote",
-    "EmergencyClosePosition",
-    "FillCloseRequest",
-    "OpenPosition",
-    "SetSymbolsPricesEvent"
-  ],
-  "User": [
-    "SendQuote",
-    "AddAccount"
-  ]
+	"Quote": [
+		"AcceptCancelRequest",
+		"AcceptCancelCloseRequest",
+		"SendQuote",
+		"LockQuote",
+		"UnlockQuote",
+		"ChargeFundingRate",
+		"LiquidatePositionsPartyB",
+		"LiquidatePositionsPartyA",
+		"RequestToClosePosition",
+		"ExpireQuote",
+		"handleForceCancelCloseRe",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"FillCloseRequest",
+		"OpenPosition",
+		"SetSymbolsPricesEvent"
+	],
+	"User": ["SendQuote", "AddAccount"]
 }
