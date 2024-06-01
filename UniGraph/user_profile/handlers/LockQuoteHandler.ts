@@ -1,5 +1,8 @@
 import { LockQuoteHandler as CommonLockQuoteHandler } from "../../common/handlers/LockQuoteHandler"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { Quote } from "../../generated/schema"
 import { LockQuote } from "../../generated/symmio/symmio"
+import { QuoteStatus } from "../utils"
 
 export class LockQuoteHandler extends CommonLockQuoteHandler {
 
@@ -14,5 +17,12 @@ export class LockQuoteHandler extends CommonLockQuoteHandler {
 		super.handleSymbol()
 		super.handleUser()
 		super.handleAccount()
+		let event = super.getEvent()
+
+		let quote = Quote.load(event.params.quoteId.toString())!
+		quote.partyB = event.params.partyB
+		quote.quoteStatus = QuoteStatus.LOCKED
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "LockQuote", event.transaction.hash)
+		quote.save()
 	}
 }

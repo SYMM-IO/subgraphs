@@ -2,7 +2,7 @@ import { AddSymbolHandler as CommonAddSymbolHandler } from "../../common/handler
 import { Symbol } from "../../generated/schema"
 import { AddSymbol } from "../../generated/symmio/symmio"
 
-export class AcceptCancelCloseRequestHandler extends CommonAddSymbolHandler {
+export class AddSymbolHandler extends CommonAddSymbolHandler {
 
     constructor(event: AddSymbol) {
         super(event)
