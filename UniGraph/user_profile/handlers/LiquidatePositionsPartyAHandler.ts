@@ -14,5 +14,10 @@ export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPar
 		super.handleSymbol()
 		super.handleUser()
 		super.handleAccount()
+		let event = super.getEvent()
+		for (let i = 0; i < event.params.quoteIds.length; i++) {
+			const qId = event.params.quoteIds[i]
+			handleLiquidatePosition(event, qId)
+		}
 	}
 }

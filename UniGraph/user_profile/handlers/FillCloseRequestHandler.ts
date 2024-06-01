@@ -1,5 +1,7 @@
+import { BigInt } from "@graphprotocol/graph-ts"
 import { FillCloseRequestHandler as CommonFillCloseRequestHandler } from "../../common/handlers/FillCloseRequestHandler"
 import { FillCloseRequest } from "../../generated/symmio/symmio"
+import { handleClose } from "./handleClose"
 
 export class FillCloseRequestHandler extends CommonFillCloseRequestHandler {
 
@@ -14,5 +16,8 @@ export class FillCloseRequestHandler extends CommonFillCloseRequestHandler {
 		super.handleSymbol()
 		super.handleUser()
 		super.handleAccount()
+		let event = super.getEvent()
+
+		handleClose(event, 'FillCloseRequest')
 	}
 }

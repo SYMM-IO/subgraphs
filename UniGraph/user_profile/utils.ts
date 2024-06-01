@@ -1,5 +1,5 @@
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
-import { DailyHistory, DailySymbolTradesHistory, TotalHistory, TotalSymbolTradesHistory, User as UserModel, Account as AccountModel } from "../generated/schema"
+import { DailyHistory, DailySymbolTradesHistory, TotalHistory, TotalSymbolTradesHistory, Configuration } from "../generated/schema"
 
 
 export enum QuoteStatus {
@@ -168,4 +168,16 @@ export function getTotalHistory(
 
 export function unDecimal(value: BigInt, power: number = 18): BigInt {
 	return value.div(BigInt.fromString("10").pow(18))
+}
+
+export function getConfiguration(event: ethereum.Event): Configuration {
+	let configuration = Configuration.load("0")
+	if (configuration == null) {
+		configuration = new Configuration("0")
+		configuration.updateTimestamp = event.block.timestamp
+		configuration.updateTransaction = event.transaction.hash
+		configuration.collateral = event.address // Will be replaced shortly after creation
+		configuration.save()
+	}
+	return configuration
 }

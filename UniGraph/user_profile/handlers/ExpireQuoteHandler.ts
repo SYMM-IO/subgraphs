@@ -1,4 +1,6 @@
 import { ExpireQuoteHandler as CommonExpireQuoteHandler } from "../../common/handlers/ExpireQuoteHandler"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { Quote } from "../../generated/schema"
 import { ExpireQuote } from "../../generated/symmio/symmio"
 
 export class ExpireQuoteHandler extends CommonExpireQuoteHandler {
@@ -14,5 +16,11 @@ export class ExpireQuoteHandler extends CommonExpireQuoteHandler {
 		super.handleSymbol()
 		super.handleUser()
 		super.handleAccount()
+		let event = super.getEvent()
+
+		let quote = Quote.load(event.params.quoteId.toString())!
+		quote.quoteStatus = event.params.quoteStatus
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "ExpireQuote", event.transaction.hash)
+		quote.save()
 	}
 }
