@@ -26,7 +26,7 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			let quote = Quote.load(quoteId.toString())!
 			let account = Account.load(quote.partyA.toHexString())!
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
-			const chainQuote = getQuote(BigInt.fromString(quote.id), event.address)!
+			const chainQuote = getQuote(BigInt.fromString(quote.id), event.address)
 			const paid = rate.gt(BigInt.zero())
 			const funding = unDecimal((chainQuote.openedPrice.minus(quote.openedPrice!).abs()).times(openAmount))
 

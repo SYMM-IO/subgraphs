@@ -26,7 +26,7 @@ export class OpenPositionHandler extends CommonOpenPositionHandler {
 		account.save()
 
 		let quote = Quote.load(event.params.quoteId.toString())!
-		const chainQuote = getQuote(BigInt.fromString(quote.id), event.address)!
+		const chainQuote = getQuote(event.params.quoteId, event.address)
 		quote.openedPrice = event.params.openedPrice
 		quote.cva = chainQuote.lockedValues.cva
 		quote.lf = chainQuote.lockedValues.lf
@@ -43,7 +43,7 @@ export class OpenPositionHandler extends CommonOpenPositionHandler {
 		if (symbol == null) return
 
 		const tradingFee = event.params.filledAmount
-			.times(quote.openedPrice)
+			.times(quote.openedPrice!)
 			.times(symbol.tradingFee)
 			.div(BigInt.fromString("10").pow(36))
 

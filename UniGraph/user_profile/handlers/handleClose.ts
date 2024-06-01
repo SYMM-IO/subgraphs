@@ -14,7 +14,7 @@ export function handleClose(_event: ethereum.Event, eventName: string): void {
         .plus(event.params.filledAmount.times(event.params.closedPrice))
         .div(quote.closedAmount!.plus(event.params.filledAmount))
     quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
-    if (quote.closedAmount.equals(quote.quantity!))
+    if (quote.closedAmount!.equals(quote.quantity!))
         quote.quoteStatus = QuoteStatus.CLOSED
     setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, eventName, event.transaction.hash)
 
