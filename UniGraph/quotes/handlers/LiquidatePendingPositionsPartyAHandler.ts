@@ -2,9 +2,10 @@ import { log } from "@graphprotocol/graph-ts"
 import {
 	LiquidatePendingPositionsPartyAHandler as CommonLiquidatePendingPositionsPartyAHandler,
 } from "../../common/handlers/LiquidatePendingPositionsPartyAHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+
 import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
 import { LiquidatePendingPositionsPartyA } from "../../generated/symmio/symmio"
+import { getGlobalCounterAndInc } from "../../common/utils"
 
 export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendingPositionsPartyAHandler {
 

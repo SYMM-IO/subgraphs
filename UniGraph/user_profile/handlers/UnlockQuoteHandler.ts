@@ -1,5 +1,5 @@
 import { UnlockQuoteHandler as CommonUnlockQuoteHandler } from "../../common/handlers/UnlockQuoteHandler"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 import { Quote } from "../../generated/schema"
 import { UnlockQuote } from "../../generated/symmio/symmio"
 import { QuoteStatus } from "../utils"

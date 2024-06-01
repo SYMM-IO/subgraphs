@@ -1,8 +1,9 @@
 import { log } from "@graphprotocol/graph-ts"
 import { LiquidatePartyAHandler as CommonLiquidatePartyAHandler } from "../../common/handlers/LiquidatePartyAHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+
 import { PartyA, Quote } from "../../generated/schema"
 import { LiquidatePartyA } from "../../generated/symmio/symmio"
+import { getGlobalCounterAndInc } from "../../common/utils"
 
 export class LiquidatePartyAHandler extends CommonLiquidatePartyAHandler {
 

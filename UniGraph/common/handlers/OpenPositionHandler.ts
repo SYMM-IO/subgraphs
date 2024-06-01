@@ -1,8 +1,9 @@
 import { BaseHandler } from "./BaseHandler"
 import { OpenPosition } from "../../generated/symmio/symmio"
 import { Account, InitialQuote, Quote } from "../../generated/schema"
-import { getGlobalCounterAndInc, getQuote, setEventTimestampAndTransactionHashAndAction } from "../helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
 import { BigInt } from "@graphprotocol/graph-ts"
+import { getGlobalCounterAndInc, getQuote } from "../utils"
 
 export class OpenPositionHandler extends BaseHandler {
 	protected event: OpenPosition

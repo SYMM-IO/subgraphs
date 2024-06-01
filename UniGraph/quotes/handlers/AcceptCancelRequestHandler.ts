@@ -1,5 +1,6 @@
 import { AcceptCancelRequestHandler as CommonAcceptCancelRequestHandler } from "../../common/handlers/AcceptCancelRequestHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+import { getGlobalCounterAndInc } from "../../common/utils"
+
 import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
 import { AcceptCancelRequest } from "../../generated/symmio/symmio"
 

@@ -2,8 +2,9 @@ import { BigInt } from "@graphprotocol/graph-ts"
 import { OpenPositionHandler as CommonOpenPositionHandler } from "../../common/handlers/OpenPositionHandler"
 import { Account, Quote, Symbol } from "../../generated/schema"
 import { OpenPosition } from "../../generated/symmio/symmio"
-import { getQuote, setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 import { QuoteStatus, getDailyHistoryForTimestamp, getDailySymbolTradesHistory, getTotalHistory, getTotalSymbolTradesHistory, unDecimal } from "../utils"
+import { getQuote } from "../../common/utils"
 
 export class OpenPositionHandler extends CommonOpenPositionHandler {
 

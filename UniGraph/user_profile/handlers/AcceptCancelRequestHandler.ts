@@ -1,5 +1,5 @@
 import { AcceptCancelRequestHandler as CommonAcceptCancelRequestHandler } from "../../common/handlers/AcceptCancelRequestHandler"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 import { Quote } from "../../generated/schema"
 import { AcceptCancelRequest } from "../../generated/symmio/symmio"
 

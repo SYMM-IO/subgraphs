@@ -1,5 +1,5 @@
 import { LockQuoteHandler as CommonLockQuoteHandler } from "../../common/handlers/LockQuoteHandler"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 import { Quote } from "../../generated/schema"
 import { LockQuote } from "../../generated/symmio/symmio"
 import { QuoteStatus } from "../utils"

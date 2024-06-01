@@ -1,5 +1,6 @@
 import { OpenPositionHandler as CommonOpenPositionHandler } from "../../common/handlers/OpenPositionHandler"
-import { getGlobalCounterAndInc } from "../../common/helper"
+import { getGlobalCounterAndInc } from "../../common/utils"
+
 import { PartyA, PartyBPartyA } from "../../generated/schema"
 import { OpenPosition } from "../../generated/symmio/symmio"
 

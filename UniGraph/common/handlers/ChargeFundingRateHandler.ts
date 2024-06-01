@@ -1,7 +1,8 @@
 import { BaseHandler } from "./BaseHandler"
 import { ChargeFundingRate } from "../../generated/symmio/symmio"
-import { FACTOR, getGlobalCounterAndInc, setEventTimestampAndTransactionHashAndAction } from "../helper"
+import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
 import { Quote } from "../../generated/schema"
+import { FACTOR, getGlobalCounterAndInc } from "../utils"
 
 export class ChargeFundingRateHandler extends BaseHandler {
 	protected event: ChargeFundingRate
