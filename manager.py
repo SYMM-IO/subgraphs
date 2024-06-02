@@ -36,7 +36,7 @@ def create_schema_file(target_module, target_config):
     common_models_dir = os.path.join("common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
-        "schema.graphql", "w"
+            "schema.graphql", "w"
     ) as dest_file:
         dest_file.write("# Imported Models\n")
         for model in os.listdir(common_models_dir):
@@ -172,18 +172,18 @@ def get_events_with_signatures(needed_events):
 
 
 def prepare_module(
-    config, target_module, create_src_file: bool, create_handler_files: bool
+        config, target_module, create_src_file: bool, create_handler_files: bool
 ):
     with open(os.path.join("common", "dependencies.json"), "r") as dependencies_file:
         common_dependencies = json.load(dependencies_file)
 
     with open(
-        os.path.join(target_module, "dependencies.json"), "r"
+            os.path.join(target_module, "dependencies.json"), "r"
     ) as dependencies_file:
         target_dependencies = json.load(dependencies_file)
 
     with open(
-        os.path.join(target_module, "subgraph_config.json"), "r"
+            os.path.join(target_module, "subgraph_config.json"), "r"
     ) as target_config_file:
         target_config = json.load(target_config_file)
 
@@ -230,7 +230,6 @@ def prepare_module(
     subprocess.run(["graph", "codegen"], check=True)
     subprocess.run(["graph", "build"], check=True)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Module preparation script.")
     parser.add_argument("config_file", type=str, help="Configuration file path")
@@ -241,9 +240,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--create-handlers", action="store_true", help="Create the handler files"
     )
+    parser.add_argument(
+        "--deploy", action="store_true", help="Deploy the module"
+    )
+    parser.add_argument(
+        "--mantle", action="store_true", help="Deployment is on mantle or not"
+    )
 
     args = parser.parse_args()
-
     # Check if the configuration file exists
     if not os.path.exists(args.config_file):
         print(f"Configuration file {args.config_file} does not exist!")
@@ -254,3 +258,12 @@ if __name__ == "__main__":
         config = json.load(f)
 
     prepare_module(config, args.module_name, args.create_src, args.create_handlers)
+
+    if args.deploy:
+        if args.mantle:
+            deploy_url = config[f"mantle-{args.module_name}"]
+            subprocess.run(["graph", "deploy", deploy_url, "--node", "https://subgraph-api.mantle.xyz/deploy",
+                            "--ipfs", "https://subgraph-api.mantle.xyz/ipfs"], check=True)
+        else:
+            deploy_url = config[f"studio-{args.module_name}"]
+            subprocess.run(["graph", "deploy", "--studio", deploy_url], check=True)
