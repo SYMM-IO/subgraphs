@@ -1,5 +1,4 @@
 networks.json
-subgraph.yaml
 build/
 generated/
 node_modules/
@@ -14,6 +13,6 @@ yarn-error.log
 
 .env
 
-UniGraph/UniConfig.json
-UniGraph/subgraph.yaml
-UniGraph/schema.graphql
+UniConfig.json
+subgraph.yaml
+schema.graphql
