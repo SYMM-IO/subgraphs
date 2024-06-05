@@ -692,6 +692,8 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
             initialEntity.lf = newLF
             initialEntity.quantity = event.params.filledAmount
             initialEntity.save()
+        } else {
+            log.error("error to get_quote in quoteid={} and TRhash={} and timestamp={}", [event.params.quoteId, event.transaction.hash, event.block.timestamp])
         }
     }
 
