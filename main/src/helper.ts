@@ -1,6 +1,6 @@
 import { Address, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { symmio, symmio__getQuoteResultValue0Struct } from "../generated/symmio/symmio"
-import { InitialQuote, GlobalCounter } from "../generated/schema"
+import { InitialQuote, GlobalCounter, PartyA, ResultEntity, PartyApartyB } from "../generated/schema"
 
 export function getGlobalCounterAndInc(): BigInt {
     let entity = GlobalCounter.load("GLOBAL")
@@ -83,4 +83,25 @@ export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__get
         return null
     }
     return callResult.value
+}
+
+
+export function removeQuoteFromPendingList(quoteId: BigInt): void {
+    let quote = ResultEntity.load(quoteId.toHexString())!
+    let partyAEntity = PartyA.load(quote.partyA.toHexString())!
+    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
+    let temp = partyAEntity.quoteUntilLiquid!.slice(0)
+    const indexA = temp.indexOf(quoteId)
+    temp.splice(indexA, 1)
+    partyAEntity.quoteUntilLiquid = temp.slice(0)
+    partyAEntity.save()
+    let partyAPartyBEntity = PartyApartyB.load(quote.partyA.toHexString() + '-' + quote.partyB!.toHexString())
+    if (partyAPartyBEntity) {
+        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
+        temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
+        const indexB = temp.indexOf(quoteId)
+        temp.splice(indexB, 1)
+        partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
+        partyAPartyBEntity.save()
+    }
 }

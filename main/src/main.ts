@@ -37,7 +37,7 @@ import {
     ResultEntity,
     SymbolInfo
 } from "../generated/schema"
-import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getGlobalCounterAndInc, getQuote, initialHelper, symbolIdToSymbolName, } from './helper'
+import { allocatedBalanceOfPartyA, allocatedBalanceOfPartyB, getGlobalCounterAndInc, getQuote, initialHelper, removeQuoteFromPendingList, symbolIdToSymbolName, } from './helper'
 
 
 const FACTOR: BigInt = BigInt.fromI32(10).pow(18);
@@ -296,29 +296,9 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
     entity.timeStamp = event.block.timestamp
     entity.timestampsExpireQuoteTimeStamp = event.block.timestamp
     entity.TrHashExpireQuote = event.transaction.hash
-
-
-    if (entity.quoteStatus === 0) {
-        let partyAEntity = PartyA.load(entity.partyA.toHexString())!
-        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
-        let temp = partyAEntity.quoteUntilLiquid!.slice(0)
-        const indexA = temp.indexOf(event.params.quoteId)
-        const removedPa = temp.splice(indexA, 1)
-        partyAEntity.quoteUntilLiquid = temp.slice(0)
-        partyAEntity.save()
-    } else if (entity.quoteStatus === 1) {
-        let partyAPartyBEntity = PartyApartyB.load(entity.partyA.toHexString() + '-' + entity.partyB!.toHexString())!
-        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
-        let temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
-        const indexB = temp.indexOf(event.params.quoteId)
-        const removedPb = temp.splice(indexB, 1)
-        partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
-        log.debug(`remove in expire quote party B = ${removedPb}\nnew list: ${temp.toString()} remove index: ${indexB}`, [])
-    }
-
     entity.quoteStatus = event.params.quoteStatus
-
     entity.save()
+    removeQuoteFromPendingList(event.params.quoteId)
 }
 
 export function handleForceCancelCloseRequest(
@@ -344,9 +324,8 @@ export function handleForceCancelQuote(event: ForceCancelQuoteEvent): void {
     entity.timeStamp = event.block.timestamp
     entity.timestampsForceCancelQuoteTimeStamp = event.block.timestamp
     entity.TrHashForceCancelQuote = event.transaction.hash
-
     entity.save()
-
+    removeQuoteFromPendingList(event.params.quoteId)
 }
 
 
@@ -399,13 +378,7 @@ export function handleRequestToCancelQuote(
     entity.save()
 
     if (event.params.quoteStatus === 3) {
-        let partyAEntity = PartyA.load(entity.partyA.toHexString())!
-        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
-        let temp = partyAEntity.quoteUntilLiquid!.slice(0)
-        const indexA = temp.indexOf(event.params.quoteId)
-        temp.splice(indexA, 1)
-        partyAEntity.quoteUntilLiquid = temp.slice(0)
-        partyAEntity.save()
+        removeQuoteFromPendingList(event.params.quoteId)
     }
 
 }
@@ -532,26 +505,8 @@ export function handleAcceptCancelRequest(
         entity.timeStamp = event.block.timestamp
         entity.timestampsAcceptCancelCloseRequestTimeStamp = event.block.timestamp
         entity.TrHashAcceptCancelCloseRequest = event.transaction.hash
-
         entity.save()
-
-
-        let partyAEntity = PartyA.load(entity.partyA.toHexString())!
-        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
-        let temp = partyAEntity.quoteUntilLiquid!.slice(0)
-        const indexA = temp.indexOf(event.params.quoteId)
-        const removedPa = temp.splice(indexA, 1)
-        partyAEntity.quoteUntilLiquid = temp.slice(0)
-        partyAEntity.save()
-        let partyAPartyBEntity = PartyApartyB.load(entity.partyA.toHexString() + '-' + entity.partyB!.toHexString())!
-        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
-        temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
-        const indexB = temp.indexOf(event.params.quoteId)
-        const removedPb = temp.splice(indexB, 1)
-        partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
-
-        partyAPartyBEntity.save()
-
+        removeQuoteFromPendingList(event.params.quoteId)
 
     } else {
         let newEntity = new ResultEntity(event.params.quoteId.toString())
@@ -699,22 +654,7 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
 
 
     entity.save()
-
-    let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
-    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
-    let temp = partyAEntity.quoteUntilLiquid!.slice(0)
-    const indexA = temp.indexOf(event.params.quoteId)
-    const removedPa = temp.splice(indexA, 1)
-    partyAEntity.quoteUntilLiquid = temp.slice(0)
-    partyAEntity.save()
-    let partyAPartyBEntity = PartyApartyB.load(event.params.partyA.toHexString() + '-' + event.params.partyB.toHexString())!
-    partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
-    temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
-    const indexB = temp.indexOf(event.params.quoteId)
-    const removedPb = temp.splice(indexB, 1)
-    partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
-
-    partyAPartyBEntity.save()
+    removeQuoteFromPendingList(event.params.quoteId)
 }
 
 
