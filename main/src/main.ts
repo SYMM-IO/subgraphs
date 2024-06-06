@@ -95,23 +95,6 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
 }
 
 export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
-    let partyAEntity = PartyA.load(event.params.partyA.toHexString())
-    if (partyAEntity) {
-        partyAEntity.GlobalCounter = getGlobalCounterAndInc()
-        const list = partyAEntity.quoteUntilLiquid!.slice(0)
-        for (let i = 0, lenQ = list.length; i < lenQ; i++) {
-            const quoteId = list[i]
-            let pendingEntity = ResultEntity.load(quoteId.toString())!
-            pendingEntity.GlobalCounter = getGlobalCounterAndInc()
-            if (pendingEntity.quoteStatus <= 2 && pendingEntity.quoteStatus >= 0) {
-                pendingEntity.quoteStatus = 8
-                pendingEntity.save()
-            } else {
-                log.error("error in liquidate positions party A  QuoteId={}  Quote status={}  timeStamp={} trhash ={}", [quoteId.toString(), pendingEntity.quoteStatus.toString(), event.block.timestamp.toString(), event.transaction.hash.toHexString()])
-            }
-        }
-
-    }
 }
 
 export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPositionsPartyAEvent): void {
