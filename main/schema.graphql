@@ -114,18 +114,6 @@ type PartyApartyB @entity {
   GlobalCounter: BigInt!
 }
 
-type LiquidTransaction @entity {
-  id: String!
-  mode: LiquidMode
-  balance: BigInt!
-  pendigQuoteLiquidateList: [BigInt!]
-  listLenght: Int!
-  partyA: Bytes!
-  partyB: Bytes
-  timeStamp: BigInt!
-  GlobalCounter: BigInt!
-}
-
 enum LiquidMode {
   PartyA
   PartyB
