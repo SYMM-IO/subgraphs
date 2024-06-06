@@ -87,21 +87,30 @@ export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__get
 
 
 export function removeQuoteFromPendingList(quoteId: BigInt): void {
-    let quote = ResultEntity.load(quoteId.toHexString())!
-    let partyAEntity = PartyA.load(quote.partyA.toHexString())!
-    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
-    let temp = partyAEntity.quoteUntilLiquid!.slice(0)
-    const indexA = temp.indexOf(quoteId)
-    temp.splice(indexA, 1)
-    partyAEntity.quoteUntilLiquid = temp.slice(0)
-    partyAEntity.save()
-    let partyAPartyBEntity = PartyApartyB.load(quote.partyA.toHexString() + '-' + quote.partyB!.toHexString())
-    if (partyAPartyBEntity) {
-        partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
-        temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
-        const indexB = temp.indexOf(quoteId)
-        temp.splice(indexB, 1)
-        partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
-        partyAPartyBEntity.save()
+    let quote = ResultEntity.load(quoteId.toString())
+    if (quote) {
+
+        let partyAEntity = PartyA.load(quote.partyA.toHexString())
+        if (partyAEntity) {
+            partyAEntity.GlobalCounter = getGlobalCounterAndInc()
+            let temp = partyAEntity.quoteUntilLiquid!.slice(0)
+            const indexA = temp.indexOf(quoteId)
+            temp.splice(indexA, 1)
+            partyAEntity.quoteUntilLiquid = temp.slice(0)
+            partyAEntity.save()
+        }
+        let partyB = quote.partyB
+        if (partyB) {
+            let partyAPartyBEntity = PartyApartyB.load(quote.partyA.toHexString() + '-' + partyB.toHexString())
+            if (partyAPartyBEntity) {
+                partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
+                let temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
+                const indexB = temp.indexOf(quoteId)
+                temp.splice(indexB, 1)
+                partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
+                partyAPartyBEntity.save()
+
+            }
+        }
     }
 }

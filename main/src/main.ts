@@ -30,7 +30,6 @@ import {
 import {
     DebugEntity,
     InitialQuote,
-    LiquidTransaction,
     PartyA,
     PartyApartyB,
     PartyASymbolPrice,
@@ -108,23 +107,10 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
                 pendingEntity.quoteStatus = 8
                 pendingEntity.save()
             } else {
-                log.error(`error in liquidate positions party A\nQuoteId: ${quoteId}\nQuote status: ${pendingEntity.quoteStatus}`, [])
+                log.error("error in liquidate positions party A  QuoteId={}  Quote status={}  timeStamp={} trhash ={}", [quoteId.toString(), pendingEntity.quoteStatus.toString(), event.block.timestamp.toString(), event.transaction.hash.toHexString()])
             }
         }
 
-        let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toHexString()))
-        liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
-        liquidTrEntity.mode = "Pending"
-        const balance = allocatedBalanceOfPartyA(event.params.partyA, event.address)
-        if (balance) {
-            liquidTrEntity.balance = balance
-        }
-        liquidTrEntity.pendigQuoteLiquidateList = list
-        liquidTrEntity.listLenght = list.length
-        liquidTrEntity.partyA = event.params.partyA
-        liquidTrEntity.timeStamp = event.block.timestamp
-        liquidTrEntity.save()
-        partyAEntity.save()
     }
 }
 
@@ -150,19 +136,6 @@ export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPos
                 log.error(`error in liquidate positions party A\nQuoteId: ${quoteId}\nQuote status: ${pendingEntity.quoteStatus}`, [])
             }
         }
-
-        let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toHexString()))
-        liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
-        liquidTrEntity.mode = "Pending"
-        const balance = allocatedBalanceOfPartyA(event.params.partyA, event.address)
-        if (balance) {
-            liquidTrEntity.balance = balance
-        }
-        liquidTrEntity.pendigQuoteLiquidateList = list
-        liquidTrEntity.listLenght = list.length
-        liquidTrEntity.partyA = event.params.partyA
-        liquidTrEntity.timeStamp = event.block.timestamp
-        liquidTrEntity.save()
         partyAEntity.quoteUntilLiquid = []
         partyAEntity.save()
     }
@@ -185,21 +158,6 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
                 log.error(`error in liquidate positions party B\nQuoteId: ${quoteId}\nQuote status: ${entity.quoteStatus}`, [])
             }
         }
-
-
-        let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString())
-        liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
-        liquidTrEntity.mode = "PartyB"
-        const balance = allocatedBalanceOfPartyB(event.params.partyB, event.params.partyA, event.address)
-        if (balance) {
-            liquidTrEntity.balance = balance
-        }
-        liquidTrEntity.pendigQuoteLiquidateList = list
-        liquidTrEntity.listLenght = list.length
-        liquidTrEntity.partyA = event.params.partyA
-        liquidTrEntity.partyB = event.params.partyB
-        liquidTrEntity.timeStamp = event.block.timestamp
-        liquidTrEntity.save()
 
         let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
         partyAEntity.GlobalCounter = getGlobalCounterAndInc()
