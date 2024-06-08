@@ -22,6 +22,7 @@ export class ForceClosePositionHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
+		quote.blockNumber = this.event.block.number
 		quote.quoteId = this.event.params.quoteId
 		quote.fillAmount = this.event.params.filledAmount
 		quote.closedPrice = this.event.params.closedPrice

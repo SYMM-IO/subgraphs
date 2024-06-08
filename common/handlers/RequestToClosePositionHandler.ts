@@ -22,6 +22,7 @@ export class RequestToClosePositionHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
+		quote.blockNumber = this.event.block.number
 		quote.closePrice = this.event.params.closePrice
 		quote.closeDeadline = this.event.params.deadline
 		quote.orderTypeClose = this.event.params.orderType

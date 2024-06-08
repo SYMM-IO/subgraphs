@@ -2,7 +2,7 @@ import { BaseHandler } from "./BaseHandler"
 import { SendQuote, symmio } from "../../generated/symmio/symmio"
 import { BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts"
 import { Account, EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
-import { initialHelper } from "../utils/quote&analitics&user"
+import { initialHelper, setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
 import { getGlobalCounterAndInc } from "../utils"
 
 export class SendQuoteHandler extends BaseHandler {
@@ -23,6 +23,8 @@ export class SendQuoteHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = new Quote(this.event.params.quoteId.toString())
 		quote.globalCounter = getGlobalCounterAndInc()
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
+			'SendQuote', this.event.transaction.hash)
 		quote.quoteId = this.event.params.quoteId
 		quote.orderTypeOpen = this.event.params.orderType
 		quote.partyA = this.event.params.partyA
@@ -41,7 +43,7 @@ export class SendQuoteHandler extends BaseHandler {
 		quote.closedAmount = BigInt.fromI32(0)
 		quote.tradingFee = this.event.params.tradingFee
 		quote.fundingRateFee = BigInt.fromI32(0)
-
+		quote.blockNumber = this.event.block.number
 		let initialQuote = new InitialQuote(this.event.params.quoteId.toString())
 		quote.initialData = initialQuote.id
 		initialQuote.quoteId = this.event.params.quoteId

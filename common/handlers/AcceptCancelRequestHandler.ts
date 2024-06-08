@@ -24,6 +24,7 @@ export class AcceptCancelRequestHandler extends BaseHandler {
 		if (quote) {
 
 			quote.globalCounter = getGlobalCounterAndInc()
+			quote.blockNumber = this.event.block.number
 			quote.quoteStatus = this.event.params.quoteStatus
 			quote.timeStamp = this.event.block.timestamp
 			quote.save()
