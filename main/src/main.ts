@@ -567,30 +567,28 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
     entity.quantity = event.params.filledAmount
     entity.initialOpenedPrice = event.params.openedPrice
 
-    if (entity.orderTypeOpen === 0) {
-        const initialEntity = InitialQuote.load(entity.initialData!)!
+    const initialEntity = InitialQuote.load(entity.initialData!)!
 
-        let q = getQuote(event.params.quoteId, event.address);
-        if (q) {
+    let q = getQuote(event.params.quoteId, event.address);
+    if (q) {
 
-            const newCva = q.lockedValues.cva
-            const newPartyAmm = q.lockedValues.partyAmm
-            const newPartyBmm = q.lockedValues.partyBmm
-            const newLF = q.lockedValues.lf
+        const newCva = q.lockedValues.cva
+        const newPartyAmm = q.lockedValues.partyAmm
+        const newPartyBmm = q.lockedValues.partyBmm
+        const newLF = q.lockedValues.lf
 
-            entity.cva = newCva
-            entity.partyAmm = newPartyAmm
-            entity.partyBmm = newPartyBmm
-            entity.lf = newLF
-            initialEntity.cva = newCva
-            initialEntity.partyAmm = newPartyAmm
-            initialEntity.partyBmm = newPartyBmm
-            initialEntity.lf = newLF
-            initialEntity.quantity = event.params.filledAmount
-            initialEntity.save()
-        } else {
-            log.error("error to get_quote in quoteid={} and TRhash={} and timestamp={}", [event.params.quoteId.toString(), event.transaction.hash.toHexString(), event.block.timestamp.toString()])
-        }
+        entity.cva = newCva
+        entity.partyAmm = newPartyAmm
+        entity.partyBmm = newPartyBmm
+        entity.lf = newLF
+        initialEntity.cva = newCva
+        initialEntity.partyAmm = newPartyAmm
+        initialEntity.partyBmm = newPartyBmm
+        initialEntity.lf = newLF
+        initialEntity.quantity = event.params.filledAmount
+        initialEntity.save()
+    } else {
+        log.error("error to get_quote in quoteid={} and TRhash={} and timestamp={}", [event.params.quoteId.toString(), event.transaction.hash.toHexString(), event.block.timestamp.toString()])
     }
 
 
