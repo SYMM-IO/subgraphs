@@ -57,8 +57,6 @@ import { SendQuoteHandler } from "./handlers/SendQuoteHandler"
 
 import { UnlockQuoteHandler } from "./handlers/UnlockQuoteHandler"
 
-import { LiquidatePartyAHandler } from "./handlers/LiquidatePartyAHandler"
-
 import { RequestToCancelQuoteHandler } from "./handlers/RequestToCancelQuoteHandler"
 
 import { RequestToClosePositionHandler } from "./handlers/RequestToClosePositionHandler"
@@ -153,10 +151,6 @@ export function handleUnlockQuote(event: UnlockQuote): void {
 	handler.handle()
 }
 
-export function handleLiquidatePartyA(event: LiquidatePartyA): void {
-	let handler = new LiquidatePartyAHandler(event)
-	handler.handle()
-}
 
 export function handleRequestToCancelQuote(event: RequestToCancelQuote): void {
 	let handler = new RequestToCancelQuoteHandler(event)
@@ -167,4 +161,3 @@ export function handleRequestToClosePosition(event: RequestToClosePosition): voi
 	let handler = new RequestToClosePositionHandler(event)
 	handler.handle()
 }
-		
