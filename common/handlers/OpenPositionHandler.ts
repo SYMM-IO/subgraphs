@@ -23,6 +23,7 @@ export class OpenPositionHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
+		quote.blockNumber = this.event.block.number
 		quote.quoteId = this.event.params.quoteId
 		quote.fillAmount = this.event.params.filledAmount
 		quote.openedPrice = this.event.params.openedPrice

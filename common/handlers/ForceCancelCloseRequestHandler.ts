@@ -22,6 +22,7 @@ export class ForceCancelCloseRequestHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
+		quote.blockNumber = this.event.block.number
 		quote.quoteId = this.event.params.quoteId
 		quote.quoteStatus = this.event.params.quoteStatus
 		quote.timeStamp = this.event.block.timestamp

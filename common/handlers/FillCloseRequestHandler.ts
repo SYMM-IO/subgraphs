@@ -22,6 +22,7 @@ export class FillCloseRequestHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
+		quote.blockNumber = this.event.block.number
 		let q = getQuote(this.event.params.quoteId, this.event.address)
 		quote.cva = q.lockedValues.cva
 		quote.partyAmm = q.lockedValues.partyAmm

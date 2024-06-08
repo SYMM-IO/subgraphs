@@ -24,6 +24,7 @@ export class ChargeFundingRateHandler extends BaseHandler {
 			let qoutId = this.event.params.quoteIds[i]
 			let quote = Quote.load(qoutId.toString())!
 			quote.globalCounter = getGlobalCounterAndInc()
+			quote.blockNumber = this.event.block.number
 			if (quote.positionType) { // SHORT position
 				quote.openedPrice = quote.openedPrice!.minus(quote.openedPrice!.times(this.event.params.rates[i]).div(FACTOR))
 			} else {
