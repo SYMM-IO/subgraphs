@@ -1,4 +1,5 @@
 import { SetSymbolsPricesHandler as CommoneSetSymbolsPricesHandler } from "../../common/handlers/SetSymbolsPricesHandler"
+import { getGlobalCounterAndInc } from "../../common/utils"
 
 import { PartyASymbolPrice } from "../../generated/schema"
 import { SetSymbolsPrices } from "../../generated/symmio/symmio"
