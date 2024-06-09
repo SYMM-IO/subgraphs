@@ -27,8 +27,9 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 			if (pendingEntity.quoteStatus <= 2 && pendingEntity.quoteStatus >= 0) {
 				pendingEntity.quoteStatus = 8
 				pendingEntity.save()
-				if (pendingEntity.partyB) {
-					let partyAPartyBEntity = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + pendingEntity.partyB.toHexString())!
+				const partyB = pendingEntity.partyB
+				if (partyB) {
+					let partyAPartyBEntity = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + partyB.toHexString())!
 					partyAPartyBEntity.globalCounter = getGlobalCounterAndInc()
 					partyAPartyBEntity.quoteUntilLiquid = []
 					partyAPartyBEntity.save()
