@@ -46,7 +46,7 @@ export function allocatedBalanceOfPartyB(partyB: Address, partyA: Address, contr
 
 export function symbolIdToSymbolName(symbolId: BigInt, contractAddress: Address): string {
     let symmioContract = symmio.bind(contractAddress)
-    let callResult = symmioContract.try_symbolNameByQuoteId([symbolId])
+    let callResult = symmioContract.try_symbolNameById([symbolId])
     if (callResult.reverted) {
         log.error("error in symbol bind", [])
         return ""
