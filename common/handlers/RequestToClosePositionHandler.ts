@@ -34,6 +34,6 @@ export class RequestToClosePositionHandler extends BaseHandler {
 		quote.timeStamp = this.event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'LiquidatePositionsPartyB', this.event.transaction.hash)
+			'RequestToClosePosition', this.event.transaction.hash)
 	}
 }
