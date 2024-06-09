@@ -16,6 +16,17 @@ export class SendQuoteHandler extends CommonSendQuoteHandler {
 		super.handleQuote()
 
 		let event = super.getEvent()
-		removeQuoteFromPendingList(event.params.quoteId)
+		let partyAEntity = PartyA.load(event.params.partyA.toHexString())
+		if (!partyAEntity) {
+			partyAEntity = new PartyA(event.params.partyA.toHexString())
+			partyAEntity.quoteUntilLiquid = [event.params.quoteId]
+		} else {
+			let temp = partyAEntity.quoteUntilLiquid!.slice(0)
+			temp.push(event.params.quoteId)
+
+			partyAEntity.quoteUntilLiquid = temp.slice(0)
+		}
+		partyAEntity.globalCounter = getGlobalCounterAndInc()
+		partyAEntity.save()
 	}
 }
