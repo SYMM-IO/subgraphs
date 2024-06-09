@@ -3,7 +3,7 @@ import { SendQuote, symmio } from "../../generated/symmio/symmio"
 import { BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts"
 import { Account, EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
 import { initialHelper, setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
-import { getGlobalCounterAndInc } from "../utils"
+import { getGlobalCounterAndInc, getQuote, symbolIdToSymbolName } from "../utils"
 
 export class SendQuoteHandler extends BaseHandler {
 	protected event: SendQuote
@@ -23,8 +23,6 @@ export class SendQuoteHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = new Quote(this.event.params.quoteId.toString())
 		quote.globalCounter = getGlobalCounterAndInc()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'SendQuote', this.event.transaction.hash)
 		quote.quoteId = this.event.params.quoteId
 		quote.orderTypeOpen = this.event.params.orderType
 		quote.partyA = this.event.params.partyA
@@ -61,26 +59,17 @@ export class SendQuoteHandler extends BaseHandler {
 		initialQuote.quoteStatus = 0
 		initialQuote.marketPrice = this.event.params.marketPrice
 
-		let symmioContract = symmio.bind(this.event.address)
-		let callResultGetQuote = symmioContract.try_getQuote(this.event.params.quoteId)
-		if (callResultGetQuote.reverted) {
-			log.error('accept cancel bind crashed!', [])
-		} else {
-			let Result = callResultGetQuote.value as ethereum.Tuple
-			let initialNewEntity = initialHelper(Result)
-			if (initialNewEntity) {
-				quote.maxFundingRate = initialNewEntity.tradingFee
-				initialQuote.tradingFee = initialNewEntity.tradingFee
-			}
-		}
 
-		let callResult = symmioContract.try_symbolNameByQuoteId([this.event.params.quoteId])
-		if (callResult.reverted) {
-			log.error("error in symbol bind", [])
-		} else {
-			quote.symbol = callResult.value[0]
-			initialQuote.symbol = callResult.value[0]
-		}
+		const getQuoteValue = getQuote(this.event.params.quoteId, this.event.address)
+		let initialNewEntity = initialHelper(getQuoteValue)
+		quote.maxFundingRate = initialNewEntity.tradingFee
+		initialQuote.tradingFee = initialNewEntity.tradingFee
+
+
+		const symbolName = symbolIdToSymbolName(this.event.params.symbolId, this.event.address)
+		quote.symbol = symbolName
+		initialQuote.symbol = symbolName
+
 
 		if (this.event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
@@ -96,9 +85,9 @@ export class SendQuoteHandler extends BaseHandler {
 
 		quote.timeStamp = this.event.block.timestamp
 		let EventTimestampEntity = new EventsTimestamp(this.event.params.quoteId.toString())
-		quote.eventsTimestamp = EventTimestampEntity.id
+		quote.eventsTimestamp = this.event.params.quoteId.toString()
 		let TransactionsHashEntity = new TransactionsHash(this.event.params.quoteId.toString())
-		quote.transactionsHash = TransactionsHashEntity.id
+		quote.transactionsHash = this.event.params.quoteId.toString()
 		quote.action = "SendQuote"
 		quote.save()
 
@@ -106,6 +95,8 @@ export class SendQuoteHandler extends BaseHandler {
 		EventTimestampEntity.save()
 		TransactionsHashEntity.SendQuote = this.event.transaction.hash
 		TransactionsHashEntity.save()
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
+			'SendQuote', this.event.transaction.hash)
 	}
 
 	handleAccount(): void {
