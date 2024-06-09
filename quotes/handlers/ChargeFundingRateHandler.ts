@@ -3,6 +3,7 @@ import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../.
 import { FACTOR } from "../../common/utils"
 import { GlobalFee, Quote } from "../../generated/schema"
 import { ChargeFundingRate } from "../../generated/symmio/symmio"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 
 export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 
@@ -40,6 +41,8 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			globalEntity.globalFee = globalEntity.globalFee.plus(fee)
 			globalEntity.latestTimestamp = this.event.block.timestamp
 			globalEntity.save()
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
+				'ChargeFundingRate', this.event.transaction.hash)
 		}
 	}
 }

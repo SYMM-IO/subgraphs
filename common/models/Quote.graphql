@@ -89,6 +89,7 @@ type EventsTimestamp @entity {
 	ExpireQuote: BigInt
 	AcceptCancelCloseRequest: BigInt
 	AcceptCancelRequest: BigInt
+	ChargeFundingRate: BigInt
 	EmergencyClosePosition: BigInt
 	ForceCancelCloseRequest: BigInt
 	FillCloseRequest: BigInt
@@ -111,6 +112,7 @@ type TransactionsHash @entity {
 	ExpireQuote: Bytes
 	AcceptCancelCloseRequest: Bytes
 	AcceptCancelRequest: Bytes
+	ChargeFundingRate: Bytes
 	EmergencyClosePosition: Bytes
 	ForceCancelCloseRequest: Bytes
 	FillCloseRequest: Bytes
