@@ -14,7 +14,6 @@ export class RequestToCancelQuoteHandler extends CommonRequestToCancelQuoteHandl
 	handle(): void {
 		super.handle()
 		super.handleQuote()
-		let quote = Quote.load(this.event.params.quoteId.toString())!
 		if (this.event.params.quoteStatus === 3) {
 			let event = super.getEvent()
 			removeQuoteFromPendingList(event.params.quoteId)

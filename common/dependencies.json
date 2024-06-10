@@ -15,7 +15,7 @@
 		"EmergencyClosePosition",
 		"FillCloseRequest",
 		"OpenPosition",
-		"SetSymbolsPricesEvent"
+		"SetSymbolsPrices"
 	],
 	"User": ["SendQuote", "AddAccount"]
 }

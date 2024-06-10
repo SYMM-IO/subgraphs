@@ -27,7 +27,7 @@ export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPar
 			if (partyASymbolPriceEntity) {
 				quote.liquidatePrice = partyASymbolPriceEntity.requestedOpenPrice
 			} else {
-				log.debug(`Error in get entity liquidate requestedOpenPrice`, [])
+				log.debug(`Error in get entity liquidate requestedOpenPrice quoteId={} partyA={} symbolID={}`, [qoutId.toString(), this.event.params.partyA.toHexString(), quote.symbolId!.toString()])
 			}
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 				'LiquidatePositionsPartyA', this.event.transaction.hash)
