@@ -571,11 +571,11 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
 
     let q = getQuote(event.params.quoteId, event.address);
     if (q) {
-
         const newCva = q.lockedValues.cva
         const newPartyAmm = q.lockedValues.partyAmm
         const newPartyBmm = q.lockedValues.partyBmm
         const newLF = q.lockedValues.lf
+        log.debug("get quote value quoteId={} cva={} Amm={} lf={]", [event.params.quoteId.toString(), newCva.toString(), newPartyAmm.toString(), newLF.toString()])
 
         entity.cva = newCva
         entity.partyAmm = newPartyAmm
