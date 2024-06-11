@@ -28,9 +28,9 @@ export class ForceClosePositionHandler extends BaseHandler {
 		quote.averageClosedPrice = (quote.closedAmount!.times(quote.averageClosedPrice!).plus(this.event.params.filledAmount.times(this.event.params.closedPrice))).div(quote.closedAmount!.plus(this.event.params.filledAmount))
 		quote.closedAmount = quote.closedAmount!.plus(this.event.params.filledAmount)
 		quote.quoteStatus = this.event.params.quoteStatus
+		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 			'ForceClosePosition', this.event.transaction.hash, this.event.block.number)
 
-		quote.save()
 	}
 }

@@ -25,8 +25,8 @@ export class LockQuoteHandler extends BaseHandler {
 		quote.quoteId = this.event.params.quoteId
 		quote.partyB = this.event.params.partyB
 		quote.quoteStatus = 1
+		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
 			'LockQuote', this.event.transaction.hash, this.event.block.number)
-		quote.save()
 	}
 }
