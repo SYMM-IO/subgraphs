@@ -14,7 +14,7 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 	handle(): void {
 		super.handle()
 		super.handleQuote()
-
+		const event = super.getEvent()
 		for (let i = 0, lenQ = this.event.params.quoteIds.length; i < lenQ; i++) {
 			let qoutId = this.event.params.quoteIds[i]
 			const rate = this.event.params.rates[i]
@@ -32,6 +32,8 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			quote.openedPrice = newPrice
 			quote.globalCounter = getGlobalCounterAndInc()
 			quote.save()
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
+				'ChargeFundingRate', event.transaction.hash, event.block.number)
 
 			let globalEntity = GlobalFee.load("GlobalEntity")
 			if (!globalEntity) {
@@ -41,8 +43,6 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			globalEntity.globalFee = globalEntity.globalFee.plus(fee)
 			globalEntity.latestTimestamp = this.event.block.timestamp
 			globalEntity.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'ChargeFundingRate', this.event.transaction.hash)
 		}
 	}
 }
