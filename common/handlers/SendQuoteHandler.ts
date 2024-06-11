@@ -95,8 +95,6 @@ export class SendQuoteHandler extends BaseHandler {
 		EventTimestampEntity.save()
 		TransactionsHashEntity.SendQuote = this.event.transaction.hash
 		TransactionsHashEntity.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'SendQuote', this.event.transaction.hash)
 	}
 
 	handleAccount(): void {

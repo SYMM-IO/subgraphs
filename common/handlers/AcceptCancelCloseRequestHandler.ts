@@ -31,7 +31,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 			quote.save()
 
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'AcceptCancelCloseRequest', this.event.transaction.hash)
+				'AcceptCancelCloseRequest', this.event.transaction.hash, this.event.block.number)
 		} else {
 			let newEntity = new Quote(this.event.params.quoteId.toString())
 			newEntity.globalCounter = getGlobalCounterAndInc()

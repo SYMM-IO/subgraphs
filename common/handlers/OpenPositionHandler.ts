@@ -30,8 +30,7 @@ export class OpenPositionHandler extends BaseHandler {
 		quote.quantity = this.event.params.filledAmount
 		quote.initialOpenedPrice = this.event.params.openedPrice
 		quote.fundingRateOpenedPrice = this.event.params.openedPrice
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'OpenPosition', this.event.transaction.hash, this.event.block.number)
+
 		const initialEntity = InitialQuote.load(quote.initialData!)!
 
 		let q = getQuote(this.event.params.quoteId, this.event.address)
@@ -51,6 +50,8 @@ export class OpenPositionHandler extends BaseHandler {
 		initialEntity.quantity = this.event.params.filledAmount
 		initialEntity.save()
 		quote.save()
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
+			'OpenPosition', this.event.transaction.hash, this.event.block.number)
 	}
 
 	handleAccount(): void {
