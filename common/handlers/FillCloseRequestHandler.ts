@@ -22,7 +22,6 @@ export class FillCloseRequestHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
-		quote.blockNumber = this.event.block.number
 		let q = getQuote(this.event.params.quoteId, this.event.address)
 		quote.cva = q.lockedValues.cva
 		quote.partyAmm = q.lockedValues.partyAmm
@@ -34,9 +33,8 @@ export class FillCloseRequestHandler extends BaseHandler {
 		quote.quoteStatus = this.event.params.quoteStatus
 		quote.averageClosedPrice = (quote.closedAmount!.times(quote.averageClosedPrice!).plus(this.event.params.filledAmount.times(this.event.params.closedPrice))).div(quote.closedAmount!.plus(this.event.params.filledAmount))
 		quote.closedAmount = quote.closedAmount!.plus(this.event.params.filledAmount)
-		quote.timeStamp = this.event.block.timestamp
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'FillCloseRequest', this.event.transaction.hash)
+			'FillCloseRequest', this.event.transaction.hash, this.event.block.number)
 		quote.save()
 	}
 }

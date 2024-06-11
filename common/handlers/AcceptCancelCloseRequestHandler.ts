@@ -58,7 +58,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 				newEntity.initialData = initialNewEntity.id
 			}
 			setEventTimestampAndTransactionHashAndAction(newEntity.eventsTimestamp, this.event.block.timestamp,
-				'AcceptCancelCloseRequest', this.event.transaction.hash)
+				'AcceptCancelCloseRequest', this.event.transaction.hash, this.event.block.number)
 
 			newEntity.save()
 		}

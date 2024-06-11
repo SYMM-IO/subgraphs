@@ -14,23 +14,22 @@ export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPar
 	handle(): void {
 		super.handle()
 		super.handleQuote()
-
-		for (let i = 0, lenQ = this.event.params.quoteIds.length; i < lenQ; i++) {
-			let qoutId = this.event.params.quoteIds[i]
+		const event = super.getEvent()
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			let qoutId = event.params.quoteIds[i]
 			let quote = Quote.load(qoutId.toString())!
 			quote.globalCounter = getGlobalCounterAndInc()
-			quote.timeStamp = this.event.block.timestamp
 			quote.quoteStatus = 8
 			let LiquidateAmount = quote.quantity!.minus(quote.closedAmount!)
 			quote.liquidateAmount = LiquidateAmount
-			let partyASymbolPriceEntity = PartyASymbolPrice.load(this.event.params.partyA.toHexString().concat('-').concat(quote.symbolId!.toHex()))
+			let partyASymbolPriceEntity = PartyASymbolPrice.load(event.params.partyA.toHexString().concat('-').concat(quote.symbolId!.toHex()))
 			if (partyASymbolPriceEntity) {
 				quote.liquidatePrice = partyASymbolPriceEntity.requestedOpenPrice
 			} else {
 				log.debug(`Error in get entity liquidate requestedOpenPrice quoteId={} partyA={} symbolID={}`, [qoutId.toString(), this.event.params.partyA.toHexString(), quote.symbolId!.toString()])
 			}
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'LiquidatePositionsPartyA', this.event.transaction.hash)
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
+				'LiquidatePositionsPartyA', event.transaction.hash, event.block.number)
 			quote.save()
 		}
 	}

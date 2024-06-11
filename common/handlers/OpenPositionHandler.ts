@@ -23,17 +23,15 @@ export class OpenPositionHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
-		quote.blockNumber = this.event.block.number
 		quote.quoteId = this.event.params.quoteId
 		quote.fillAmount = this.event.params.filledAmount
 		quote.openedPrice = this.event.params.openedPrice
 		quote.quoteStatus = 4
-		quote.timeStamp = this.event.block.timestamp
 		quote.quantity = this.event.params.filledAmount
 		quote.initialOpenedPrice = this.event.params.openedPrice
 		quote.fundingRateOpenedPrice = this.event.params.openedPrice
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'OpenPosition', this.event.transaction.hash)
+			'OpenPosition', this.event.transaction.hash, this.event.block.number)
 		const initialEntity = InitialQuote.load(quote.initialData!)!
 
 		let q = getQuote(this.event.params.quoteId, this.event.address)

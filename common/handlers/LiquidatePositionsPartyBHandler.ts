@@ -25,8 +25,6 @@ export class LiquidatePositionsPartyBHandler extends BaseHandler {
 			let qouteId = this.event.params.quoteIds[i]
 			let quote = Quote.load(qouteId.toString())!
 			quote.globalCounter = getGlobalCounterAndInc()
-			quote.blockNumber = this.event.block.number
-			quote.timeStamp = this.event.block.timestamp
 			quote.quoteStatus = 8
 			const result = getQuote(qouteId, this.event.address)
 			const getclosedAmount = quote.quantity!
@@ -40,7 +38,7 @@ export class LiquidatePositionsPartyBHandler extends BaseHandler {
 			}
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'LiquidatePositionsPartyB', this.event.transaction.hash)
+				'LiquidatePositionsPartyB', this.event.transaction.hash, this.event.block.number)
 		}
 	}
 }

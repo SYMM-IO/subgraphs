@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../common/handlers/ChargeFundingRateHandler"
-import { FACTOR } from "../../common/utils"
+import { FACTOR, getGlobalCounterAndInc } from "../../common/utils"
 import { GlobalFee, Quote } from "../../generated/schema"
 import { ChargeFundingRate } from "../../generated/symmio/symmio"
 import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
@@ -30,7 +30,7 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			fee = quote.openedPrice!.times(rate).times(openQuantityUntilNow).div(FACTOR).div(FACTOR)
 			quote.fundingRateFee = fee.plus(quote.fundingRateFee!)
 			quote.openedPrice = newPrice
-
+			quote.globalCounter = getGlobalCounterAndInc()
 			quote.save()
 
 			let globalEntity = GlobalFee.load("GlobalEntity")

@@ -30,7 +30,7 @@ export class AcceptCancelRequestHandler extends BaseHandler {
 			quote.save()
 
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'AcceptCancelRequest', this.event.transaction.hash)
+				'AcceptCancelRequest', this.event.transaction.hash, this.event.block.number)
 		}
 	}
 }

@@ -6,6 +6,7 @@ import {
 import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
 import { LiquidatePendingPositionsPartyA } from "../../generated/symmio/symmio"
 import { getGlobalCounterAndInc } from "../../common/utils"
+import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
 
 export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendingPositionsPartyAHandler {
 
@@ -16,18 +17,20 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 	handle(): void {
 		super.handle()
 		super.handleQuote()
-
+		const event = super.getEvent()
 		let partyAEntity = PartyA.load(this.event.params.partyA.toHexString())!
 		partyAEntity.globalCounter = getGlobalCounterAndInc()
 		const list = partyAEntity.quoteUntilLiquid!.slice(0)
 		for (let i = 0, lenQ = list.length; i < lenQ; i++) {
 			const quoteId = list[i]
-			let pendingEntity = Quote.load(quoteId.toString())!
-			pendingEntity.globalCounter = getGlobalCounterAndInc()
-			if (pendingEntity.quoteStatus <= 2 && pendingEntity.quoteStatus >= 0) {
-				pendingEntity.quoteStatus = 8
-				pendingEntity.save()
-				const partyB = pendingEntity.partyB
+			let quote = Quote.load(quoteId.toString())!
+			quote.globalCounter = getGlobalCounterAndInc()
+			if (quote.quoteStatus <= 2 && quote.quoteStatus >= 0) {
+				quote.quoteStatus = 8
+				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
+					'LiquidatePendingPositionsPartyA', event.transaction.hash, event.block.number)
+				quote.save()
+				const partyB = quote.partyB
 				if (partyB) {
 					let partyAPartyBEntity = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + partyB.toHexString())!
 					partyAPartyBEntity.globalCounter = getGlobalCounterAndInc()
@@ -35,7 +38,7 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 					partyAPartyBEntity.save()
 				}
 			} else {
-				log.error(`error in liquidate positions party A\nQuoteId: ${quoteId}\nQuote status: ${pendingEntity.quoteStatus}`, [])
+				log.error(`error in liquidate positions party A\nQuoteId: ${quoteId}\nQuote status: ${quote.quoteStatus}`, [])
 			}
 		}
 	}
