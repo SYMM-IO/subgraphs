@@ -36,6 +36,8 @@ export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler
 			quote.action = 'AcceptCancelRequest'
 			quote.eventsTimestamp = quoteStr
 			quote.transactionsHash = quoteStr
+			quote.timeStamp = event.block.timestamp
+			quote.blockNumber = event.block.number
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
 				'AcceptCancelRequest', event.transaction.hash, event.block.number)
 			quote.save()
