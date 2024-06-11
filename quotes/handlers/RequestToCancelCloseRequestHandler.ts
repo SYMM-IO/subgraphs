@@ -13,9 +13,5 @@ export class RequestToCancelCloseRequestHandler extends CommonRequestToCancelClo
 	handle(): void {
 		super.handle()
 		super.handleQuote()
-		let event = super.getEvent()
-		if (event.params.quoteStatus === 3) {
-			removeQuoteFromPendingList(event.params.quoteId)
-		}
 	}
 }

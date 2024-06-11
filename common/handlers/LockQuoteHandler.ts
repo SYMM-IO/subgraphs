@@ -22,13 +22,11 @@ export class LockQuoteHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
-		quote.blockNumber = this.event.block.number
 		quote.quoteId = this.event.params.quoteId
 		quote.partyB = this.event.params.partyB
 		quote.quoteStatus = 1
-		quote.timeStamp = this.event.block.timestamp
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'LockQuote', this.event.transaction.hash)
+			'LockQuote', this.event.transaction.hash, this.event.block.number)
 		quote.save()
 	}
 }

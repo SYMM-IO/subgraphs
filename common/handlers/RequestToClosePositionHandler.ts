@@ -22,7 +22,6 @@ export class RequestToClosePositionHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
-		quote.blockNumber = this.event.block.number
 		quote.closePrice = this.event.params.closePrice
 		quote.closeDeadline = this.event.params.deadline
 		quote.orderTypeClose = this.event.params.orderType
@@ -31,9 +30,8 @@ export class RequestToClosePositionHandler extends BaseHandler {
 		quote.quantityToClose = this.event.params.quantityToClose
 		quote.quoteId = this.event.params.quoteId
 		quote.quoteStatus = this.event.params.quoteStatus
-		quote.timeStamp = this.event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'RequestToClosePosition', this.event.transaction.hash)
+			'RequestToClosePosition', this.event.transaction.hash, this.event.block.number)
 	}
 }

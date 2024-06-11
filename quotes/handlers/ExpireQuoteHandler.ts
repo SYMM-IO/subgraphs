@@ -17,5 +17,6 @@ export class ExpireQuoteHandler extends CommonExpireQuoteHandler {
 		super.handleQuote()
 		let event = super.getEvent()
 		removeQuoteFromPendingList(event.params.quoteId)
+
 	}
 }

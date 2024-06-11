@@ -32,7 +32,7 @@ export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
 	return entity
 }
 
-export function setEventTimestampAndTransactionHashAndAction(id: string, timestamp: BigInt, eventName: string, trHash: Bytes): void {
+export function setEventTimestampAndTransactionHashAndAction(id: string, timestamp: BigInt, eventName: string, trHash: Bytes, blockNumber: BigInt | null = null): void {
 	let timestampEntity = EventsTimestamp.load(id)
 	if (!timestampEntity) {
 		timestampEntity = new EventsTimestamp(id)
@@ -49,6 +49,10 @@ export function setEventTimestampAndTransactionHashAndAction(id: string, timesta
 
 	let quote = Quote.load(id)!
 	quote.action = eventName
+	quote.timeStamp = timestamp
+	if (blockNumber) {
+		quote.blockNumber = blockNumber
+	}
 	quote.save()
 }
 

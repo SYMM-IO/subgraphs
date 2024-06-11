@@ -23,11 +23,9 @@ export class ExpireQuoteHandler extends BaseHandler {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
 		quote.quoteId = this.event.params.quoteId
-		quote.timeStamp = this.event.block.timestamp
-		quote.blockNumber = this.event.block.number
 		quote.quoteStatus = this.event.params.quoteStatus
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'ExpireQuote', this.event.transaction.hash)
+			'ExpireQuote', this.event.transaction.hash, this.event.block.number)
 		quote.save()
 	}
 }

@@ -24,7 +24,6 @@ export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler
 			quote.globalCounter = getGlobalCounterAndInc()
 			quote.quoteId = event.params.quoteId
 			quote.quoteStatus = event.params.quoteStatus
-			quote.timeStamp = event.block.timestamp
 
 			const quoteData = getQuote(quote.quoteId, event.address)
 			let initialquote = initialHelper(quoteData)
@@ -34,9 +33,13 @@ export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler
 			quote.partyA = initialquote.partyA
 			quote.tradingFee = initialquote.tradingFee!
 			quote.initialData = initialquote.id
+			quote.action = 'AcceptCancelRequest'
+			quote.eventsTimestamp = quoteStr
+			quote.transactionsHash = quoteStr
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
+				'AcceptCancelRequest', event.transaction.hash, event.block.number)
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quoteStr, this.event.block.timestamp,
-				'AcceptCancelRequest', this.event.transaction.hash)
+
 		}
 	}
 }

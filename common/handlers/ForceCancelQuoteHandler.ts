@@ -22,12 +22,10 @@ export class ForceCancelQuoteHandler extends BaseHandler {
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
 		quote.globalCounter = getGlobalCounterAndInc()
-		quote.blockNumber = this.event.block.number
 		quote.quoteId = this.event.params.quoteId
 		quote.quoteStatus = this.event.params.quoteStatus
-		quote.timeStamp = this.event.block.timestamp
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'ForceCancelQuote', this.event.transaction.hash)
+			'ForceCancelQuote', this.event.transaction.hash, this.event.block.number)
 
 		quote.save()
 	}
