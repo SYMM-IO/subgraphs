@@ -37,8 +37,8 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			else
 				quoteFundingDetails.fundingReceived = quoteFundingDetails.fundingReceived.plus(funding)
 			quote.openedPrice = chainQuote.openedPrice
+			setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, 'ChargeFundingRate', event.transaction.hash, event.block.number)
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, 'ChargeFundingRate', event.transaction.hash)
 
 			const dh = getDailyHistoryForTimestamp(
 				event.block.timestamp,

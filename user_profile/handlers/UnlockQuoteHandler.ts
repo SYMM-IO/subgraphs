@@ -22,7 +22,7 @@ export class UnlockQuoteHandler extends CommonUnlockQuoteHandler {
 		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.partyB = null
 		quote.quoteStatus = QuoteStatus.PENDING
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "UnlockQuote", event.transaction.hash)
 		quote.save()
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "UnlockQuote", event.transaction.hash, event.block.number)
 	}
 }

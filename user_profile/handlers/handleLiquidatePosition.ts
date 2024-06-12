@@ -9,8 +9,8 @@ export function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt, eve
     const event = changetype<LiquidatePositionsPartyA>(_event)
     const quote = Quote.load(qId.toString())!
     quote.quoteStatus = QuoteStatus.LIQUIDATED
-    setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, eventName, event.transaction.hash)
     quote.save()
+    setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, eventName, event.transaction.hash, event.block.number)
     const chainQuote = getQuote(qId, event.address)
     if (chainQuote == null) return
     const liquidAmount = quote.quantity!.minus(quote.closedAmount!)

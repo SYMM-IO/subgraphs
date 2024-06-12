@@ -22,7 +22,7 @@ export class LockQuoteHandler extends CommonLockQuoteHandler {
 		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.partyB = event.params.partyB
 		quote.quoteStatus = QuoteStatus.LOCKED
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "LockQuote", event.transaction.hash)
 		quote.save()
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "LockQuote", event.transaction.hash, event.block.number)
 	}
 }

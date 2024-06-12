@@ -16,7 +16,6 @@ export function handleClose(_event: ethereum.Event, eventName: string): void {
     quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
     if (quote.closedAmount!.equals(quote.quantity!))
         quote.quoteStatus = QuoteStatus.CLOSED
-    setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, eventName, event.transaction.hash)
 
     const pnl = unDecimal(
         (quote.positionType == 0
@@ -27,6 +26,7 @@ export function handleClose(_event: ethereum.Event, eventName: string): void {
             .times(event.params.filledAmount),
     )
     quote.save()
+    setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, eventName, event.transaction.hash, event.block.number)
 
     let quoteFundingDetails = QuoteFundingDetails.load(quote.id)!
     quoteFundingDetails.pnl = quoteFundingDetails.pnl.plus(pnl)

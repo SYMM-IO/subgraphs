@@ -25,9 +25,9 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
 			if (quote.quoteStatus <= 2 && quote.quoteStatus >= 0) {
 				quote.quoteStatus = 8
 				quote.globalCounter = getGlobalCounterAndInc()
+				quote.save()
 				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
 					'LiquidatePartyB', event.transaction.hash, event.block.number)
-				quote.save()
 			} else {
 				log.error(`error in liquidate positions party B\nQuoteId: ${quoteId}\nQuote status: ${quote.quoteStatus}`, [])
 			}

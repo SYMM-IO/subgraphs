@@ -27,9 +27,9 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 			quote.globalCounter = getGlobalCounterAndInc()
 			if (quote.quoteStatus <= 2 && quote.quoteStatus >= 0) {
 				quote.quoteStatus = 8
+				quote.save()
 				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
 					'LiquidatePendingPositionsPartyA', event.transaction.hash, event.block.number)
-				quote.save()
 				const partyB = quote.partyB
 				if (partyB) {
 					let partyAPartyBEntity = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + partyB.toHexString())!
