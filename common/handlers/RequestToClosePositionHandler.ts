@@ -25,10 +25,7 @@ export class RequestToClosePositionHandler extends BaseHandler {
 		quote.closePrice = this.event.params.closePrice
 		quote.closeDeadline = this.event.params.deadline
 		quote.orderTypeClose = this.event.params.orderType
-		quote.partyA = this.event.params.partyA
-		quote.partyB = this.event.params.partyB
 		quote.quantityToClose = this.event.params.quantityToClose
-		quote.quoteId = this.event.params.quoteId
 		quote.quoteStatus = this.event.params.quoteStatus
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,

@@ -1,9 +1,9 @@
 import { AcceptCancelRequestHandler as CommonAcceptCancelRequestHandler } from "../../common/handlers/AcceptCancelRequestHandler"
 import { getGlobalCounterAndInc, getQuote, symbolIdToSymbolName } from "../../common/utils"
 import { removeQuoteFromPendingList } from "../../common/utils/quote"
-import { initialHelper, setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
+import { initialHelper, } from "../../common/utils/quote&analitics&user"
 
-import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
+import { Quote } from "../../generated/schema"
 import { AcceptCancelRequest } from "../../generated/symmio/symmio"
 
 export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler {
