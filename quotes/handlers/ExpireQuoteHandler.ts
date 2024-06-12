@@ -3,7 +3,6 @@ import { ExpireQuoteHandler as CommonExpireQuoteHandler } from "../../common/han
 
 import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
 import { ExpireQuote } from "../../generated/symmio/symmio"
-import { getGlobalCounterAndInc } from "../../common/utils"
 import { removeQuoteFromPendingList } from "../../common/utils/quote"
 
 export class ExpireQuoteHandler extends CommonExpireQuoteHandler {
