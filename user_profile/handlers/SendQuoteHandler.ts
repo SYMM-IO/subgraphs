@@ -56,7 +56,6 @@ export class SendQuoteHandler extends CommonSendQuoteHandler {
 		quoteFundingDetails.collateral = getConfiguration(event).collateral
 		quoteFundingDetails.save()
 
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "SendQuote", event.transaction.hash)
 
 		const dh = getDailyHistoryForTimestamp(
 			event.block.timestamp,
@@ -66,6 +65,7 @@ export class SendQuoteHandler extends CommonSendQuoteHandler {
 		dh.quotesCount = dh.quotesCount.plus(BigInt.fromString("1"))
 		dh.updateTimestamp = event.block.timestamp
 		dh.save()
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "SendQuote", event.transaction.hash, event.block.number)
 
 		const th = getTotalHistory(
 			event.block.timestamp,

@@ -21,8 +21,8 @@ export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler
 		let quote = Quote.load(event.params.quoteId.toString())
 		if (quote == null) return
 		quote.quoteStatus = event.params.quoteStatus
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "AcceptCancelRequest", event.transaction.hash)
-
 		quote.save()
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "AcceptCancelRequest", event.transaction.hash, event.block.number)
+
 	}
 }

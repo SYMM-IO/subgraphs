@@ -36,7 +36,7 @@ export class OpenPositionHandler extends CommonOpenPositionHandler {
 		quote.quantity = event.params.filledAmount
 		quote.quoteStatus = QuoteStatus.OPENED
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "OpenPosition", event.transaction.hash)
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "OpenPosition", event.transaction.hash, event.block.number)
 
 
 		const symbol = Symbol.load(quote.symbolId!.toString())

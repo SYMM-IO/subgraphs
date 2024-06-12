@@ -21,7 +21,7 @@ export class RequestToClosePositionHandler extends CommonRequestToClosePositionH
 
 		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.quoteStatus = QuoteStatus.CLOSE_PENDING
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "RequestToClosePosition", event.transaction.hash)
 		quote.save()
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "RequestToClosePosition", event.transaction.hash, event.block.number)
 	}
 }

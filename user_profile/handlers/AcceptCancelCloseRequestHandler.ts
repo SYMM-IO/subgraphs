@@ -21,7 +21,7 @@ export class AcceptCancelCloseRequestHandler extends CommonAcceptCancelCloseRequ
 
 		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.quoteStatus = QuoteStatus.OPENED
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "AcceptCancelCloseRequest", event.transaction.hash)
 		quote.save()
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "AcceptCancelCloseRequest", event.transaction.hash, event.block.number)
 	}
 }

@@ -20,7 +20,7 @@ export class ExpireQuoteHandler extends CommonExpireQuoteHandler {
 
 		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.quoteStatus = event.params.quoteStatus
-		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "ExpireQuote", event.transaction.hash)
 		quote.save()
+		setEventTimestampAndTransactionHashAndAction(quote.id, event.block.timestamp, "ExpireQuote", event.transaction.hash, event.block.number)
 	}
 }
