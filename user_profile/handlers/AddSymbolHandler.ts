@@ -10,7 +10,7 @@ export class AddSymbolHandler extends CommonAddSymbolHandler {
 
     handle(): void {
         super.handle()
-        super.handleGlobalCounter()
+        const globalCounter = super.handleGlobalCounter()
         super.handleQuote()
         super.handleSymbol()
         super.handleUser()
