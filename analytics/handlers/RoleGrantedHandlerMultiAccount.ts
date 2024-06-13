@@ -16,21 +16,21 @@ export class RoleGrantedHandler extends CommonRoleGrantedHandler {
 		super.handleUser()
 		super.handleAccount()
 
-		let event = super.getEvent()
+		// let event = super.getEvent()
 
-		let id =
-			rolesNames.get(event.params.role.toHexString()) +
-			"_" +
-			event.params.account.toHexString() +
-			"_" +
-			event.address.toHexString()
-		let gr = new GrantedRole(id)
-		gr.role = rolesNames.get(event.params.role.toHexString()) || event.params.role.toHexString()
-		gr.user = event.params.account
-		gr.contract = event.address
-		gr.grantTransaction = event.transaction.hash
-		gr.revokeTransaction = null
-		gr.updateTimestamp = event.block.timestamp
-		gr.save()
+		// let id =
+		// 	rolesNames.get(event.params.role.toHexString()) +
+		// 	"_" +
+		// 	event.params.account.toHexString() +
+		// 	"_" +
+		// 	event.address.toHexString()
+		// let gr = new GrantedRole(id)
+		// gr.role = rolesNames.get(event.params.role.toHexString()) || event.params.role.toHexString()
+		// gr.user = event.params.account
+		// gr.contract = event.address
+		// gr.grantTransaction = event.transaction.hash
+		// gr.revokeTransaction = null
+		// gr.updateTimestamp = event.block.timestamp
+		// gr.save()
 	}
 }
