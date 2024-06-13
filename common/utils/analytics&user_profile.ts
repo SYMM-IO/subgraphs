@@ -40,6 +40,7 @@ export function createNewAccount(
     account.accountSource = accountSource
     account.name = name
     account.globalCounter = getGlobalCounterAndInc()
+    account.blockNumber = block.number
     account.save()
     return account
 }
