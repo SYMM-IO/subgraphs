@@ -430,7 +430,8 @@ export function handleAcceptCancelCloseRequest(
     entity.GlobalCounter = getGlobalCounterAndInc()
     entity.quoteId = event.params.quoteId
     entity.quoteStatus = event.params.quoteStatus
-
+    entity.timeStamp = event.block.timestamp
+    entity.timestampsAcceptCancelCloseRequestTimeStamp = event.block.timestamp
 
     entity.save()
 }
