@@ -18,11 +18,11 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
 
-    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
+    partyAEntity.globalCounter = super.handleGlobalCounter()
     const list = partyAEntity.quoteUntilLiquid!.slice(0)
 
     let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toHexString()))
-    liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
+    liquidTrEntity.GlobalCounter = super.handleGlobalCounter()
     liquidTrEntity.mode = "Pending"
     const balance = allocatedBalanceOfPartyA(event.params.partyA, event.address)
     if (balance) {

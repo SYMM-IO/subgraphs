@@ -21,7 +21,7 @@ export class RequestToCancelCloseRequestHandler extends BaseHandler {
 
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
-		quote.globalCounter = getGlobalCounterAndInc()
+		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteStatus = this.event.params.quoteStatus
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,

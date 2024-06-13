@@ -21,7 +21,7 @@ export class EmergencyClosePositionHandler extends BaseHandler {
 
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
-		quote.globalCounter = getGlobalCounterAndInc()
+		quote.globalCounter = super.handleGlobalCounter()
 		quote.blockNumber = this.event.block.number
 		quote.quoteId = this.event.params.quoteId
 		quote.fillAmount = this.event.params.filledAmount

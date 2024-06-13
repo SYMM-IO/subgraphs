@@ -1,5 +1,6 @@
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { User as UserModel, Account as AccountModel } from "../../generated/schema"
+import { getGlobalCounterAndInc } from "../utils"
 
 export function createNewUser(
     address: Bytes,
@@ -9,6 +10,7 @@ export function createNewUser(
     let user = new UserModel(address.toHexString())
     user.timestamp = block.timestamp
     user.transaction = transaction.hash
+    user.globalCounter = getGlobalCounterAndInc()
     user.save()
     return user
 }
@@ -36,6 +38,7 @@ export function createNewAccount(
     account.updateTimestamp = block.timestamp
     account.accountSource = accountSource
     account.name = name
+    account.globalCounter = getGlobalCounterAndInc()
     account.save()
     return account
 }

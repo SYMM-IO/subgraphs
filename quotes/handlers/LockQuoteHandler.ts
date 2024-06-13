@@ -24,7 +24,7 @@ export class LockQuoteHandler extends CommonLockQuoteHandler {
 			temp.push(this.event.params.quoteId)
 			partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
 		}
-		partyAPartyBEntity.globalCounter = getGlobalCounterAndInc()
+		partyAPartyBEntity.globalCounter = super.handleGlobalCounter()
 		partyAPartyBEntity.save()
 	}
 }

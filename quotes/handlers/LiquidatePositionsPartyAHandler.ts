@@ -18,7 +18,7 @@ export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPar
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let qoutId = event.params.quoteIds[i]
 			let quote = Quote.load(qoutId.toString())!
-			quote.globalCounter = getGlobalCounterAndInc()
+			quote.globalCounter = super.handleGlobalCounter()
 			quote.quoteStatus = 8
 			let LiquidateAmount = quote.quantity!.minus(quote.closedAmount!)
 			quote.liquidateAmount = LiquidateAmount

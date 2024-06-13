@@ -18,7 +18,7 @@ type PartyA @entity {
 	id: String!
 	partyB: Bytes
 	quoteUntilLiquid: [BigInt!]
-	GlobalCounter: BigInt!
+	globalCounter: BigInt!
 }
 type PartyApartyB @entity {
 	id: String!

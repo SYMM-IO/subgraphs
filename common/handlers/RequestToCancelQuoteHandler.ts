@@ -21,7 +21,7 @@ export class RequestToCancelQuoteHandler extends BaseHandler {
 
 	handleQuote(): void {
 		let quote = Quote.load(this.event.params.quoteId.toString())!
-		quote.globalCounter = getGlobalCounterAndInc()
+		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteId = this.event.params.quoteId
 		quote.partyA = this.event.params.partyA
 		quote.quoteStatus = this.event.params.quoteStatus

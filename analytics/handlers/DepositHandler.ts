@@ -21,6 +21,7 @@ export class DepositHandler extends CommonDepositHandler {
 
 		let account = Account.load(event.params.user.toHexString())!
 		account.deposit = account.deposit.plus(event.params.amount)
+		account.globalCounter = globalCounter
 		account.save()
 		updateActivityTimestamps(account, event.block.timestamp)
 		let deposit = new BalanceChange(
