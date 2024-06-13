@@ -8,6 +8,7 @@ export function createNewUser(
     transaction: ethereum.Transaction,
 ): UserModel {
     let user = new UserModel(address.toHexString())
+    user.address = address
     user.timestamp = block.timestamp
     user.transaction = transaction.hash
     user.globalCounter = getGlobalCounterAndInc()
