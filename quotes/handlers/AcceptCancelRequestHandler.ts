@@ -21,7 +21,7 @@ export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler
 		let quote = Quote.load(quoteStr)
 		if (!quote) {
 			quote = new Quote(quoteStr)
-			quote.globalCounter = getGlobalCounterAndInc()
+			quote.globalCounter = super.handleGlobalCounter()
 			quote.quoteId = event.params.quoteId
 			quote.quoteStatus = event.params.quoteStatus
 

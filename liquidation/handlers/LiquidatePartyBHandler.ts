@@ -16,10 +16,10 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
     let event = super.getEvent()
     let partyAPartyBEntity = PartyApartyB.load(event.params.partyA.toHexString() + '-' + event.params.partyB.toHexString())!
     const list = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
-    partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
+    partyAPartyBEntity.GlobalCounter = super.handleGlobalCounter()
 
     let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString())
-    liquidTrEntity.GlobalCounter = getGlobalCounterAndInc()
+    liquidTrEntity.GlobalCounter = super.handleGlobalCounter()
     liquidTrEntity.mode = "PartyB"
     const balance = allocatedBalanceOfPartyB(event.params.partyB, event.params.partyA, event.address)
     if (balance) {
@@ -33,7 +33,7 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
     liquidTrEntity.save()
 
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
-    partyAEntity.GlobalCounter = getGlobalCounterAndInc()
+    partyAEntity.globalCounter = super.handleGlobalCounter()
     partyAPartyBEntity.quoteUntilLiquid = []
     partyAEntity.quoteUntilLiquid = []
     partyAEntity.save()

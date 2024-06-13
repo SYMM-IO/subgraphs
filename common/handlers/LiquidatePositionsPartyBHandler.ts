@@ -24,7 +24,7 @@ export class LiquidatePositionsPartyBHandler extends BaseHandler {
 		for (let i = 0, lenQ = this.event.params.quoteIds.length; i < lenQ; i++) {
 			let qouteId = this.event.params.quoteIds[i]
 			let quote = Quote.load(qouteId.toString())!
-			quote.globalCounter = getGlobalCounterAndInc()
+			quote.globalCounter = super.handleGlobalCounter()
 			quote.quoteStatus = 8
 			const result = getQuote(qouteId, this.event.address)
 			const getclosedAmount = quote.quantity!

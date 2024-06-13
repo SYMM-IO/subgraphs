@@ -1,4 +1,5 @@
-import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { getGlobalCounterAndInc } from "../utils"
 
 export class BaseHandler {
 	protected _event: ethereum.Event
@@ -11,7 +12,8 @@ export class BaseHandler {
 		// This is a generic handler. Specific event handlers will override this method.
 	}
 
-	handleGlobalCounter(): void {
+	handleGlobalCounter(): BigInt {
+		return getGlobalCounterAndInc()
 	}
 
 	handleSymbol(): void {

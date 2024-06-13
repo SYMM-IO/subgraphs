@@ -19,12 +19,12 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 		super.handleQuote()
 		const event = super.getEvent()
 		let partyAEntity = PartyA.load(this.event.params.partyA.toHexString())!
-		partyAEntity.globalCounter = getGlobalCounterAndInc()
+		partyAEntity.globalCounter = super.handleGlobalCounter()
 		const list = partyAEntity.quoteUntilLiquid!.slice(0)
 		for (let i = 0, lenQ = list.length; i < lenQ; i++) {
 			const quoteId = list[i]
 			let quote = Quote.load(quoteId.toString())!
-			quote.globalCounter = getGlobalCounterAndInc()
+			quote.globalCounter = super.handleGlobalCounter()
 			if (quote.quoteStatus <= 2 && quote.quoteStatus >= 0) {
 				quote.quoteStatus = 8
 				quote.save()
@@ -33,7 +33,7 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 				const partyB = quote.partyB
 				if (partyB) {
 					let partyAPartyBEntity = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + partyB.toHexString())!
-					partyAPartyBEntity.globalCounter = getGlobalCounterAndInc()
+					partyAPartyBEntity.globalCounter = super.handleGlobalCounter()
 					partyAPartyBEntity.quoteUntilLiquid = []
 					partyAPartyBEntity.save()
 				}

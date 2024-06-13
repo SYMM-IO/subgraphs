@@ -24,7 +24,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 		let quote = Quote.load(this.event.params.quoteId.toString())
 		if (quote) {
 
-			quote.globalCounter = getGlobalCounterAndInc()
+			quote.globalCounter = super.handleGlobalCounter()
 			quote.quoteStatus = this.event.params.quoteStatus
 			quote.blockNumber = this.event.block.number
 			quote.timeStamp = this.event.block.timestamp
@@ -34,7 +34,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 				'AcceptCancelCloseRequest', this.event.transaction.hash, this.event.block.number)
 		} else {
 			let newEntity = new Quote(this.event.params.quoteId.toString())
-			newEntity.globalCounter = getGlobalCounterAndInc()
+			newEntity.globalCounter = super.handleGlobalCounter()
 			newEntity.quoteId = this.event.params.quoteId
 			newEntity.quoteStatus = this.event.params.quoteStatus
 			newEntity.timeStamp = this.event.block.timestamp

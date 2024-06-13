@@ -27,7 +27,7 @@ export class SetSymbolsPricesHandler extends CommoneSetSymbolsPricesHandler {
 			partyASP.requestedOpenPrice = listOfPrices[i]
 			partyASP.timeStamp = this.event.block.timestamp
 			partyASP.trHash = this.event.transaction.hash
-			partyASP.GlobalCounter = getGlobalCounterAndInc()
+			partyASP.GlobalCounter = super.handleGlobalCounter()
 			partyASP.save()
 		}
 	}

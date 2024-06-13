@@ -18,13 +18,13 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
 		const event = super.getEvent()
 		let partyBpartyA = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + this.event.params.partyB.toHexString())!
 		const list = partyBpartyA.quoteUntilLiquid!.slice(0)
-		partyBpartyA.globalCounter = getGlobalCounterAndInc()
+		partyBpartyA.globalCounter = super.handleGlobalCounter()
 		for (let i = 0, lenQ = list.length; i < lenQ; i++) {
 			const quoteId = list[i]
 			let quote = Quote.load(quoteId.toString())!
 			if (quote.quoteStatus <= 2 && quote.quoteStatus >= 0) {
 				quote.quoteStatus = 8
-				quote.globalCounter = getGlobalCounterAndInc()
+				quote.globalCounter = super.handleGlobalCounter()
 				quote.save()
 				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
 					'LiquidatePartyB', event.transaction.hash, event.block.number)
@@ -33,7 +33,7 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
 			}
 		}
 		let partyA = PartyA.load(this.event.params.partyA.toHexString())!
-		partyA.globalCounter = getGlobalCounterAndInc()
+		partyA.globalCounter = super.handleGlobalCounter()
 		partyBpartyA.quoteUntilLiquid = []
 		partyA.quoteUntilLiquid = []
 		partyA.save()

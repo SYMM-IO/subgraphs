@@ -30,7 +30,7 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			fee = quote.openedPrice!.times(rate).times(openQuantityUntilNow).div(FACTOR).div(FACTOR)
 			quote.fundingRateFee = fee.plus(quote.fundingRateFee!)
 			quote.openedPrice = newPrice
-			quote.globalCounter = getGlobalCounterAndInc()
+			quote.globalCounter = super.handleGlobalCounter()
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
 				'ChargeFundingRate', event.transaction.hash, event.block.number)

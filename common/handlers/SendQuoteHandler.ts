@@ -22,7 +22,7 @@ export class SendQuoteHandler extends BaseHandler {
 
 	handleQuote(): void {
 		let quote = new Quote(this.event.params.quoteId.toString())
-		quote.globalCounter = getGlobalCounterAndInc()
+		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteId = this.event.params.quoteId
 		quote.orderTypeOpen = this.event.params.orderType
 		quote.partyA = this.event.params.partyA

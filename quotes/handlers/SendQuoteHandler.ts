@@ -26,7 +26,7 @@ export class SendQuoteHandler extends CommonSendQuoteHandler {
 
 			partyAEntity.quoteUntilLiquid = temp.slice(0)
 		}
-		partyAEntity.globalCounter = getGlobalCounterAndInc()
+		partyAEntity.globalCounter = super.handleGlobalCounter()
 		partyAEntity.save()
 	}
 }
