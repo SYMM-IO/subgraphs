@@ -10,7 +10,7 @@ export class AddAccountHandler extends CommonAddAccountHandler {
 
 	handle(): void {
 		super.handle()
-		super.handleGlobalCounter()
+		const globalCounter = super.handleGlobalCounter()
 
 		let event = super.getEvent()
 		newUserAndAccount(event.params.user, event.block, event.transaction)

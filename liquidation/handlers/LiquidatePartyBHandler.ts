@@ -12,7 +12,7 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
 
   handle(): void {
     super.handle()
-    super.handleGlobalCounter()
+    const globalCounter = super.handleGlobalCounter()
     let event = super.getEvent()
     let partyAPartyBEntity = PartyApartyB.load(event.params.partyA.toHexString() + '-' + event.params.partyB.toHexString())!
     const list = partyAPartyBEntity.quoteUntilLiquid!.slice(0)

@@ -11,7 +11,7 @@ export class SetSymbolTradingFeeHandler extends CommonSetSymbolTradingFeeHandler
 
 	handle(): void {
 		super.handle()
-		super.handleGlobalCounter()
+		const globalCounter = super.handleGlobalCounter()
 		super.handleQuote()
 		super.handleSymbol()
 		super.handleUser()

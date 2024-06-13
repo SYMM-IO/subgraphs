@@ -12,7 +12,7 @@ export class OpenPositionHandler extends CommonOpenPositionHandler {
 
 	handle(): void {
 		super.handle()
-		super.handleGlobalCounter()
+		const globalCounter = super.handleGlobalCounter()
 		super.handleQuote()
 		super.handleSymbol()
 		super.handleUser()

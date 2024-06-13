@@ -12,7 +12,7 @@ export class WithdrawHandler extends CommonWithdrawHandler {
 
 	handle(): void {
 		super.handle()
-		super.handleGlobalCounter()
+		const globalCounter = super.handleGlobalCounter()
 		super.handleQuote()
 		super.handleSymbol()
 		super.handleUser()

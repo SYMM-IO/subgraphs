@@ -13,7 +13,7 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 
   handle(): void {
     super.handle()
-    super.handleGlobalCounter()
+    const globalCounter = super.handleGlobalCounter()
     let event = super.getEvent()
 
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())!

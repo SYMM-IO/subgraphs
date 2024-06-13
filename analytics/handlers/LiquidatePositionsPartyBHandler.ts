@@ -10,7 +10,7 @@ export class LiquidatePositionsPartyBHandler extends CommonLiquidatePositionsPar
 
 	handle(): void {
 		super.handle()
-		super.handleGlobalCounter()
+		const globalCounter = super.handleGlobalCounter()
 		super.handleSymbol()
 		super.handleUser()
 		super.handleAccount()
