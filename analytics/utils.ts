@@ -32,6 +32,14 @@ rolesNames.set('0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c
 rolesNames.set('0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84', 'SUSPENDER_ROLE')
 rolesNames.set('0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4', 'DISPUTE_ROLE')
 
+
+export let rolesNamesMultiAccount = new Map<string, string>()
+rolesNamesMultiAccount.set('0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a', 'PAUSER_ROLE')
+rolesNamesMultiAccount.set('0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda', 'SETTER_ROLE')
+rolesNamesMultiAccount.set('0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a', 'UNPAUSER_ROLE')
+rolesNamesMultiAccount.set('0x0000000000000000000000000000000000000000000000000000000000000000', 'DEFAULT_ADMIN_ROLE')
+
+
 export enum QuoteStatus {
 	PENDING,
 	LOCKED,
