@@ -2,6 +2,7 @@ import { LiquidatePartyAHandler } from "./handlers/LiquidatePartyAHandler"
 import {
 	AcceptCancelCloseRequest,
 	AcceptCancelRequest,
+	AddSymbol,
 	AllocateForPartyB,
 	AllocatePartyA,
 	ChargeFundingRate,
@@ -92,6 +93,7 @@ import { AllocatePartyAHandler } from "./handlers/AllocatePartyAHandler"
 import { AllocateForPartyBHandler } from "./handlers/AllocateForPartyBHandler"
 import { DeallocateForPartyBHandler } from "./handlers/DeallocateForPartyBHandler"
 import { SetCollateralHandler } from "./handlers/SetCollateralHandler"
+import { AddSymbolHandler } from "./handlers/AddSymbolHandler"
 
 export function handleLiquidatePartyA(event: LiquidatePartyA): void {
 	let handler = new LiquidatePartyAHandler(event)
@@ -252,4 +254,10 @@ export function handleAllocatePartyA(event: AllocatePartyA): void {
 	let handler = new AllocatePartyAHandler(event)
 	handler.handle()
 }
+
+export function handleAddSymbol(event: AddSymbol): void {
+	let handler = new AddSymbolHandler(event)
+	handler.handle()
+}
+		
 		

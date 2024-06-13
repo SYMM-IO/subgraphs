@@ -17,5 +17,11 @@
 		"OpenPosition",
 		"SetSymbolsPrices"
 	],
-	"User": ["SendQuote", "AddAccount"]
+	"User": [
+		"SendQuote",
+		"AddAccount"
+	],
+	"Symbol":[
+		"AddSymbol"
+	]
 }
