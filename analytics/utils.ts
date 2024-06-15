@@ -21,24 +21,22 @@ import { getQuote } from "./contract_utils"
 import { createNewAccount, createNewUser } from "../common/utils/analytics&user_profile"
 
 export let rolesNames = new Map<string, string>()
-rolesNames.set('0x1effbbff9c66c5e59634f24fe842750c60d18891155c32dd155fc2d661a4c86d', 'DEFAULT_ADMIN_ROLE')
-rolesNames.set('0xb048589f9ee6ae43a7d6093c04bc48fc93d622d76009b51a2c566fc7cda84ce7', 'MUON_SETTER_ROLE')
-rolesNames.set('0xddf732565ddd4d1d3a527786b8b1e425a602b603d457c0a999938869f38049b0', 'SYMBOL_MANAGER_ROLE')
-rolesNames.set('0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda', 'SETTER_ROLE')
-rolesNames.set('0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a', 'PAUSER_ROLE')
-rolesNames.set('0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a', 'UNPAUSER_ROLE')
-rolesNames.set('0x23288e74cb14deb13fd69e749986e8975f19aa3efb14b2fe5e9b512d772f19b3', 'PARTY_B_MANAGER_ROLE')
-rolesNames.set('0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c16', 'LIQUIDATOR_ROLE')
-rolesNames.set('0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84', 'SUSPENDER_ROLE')
-rolesNames.set('0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4', 'DISPUTE_ROLE')
-
+rolesNames.set("0x1effbbff9c66c5e59634f24fe842750c60d18891155c32dd155fc2d661a4c86d", "DEFAULT_ADMIN_ROLE")
+rolesNames.set("0xb048589f9ee6ae43a7d6093c04bc48fc93d622d76009b51a2c566fc7cda84ce7", "MUON_SETTER_ROLE")
+rolesNames.set("0xddf732565ddd4d1d3a527786b8b1e425a602b603d457c0a999938869f38049b0", "SYMBOL_MANAGER_ROLE")
+rolesNames.set("0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda", "SETTER_ROLE")
+rolesNames.set("0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a", "PAUSER_ROLE")
+rolesNames.set("0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a", "UNPAUSER_ROLE")
+rolesNames.set("0x23288e74cb14deb13fd69e749986e8975f19aa3efb14b2fe5e9b512d772f19b3", "PARTY_B_MANAGER_ROLE")
+rolesNames.set("0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c16", "LIQUIDATOR_ROLE")
+rolesNames.set("0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84", "SUSPENDER_ROLE")
+rolesNames.set("0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4", "DISPUTE_ROLE")
 
 export let rolesNamesMultiAccount = new Map<string, string>()
-rolesNamesMultiAccount.set('0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a', 'PAUSER_ROLE')
-rolesNamesMultiAccount.set('0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda', 'SETTER_ROLE')
-rolesNamesMultiAccount.set('0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a', 'UNPAUSER_ROLE')
-rolesNamesMultiAccount.set('0x0000000000000000000000000000000000000000000000000000000000000000', 'DEFAULT_ADMIN_ROLE')
-
+rolesNamesMultiAccount.set("0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a", "PAUSER_ROLE")
+rolesNamesMultiAccount.set("0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda", "SETTER_ROLE")
+rolesNamesMultiAccount.set("0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a", "UNPAUSER_ROLE")
+rolesNamesMultiAccount.set("0x0000000000000000000000000000000000000000000000000000000000000000", "DEFAULT_ADMIN_ROLE")
 
 export enum QuoteStatus {
 	PENDING,
@@ -54,16 +52,12 @@ export enum QuoteStatus {
 }
 
 export function newUserAndAccount(userAddress: Address, block: ethereum.Block, transaction: ethereum.Transaction): void {
-
 	let account = Account.load(userAddress.toHexString())
 	if (account == null) {
 		let user = createNewUser(userAddress, block, transaction)
 		account = createNewAccount(userAddress, user, null, block, transaction)
 	}
-
 }
-
-
 
 export function getDateFromTimeStamp(timestamp: BigInt): Date {
 	let date = new Date(timestamp.toI64() * 1000)
@@ -75,9 +69,7 @@ export function getDateFromTimeStamp(timestamp: BigInt): Date {
 }
 
 export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): DailyHistory {
-	const dateStr = getDateFromTimeStamp(timestamp)
-		.getTime()
-		.toString()
+	const dateStr = getDateFromTimeStamp(timestamp).getTime().toString()
 	const id = dateStr + "_" + (accountSource === null ? "null" : accountSource.toHexString())
 	let dh = DailyHistory.load(id)
 	if (dh == null) {
@@ -146,7 +138,6 @@ export function getSymbolTradeVolume(symbol: BigInt, timestamp: BigInt, accountS
 	return stv
 }
 
-
 export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null): OpenInterest {
 	const id = "OpenInterest_" + (accountSource === null ? "null" : accountSource.toHexString())
 	let oi = OpenInterest.load(id)
@@ -161,11 +152,7 @@ export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null):
 }
 
 export function isSameDay(timestamp1: BigInt, timestamp2: BigInt): boolean {
-	return getDateFromTimeStamp(timestamp1)
-		.getTime()
-		.toString() == getDateFromTimeStamp(timestamp2)
-			.getTime()
-			.toString()
+	return getDateFromTimeStamp(timestamp1).getTime().toString() == getDateFromTimeStamp(timestamp2).getTime().toString()
 
 	// const date1 = new Date(timestamp1.toI64() * 1000)
 	// const date2 = new Date(timestamp2.toI64() * 1000)
@@ -185,31 +172,18 @@ export function diffInSeconds(timestamp1: BigInt, timestamp2: BigInt): BigInt {
 	return timestamp1.minus(timestamp2)
 }
 
-export function updateDailyOpenInterest(
-	blockTimestamp: BigInt,
-	value: BigInt,
-	increase: boolean,
-	accountSource: Bytes | null,
-): void {
+export function updateDailyOpenInterest(blockTimestamp: BigInt, value: BigInt, increase: boolean, accountSource: Bytes | null): void {
 	let oi = getOpenInterest(blockTimestamp, accountSource)
 	let dh = getDailyHistoryForTimestamp(blockTimestamp, accountSource)
 
-	const startOfDay = BigInt.fromString(
-		(getDateFromTimeStamp(blockTimestamp).getTime() / 1000).toString(),
-	)
+	const startOfDay = BigInt.fromString((getDateFromTimeStamp(blockTimestamp).getTime() / 1000).toString())
 
 	if (isSameDay(blockTimestamp, oi.timestamp)) {
-		oi.accumulatedAmount = oi.accumulatedAmount.plus(
-			diffInSeconds(blockTimestamp, oi.timestamp).times(oi.amount),
-		)
-		dh.openInterest = oi.accumulatedAmount.div(
-			diffInSeconds(blockTimestamp, startOfDay),
-		)
+		oi.accumulatedAmount = oi.accumulatedAmount.plus(diffInSeconds(blockTimestamp, oi.timestamp).times(oi.amount))
+		dh.openInterest = oi.accumulatedAmount.div(diffInSeconds(blockTimestamp, startOfDay))
 	} else {
 		dh.openInterest = oi.accumulatedAmount.div(BigInt.fromString("86400"))
-		oi.accumulatedAmount = diffInSeconds(blockTimestamp, startOfDay).times(
-			oi.amount,
-		)
+		oi.accumulatedAmount = diffInSeconds(blockTimestamp, startOfDay).times(oi.amount)
 	}
 	oi.amount = increase ? oi.amount.plus(value) : oi.amount.minus(value)
 	oi.timestamp = blockTimestamp
@@ -219,11 +193,7 @@ export function updateDailyOpenInterest(
 	dh.save()
 }
 
-
-export function updateActivityTimestamps(
-	account: Account,
-	timestamp: BigInt,
-): void {
+export function updateActivityTimestamps(account: Account, timestamp: BigInt): void {
 	account.lastActivityTimestamp = timestamp
 	account.save()
 	let ua = getUserActivity(account.user, account.accountSource, timestamp)
@@ -265,12 +235,8 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 export function handleClose(_event: ethereum.Event, name: string): void {
 	const event = changetype<FillCloseRequest>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
 	let quote = Quote.load(event.params.quoteId.toString())!
-	let history = TradeHistory.load(
-		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString(),
-	)!
-	const additionalVolume = event.params.filledAmount
-		.times(event.params.closedPrice)
-		.div(BigInt.fromString("10").pow(18))
+	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
+	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
 	history.volume = history.volume.plus(additionalVolume)
 	history.updateTimestamp = event.block.timestamp
 	history.quoteStatus = quote.quoteStatus
@@ -305,34 +271,18 @@ export function handleClose(_event: ethereum.Event, name: string): void {
 	stv.updateTimestamp = event.block.timestamp
 	stv.save()
 
-	updateDailyOpenInterest(
-		event.block.timestamp,
-		unDecimal(event.params.filledAmount.times(quote.openedPrice!)),
-		false,
-		account.accountSource,
-	)
+	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.openedPrice!)), false, account.accountSource)
 }
 
 export function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
 	const event = changetype<LiquidatePositionsPartyA>(_event)
-	let history = TradeHistory.load(
-		event.params.partyA.toHexString() + "-" + qId.toString(),
-	)!
+	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!
 	const quote = Quote.load(qId.toString())!
 	const chainQuote = getQuote(event.address, qId)
-	if (chainQuote == null)
-		return
+	if (chainQuote == null) return
 	const liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-	const liquidPrice = chainQuote.avgClosedPrice
-		.times(quote.quantity!)
-		.minus(
-			quote.averageClosedPrice!
-				.times(quote.closedAmount!),
-		)
-		.div(liquidAmount)
-	const additionalVolume = liquidAmount
-		.times(liquidPrice)
-		.div(BigInt.fromString("10").pow(18))
+	const liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
+	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 	history.volume = history.volume.plus(additionalVolume)
 	history.quoteStatus = QuoteStatus.LIQUIDATED
 	history.updateTimestamp = event.block.timestamp
@@ -358,10 +308,5 @@ export function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): vo
 	stv.updateTimestamp = event.block.timestamp
 	stv.save()
 
-	updateDailyOpenInterest(
-		event.block.timestamp,
-		unDecimal(liquidAmount.times(quote.openedPrice!)),
-		false,
-		account.accountSource,
-	)
+	updateDailyOpenInterest(event.block.timestamp, unDecimal(liquidAmount.times(quote.openedPrice!)), false, account.accountSource)
 }

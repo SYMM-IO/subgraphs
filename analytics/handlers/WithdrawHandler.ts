@@ -19,7 +19,7 @@ export class WithdrawHandler extends CommonWithdrawHandler {
 		let event = super.getEvent()
 		newUserAndAccount(event.params.user, event.block, event.transaction)
 
-		let account = Account.load(event.params.sender.toHexString())!
+		let account = Account.load(event.params.user.toHexString())!
 		account.withdraw = account.withdraw.plus(event.params.amount)
 		account.updateTimestamp = event.block.timestamp
 		account.save()
@@ -32,7 +32,7 @@ export class WithdrawHandler extends CommonWithdrawHandler {
 		withdraw.blockNumber = event.block.number
 		withdraw.transaction = event.transaction.hash
 		withdraw.amount = event.params.amount
-		withdraw.account = event.params.sender
+		withdraw.account = event.params.user
 		withdraw.collateral = getConfiguration(event).collateral
 		withdraw.save()
 
