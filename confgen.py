@@ -35,11 +35,10 @@ def generate_subgraph_config(subgraph_dir, config_file):
 
     # Prepare the subgraph
     subprocess.run(
-        ["npx", "mustache", f'../{config_file}', "template.yaml"],
+        ["npx", "mustache", f"../{config_file}", "template.yaml"],
         check=True,
         stdout=open("subgraph.yaml", "w"),
     )
-
 
     os.chdir("..")
 
@@ -62,7 +61,7 @@ def main():
     with open(config_file, "r") as f:
         config = json.load(f)
 
-    for subgraph in ["main", "parties", "fundingrate", "events"]:
+    for subgraph in ["main", "parties", "fundingrate", "events", "analytics"]:
         # Copy the ABI files to each subgraph directory
         copy_abi_files(subgraph, config["symmioVersion"])
 
