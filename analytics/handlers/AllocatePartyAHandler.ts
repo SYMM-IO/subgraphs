@@ -22,6 +22,7 @@ export class AllocatePartyAHandler extends CommonAllocatePartyAHandler {
 		let account = Account.load(event.params.user.toHexString())!
 		account.allocated = account.allocated.plus(event.params.amount)
 		account.updateTimestamp = event.block.timestamp
+		account.globalCounter = globalCounter
 		account.save()
 		updateActivityTimestamps(account, event.block.timestamp)
 		let allocate = new BalanceChange(
