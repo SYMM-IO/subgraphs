@@ -25,7 +25,6 @@
 		"Deposit",
 		"Withdraw",
 		"AllocateForPartyB",
-		"AllocatePartyB",
 		"DeallocateForPartyB",
 		"SendQuote",
 		"RequestToCancelQuote",
