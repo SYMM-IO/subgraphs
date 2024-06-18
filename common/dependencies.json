@@ -17,11 +17,20 @@
 		"OpenPosition",
 		"SetSymbolsPrices"
 	],
-	"User": [
+	"User": ["SendQuote", "AddAccount"],
+	"Symbol": ["AddSymbol"],
+	"Account": [
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"AllocateForPartyB",
+		"AllocatePartyB",
+		"DeallocateForPartyB",
 		"SendQuote",
-		"AddAccount"
-	],
-	"Symbol":[
-		"AddSymbol"
+		"RequestToCancelQuote",
+		"OpenPosition",
+		"RequestToClosePosition",
+		"RequestToCancelCloseRequest"
 	]
 }
