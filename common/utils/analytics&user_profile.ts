@@ -25,6 +25,7 @@ export function createNewAccount(
     name: string | null = null,
 ): AccountModel {
     let account = new AccountModel(address.toHexString())
+    account.account = address
     account.lastActivityTimestamp = block.timestamp
     account.timestamp = block.timestamp
     account.transaction = transaction.hash
