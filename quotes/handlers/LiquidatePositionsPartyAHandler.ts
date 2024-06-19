@@ -19,9 +19,6 @@ export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPar
 			let qoutId = event.params.quoteIds[i]
 			let quote = Quote.load(qoutId.toString())!
 			quote.globalCounter = super.handleGlobalCounter()
-			quote.quoteStatus = 8
-			let LiquidateAmount = quote.quantity!.minus(quote.closedAmount!)
-			quote.liquidateAmount = LiquidateAmount
 			let partyASymbolPriceEntity = PartyASymbolPrice.load(event.params.partyA.toHexString().concat('-').concat(quote.symbolId!.toHex()))
 			if (partyASymbolPriceEntity) {
 				quote.liquidatePrice = partyASymbolPriceEntity.requestedOpenPrice
@@ -29,8 +26,6 @@ export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPar
 				log.debug(`Error in get entity liquidate requestedOpenPrice quoteId={} partyA={} symbolID={}`, [qoutId.toString(), this.event.params.partyA.toHexString(), quote.symbolId!.toString()])
 			}
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
-				'LiquidatePositionsPartyA', event.transaction.hash, event.block.number)
 		}
 	}
 }

@@ -26,7 +26,6 @@
 		"AllocateForPartyB",
 		"DeallocateForPartyB",
 		"SendQuote",
-		"RequestToCancelQuote",
 		"OpenPosition",
 		"RequestToClosePosition"
 	]

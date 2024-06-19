@@ -61,5 +61,6 @@ export class OpenPositionHandler extends BaseHandler {
 		account.positionsCount = account.positionsCount.plus(BigInt.fromString("1"))
 		account.updateTimestamp = event.block.timestamp
 		account.save()
+
 	}
 }

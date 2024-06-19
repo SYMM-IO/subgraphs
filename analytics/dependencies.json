@@ -67,5 +67,5 @@
 	"PartyALiquidationDisputed": ["LiquidationDisputed"],
 	"Configuration": ["SetCollateral"],
 	"GrantedRole": ["RoleGranted", "RoleRevoked"],
-	"Account": ["RequestToCancelCloseRequest"]
+	"Account": ["RequestToCancelCloseRequest", "RequestToCancelQuote"]
 }

@@ -17,11 +17,11 @@ export class LiquidatePartyAHandler extends CommonLiquidatePartyAHandler {
     let event = super.getEvent()
     let partyAEntity = PartyA.load(event.params.partyA.toHexString())
     if (partyAEntity) {
-      partyAEntity.globalCounter = super.handleGlobalCounter()
+      partyAEntity.globalCounter = globalCounter
       const list = partyAEntity.quoteUntilLiquid!.slice(0)
 
       let liquidTrEntity = new LiquidTransaction(event.transaction.hash.toHexString().concat('-').concat(event.logIndex.toHexString()))
-      liquidTrEntity.GlobalCounter = super.handleGlobalCounter()
+      liquidTrEntity.GlobalCounter = globalCounter
       liquidTrEntity.mode = "Pending"
       const balance = allocatedBalanceOfPartyA(event.params.partyA, event.address)
       if (balance) {
