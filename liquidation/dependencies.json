@@ -1,4 +1,4 @@
 {
 	"PartyA": ["AllocatePartyA", "DeallocatePartyA", "LiquidatePartyA"],
-	"PartyApartyB": ["AllocateForPartyB", "DeallocateForPartyB", "LiquidatePartyB"]
+	"PartyB": ["AllocateForPartyB", "DeallocateForPartyB", "LiquidatePartyB"]
 }

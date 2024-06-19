@@ -1,8 +1,8 @@
 
 import { DeallocatePartyAHandler as CommonDeallocatePartyAHandler } from "../../common/handlers/DeallocatePartyAHandler"
 import { getGlobalCounterAndInc } from "../../common/utils"
+import { PartyA } from "../../generated/schema"
 import { DeallocatePartyA } from "../../generated/symmio/symmio"
-import { ResultPartyA } from "../../parties/generated/schema"
 
 export class DeallocatePartyAHandler extends CommonDeallocatePartyAHandler {
 
@@ -14,12 +14,12 @@ export class DeallocatePartyAHandler extends CommonDeallocatePartyAHandler {
     super.handle()
     super.handleGlobalCounter()
     const event = super.getEvent()
-    let deAllocateEntity = ResultPartyA.load(event.params.user.toHex())
+    let deAllocateEntity = PartyA.load(event.params.user.toHex())
     let globalCounter = getGlobalCounterAndInc()
     if (deAllocateEntity) {
       deAllocateEntity.amount = deAllocateEntity.amount.minus(event.params.amount)
     } else {
-      deAllocateEntity = new ResultPartyA(event.params.user.toHex())
+      deAllocateEntity = new PartyA(event.params.user.toHex())
       deAllocateEntity.index = globalCounter
       deAllocateEntity.partyA = event.params.user
       deAllocateEntity.amount = event.params.amount

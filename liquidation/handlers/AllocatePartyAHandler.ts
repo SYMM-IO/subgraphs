@@ -20,7 +20,7 @@ export class AllocatePartyAHandler extends CommonAllocatePartyAHandler {
 
       allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
     } else {
-      allocateEntity = new ResultPartyA(event.params.user.toHex())
+      allocateEntity = new PartyA(event.params.user.toHex())
       allocateEntity.index = globalCounter
       allocateEntity.partyA = event.params.user
       allocateEntity.amount = event.params.amount
