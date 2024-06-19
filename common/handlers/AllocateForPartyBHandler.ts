@@ -1,6 +1,5 @@
 import { BaseHandler } from "./BaseHandler"
 import { AllocateForPartyB } from "../../generated/symmio/symmio"
-import { Account } from "../../generated/schema"
 
 export class AllocateForPartyBHandler extends BaseHandler {
 	protected event: AllocateForPartyB
@@ -22,10 +21,6 @@ export class AllocateForPartyBHandler extends BaseHandler {
 
 	handleAccount(): void {
 		super.handleAccount()
-		const event = this.getEvent()
-		let account = Account.load(event.params.partyB.toHexString())!
-		account.allocated = account.allocated.plus(event.params.amount)
-		account.updateTimestamp = event.block.timestamp
-		account.save()
+
 	}
 }
