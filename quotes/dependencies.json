@@ -5,6 +5,7 @@
 		"LiquidatePendingPositionsPartyA",
 		"LiquidatePartyB",
 		"ForceCancelQuote",
-		"ForceCancelCloseRequest"
+		"ForceCancelCloseRequest",
+		"SetSymbolsPrices"
 	]
 }

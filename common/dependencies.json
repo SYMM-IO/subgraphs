@@ -14,8 +14,7 @@
 		"ForceClosePosition",
 		"EmergencyClosePosition",
 		"FillCloseRequest",
-		"OpenPosition",
-		"SetSymbolsPrices"
+		"OpenPosition"
 	],
 	"User": ["SendQuote", "AddAccount"],
 	"Symbol": ["AddSymbol"],
@@ -29,7 +28,6 @@
 		"SendQuote",
 		"RequestToCancelQuote",
 		"OpenPosition",
-		"RequestToClosePosition",
-		"RequestToCancelCloseRequest"
+		"RequestToClosePosition"
 	]
 }
