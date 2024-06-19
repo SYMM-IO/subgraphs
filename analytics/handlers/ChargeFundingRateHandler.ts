@@ -1,9 +1,10 @@
 import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../common/handlers/ChargeFundingRateHandler"
 import { ChargeFundingRate } from "../../generated/symmio/symmio"
-import { Account, Quote } from "../../generated/schema"
+import { Account, GlobalFee, Quote } from "../../generated/schema"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { getDailyHistoryForTimestamp, getTotalHistory, unDecimal } from "../utils"
 import { getQuote } from "../contract_utils"
+import { FACTOR } from "../../common/utils"
 
 export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 
@@ -28,6 +29,16 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 			const chainQuote = getQuote(event.address, BigInt.fromString(quote.id))!
 			const funding = unDecimal((chainQuote.openedPrice.minus(quote.openedPrice!).abs()).times(openAmount))
+			const fee = quote.openedPrice!.times(rate).times(openAmount).div(FACTOR).div(FACTOR)
+
+			let globalEntity = GlobalFee.load("GlobalEntity")
+			if (!globalEntity) {
+				globalEntity = new GlobalFee("GlobalEntity")
+				globalEntity.globalFee = BigInt.fromI32(0)
+			}
+			globalEntity.latestTimestamp = event.block.timestamp
+			globalEntity.globalFee = globalEntity.globalFee.plus(fee)
+			globalEntity.save()
 
 			const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
 			if (funding.gt(BigInt.zero()))
