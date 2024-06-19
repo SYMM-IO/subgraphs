@@ -1,5 +1,4 @@
 {
-	"PartyA": ["LiquidatePartyA", "LiquidatePendingPositionsPartyA", "LiquidatePartyB"],
-	"PartyApartyB": ["LiquidatePartyA", "LiquidatePendingPositionsPartyA", "LiquidatePartyB"],
-	"LiquidTransaction": ["LiquidatePartyA", "LiquidatePendingPositionsPartyA", "LiquidatePartyB"]
+	"PartyA": ["AllocatePartyA", "DeallocatePartyA", "LiquidatePartyA"],
+	"PartyApartyB": ["AllocateForPartyB", "DeallocateForPartyB", "LiquidatePartyB"]
 }
