@@ -1,9 +1,9 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
+import {Address, BigInt, Bytes} from "@graphprotocol/graph-ts"
 import {
-	Account as AccountModel,
 	Account,
 	Configuration,
 	DailyHistory,
+	MonthlyHistory,
 	OpenInterest,
 	PriceCheck,
 	Quote,
@@ -11,15 +11,16 @@ import {
 	SymbolTradeVolume,
 	TotalHistory,
 	TradeHistory,
-	User as UserModel,
 	UserActivity,
+	WeeklyHistory,
 } from "../generated/schema"
 
-import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
-import { FillCloseRequest, LiquidatePositionsPartyA, Withdraw } from "../generated/symmio/symmio"
-import { getQuote } from "./contract_utils"
-import { createNewAccount, createNewUser } from "../common/utils/analytics&user_profile"
+import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum"
+import {FillCloseRequest, LiquidatePositionsPartyA} from "../generated/symmio/symmio"
+import {getQuote} from "./contract_utils"
+import {createNewAccount, createNewUser} from "../common/utils/analytics&user_profile"
 
+// @ts-ignore
 export let rolesNames = new Map<string, string>()
 rolesNames.set("0x1effbbff9c66c5e59634f24fe842750c60d18891155c32dd155fc2d661a4c86d", "DEFAULT_ADMIN_ROLE")
 rolesNames.set("0xb048589f9ee6ae43a7d6093c04bc48fc93d622d76009b51a2c566fc7cda84ce7", "MUON_SETTER_ROLE")
@@ -32,6 +33,7 @@ rolesNames.set("0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c
 rolesNames.set("0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84", "SUSPENDER_ROLE")
 rolesNames.set("0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4", "DISPUTE_ROLE")
 
+// @ts-ignore
 export let rolesNamesMultiAccount = new Map<string, string>()
 rolesNamesMultiAccount.set("0x65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a", "PAUSER_ROLE")
 rolesNamesMultiAccount.set("0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93beda", "SETTER_ROLE")
@@ -59,7 +61,7 @@ export function newUserAndAccount(userAddress: Address, block: ethereum.Block, t
 	}
 }
 
-export function getDateFromTimeStamp(timestamp: BigInt): Date {
+export function startOfDay(timestamp: BigInt): Date {
 	let date = new Date(timestamp.toI64() * 1000)
 	date.setUTCHours(0)
 	date.setUTCMinutes(0)
@@ -68,8 +70,30 @@ export function getDateFromTimeStamp(timestamp: BigInt): Date {
 	return date
 }
 
+export function startOfWeek(timestamp: BigInt): Date {
+	let date = new Date(timestamp.toI64() * 1000)
+	let day = date.getUTCDay()
+	let diff = date.getUTCDate() - day
+	date.setUTCDate(diff)
+	date.setUTCHours(0)
+	date.setUTCMinutes(0)
+	date.setUTCSeconds(0)
+	date.setUTCMilliseconds(0)
+	return date
+}
+
+export function startOfMonth(timestamp: BigInt): Date {
+	let date = new Date(timestamp.toI64() * 1000)
+	date.setUTCDate(1)
+	date.setUTCHours(0)
+	date.setUTCMinutes(0)
+	date.setUTCSeconds(0)
+	date.setUTCMilliseconds(0)
+	return date
+}
+
 export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): DailyHistory {
-	const dateStr = getDateFromTimeStamp(timestamp).getTime().toString()
+	const dateStr = startOfDay(timestamp).getTime().toString()
 	const id = dateStr + "_" + (accountSource === null ? "null" : accountSource.toHexString())
 	let dh = DailyHistory.load(id)
 	if (dh == null) {
@@ -95,6 +119,36 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.save()
 	}
 	return dh
+}
+
+export function getWeeklyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): WeeklyHistory {
+	const dateStr = startOfWeek(timestamp).getTime().toString()
+	const id = dateStr + "_" + (accountSource === null ? "null" : accountSource.toHexString())
+	let wh = WeeklyHistory.load(id)
+	if (wh == null) {
+		wh = new WeeklyHistory(id)
+		wh.timestamp = timestamp
+		wh.tradeVolume = BigInt.zero()
+		wh.activeUsers = BigInt.zero()
+		wh.accountSource = accountSource
+		wh.save()
+	}
+	return wh
+}
+
+export function getMonthlyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): MonthlyHistory {
+	const dateStr = startOfMonth(timestamp).getTime().toString()
+	const id = dateStr + "_" + (accountSource === null ? "null" : accountSource.toHexString())
+	let mh = MonthlyHistory.load(id)
+	if (mh == null) {
+		mh = new MonthlyHistory(id)
+		mh.timestamp = timestamp
+		mh.tradeVolume = BigInt.zero()
+		mh.activeUsers = BigInt.zero()
+		mh.accountSource = accountSource
+		mh.save()
+	}
+	return mh
 }
 
 export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null): TotalHistory {
@@ -152,16 +206,15 @@ export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null):
 }
 
 export function isSameDay(timestamp1: BigInt, timestamp2: BigInt): boolean {
-	return getDateFromTimeStamp(timestamp1).getTime().toString() == getDateFromTimeStamp(timestamp2).getTime().toString()
+	return startOfDay(timestamp1).getTime().toString() == startOfDay(timestamp2).getTime().toString()
+}
 
-	// const date1 = new Date(timestamp1.toI64() * 1000)
-	// const date2 = new Date(timestamp2.toI64() * 1000)
-	//
-	// return (
-	// 	date1.getUTCFullYear() === date2.getUTCFullYear() &&
-	// 	date1.getUTCMonth() === date2.getUTCMonth() &&
-	// 	date1.getUTCDate() === date2.getUTCDate()
-	// )
+export function isSameWeek(timestamp1: BigInt, timestamp2: BigInt): boolean {
+	return startOfWeek(timestamp1).getTime().toString() == startOfWeek(timestamp2).getTime().toString()
+}
+
+export function isSameMonth(timestamp1: BigInt, timestamp2: BigInt): boolean {
+	return startOfMonth(timestamp1).getTime().toString() == startOfMonth(timestamp2).getTime().toString()
 }
 
 export function unDecimal(value: BigInt): BigInt {
@@ -176,14 +229,14 @@ export function updateDailyOpenInterest(blockTimestamp: BigInt, value: BigInt, i
 	let oi = getOpenInterest(blockTimestamp, accountSource)
 	let dh = getDailyHistoryForTimestamp(blockTimestamp, accountSource)
 
-	const startOfDay = BigInt.fromString((getDateFromTimeStamp(blockTimestamp).getTime() / 1000).toString())
+	const sod = BigInt.fromString((startOfDay(blockTimestamp).getTime() / 1000).toString())
 
 	if (isSameDay(blockTimestamp, oi.timestamp)) {
 		oi.accumulatedAmount = oi.accumulatedAmount.plus(diffInSeconds(blockTimestamp, oi.timestamp).times(oi.amount))
-		dh.openInterest = oi.accumulatedAmount.div(diffInSeconds(blockTimestamp, startOfDay))
+		dh.openInterest = oi.accumulatedAmount.div(diffInSeconds(blockTimestamp, sod))
 	} else {
 		dh.openInterest = oi.accumulatedAmount.div(BigInt.fromString("86400"))
-		oi.accumulatedAmount = diffInSeconds(blockTimestamp, startOfDay).times(oi.amount)
+		oi.accumulatedAmount = diffInSeconds(blockTimestamp, sod).times(oi.amount)
 	}
 	oi.amount = increase ? oi.amount.plus(value) : oi.amount.minus(value)
 	oi.timestamp = blockTimestamp
@@ -202,6 +255,16 @@ export function updateActivityTimestamps(account: Account, timestamp: BigInt): v
 		let dh = getDailyHistoryForTimestamp(timestamp, account.accountSource)
 		dh.activeUsers = dh.activeUsers.plus(BigInt.fromString("1"))
 		dh.save()
+	}
+	if (!isSameWeek(timestamp, uaTimestamp)) {
+		let wh = getWeeklyHistoryForTimestamp(timestamp, account.accountSource)
+		wh.activeUsers = wh.activeUsers.plus(BigInt.fromString("1"))
+		wh.save()
+	}
+	if (!isSameMonth(timestamp, uaTimestamp)) {
+		let mh = getMonthlyHistoryForTimestamp(timestamp, account.accountSource)
+		mh.activeUsers = mh.activeUsers.plus(BigInt.fromString("1"))
+		mh.save()
 	}
 	ua.updateTimestamp = timestamp
 	ua.save()
@@ -233,6 +296,7 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 }
 
 export function handleClose(_event: ethereum.Event, name: string): void {
+	// @ts-ignore
 	const event = changetype<FillCloseRequest>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
 	let quote = Quote.load(event.params.quoteId.toString())!
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
@@ -275,6 +339,7 @@ export function handleClose(_event: ethereum.Event, name: string): void {
 }
 
 export function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
+	// @ts-ignore
 	const event = changetype<LiquidatePositionsPartyA>(_event)
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!
 	const quote = Quote.load(qId.toString())!

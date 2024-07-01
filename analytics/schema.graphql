@@ -51,6 +51,22 @@ type DailyHistory @entity {
     timestamp: BigInt!
 }
 
+type WeeklyHistory @entity {
+    id: ID!
+    tradeVolume: BigInt!
+    activeUsers: BigInt!
+    accountSource: Bytes
+    timestamp: BigInt!
+}
+
+type MonthlyHistory @entity {
+    id: ID!
+    tradeVolume: BigInt!
+    activeUsers: BigInt!
+    accountSource: Bytes
+    timestamp: BigInt!
+}
+
 type TotalHistory @entity {
     id: ID!
     quotesCount: BigInt!
