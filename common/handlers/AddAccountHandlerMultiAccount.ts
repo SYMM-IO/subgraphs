@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { AddAccount } from "../../generated/symmioMultiAccount_0/symmioMultiAccount"
 
 export class AddAccountHandler extends BaseHandler {

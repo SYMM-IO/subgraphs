@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { LiquidationDisputed } from "../../generated/symmio/symmio"
 
 export class LiquidationDisputedHandler extends BaseHandler {

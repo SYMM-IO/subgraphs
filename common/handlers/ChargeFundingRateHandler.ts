@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { ChargeFundingRate } from "../../generated/symmio/symmio"
 
 export class ChargeFundingRateHandler extends BaseHandler {

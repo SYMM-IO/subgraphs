@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { RoleGranted } from "../../generated/symmio/symmio"
 
 export class RoleGrantedHandler extends BaseHandler {

@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { AddSymbol } from "../../generated/symmio/symmio"
 import { Symbol } from "../../generated/schema"
 

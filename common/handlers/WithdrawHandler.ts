@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { Withdraw } from "../../generated/symmio/symmio"
 
 export class WithdrawHandler extends BaseHandler {

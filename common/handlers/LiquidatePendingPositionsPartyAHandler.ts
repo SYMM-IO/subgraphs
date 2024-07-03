@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { LiquidatePendingPositionsPartyA } from "../../generated/symmio/symmio"
 
 export class LiquidatePendingPositionsPartyAHandler extends BaseHandler {

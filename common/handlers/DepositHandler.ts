@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { Deposit } from "../../generated/symmio/symmio"
 
 export class DepositHandler extends BaseHandler {

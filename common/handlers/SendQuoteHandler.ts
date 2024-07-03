@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { SendQuote } from "../../generated/symmio/symmio"
 import { BigInt, Bytes, } from "@graphprotocol/graph-ts"
 import { Account, EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"

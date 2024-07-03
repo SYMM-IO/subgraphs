@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { AllocatePartyB } from "../../generated/symmio/symmio"
 
 export class AllocatePartyBHandler extends BaseHandler {

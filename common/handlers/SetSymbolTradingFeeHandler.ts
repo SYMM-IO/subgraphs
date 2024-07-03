@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { SetSymbolTradingFee } from "../../generated/symmio/symmio"
 
 export class SetSymbolTradingFeeHandler extends BaseHandler {

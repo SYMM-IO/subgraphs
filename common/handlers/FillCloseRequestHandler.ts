@@ -2,7 +2,7 @@ import { Quote } from "../../generated/schema"
 import { FillCloseRequest } from "../../generated/symmio/symmio"
 import { getGlobalCounterAndInc, getQuote } from "../utils"
 import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 
 export class FillCloseRequestHandler extends BaseHandler {
 	protected event: FillCloseRequest

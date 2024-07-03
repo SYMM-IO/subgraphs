@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { UnlockQuote } from "../../generated/symmio/symmio"
 import { Quote } from "../../generated/schema"
 import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"

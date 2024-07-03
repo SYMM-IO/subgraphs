@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 import subprocess
 import sys
 from shutil import copyfile
@@ -11,7 +10,7 @@ def copy_abi_files(subgraph_dir, version):
     Copy the ABI files for the provided version from the root 'abis' directory
     to the 'abis' directory inside the given subgraph directory.
     """
-    root_abis_dir = "abis"
+    root_abis_dir = "../abis"
     subgraph_abis_dir = os.path.join(subgraph_dir, "abis")
 
     files_to_copy = [f"symmio_{version}.json", f"symmioMultiAccount_{version}.json"]
@@ -37,11 +36,10 @@ def generate_subgraph_config(subgraph_dir, config_file):
     subprocess.run(
         ["npx", "mustache", f'../{config_file}', "template.yaml"],
         check=True,
-        stdout=open("subgraph.yaml", "w"),
+        stdout=open("../subgraph.yaml", "w"),
     )
 
-
-    os.chdir("..")
+    os.chdir("../..")
 
 
 def main():
