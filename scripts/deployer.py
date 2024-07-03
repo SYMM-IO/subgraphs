@@ -9,7 +9,7 @@ def copy_abi_files(subgraph_dir, version):
 	Copy the ABI files for the provided version from the root 'abis' directory
 	to the 'abis' directory inside the given subgraph directory.
 	"""
-	root_abis_dir = "abis"
+	root_abis_dir = "../abis"
 	subgraph_abis_dir = os.path.join(subgraph_dir, "abis")
 
 	files_to_copy = [f"symmio_{version}.json", f"symmioMultiAccount_{version}.json"]
@@ -33,7 +33,7 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only, studio,
 	print(f"Deploying {subgraph_dir} to {deploy_url} with config {config_file}")
 
 	# Adjust the path for the config file when inside a subgraph directory
-	adjusted_config_path = os.path.join("..", config_file)
+	adjusted_config_path = os.path.join("../..", config_file)
 
 	# Set working directory to the specific subgraph's directory
 	os.chdir(subgraph_dir)
@@ -41,7 +41,7 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only, studio,
 	subprocess.run(
 		["npx", "mustache", adjusted_config_path, "template.yaml"],
 		check=True,
-		stdout=open("subgraph.yaml", "w"),
+		stdout=open("../subgraph.yaml", "w"),
 	)
 
 	subprocess.run(["graph", "codegen"], check=True)
@@ -60,7 +60,7 @@ def deploy_subgraph(subgraph_dir, config_file, deploy_url, prepare_only, studio,
 			)
 
 	# Change directory back to the root directory
-	os.chdir("..")
+	os.chdir("../..")
 
 
 def main():

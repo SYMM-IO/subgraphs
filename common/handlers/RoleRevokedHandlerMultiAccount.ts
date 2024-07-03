@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { RoleRevoked } from "../../generated/symmioMultiAccount_0/symmioMultiAccount"
 
 export class RoleRevokedHandler extends BaseHandler {

@@ -1,45 +1,36 @@
-import { BaseHandler } from "./BaseHandler"
-import { AcceptCancelCloseRequest, symmio } from "../../generated/symmio/symmio"
-import { Quote } from "../../generated/schema"
-import { initialHelper, setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
-import { ethereum, log } from "@graphprotocol/graph-ts"
-import { getGlobalCounterAndInc, symbolIdToSymbolName } from "../utils"
+import {BaseHandler} from "../BaseHandler"
+import {AcceptCancelCloseRequest, symmio_0_8_2} from "../../generated/symmio_0_8_2/symmio_0_8_2"
+import {Quote} from "../../generated/schema"
+import {initialHelper, setEventTimestampAndTransactionHashAndAction} from "../utils/quote&analitics&user"
+import {ethereum, log} from "@graphprotocol/graph-ts"
+import {symbolIdToSymbolName} from "../utils"
 
 export class AcceptCancelCloseRequestHandler extends BaseHandler {
-	protected event: AcceptCancelCloseRequest
 
-	constructor(event: AcceptCancelCloseRequest) {
-		super(event)
-		this.event = event
+	handle(_event: ethereum.Event, version: string = "0_8_2"): void {
 	}
 
-	protected getEvent(): AcceptCancelCloseRequest {
-		return this.event
-	}
+	handleQuote(_event: ethereum.Event): void {
+		// @ts-ignore
+		const event = changetype<AcceptCancelCloseRequest>(_event)
 
-	handle(): void {
-	}
-
-	handleQuote(): void {
-		let quote = Quote.load(this.event.params.quoteId.toString())
+		let quote = Quote.load(event.params.quoteId.toString())
 		if (quote) {
-
 			quote.globalCounter = super.handleGlobalCounter()
-			quote.quoteStatus = this.event.params.quoteStatus
-			quote.blockNumber = this.event.block.number
-			quote.timeStamp = this.event.block.timestamp
+			quote.quoteStatus = event.params.quoteStatus
+			quote.blockNumber = event.block.number
+			quote.timeStamp = event.block.timestamp
 			quote.save()
-
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'AcceptCancelCloseRequest', this.event.transaction.hash, this.event.block.number)
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
+				'AcceptCancelCloseRequest', event.transaction.hash, event.block.number)
 		} else {
-			let newEntity = new Quote(this.event.params.quoteId.toString())
+			let newEntity = new Quote(event.params.quoteId.toString())
 			newEntity.globalCounter = super.handleGlobalCounter()
-			newEntity.quoteId = this.event.params.quoteId
-			newEntity.quoteStatus = this.event.params.quoteStatus
-			newEntity.timeStamp = this.event.block.timestamp
-			let symmioContract = symmio.bind(this.event.address)
-			let callResult = symmioContract.try_getQuote(this.event.params.quoteId)
+			newEntity.quoteId = event.params.quoteId
+			newEntity.quoteStatus = event.params.quoteStatus
+			newEntity.timeStamp = event.block.timestamp
+			let symmioContract = symmio_0_8_2.bind(event.address)
+			let callResult = symmioContract.try_getQuote(event.params.quoteId)
 			if (callResult.reverted) {
 				log.error('accept cancel bind crashed!', [])
 			} else {
@@ -47,7 +38,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 				let initialNewEntity = initialHelper(Result)
 				if (initialNewEntity) {
 
-					const symbol = symbolIdToSymbolName(initialNewEntity.symbolId, this.event.address)
+					const symbol = symbolIdToSymbolName(initialNewEntity.symbolId, event.address)
 					if (symbol) {
 						initialNewEntity.symbol = symbol
 					}
@@ -57,9 +48,8 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 				newEntity.tradingFee = initialNewEntity.tradingFee!
 				newEntity.initialData = initialNewEntity.id
 			}
-			setEventTimestampAndTransactionHashAndAction(newEntity.eventsTimestamp, this.event.block.timestamp,
-				'AcceptCancelCloseRequest', this.event.transaction.hash, this.event.block.number)
-
+			setEventTimestampAndTransactionHashAndAction(newEntity.eventsTimestamp, event.block.timestamp,
+				'AcceptCancelCloseRequest', event.transaction.hash, event.block.number)
 			newEntity.save()
 		}
 	}

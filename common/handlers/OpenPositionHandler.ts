@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { OpenPosition } from "../../generated/symmio/symmio"
 import { Account, InitialQuote, Quote } from "../../generated/schema"
 import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"

@@ -1,7 +1,5 @@
-import { BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts'
-import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
-
-
+import {BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts'
+import {EventsTimestamp, InitialQuote, Quote, TransactionsHash} from "../../generated/schema"
 
 
 export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {

@@ -1,4 +1,4 @@
-import { BaseHandler } from "./BaseHandler"
+import { BaseHandler } from "../BaseHandler"
 import { SetCollateral } from "../../generated/symmio/symmio"
 
 export class SetCollateralHandler extends BaseHandler {
