@@ -1,17 +1,12 @@
 import {
 	RequestToCancelCloseRequestHandler as CommonRequestToCancelCloseRequestHandler,
 } from "../../common/handlers/RequestToCancelCloseRequestHandler"
-import { removeQuoteFromPendingList } from "../../common/utils/quote"
-import { RequestToCancelCloseRequest } from "../../generated/symmio/symmio"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-export class RequestToCancelCloseRequestHandler extends CommonRequestToCancelCloseRequestHandler {
-
-	constructor(event: RequestToCancelCloseRequest) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
+export class RequestToCancelCloseRequestHandler<T> extends CommonRequestToCancelCloseRequestHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 	}
 }

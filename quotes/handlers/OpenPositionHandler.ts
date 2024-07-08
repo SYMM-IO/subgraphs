@@ -1,21 +1,14 @@
-import { OpenPositionHandler as CommonOpenPositionHandler } from "../../common/handlers/OpenPositionHandler"
-import { getGlobalCounterAndInc } from "../../common/utils"
-import { removeQuoteFromPendingList } from "../../common/utils/quote"
+import {OpenPositionHandler as CommonOpenPositionHandler} from "../../common/handlers/OpenPositionHandler"
+import {removeQuoteFromPendingList} from "../../common/utils/quote"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-import { PartyA, PartyBPartyA } from "../../generated/schema"
-import { OpenPosition } from "../../generated/symmio/symmio"
-
-export class OpenPositionHandler extends CommonOpenPositionHandler {
-
-	constructor(event: OpenPosition) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		let event = super.getEvent()
+export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 		removeQuoteFromPendingList(event.params.quoteId)
-
 	}
 }

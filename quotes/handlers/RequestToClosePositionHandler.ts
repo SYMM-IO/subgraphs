@@ -1,14 +1,12 @@
-import { RequestToClosePositionHandler as CommonRequestToClosePositionHandler } from "../../common/handlers/RequestToClosePositionHandler"
-import { RequestToClosePosition } from "../../generated/symmio/symmio"
+import {
+	RequestToClosePositionHandler as CommonRequestToClosePositionHandler
+} from "../../common/handlers/RequestToClosePositionHandler"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-export class RequestToClosePositionHandler extends CommonRequestToClosePositionHandler {
-
-	constructor(event: RequestToClosePosition) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
+export class RequestToClosePositionHandler<T> extends CommonRequestToClosePositionHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 	}
 }

@@ -1,14 +1,12 @@
-import { LiquidatePositionsPartyBHandler as CommonLiquidatePositionsPartyBHandler } from "../../common/handlers/LiquidatePositionsPartyBHandler"
-import { LiquidatePositionsPartyB } from "../../generated/symmio/symmio"
+import {
+	LiquidatePositionsPartyBHandler as CommonLiquidatePositionsPartyBHandler
+} from "../../common/handlers/LiquidatePositionsPartyBHandler"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-export class LiquidatePositionsPartyBHandler extends CommonLiquidatePositionsPartyBHandler {
-
-	constructor(event: LiquidatePositionsPartyB) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
+export class LiquidatePositionsPartyBHandler<T> extends CommonLiquidatePositionsPartyBHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 	}
 }

@@ -1,3 +1,6 @@
 {
-	"importModels": ["GlobalCounter", "Quote", "Symbol", "Account"]
+  "importModels": [
+    "GlobalCounter",
+    "Quote"
+  ]
 }

@@ -1,4 +1,4 @@
-import {BigInt, Bytes, ethereum} from '@graphprotocol/graph-ts'
+import {Bytes, ethereum} from '@graphprotocol/graph-ts'
 import {EventsTimestamp, InitialQuote, Quote, TransactionsHash} from "../../generated/schema"
 
 
@@ -30,25 +30,25 @@ export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
 	return entity
 }
 
-export function setEventTimestampAndTransactionHashAndAction(id: string, timestamp: BigInt, eventName: string, trHash: Bytes, blockNumber: BigInt): void {
+export function setEventTimestampAndTransactionHashAndAction(id: string, eventName: string, _event: ethereum.Event,): void {
 	let timestampEntity = EventsTimestamp.load(id)
 	if (!timestampEntity) {
 		timestampEntity = new EventsTimestamp(id)
 	}
-	timestampEntity.setBigInt(eventName, timestamp)
+	timestampEntity.setBigInt(eventName, _event.block.timestamp)
 	timestampEntity.save()
 
 	let trHashEntity = TransactionsHash.load(id)
 	if (!trHashEntity) {
 		trHashEntity = new TransactionsHash(id)
 	}
-	trHashEntity.setBytes(eventName, trHash)
+	trHashEntity.setBytes(eventName, _event.transaction.hash)
 	trHashEntity.save()
 
 	let quote = Quote.load(id)!
 	quote.action = eventName
-	quote.timeStamp = timestamp
-	quote.blockNumber = blockNumber
+	quote.timeStamp = _event.block.timestamp
+	quote.blockNumber = _event.block.number
 	quote.save()
 }
 

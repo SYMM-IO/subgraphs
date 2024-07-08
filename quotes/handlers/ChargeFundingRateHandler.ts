@@ -1,24 +1,22 @@
-import { BigInt } from "@graphprotocol/graph-ts"
-import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../common/handlers/ChargeFundingRateHandler"
-import { FACTOR, getGlobalCounterAndInc } from "../../common/utils"
-import { GlobalFee, Quote } from "../../generated/schema"
-import { ChargeFundingRate } from "../../generated/symmio/symmio"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
+import {BigInt, ethereum} from "@graphprotocol/graph-ts"
+import {
+	ChargeFundingRateHandler as CommonChargeFundingRateHandler
+} from "../../common/handlers/ChargeFundingRateHandler"
+import {FACTOR} from "../../common/utils"
+import {GlobalFee, Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../../common/utils/quote&analitics&user"
+import {Version} from "../../common/BaseHandler";
 
-export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
-
-	constructor(event: ChargeFundingRate) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		const event = super.getEvent()
-		for (let i = 0, lenQ = this.event.params.quoteIds.length; i < lenQ; i++) {
-			let qoutId = this.event.params.quoteIds[i]
-			const rate = this.event.params.rates[i]
-			let quote = Quote.load(qoutId.toString())!
+export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			let quoteId = event.params.quoteIds[i]
+			const rate = event.params.rates[i]
+			let quote = Quote.load(quoteId.toString())!
 			const openQuantityUntilNow = quote.quantity!.minus(quote.closedAmount!)
 			let newPrice: BigInt
 			if (quote.positionType === 0) { //Long
@@ -32,8 +30,7 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 			quote.openedPrice = newPrice
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
-				'ChargeFundingRate', event.transaction.hash, event.block.number)
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'ChargeFundingRate', _event)
 
 			let globalEntity = GlobalFee.load("GlobalEntity")
 			if (!globalEntity) {
@@ -41,7 +38,7 @@ export class ChargeFundingRateHandler extends CommonChargeFundingRateHandler {
 				globalEntity.globalFee = BigInt.fromI32(0)
 			}
 			globalEntity.globalFee = globalEntity.globalFee.plus(fee)
-			globalEntity.latestTimestamp = this.event.block.timestamp
+			globalEntity.latestTimestamp = event.block.timestamp
 			globalEntity.save()
 		}
 	}

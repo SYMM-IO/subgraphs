@@ -1,21 +1,4 @@
-import { BaseHandler } from "../BaseHandler"
-import { RoleGranted } from "../../generated/symmioMultiAccount_0/symmioMultiAccount"
+import {BaseHandler} from "../BaseHandler"
 
-export class RoleGrantedHandler extends BaseHandler {
-	protected event: RoleGranted
-
-	constructor(event: RoleGranted) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): RoleGranted {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-	}
+export class RoleGrantedHandler<T> extends BaseHandler {
 }

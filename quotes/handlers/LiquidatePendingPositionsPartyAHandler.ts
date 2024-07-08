@@ -1,24 +1,19 @@
-import { log } from "@graphprotocol/graph-ts"
+import {ethereum, log} from "@graphprotocol/graph-ts"
 import {
 	LiquidatePendingPositionsPartyAHandler as CommonLiquidatePendingPositionsPartyAHandler,
 } from "../../common/handlers/LiquidatePendingPositionsPartyAHandler"
 
-import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
-import { LiquidatePendingPositionsPartyA } from "../../generated/symmio/symmio"
-import { getGlobalCounterAndInc } from "../../common/utils"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
+import {PartyA, PartyBPartyA, Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../../common/utils/quote&analitics&user"
+import {Version} from "../../common/BaseHandler";
 
-export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendingPositionsPartyAHandler {
-
-	constructor(event: LiquidatePendingPositionsPartyA) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		const event = super.getEvent()
-		let partyAEntity = PartyA.load(this.event.params.partyA.toHexString())!
+export class LiquidatePendingPositionsPartyAHandler<T> extends CommonLiquidatePendingPositionsPartyAHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
+		let partyAEntity = PartyA.load(event.params.partyA.toHexString())!
 		partyAEntity.globalCounter = super.handleGlobalCounter()
 		const list = partyAEntity.quoteUntilLiquid!.slice(0)
 		for (let i = 0, lenQ = list.length; i < lenQ; i++) {
@@ -28,11 +23,10 @@ export class LiquidatePendingPositionsPartyAHandler extends CommonLiquidatePendi
 			if (quote.quoteStatus <= 2 && quote.quoteStatus >= 0) {
 				quote.quoteStatus = 8
 				quote.save()
-				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
-					'LiquidatePendingPositionsPartyA', event.transaction.hash, event.block.number)
+				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LiquidatePendingPositionsPartyA', _event)
 				const partyB = quote.partyB
 				if (partyB) {
-					let partyAPartyBEntity = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + partyB.toHexString())!
+					let partyAPartyBEntity = PartyBPartyA.load(event.params.partyA.toHexString() + '-' + partyB.toHexString())!
 					partyAPartyBEntity.globalCounter = super.handleGlobalCounter()
 					partyAPartyBEntity.quoteUntilLiquid = []
 					partyAPartyBEntity.save()

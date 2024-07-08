@@ -1,36 +1,23 @@
-import { BaseHandler } from "../BaseHandler"
-import { AcceptCancelRequest } from "../../generated/symmio/symmio"
-import { Quote } from "../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
-import { getGlobalCounterAndInc } from "../utils"
+import {BaseHandler, Version} from "../BaseHandler"
+import {Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../utils/quote&analitics&user"
+import {ethereum} from "@graphprotocol/graph-ts";
 
-export class AcceptCancelRequestHandler extends BaseHandler {
-	protected event: AcceptCancelRequest
+export class AcceptCancelRequestHandler<T> extends BaseHandler {
 
-	constructor(event: AcceptCancelRequest) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): AcceptCancelRequest {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-		let quote = Quote.load(this.event.params.quoteId.toString())
+	handleQuote(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		let quote = Quote.load(event.params.quoteId.toString())
 		if (quote) {
 
 			quote.globalCounter = super.handleGlobalCounter()
-			quote.blockNumber = this.event.block.number
-			quote.quoteStatus = this.event.params.quoteStatus
-			quote.timeStamp = this.event.block.timestamp
+			quote.blockNumber = event.block.number
+			quote.quoteStatus = event.params.quoteStatus
+			quote.timeStamp = event.block.timestamp
 			quote.save()
 
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'AcceptCancelRequest', this.event.transaction.hash, this.event.block.number)
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'AcceptCancelRequest', _event)
 		}
 	}
 }

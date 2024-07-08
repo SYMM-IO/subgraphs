@@ -88,17 +88,19 @@ def generate_src_ts(target_module, contract: Contract):
 
         imports_code += f"""
 import {{{handler_class_name}}} from "./handlers/{handler_class_name}"
-import {{{event_name}}} from "../generated/{source}/{source}" """
+import {{{event_name}}} from "../generated/{source}/{source}"
+"""
 
         handlers_code += f"""
 export function handle{event_name}(event: {event_name}): void {{
-    let handler = new {handler_class_name}(event, "{contract.version}")
-    handler.handle()
+    let handler = new {handler_class_name}<{event_name}>()
+    handler.handle(event, Version.v_{contract.version})
 }}
         """
     imports_code += "\n\n"
     with open(os.path.join(target_module, f"src_{contract.path()}.ts"), "w") as src_file:
         src_file.write(imports_code)
+        src_file.write(f"import {{Version}} from \"../common/BaseHandler\"")
         src_file.write(handlers_code)
 
 
@@ -129,7 +131,7 @@ import {{{event_name}}} from "../../generated/{source}/{source}"
 
 export class {handler_class_name} extends Common{handler_class_name} {{
 
-    handle(_event: ethereum.Event, version: string): void {{
+    handle(_event: ethereum.Event, version: Version): void {{
         super.handle(_event, version)
 {super_calls_str}
     }}
@@ -223,6 +225,8 @@ def prepare_module(config: Config, target_module: str):
     }
 
     for contract in config.contracts:
+        if len(contract.events) == 0:
+            continue
         source_config = {
             "kind": "ethereum/contract",
             "name": contract.path(),
@@ -290,7 +294,8 @@ def main():
 
     if args.create_src:
         for contract in config.contracts:
-            generate_src_ts(args.module_name, contract)
+            if len(contract.events) > 0:
+                generate_src_ts(args.module_name, contract)
 
     if args.create_handlers:
         for contract in config.contracts:

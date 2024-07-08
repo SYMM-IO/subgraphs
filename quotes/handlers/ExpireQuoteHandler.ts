@@ -1,21 +1,14 @@
-import { log } from "@graphprotocol/graph-ts"
-import { ExpireQuoteHandler as CommonExpireQuoteHandler } from "../../common/handlers/ExpireQuoteHandler"
+import {ethereum} from "@graphprotocol/graph-ts"
+import {ExpireQuoteHandler as CommonExpireQuoteHandler} from "../../common/handlers/ExpireQuoteHandler"
+import {removeQuoteFromPendingList} from "../../common/utils/quote"
+import {Version} from "../../common/BaseHandler";
 
-import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
-import { ExpireQuote } from "../../generated/symmio/symmio"
-import { removeQuoteFromPendingList } from "../../common/utils/quote"
-
-export class ExpireQuoteHandler extends CommonExpireQuoteHandler {
-
-	constructor(event: ExpireQuote) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		let event = super.getEvent()
+export class ExpireQuoteHandler<T> extends CommonExpireQuoteHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 		removeQuoteFromPendingList(event.params.quoteId)
-
 	}
 }
