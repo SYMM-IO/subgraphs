@@ -1,14 +1,12 @@
-import { AcceptCancelCloseRequestHandler as CommonAcceptCancelCloseRequestHandler } from "../../common/handlers/AcceptCancelCloseRequestHandler"
-import { AcceptCancelCloseRequest } from "../../generated/symmio/symmio"
+import {
+	AcceptCancelCloseRequestHandler as CommonAcceptCancelCloseRequestHandler
+} from "../../common/handlers/AcceptCancelCloseRequestHandler"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-export class AcceptCancelCloseRequestHandler extends CommonAcceptCancelCloseRequestHandler {
-
-	constructor(event: AcceptCancelCloseRequest) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
+export class AcceptCancelCloseRequestHandler<T> extends CommonAcceptCancelCloseRequestHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 	}
 }

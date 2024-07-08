@@ -1,34 +1,20 @@
-import { BaseHandler } from "../BaseHandler"
-import { RequestToClosePosition } from "../../generated/symmio/symmio"
-import { Quote } from "../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
-import { getGlobalCounterAndInc } from "../utils"
+import {BaseHandler, Version} from "../BaseHandler"
+import {Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../utils/quote&analitics&user"
+import {ethereum} from "@graphprotocol/graph-ts";
 
-export class RequestToClosePositionHandler extends BaseHandler {
-	protected event: RequestToClosePosition
-
-	constructor(event: RequestToClosePosition) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): RequestToClosePosition {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-		let quote = Quote.load(this.event.params.quoteId.toString())!
+export class RequestToClosePositionHandler<T> extends BaseHandler {
+	handleQuote(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.globalCounter = super.handleGlobalCounter()
-		quote.closePrice = this.event.params.closePrice
-		quote.closeDeadline = this.event.params.deadline
-		quote.orderTypeClose = this.event.params.orderType
-		quote.quantityToClose = this.event.params.quantityToClose
-		quote.quoteStatus = this.event.params.quoteStatus
+		quote.closePrice = event.params.closePrice
+		quote.closeDeadline = event.params.deadline
+		quote.orderTypeClose = event.params.orderType
+		quote.quantityToClose = event.params.quantityToClose
+		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'RequestToClosePosition', this.event.transaction.hash, this.event.block.number)
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'RequestToClosePosition', _event)
 	}
 }

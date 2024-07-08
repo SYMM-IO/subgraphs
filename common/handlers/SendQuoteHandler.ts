@@ -1,107 +1,83 @@
-import { BaseHandler } from "../BaseHandler"
-import { SendQuote } from "../../generated/symmio/symmio"
-import { BigInt, Bytes, } from "@graphprotocol/graph-ts"
-import { Account, EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../generated/schema"
-import { initialHelper, } from "../utils/quote&analitics&user"
-import { getGlobalCounterAndInc, getQuote, symbolIdToSymbolName } from "../utils"
+import {BaseHandler, Version} from "../BaseHandler"
+import {BigInt, Bytes, ethereum,} from "@graphprotocol/graph-ts"
+import {EventsTimestamp, InitialQuote, Quote, TransactionsHash} from "../../generated/schema"
+import {initialHelper,} from "../utils/quote&analitics&user"
+import {getQuote, symbolIdToSymbolName} from "../utils"
 
-export class SendQuoteHandler extends BaseHandler {
-	protected event: SendQuote
-
-	constructor(event: SendQuote) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): SendQuote {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-		let quote = new Quote(this.event.params.quoteId.toString())
+export class SendQuoteHandler<T> extends BaseHandler {
+	handleQuote(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		let quote = new Quote(event.params.quoteId.toString())
 		quote.globalCounter = super.handleGlobalCounter()
-		quote.quoteId = this.event.params.quoteId
-		quote.orderTypeOpen = this.event.params.orderType
-		quote.partyA = this.event.params.partyA
-		quote.symbolId = this.event.params.symbolId
-		quote.positionType = this.event.params.positionType
-		quote.requestedOpenPrice = this.event.params.price
-		quote.quantity = this.event.params.quantity
-		quote.cva = this.event.params.cva
-		quote.partyAmm = this.event.params.partyAmm
-		quote.partyBmm = this.event.params.partyBmm
-		quote.lf = this.event.params.lf
-		quote.openDeadline = this.event.params.deadline
+		quote.quoteId = event.params.quoteId
+		quote.orderTypeOpen = event.params.orderType
+		quote.partyA = event.params.partyA
+		quote.symbolId = event.params.symbolId
+		quote.positionType = event.params.positionType
+		quote.requestedOpenPrice = event.params.price
+		quote.quantity = event.params.quantity
+		quote.cva = event.params.cva
+		quote.partyAmm = event.params.partyAmm
+		quote.partyBmm = event.params.partyBmm
+		quote.lf = event.params.lf
+		quote.openDeadline = event.params.deadline
 		quote.quoteStatus = 0
-		quote.marketPrice = this.event.params.marketPrice
+		quote.marketPrice = event.params.marketPrice
 		quote.averageClosedPrice = BigInt.fromI32(0)
 		quote.closedAmount = BigInt.fromI32(0)
-		quote.tradingFee = this.event.params.tradingFee
+		quote.tradingFee = event.params.tradingFee
 		quote.fundingRateFee = BigInt.fromI32(0)
-		quote.blockNumber = this.event.block.number
-		let initialQuote = new InitialQuote(this.event.params.quoteId.toString())
+		quote.blockNumber = event.block.number
+		let initialQuote = new InitialQuote(event.params.quoteId.toString())
 		quote.initialData = initialQuote.id
-		initialQuote.quoteId = this.event.params.quoteId
-		initialQuote.orderTypeOpen = this.event.params.orderType
-		initialQuote.partyA = this.event.params.partyA
-		initialQuote.symbolId = this.event.params.symbolId
-		initialQuote.positionType = this.event.params.positionType
-		initialQuote.requestedOpenPrice = this.event.params.price
-		initialQuote.quantity = this.event.params.quantity
-		initialQuote.cva = this.event.params.cva
-		initialQuote.partyAmm = this.event.params.partyAmm
-		initialQuote.partyBmm = this.event.params.partyBmm
-		initialQuote.lf = this.event.params.lf
-		initialQuote.deadline = this.event.params.deadline
+		initialQuote.quoteId = event.params.quoteId
+		initialQuote.orderTypeOpen = event.params.orderType
+		initialQuote.partyA = event.params.partyA
+		initialQuote.symbolId = event.params.symbolId
+		initialQuote.positionType = event.params.positionType
+		initialQuote.requestedOpenPrice = event.params.price
+		initialQuote.quantity = event.params.quantity
+		initialQuote.cva = event.params.cva
+		initialQuote.partyAmm = event.params.partyAmm
+		initialQuote.partyBmm = event.params.partyBmm
+		initialQuote.lf = event.params.lf
+		initialQuote.deadline = event.params.deadline
 		initialQuote.quoteStatus = 0
-		initialQuote.marketPrice = this.event.params.marketPrice
+		initialQuote.marketPrice = event.params.marketPrice
 
-
-		const getQuoteValue = getQuote(this.event.params.quoteId, this.event.address)
+		const getQuoteValue = getQuote(event.params.quoteId, event.address)
 		let initialNewEntity = initialHelper(getQuoteValue)
 		quote.maxFundingRate = initialNewEntity.tradingFee
 		initialQuote.tradingFee = initialNewEntity.tradingFee
 
-
-		const symbolName = symbolIdToSymbolName(this.event.params.symbolId, this.event.address)
+		const symbolName = symbolIdToSymbolName(event.params.symbolId, event.address)
 		quote.symbol = symbolName
 		initialQuote.symbol = symbolName
 
-
-		if (this.event.params.partyBsWhiteList) {
+		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
-			for (let i = 0, len = this.event.params.partyBsWhiteList.length; i < len; i++) {
-				partyBsWhiteList.push(this.event.params.partyBsWhiteList[i])
+			for (let i = 0, len = event.params.partyBsWhiteList.length; i < len; i++) {
+				partyBsWhiteList.push(event.params.partyBsWhiteList[i])
 			}
 			quote.partyBsWhiteList = partyBsWhiteList
 			initialQuote.partyBsWhiteList = partyBsWhiteList
 		}
 
-		initialQuote.timeStamp = this.event.block.timestamp
+		initialQuote.timeStamp = event.block.timestamp
 		initialQuote.save()
 
-		quote.timeStamp = this.event.block.timestamp
-		let EventTimestampEntity = new EventsTimestamp(this.event.params.quoteId.toString())
-		quote.eventsTimestamp = this.event.params.quoteId.toString()
-		let TransactionsHashEntity = new TransactionsHash(this.event.params.quoteId.toString())
-		quote.transactionsHash = this.event.params.quoteId.toString()
+		quote.timeStamp = event.block.timestamp
+		let EventTimestampEntity = new EventsTimestamp(event.params.quoteId.toString())
+		quote.eventsTimestamp = event.params.quoteId.toString()
+		let TransactionsHashEntity = new TransactionsHash(event.params.quoteId.toString())
+		quote.transactionsHash = event.params.quoteId.toString()
 		quote.action = "SendQuote"
 		quote.save()
 
-		EventTimestampEntity.SendQuote = this.event.block.timestamp
+		EventTimestampEntity.SendQuote = event.block.timestamp
 		EventTimestampEntity.save()
-		TransactionsHashEntity.SendQuote = this.event.transaction.hash
+		TransactionsHashEntity.SendQuote = event.transaction.hash
 		TransactionsHashEntity.save()
-	}
-
-	handleAccount(): void {
-		super.handleAccount()
-		let event = this.getEvent()
-		let account = Account.load(event.params.partyA.toHexString())!
-		account.quotesCount = account.quotesCount.plus(BigInt.fromString("1"))
-		account.save()
 	}
 }

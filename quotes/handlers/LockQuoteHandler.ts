@@ -1,27 +1,24 @@
-import { LockQuoteHandler as CommonLockQuoteHandler } from "../../common/handlers/LockQuoteHandler"
-import { getGlobalCounterAndInc } from "../../common/utils"
+import {LockQuoteHandler as CommonLockQuoteHandler} from "../../common/handlers/LockQuoteHandler"
 
-import { PartyBPartyA, Quote } from "../../generated/schema"
-import { LockQuote } from "../../generated/symmio/symmio"
+import {PartyBPartyA, Quote} from "../../generated/schema"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-export class LockQuoteHandler extends CommonLockQuoteHandler {
+export class LockQuoteHandler<T> extends CommonLockQuoteHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
+		let entity = Quote.load(event.params.quoteId.toString())!
 
-	constructor(event: LockQuote) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		let entity = Quote.load(this.event.params.quoteId.toString())!
-
-		let partyAPartyBEntity = PartyBPartyA.load(entity.partyA.toHexString() + '-' + this.event.params.partyB.toHexString())
+		let partyAPartyBEntity = PartyBPartyA.load(entity.partyA.toHexString() + '-' + event.params.partyB.toHexString())
 		if (!partyAPartyBEntity) {
-			partyAPartyBEntity = new PartyBPartyA(entity.partyA.toHexString() + '-' + this.event.params.partyB.toHexString())
-			partyAPartyBEntity.quoteUntilLiquid = [this.event.params.quoteId]
+			partyAPartyBEntity = new PartyBPartyA(entity.partyA.toHexString() + '-' + event.params.partyB.toHexString())
+			partyAPartyBEntity.quoteUntilLiquid = [event.params.quoteId]
 		} else {
 			let temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
-			temp.push(this.event.params.quoteId)
+			temp.push(event.params.quoteId)
 			partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
 		}
 		partyAPartyBEntity.globalCounter = super.handleGlobalCounter()

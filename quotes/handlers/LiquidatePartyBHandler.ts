@@ -1,24 +1,19 @@
-import { log } from "@graphprotocol/graph-ts"
-import { LiquidatePartyBHandler as CommonLiquidatePartyBHandler } from "../../common/handlers/LiquidatePartyBHandler"
+import {ethereum, log} from "@graphprotocol/graph-ts"
+import {LiquidatePartyBHandler as CommonLiquidatePartyBHandler} from "../../common/handlers/LiquidatePartyBHandler"
 
-import { PartyA, PartyBPartyA, Quote } from "../../generated/schema"
-import { LiquidatePartyB } from "../../generated/symmio/symmio"
-import { getGlobalCounterAndInc } from "../../common/utils"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
+import {PartyA, PartyBPartyA, Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../../common/utils/quote&analitics&user"
+import {Version} from "../../common/BaseHandler";
 
-export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
-
-	constructor(event: LiquidatePartyB) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		const event = super.getEvent()
-		let partyBpartyA = PartyBPartyA.load(this.event.params.partyA.toHexString() + '-' + this.event.params.partyB.toHexString())!
-		const list = partyBpartyA.quoteUntilLiquid!.slice(0)
-		partyBpartyA.globalCounter = super.handleGlobalCounter()
+export class LiquidatePartyBHandler<T> extends CommonLiquidatePartyBHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
+		let partyBPartyA = PartyBPartyA.load(event.params.partyA.toHexString() + '-' + event.params.partyB.toHexString())!
+		const list = partyBPartyA.quoteUntilLiquid!.slice(0)
+		partyBPartyA.globalCounter = super.handleGlobalCounter()
 		for (let i = 0, lenQ = list.length; i < lenQ; i++) {
 			const quoteId = list[i]
 			let quote = Quote.load(quoteId.toString())!
@@ -26,18 +21,16 @@ export class LiquidatePartyBHandler extends CommonLiquidatePartyBHandler {
 				quote.quoteStatus = 8
 				quote.globalCounter = super.handleGlobalCounter()
 				quote.save()
-				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
-					'LiquidatePartyB', event.transaction.hash, event.block.number)
+				setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LiquidatePartyB', _event)
 			} else {
 				log.error(`error in liquidate positions party B\nQuoteId: ${quoteId}\nQuote status: ${quote.quoteStatus}`, [])
 			}
 		}
-		let partyA = PartyA.load(this.event.params.partyA.toHexString())!
+		let partyA = PartyA.load(event.params.partyA.toHexString())!
 		partyA.globalCounter = super.handleGlobalCounter()
-		partyBpartyA.quoteUntilLiquid = []
+		partyBPartyA.quoteUntilLiquid = []
 		partyA.quoteUntilLiquid = []
 		partyA.save()
-		partyBpartyA.save()
-
+		partyBPartyA.save()
 	}
 }

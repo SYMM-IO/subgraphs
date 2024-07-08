@@ -1,21 +1,4 @@
-import { BaseHandler } from "../BaseHandler"
-import { LiquidationDisputed } from "../../generated/symmio/symmio"
+import {BaseHandler} from "../BaseHandler"
 
-export class LiquidationDisputedHandler extends BaseHandler {
-	protected event: LiquidationDisputed
-
-	constructor(event: LiquidationDisputed) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): LiquidationDisputed {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-	}
+export class LiquidationDisputedHandler<T> extends BaseHandler {
 }

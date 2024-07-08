@@ -1,22 +1,12 @@
-import { BaseHandler } from "../BaseHandler"
-import { AddSymbol } from "../../generated/symmio/symmio"
-import { Symbol } from "../../generated/schema"
+import {BaseHandler, Version} from "../BaseHandler"
+import {Symbol} from "../../generated/schema"
+import {ethereum} from "@graphprotocol/graph-ts";
 
-export class AddSymbolHandler extends BaseHandler {
-	protected event: AddSymbol
-
-	constructor(event: AddSymbol) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): AddSymbol {
-		return this.event
-	}
-
-	handle(): void {
+export class AddSymbolHandler<T> extends BaseHandler {
+	handleSymbol(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
 		const globalCounter = super.handleGlobalCounter()
-		let event = this.getEvent()
 		let symbol = new Symbol(event.params.id.toString())
 		symbol.globalCounter = globalCounter
 		symbol.name = event.params.name
@@ -26,6 +16,4 @@ export class AddSymbolHandler extends BaseHandler {
 		symbol.blockNumber = event.block.number
 		symbol.save()
 	}
-
-	handleQuote(): void {}
 }

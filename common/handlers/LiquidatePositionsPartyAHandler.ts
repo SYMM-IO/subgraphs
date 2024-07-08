@@ -1,35 +1,19 @@
-import { BaseHandler } from "../BaseHandler"
-import { LiquidatePositionsPartyA } from "../../generated/symmio/symmio"
-import { Quote } from "../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
+import {BaseHandler, Version} from "../BaseHandler"
+import {Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../utils/quote&analitics&user"
+import {ethereum} from "@graphprotocol/graph-ts";
 
-export class LiquidatePositionsPartyAHandler extends BaseHandler {
-	protected event: LiquidatePositionsPartyA
-
-	constructor(event: LiquidatePositionsPartyA) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): LiquidatePositionsPartyA {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-		const event = this.event
+export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
+	handleQuote(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
-			let qoutId = event.params.quoteIds[i]
-			let quote = Quote.load(qoutId.toString())!
+			let quoteId = event.params.quoteIds[i]
+			let quote = Quote.load(quoteId.toString())!
 			quote.quoteStatus = 8
-			let LiquidateAmount = quote.quantity!.minus(quote.closedAmount!)
-			quote.liquidateAmount = LiquidateAmount
+			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
-				'LiquidatePositionsPartyA', event.transaction.hash, event.block.number)
-
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LiquidatePositionsPartyA', _event)
 		}
 	}
 }

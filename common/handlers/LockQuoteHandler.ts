@@ -1,32 +1,18 @@
-import { BaseHandler } from "../BaseHandler"
-import { LockQuote } from "../../generated/symmio/symmio"
-import { Quote } from "../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
-import { getGlobalCounterAndInc } from "../utils"
+import {BaseHandler, Version} from "../BaseHandler"
+import {Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../utils/quote&analitics&user"
+import {ethereum} from "@graphprotocol/graph-ts";
 
-export class LockQuoteHandler extends BaseHandler {
-	protected event: LockQuote
-
-	constructor(event: LockQuote) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): LockQuote {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-		let quote = Quote.load(this.event.params.quoteId.toString())!
+export class LockQuoteHandler<T> extends BaseHandler {
+	handleQuote(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.globalCounter = super.handleGlobalCounter()
-		quote.quoteId = this.event.params.quoteId
-		quote.partyB = this.event.params.partyB
+		quote.quoteId = event.params.quoteId
+		quote.partyB = event.params.partyB
 		quote.quoteStatus = 1
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-			'LockQuote', this.event.transaction.hash, this.event.block.number)
+		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LockQuote', _event)
 	}
 }

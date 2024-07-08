@@ -1,32 +1,19 @@
-import { BaseHandler } from "../BaseHandler"
-import { LiquidatePositionsPartyB, symmio } from "../../generated/symmio/symmio"
-import { Quote } from "../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../utils/quote&analitics&user"
-import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
-import { getGlobalCounterAndInc, getQuote } from "../utils"
+import {BaseHandler, Version} from "../BaseHandler"
+import {Quote} from "../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../utils/quote&analitics&user"
+import {BigInt, ethereum, log} from "@graphprotocol/graph-ts"
+import {getQuote} from "../utils"
 
-export class LiquidatePositionsPartyBHandler extends BaseHandler {
-	protected event: LiquidatePositionsPartyB
-
-	constructor(event: LiquidatePositionsPartyB) {
-		super(event)
-		this.event = event
-	}
-
-	protected getEvent(): LiquidatePositionsPartyB {
-		return this.event
-	}
-
-	handle(): void {
-	}
-
-	handleQuote(): void {
-		for (let i = 0, lenQ = this.event.params.quoteIds.length; i < lenQ; i++) {
-			let qouteId = this.event.params.quoteIds[i]
-			let quote = Quote.load(qouteId.toString())!
+export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
+	handleQuote(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			let quoteId = event.params.quoteIds[i]
+			let quote = Quote.load(quoteId.toString())!
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.quoteStatus = 8
-			const result = getQuote(qouteId, this.event.address)
+			const result = getQuote(quoteId, event.address)
 			const getclosedAmount = quote.quantity!
 			let getAveragePrice = result[16].toBigInt()
 			let LiquidateAmount = getclosedAmount.minus(quote.closedAmount!)
@@ -37,8 +24,7 @@ export class LiquidatePositionsPartyBHandler extends BaseHandler {
 				log.debug(`get total fill amount: ${getclosedAmount} , past total fill amount: ${quote.closedAmount!.toString()}\nQuoteId: ${quote.quoteId}`, [])
 			}
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, this.event.block.timestamp,
-				'LiquidatePositionsPartyB', this.event.transaction.hash, this.event.block.number)
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LiquidatePositionsPartyB', _event)
 		}
 	}
 }

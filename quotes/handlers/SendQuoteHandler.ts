@@ -1,21 +1,15 @@
-import { SendQuoteHandler as CommonSendQuoteHandler } from "../../common/handlers/SendQuoteHandler"
-import { getGlobalCounterAndInc } from "../../common/utils"
-import { removeQuoteFromPendingList } from "../../common/utils/quote"
+import {SendQuoteHandler as CommonSendQuoteHandler} from "../../common/handlers/SendQuoteHandler"
 
-import { PartyA } from "../../generated/schema"
-import { SendQuote } from "../../generated/symmio/symmio"
+import {PartyA} from "../../generated/schema"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-export class SendQuoteHandler extends CommonSendQuoteHandler {
-
-	constructor(event: SendQuote) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-
-		let event = super.getEvent()
+export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 		let partyAEntity = PartyA.load(event.params.partyA.toHexString())
 		if (!partyAEntity) {
 			partyAEntity = new PartyA(event.params.partyA.toHexString())

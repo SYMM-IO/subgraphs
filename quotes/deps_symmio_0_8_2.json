@@ -1,0 +1,11 @@
+{
+  "Quote": [
+    "RequestToCancelQuote",
+    "RequestToCancelCloseRequest",
+    "LiquidatePendingPositionsPartyA",
+    "LiquidatePartyB",
+    "ForceCancelQuote",
+    "ForceCancelCloseRequest",
+    "SetSymbolsPrices"
+  ]
+}

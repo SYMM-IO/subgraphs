@@ -1,21 +1,17 @@
-import { RequestToCancelQuoteHandler as CommonRequestToCancelQuoteHandler } from "../../common/handlers/RequestToCancelQuoteHandler"
-import { getGlobalCounterAndInc } from "../../common/utils"
-import { removeQuoteFromPendingList } from "../../common/utils/quote"
+import {
+	RequestToCancelQuoteHandler as CommonRequestToCancelQuoteHandler
+} from "../../common/handlers/RequestToCancelQuoteHandler"
+import {removeQuoteFromPendingList} from "../../common/utils/quote"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-import { PartyA, Quote } from "../../generated/schema"
-import { RequestToCancelQuote } from "../../generated/symmio/symmio"
-
-export class RequestToCancelQuoteHandler extends CommonRequestToCancelQuoteHandler {
-
-	constructor(event: RequestToCancelQuote) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		if (this.event.params.quoteStatus === 3) {
-			let event = super.getEvent()
+export class RequestToCancelQuoteHandler<T> extends CommonRequestToCancelQuoteHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
+		if (event.params.quoteStatus === 3) {
 			removeQuoteFromPendingList(event.params.quoteId)
 		}
 	}

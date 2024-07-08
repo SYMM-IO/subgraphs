@@ -1,21 +1,20 @@
-import { AcceptCancelRequestHandler as CommonAcceptCancelRequestHandler } from "../../common/handlers/AcceptCancelRequestHandler"
-import { getGlobalCounterAndInc, getQuote, symbolIdToSymbolName } from "../../common/utils"
-import { removeQuoteFromPendingList } from "../../common/utils/quote"
-import { initialHelper, } from "../../common/utils/quote&analitics&user"
+import {
+	AcceptCancelRequestHandler as CommonAcceptCancelRequestHandler
+} from "../../common/handlers/AcceptCancelRequestHandler"
+import {getQuote, symbolIdToSymbolName} from "../../common/utils"
+import {removeQuoteFromPendingList} from "../../common/utils/quote"
+import {initialHelper,} from "../../common/utils/quote&analitics&user"
 
-import { Quote } from "../../generated/schema"
-import { AcceptCancelRequest } from "../../generated/symmio/symmio"
+import {Quote} from "../../generated/schema"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../common/BaseHandler";
 
-export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler {
-
-	constructor(event: AcceptCancelRequest) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		let event = super.getEvent()
+export class AcceptCancelRequestHandler<T> extends CommonAcceptCancelRequestHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 		removeQuoteFromPendingList(event.params.quoteId)
 		const quoteStr = event.params.quoteId.toString()
 		let quote = Quote.load(quoteStr)
@@ -26,20 +25,18 @@ export class AcceptCancelRequestHandler extends CommonAcceptCancelRequestHandler
 			quote.quoteStatus = event.params.quoteStatus
 
 			const quoteData = getQuote(quote.quoteId, event.address)
-			let initialquote = initialHelper(quoteData)
-			const symbol = symbolIdToSymbolName(initialquote.symbolId, event.address)
-			initialquote.symbol = symbol
-			initialquote.save()
-			quote.partyA = initialquote.partyA
-			quote.tradingFee = initialquote.tradingFee!
-			quote.initialData = initialquote.id
+			let initialQuote = initialHelper(quoteData)
+			initialQuote.symbol = symbolIdToSymbolName(initialQuote.symbolId, event.address)
+			initialQuote.save()
+			quote.partyA = initialQuote.partyA
+			quote.tradingFee = initialQuote.tradingFee!
+			quote.initialData = initialQuote.id
 			quote.action = 'AcceptCancelRequest'
 			quote.eventsTimestamp = quoteStr
 			quote.transactionsHash = quoteStr
 			quote.timeStamp = event.block.timestamp
 			quote.blockNumber = event.block.number
 			quote.save()
-
 		}
 	}
 }

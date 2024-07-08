@@ -1,20 +1,16 @@
-import { log } from "@graphprotocol/graph-ts"
-import { LiquidatePositionsPartyAHandler as CommonLiquidatePositionsPartyAHandler } from "../../common/handlers/LiquidatePositionsPartyAHandler"
-import { setEventTimestampAndTransactionHashAndAction } from "../../common/utils/quote&analitics&user"
-import { PartyASymbolPrice, Quote } from "../../generated/schema"
-import { LiquidatePositionsPartyA } from "../../generated/symmio/symmio"
-import { getGlobalCounterAndInc } from "../../common/utils"
+import {ethereum, log} from "@graphprotocol/graph-ts"
+import {
+	LiquidatePositionsPartyAHandler as CommonLiquidatePositionsPartyAHandler
+} from "../../common/handlers/LiquidatePositionsPartyAHandler"
+import {PartyASymbolPrice, Quote} from "../../generated/schema"
+import {Version} from "../../common/BaseHandler";
 
-export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPartyAHandler {
-
-	constructor(event: LiquidatePositionsPartyA) {
-		super(event)
-	}
-
-	handle(): void {
-		super.handle()
-		super.handleQuote()
-		const event = super.getEvent()
+export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositionsPartyAHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let qoutId = event.params.quoteIds[i]
 			let quote = Quote.load(qoutId.toString())!
@@ -23,7 +19,7 @@ export class LiquidatePositionsPartyAHandler extends CommonLiquidatePositionsPar
 			if (partyASymbolPriceEntity) {
 				quote.liquidatePrice = partyASymbolPriceEntity.requestedOpenPrice
 			} else {
-				log.debug(`Error in get entity liquidate requestedOpenPrice quoteId={} partyA={} symbolID={}`, [qoutId.toString(), this.event.params.partyA.toHexString(), quote.symbolId!.toString()])
+				log.debug(`Error in get entity liquidate requestedOpenPrice quoteId={} partyA={} symbolID={}`, [qoutId.toString(), event.params.partyA.toHexString(), quote.symbolId!.toString()])
 			}
 			quote.save()
 		}

@@ -1,18 +1,14 @@
-import {BaseHandler} from "../BaseHandler"
-import {AcceptCancelCloseRequest, symmio_0_8_2} from "../../generated/symmio_0_8_2/symmio_0_8_2"
+import {BaseHandler, Version} from "../BaseHandler"
+import {symmio_0_8_2} from "../../generated/symmio_0_8_2/symmio_0_8_2"
 import {Quote} from "../../generated/schema"
 import {initialHelper, setEventTimestampAndTransactionHashAndAction} from "../utils/quote&analitics&user"
 import {ethereum, log} from "@graphprotocol/graph-ts"
 import {symbolIdToSymbolName} from "../utils"
 
-export class AcceptCancelCloseRequestHandler extends BaseHandler {
-
-	handle(_event: ethereum.Event, version: string = "0_8_2"): void {
-	}
-
-	handleQuote(_event: ethereum.Event): void {
+export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
+	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
-		const event = changetype<AcceptCancelCloseRequest>(_event)
+		const event = changetype<T>(_event)
 
 		let quote = Quote.load(event.params.quoteId.toString())
 		if (quote) {
@@ -21,8 +17,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 			quote.blockNumber = event.block.number
 			quote.timeStamp = event.block.timestamp
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, event.block.timestamp,
-				'AcceptCancelCloseRequest', event.transaction.hash, event.block.number)
+			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'AcceptCancelCloseRequest', _event)
 		} else {
 			let newEntity = new Quote(event.params.quoteId.toString())
 			newEntity.globalCounter = super.handleGlobalCounter()
@@ -48,8 +43,7 @@ export class AcceptCancelCloseRequestHandler extends BaseHandler {
 				newEntity.tradingFee = initialNewEntity.tradingFee!
 				newEntity.initialData = initialNewEntity.id
 			}
-			setEventTimestampAndTransactionHashAndAction(newEntity.eventsTimestamp, event.block.timestamp,
-				'AcceptCancelCloseRequest', event.transaction.hash, event.block.number)
+			setEventTimestampAndTransactionHashAndAction(newEntity.eventsTimestamp, 'AcceptCancelCloseRequest', _event)
 			newEntity.save()
 		}
 	}
