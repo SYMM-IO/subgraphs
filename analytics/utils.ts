@@ -16,8 +16,7 @@ import {
 } from "../generated/schema"
 
 import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum"
-import {FillCloseRequest, LiquidatePositionsPartyA} from "../generated/symmio/symmio"
-import {getQuote} from "./contract_utils"
+import {getQuote} from "./contract_utils_0_8_2"
 import {createNewAccount, createNewUser} from "../common/utils/analytics&user_profile"
 
 // @ts-ignore
@@ -32,6 +31,7 @@ rolesNames.set("0x23288e74cb14deb13fd69e749986e8975f19aa3efb14b2fe5e9b512d772f19
 rolesNames.set("0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c16", "LIQUIDATOR_ROLE")
 rolesNames.set("0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84", "SUSPENDER_ROLE")
 rolesNames.set("0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4", "DISPUTE_ROLE")
+rolesNames.set("0x931c8e73074924ecdce1f1602777505305e234e4ae359fdf7ed84d5fd0cfdbee", "AFFILIATE_MANAGER_ROLE")
 
 // @ts-ignore
 export let rolesNamesMultiAccount = new Map<string, string>()
@@ -295,9 +295,9 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 	return configuration
 }
 
-export function handleClose(_event: ethereum.Event, name: string): void {
+export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	// @ts-ignore
-	const event = changetype<FillCloseRequest>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
+	const event = changetype<T>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
 	let quote = Quote.load(event.params.quoteId.toString())!
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
@@ -338,9 +338,9 @@ export function handleClose(_event: ethereum.Event, name: string): void {
 	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.openedPrice!)), false, account.accountSource)
 }
 
-export function handleLiquidatePosition(_event: ethereum.Event, qId: BigInt): void {
+export function handleLiquidatePosition<T>(_event: ethereum.Event, qId: BigInt): void {
 	// @ts-ignore
-	const event = changetype<LiquidatePositionsPartyA>(_event)
+	const event = changetype<T>(_event)
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!
 	const quote = Quote.load(qId.toString())!
 	const chainQuote = getQuote(event.address, qId)

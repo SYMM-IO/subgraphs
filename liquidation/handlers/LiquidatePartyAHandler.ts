@@ -10,7 +10,7 @@ export class LiquidatePartyAHandler extends CommonLiquidatePartyAHandler {
   }
 
   handle(): void {
-    super.handle()
+    super.handle(_event, version)
     super.handleGlobalCounter()
     const event = super.getEvent()
     let entity = PartyA.load(event.params.partyA.toHex())!

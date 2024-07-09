@@ -157,7 +157,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "fillAmount",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
@@ -825,7 +825,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "fillAmount",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
@@ -868,7 +868,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "fillAmount",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
@@ -936,7 +936,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "fillAmount",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
@@ -1173,7 +1173,7 @@
   {
     "inputs": [
       { "internalType": "uint256", "name": "quoteId", "type": "uint256" },
-      { "internalType": "uint256", "name": "fillAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "filledAmount", "type": "uint256" },
       { "internalType": "uint256", "name": "closedPrice", "type": "uint256" },
       {
         "components": [
@@ -1253,7 +1253,7 @@
   {
     "inputs": [
       { "internalType": "uint256", "name": "quoteId", "type": "uint256" },
-      { "internalType": "uint256", "name": "fillAmount", "type": "uint256" },
+      { "internalType": "uint256", "name": "filledAmount", "type": "uint256" },
       { "internalType": "uint256", "name": "openedPrice", "type": "uint256" },
       {
         "components": [

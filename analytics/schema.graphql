@@ -113,41 +113,6 @@ type PriceCheck @entity{
     transaction: Bytes!
 }
 
-type PartyALiquidation @entity{
-    id: ID!
-    partyA: Bytes!
-    liquidator: Bytes!
-    liquidationType: Int!
-    timestamp: BigInt!
-    transaction: Bytes!
-    liquidateAllocatedBalance:BigInt
-    liquidateCva:BigInt
-    liquidatePendingCva:BigInt
-    liquidateLf:BigInt
-    liquidatePendingLf:BigInt
-}
-
-type PartyBLiquidation @entity{
-    id: ID!
-    partyA: Bytes!
-    partyB: Bytes!
-    liquidator: Bytes!
-    timestamp: BigInt!
-    transaction: Bytes!
-    liquidateAllocatedBalance:BigInt
-    liquidateCva:BigInt
-    liquidatePendingCva:BigInt
-    liquidateLf:BigInt
-    liquidatePendingLf:BigInt
-}
-
-type PartyALiquidationDisputed @entity{
-    id: ID!
-    partyA: Bytes!
-    timestamp: BigInt!
-    transaction: Bytes!
-}
-
 type Configuration @entity{
     id: ID!
     collateral: Bytes!

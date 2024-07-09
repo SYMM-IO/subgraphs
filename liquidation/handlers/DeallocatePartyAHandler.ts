@@ -11,7 +11,7 @@ export class DeallocatePartyAHandler extends CommonDeallocatePartyAHandler {
   }
 
   handle(): void {
-    super.handle()
+    super.handle(_event, version)
     super.handleGlobalCounter()
     const event = super.getEvent()
     let deAllocateEntity = PartyA.load(event.params.user.toHex())

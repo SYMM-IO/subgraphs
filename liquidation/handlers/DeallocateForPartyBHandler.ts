@@ -10,7 +10,7 @@ export class DeallocateForPartyBHandler extends CommonDeallocateForPartyBHandler
   }
 
   handle(): void {
-    super.handle()
+    super.handle(_event, version)
     const globalCounter = super.handleGlobalCounter()
     const event = super.getEvent()
     let deAllocateEntity = PartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())!
