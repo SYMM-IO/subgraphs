@@ -1,4 +1,5 @@
 import argparse
+import dataclasses
 import json
 import os
 import re
@@ -39,6 +40,13 @@ class Config:
         contracts = [Contract.from_dict(c) for c in data['contracts']]
         deploy_urls = data['deploy_urls']
         return cls(data['network'], contracts, deploy_urls)
+
+
+@dataclasses.dataclass
+class Event:
+    source: str
+    signature: str
+    name: str
 
 
 def json_to_yaml(json_data):
@@ -82,12 +90,12 @@ def generate_src_ts(target_module, contract: Contract):
     imports_code = ""
     handlers_code = ""
     for event in contract.events:
-        source = event["source"]
-        event_name = event["name"]
+        source = event.source
+        event_name = event.name
         handler_class_name = event_name + "Handler"
 
         imports_code += f"""
-import {{{handler_class_name}}} from "./handlers/{handler_class_name}"
+import {{{handler_class_name}}} from "./handlers/{contract.abi}/{handler_class_name}"
 import {{{event_name}}} from "../generated/{source}/{source}"
 """
 
@@ -186,13 +194,13 @@ def get_event_signature(event_name, abi_file_path):
     return None
 
 
-def get_events_with_signatures(needed_events, contract: Contract):
+def get_events_with_signatures(needed_events, contract: Contract) -> List[Event]:
     events = []
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
     for event in needed_events:
         sig = get_event_signature(event, abi_file)
-        events.append({"source": source, "name": event, "signature": sig})
+        events.append(Event(source=source, name=event, signature=sig))
     return events
 
 
@@ -208,9 +216,9 @@ def prepare_module(config: Config, target_module: str):
         needed_events = get_needed_events_for(models, target_module, contract) + events_debts
         events = get_events_with_signatures(needed_events, contract)
         for e in events:
-            if e['signature'] is None:
-                events_debts.append(e['name'])
-        contract.events = [e for e in events if e['signature'] is not None]
+            if e.signature is None:
+                events_debts.append(e.name)
+        contract.events = list({(e.name, e.signature): e for e in events if e.signature is not None}.values())
 
     subgraph_config = {
         "specVersion": "0.0.4",
@@ -246,8 +254,8 @@ def prepare_module(config: Config, target_module: str):
                     "file": f"./abis/{contract.path()}.json"
                 }],
                 "eventHandlers": [{
-                    "event": event["signature"],
-                    "handler": f"handle{event['name']}"
+                    "event": event.signature,
+                    "handler": f"handle{event.name}"
                 } for event in contract.events],
                 "file": f"./{target_module}/src_{contract.path()}.ts"
             }

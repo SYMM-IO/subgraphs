@@ -11,7 +11,7 @@ export class AllocatePartyAHandler extends CommonAllocatePartyAHandler {
   }
 
   handle(): void {
-    super.handle()
+    super.handle(_event, version)
     const event = super.getEvent()
     super.handleGlobalCounter()
     let allocateEntity = PartyA.load(event.params.user.toHex())
