@@ -1,14 +1,10 @@
 import {DepositHandler as CommonDepositHandler} from "../../../common/handlers/symmio/DepositHandler"
 import {Account, BalanceChange} from "../../../generated/schema"
-import {
-	getConfiguration,
-	getDailyHistoryForTimestamp,
-	getTotalHistory,
-	newUserAndAccount,
-	updateActivityTimestamps
-} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getConfiguration, newUserAndAccount} from "../../utils/builders";
+
+import {updateActivityTimestamps, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
 
 export class DepositHandler<T> extends CommonDepositHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -33,14 +29,9 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 		deposit.collateral = getConfiguration(event).collateral
 		deposit.save()
 
-		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
-		dh.deposit = dh.deposit.plus(deposit.amount)
-		dh.updateTimestamp = event.block.timestamp
-		dh.save()
-
-		const th = getTotalHistory(event.block.timestamp, account.accountSource)
-		th.deposit = th.deposit.plus(deposit.amount)
-		th.updateTimestamp = event.block.timestamp
-		th.save()
+		updateHistories(
+			new UpdateHistoriesParams(account, event.block.timestamp)
+				.deposit(deposit.amount)
+		)
 	}
 }
