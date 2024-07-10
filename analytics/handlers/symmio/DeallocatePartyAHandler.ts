@@ -2,9 +2,11 @@ import {
 	DeallocatePartyAHandler as CommonDeallocatePartyAHandler
 } from "../../../common/handlers/symmio/DeallocatePartyAWithAccountHandler"
 import {Account, BalanceChange} from "../../../generated/schema"
-import {getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getConfiguration} from "../../utils/builders";
+
+import {updateActivityTimestamps, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
 
 export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -31,14 +33,9 @@ export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T>
 		deallocate.collateral = getConfiguration(event).collateral
 		deallocate.save()
 
-		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
-		dh.deallocate = dh.deallocate.plus(deallocate.amount)
-		dh.updateTimestamp = event.block.timestamp
-		dh.save()
-
-		const th = getTotalHistory(event.block.timestamp, account.accountSource)
-		th.deallocate = th.deallocate.plus(deallocate.amount)
-		th.updateTimestamp = event.block.timestamp
-		th.save()
+		updateHistories(
+			new UpdateHistoriesParams(account, event.block.timestamp)
+				.deallocate(deallocate.amount)
+		)
 	}
 }

@@ -1,11 +1,11 @@
 import {
 	EmergencyClosePositionHandler as CommonEmergencyClosePositionHandler
 } from "../../../common/handlers/symmio/EmergencyClosePositionHandler"
-import {handleClose} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 import {EmergencyClosePosition as EmergencyClosePosition_0_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
 import {EmergencyClosePosition as EmergencyClosePosition_0_8_0} from "../../../generated/symmio_0_8_0/symmio_0_8_0";
+import {handleClose} from "../commonHandlers/close";
 
 export class EmergencyClosePositionHandler<T> extends CommonEmergencyClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

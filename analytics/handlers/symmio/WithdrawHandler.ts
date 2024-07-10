@@ -1,14 +1,10 @@
 import {WithdrawHandler as CommonWithdrawHandler} from "../../../common/handlers/symmio/WithdrawHandler"
 import {Account, BalanceChange} from "../../../generated/schema"
-import {
-	getConfiguration,
-	getDailyHistoryForTimestamp,
-	getTotalHistory,
-	newUserAndAccount,
-	updateActivityTimestamps
-} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getConfiguration, newUserAndAccount} from "../../utils/builders";
+
+import {updateActivityTimestamps, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -38,14 +34,9 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		withdraw.collateral = getConfiguration(event).collateral
 		withdraw.save()
 
-		const dh = getDailyHistoryForTimestamp(event.block.timestamp, account.accountSource)
-		dh.withdraw = dh.withdraw.plus(withdraw.amount)
-		dh.updateTimestamp = event.block.timestamp
-		dh.save()
-
-		const th = getTotalHistory(event.block.timestamp, account.accountSource)
-		th.withdraw = th.withdraw.plus(withdraw.amount)
-		th.updateTimestamp = event.block.timestamp
-		th.save()
+		updateHistories(
+			new UpdateHistoriesParams(account, event.block.timestamp)
+				.withdraw(withdraw.amount)
+		)
 	}
 }

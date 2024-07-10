@@ -2,9 +2,10 @@ import {
 	RequestToCancelCloseRequestHandler as CommonRequestToCancelCloseRequestHandler,
 } from "../../../common/handlers/symmio/RequestToCancelCloseRequestHandler"
 import {Account} from "../../../generated/schema"
-import {updateActivityTimestamps} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+
+import {updateActivityTimestamps} from "../../utils/helpers";
 
 export class RequestToCancelCloseRequestHandler<T> extends CommonRequestToCancelCloseRequestHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

@@ -2,9 +2,10 @@ import {
 	RequestToCancelQuoteHandler as CommonRequestToCancelQuoteHandler
 } from "../../../common/handlers/symmio/RequestToCancelQuoteHandler"
 import {Account} from "../../../generated/schema"
-import {updateActivityTimestamps} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+
+import {updateActivityTimestamps} from "../../utils/helpers";
 
 export class RequestToCancelQuoteHandler<T> extends CommonRequestToCancelQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

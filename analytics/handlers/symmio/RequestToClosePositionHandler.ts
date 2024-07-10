@@ -2,9 +2,10 @@ import {
 	RequestToClosePositionHandler as CommonRequestToClosePositionHandler
 } from "../../../common/handlers/symmio/RequestToClosePositionHandler"
 import {Account} from "../../../generated/schema"
-import {updateActivityTimestamps} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+
+import {updateActivityTimestamps} from "../../utils/helpers";
 
 export class RequestToClosePositionHandler<T> extends CommonRequestToClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
