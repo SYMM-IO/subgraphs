@@ -14,10 +14,11 @@ import {
 	UserActivity,
 	WeeklyHistory,
 } from "../generated/schema"
-
+import {getQuote as getQuote_0_8_2} from "../common/contract_utils_0_8_2"
+import {getQuote as getQuote_0_8_0} from "../common/contract_utils_0_8_0"
 import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum"
-import {getQuote} from "./contract_utils_0_8_2"
 import {createNewAccount, createNewUser} from "../common/utils/analytics&user_profile"
+import {Version} from "../common/BaseHandler";
 
 // @ts-ignore
 export let rolesNames = new Map<string, string>()
@@ -338,15 +339,31 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.openedPrice!)), false, account.accountSource)
 }
 
-export function handleLiquidatePosition<T>(_event: ethereum.Event, qId: BigInt): void {
+export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!
 	const quote = Quote.load(qId.toString())!
-	const chainQuote = getQuote(event.address, qId)
-	if (chainQuote == null) return
-	const liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-	const liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
+
+	let liquidAmount: BigInt;
+	let liquidPrice: BigInt;
+	switch (version) {
+		case Version.v_0_8_2: {
+			const chainQuote = getQuote_0_8_2(event.address, qId)
+			if (chainQuote == null) return
+			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
+			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
+			break
+		}
+		case Version.v_0_8_0: {
+			const chainQuote = getQuote_0_8_0(event.address, qId)
+			if (chainQuote == null) return
+			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
+			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
+			break
+		}
+	}
+
 	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 	history.volume = history.volume.plus(additionalVolume)
 	history.quoteStatus = QuoteStatus.LIQUIDATED

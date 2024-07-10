@@ -4,8 +4,8 @@ import {
 import {Account, GlobalFee, Quote} from "../../../generated/schema"
 import {BigInt, ethereum} from "@graphprotocol/graph-ts"
 import {getDailyHistoryForTimestamp, getTotalHistory, unDecimal} from "../../utils"
-import {getQuote as getQuote_0_8_2} from "../../contract_utils_0_8_2"
-import {getQuote as getQuote_0_8_0} from "../../contract_utils_0_8_0"
+import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2"
+import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0"
 import {FACTOR} from "../../../common/utils"
 import {Version} from "../../../common/BaseHandler";
 

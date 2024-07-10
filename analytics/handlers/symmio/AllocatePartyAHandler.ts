@@ -1,6 +1,6 @@
 import {
 	AllocatePartyAHandler as CommonAllocatePartyAHandler
-} from "../../../common/handlers/symmio/AllocatePartyAHandler"
+} from "../../../common/handlers/symmio/AllocatePartyAWithAccountHandler"
 import {Account, BalanceChange} from "../../../generated/schema"
 import {getConfiguration, getDailyHistoryForTimestamp, getTotalHistory, updateActivityTimestamps} from "../../utils"
 import {ethereum} from "@graphprotocol/graph-ts";

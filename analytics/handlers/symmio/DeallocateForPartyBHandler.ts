@@ -1,6 +1,6 @@
 import {
 	DeallocateForPartyBHandler as CommonDeallocateForPartyBHandler
-} from "../../../common/handlers/symmio/DeallocateForPartyBHandler"
+} from "../../../common/handlers/symmio/DeallocateForPartyBWithAccountHandler"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 

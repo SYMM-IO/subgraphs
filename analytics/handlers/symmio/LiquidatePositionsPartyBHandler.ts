@@ -19,11 +19,11 @@ export class LiquidatePositionsPartyBHandler<T> extends CommonLiquidatePositions
 			const qId = event.params.quoteIds[i]
 			switch (version) {
 				case Version.v_0_8_2: {
-					handleLiquidatePosition<LiquidatePositionsPartyB_0_8_2>(event, qId)
+					handleLiquidatePosition<LiquidatePositionsPartyB_0_8_2>(event, version, qId)
 					break
 				}
 				case Version.v_0_8_0: {
-					handleLiquidatePosition<LiquidatePositionsPartyB_0_8_0>(event, qId)
+					handleLiquidatePosition<LiquidatePositionsPartyB_0_8_0>(event, version, qId)
 					break
 				}
 			}
