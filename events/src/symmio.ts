@@ -173,6 +173,7 @@ export function handleActiveEmergencyMode(
   entity.transactionHash = event.transaction.hash
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -205,6 +206,7 @@ export function handleAddSymbol(event: AddSymbolEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -229,6 +231,7 @@ export function handleDeactiveEmergencyMode(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -254,6 +257,7 @@ export function handleDeregisterPartyB(event: DeregisterPartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -276,6 +280,7 @@ export function handlePauseAccounting(event: PauseAccountingEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -298,6 +303,7 @@ export function handlePauseGlobal(event: PauseGlobalEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -320,6 +326,7 @@ export function handlePauseLiquidation(event: PauseLiquidationEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -342,6 +349,7 @@ export function handlePausePartyAActions(event: PausePartyAActionsEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -364,6 +372,7 @@ export function handlePausePartyBActions(event: PausePartyBActionsEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -388,6 +397,7 @@ export function handleRegisterPartyB(event: RegisterPartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -413,6 +423,7 @@ export function handleRoleGranted(event: RoleGrantedEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -438,6 +449,7 @@ export function handleRoleRevoked(event: RoleRevokedEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -464,6 +476,7 @@ export function handleSetBalanceLimitPerUser(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -488,6 +501,7 @@ export function handleSetCollateral(event: SetCollateralEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -515,6 +529,7 @@ export function handleSetDeallocateCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -540,6 +555,7 @@ export function handleSetFeeCollector(event: SetFeeCollectorEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -567,6 +583,7 @@ export function handleSetForceCancelCloseCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -594,6 +611,7 @@ export function handleSetForceCancelCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -621,6 +639,7 @@ export function handleSetForceCloseCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -648,6 +667,7 @@ export function handleSetForceCloseGapRatio(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -675,6 +695,7 @@ export function handleSetLiquidationTimeout(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -700,6 +721,7 @@ export function handleSetLiquidatorShare(event: SetLiquidatorShareEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -726,6 +748,7 @@ export function handleSetMuonConfig(event: SetMuonConfigEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -753,6 +776,7 @@ export function handleSetMuonIds(event: SetMuonIdsEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -780,6 +804,7 @@ export function handleSetPartyBEmergencyStatus(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -807,6 +832,7 @@ export function handleSetPendingQuotesValidLength(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -834,6 +860,7 @@ export function handleSetSuspendedAddress(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -864,6 +891,7 @@ export function handleSetSymbolAcceptableValues(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -892,6 +920,7 @@ export function handleSetSymbolFundingState(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -920,6 +949,7 @@ export function handleSetSymbolMaxLeverage(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -948,6 +978,7 @@ export function handleSetSymbolMaxSlippage(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -976,6 +1007,7 @@ export function handleSetSymbolTradingFee(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1004,6 +1036,7 @@ export function handleSetSymbolValidationState(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1027,6 +1060,7 @@ export function handleUnpauseAccounting(event: UnpauseAccountingEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1050,6 +1084,7 @@ export function handleUnpauseGlobal(event: UnpauseGlobalEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1073,6 +1108,7 @@ export function handleUnpauseLiquidation(event: UnpauseLiquidationEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1098,6 +1134,7 @@ export function handleUnpausePartyAActions(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1123,6 +1160,7 @@ export function handleUnpausePartyBActions(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1150,6 +1188,7 @@ export function handleDisputeForLiquidation(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1177,6 +1216,7 @@ export function handleFullyLiquidatedPartyB(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1205,6 +1245,7 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1230,6 +1271,7 @@ export function handleLiquidatePartyAOld(event: LiquidatePartyAOldEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1259,6 +1301,7 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1285,6 +1328,7 @@ export function handleLiquidatePartyBOld(event: LiquidatePartyBOldEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1312,6 +1356,7 @@ export function handleLiquidatePendingPositionsPartyA(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1340,6 +1385,7 @@ export function handleLiquidatePositionsPartyA(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1370,6 +1416,7 @@ export function handleLiquidatePositionsPartyB(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1396,6 +1443,7 @@ export function handleLiquidationDisputed(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1423,6 +1471,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1450,6 +1499,7 @@ export function handleOldSettlePartyALiquidation(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1478,6 +1528,7 @@ export function handleSettlePartyALiquidation(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1503,6 +1554,7 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1530,6 +1582,7 @@ export function handleForceCancelCloseRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1555,6 +1608,7 @@ export function handleForceCancelQuote(event: ForceCancelQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1584,6 +1638,7 @@ export function handleForceClosePosition(event: ForceClosePositionEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1613,6 +1668,7 @@ export function handleRequestToCancelCloseRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1642,6 +1698,7 @@ export function handleRequestToCancelQuote(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1675,6 +1732,7 @@ export function handleRequestToClosePosition(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1712,6 +1770,7 @@ export function handleSendQuote(event: SendQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
 
   if (event.block.number.ge(BigInt.fromI32(34693893))) {
     entity.tradingFee = event.params.tradingFee
@@ -1743,6 +1802,7 @@ export function handleAllocateForPartyB(event: AllocateForPartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1768,6 +1828,7 @@ export function handleAllocatePartyA(event: AllocatePartyAEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1796,6 +1857,7 @@ export function handleDeallocateForPartyB(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1821,6 +1883,7 @@ export function handleDeallocatePartyA(event: DeallocatePartyAEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1847,6 +1910,7 @@ export function handleDeposit(event: DepositEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1873,6 +1937,7 @@ export function handleTransferAllocation(event: TransferAllocationEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1899,6 +1964,7 @@ export function handleWithdraw(event: WithdrawEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1926,6 +1992,7 @@ export function handleAcceptCancelCloseRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1953,6 +2020,7 @@ export function handleAcceptCancelRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1979,6 +2047,7 @@ export function handleAllocatePartyB(event: AllocatePartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2006,6 +2075,7 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2037,6 +2107,7 @@ export function handleEmergencyClosePosition(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2066,6 +2137,7 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2091,6 +2163,7 @@ export function handleLockQuote(event: LockQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2119,6 +2192,7 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2145,5 +2219,6 @@ export function handleUnlockQuote(event: UnlockQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
+  entity.transactionFrom = event.transaction.from
   entity.save()
 }
