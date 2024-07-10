@@ -1,6 +1,6 @@
 import {
 	AllocateForPartyBHandler as CommonAllocateForPartyBHandler
-} from "../../../common/handlers/symmio/AllocateForPartyBHandler"
+} from "../../../common/handlers/symmio/AllocateForPartyBWithAccountHandler"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 

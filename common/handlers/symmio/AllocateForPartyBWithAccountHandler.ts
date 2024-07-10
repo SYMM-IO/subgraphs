@@ -2,9 +2,8 @@ import {BaseHandler, Version} from "../../BaseHandler"
 import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
 import {Account} from "../../../generated/schema";
 
-export class AllocatePartyBHandler<T> extends BaseHandler {
-
-	handleAccount(_event: ethereum.Event, version: Version) {
+export class AllocateForPartyBHandler<T> extends BaseHandler {
+	handleAccount(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		let account = Account.load(event.params.partyB.toHexString())!
