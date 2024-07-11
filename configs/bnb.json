@@ -1,31 +1,31 @@
 {
-  "network": "bsc",
-  "contracts": [
-    {
-      "address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
-      "abi": "symmio",
-      "version": "0_8_2",
-      "startBlock": "34345963"
-    },
-    {
-      "address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
-      "abi": "symmio",
-      "version": "0_8_0",
-      "startBlock": "29380515",
-      "endBlock": "34350000"
-    },
-    {
-      "address": "0x650a2D6C263A93cFF5EdD41f836ce832F05A1cF3",
-      "abi": "symmioMultiAccount",
-      "version": "0_8_2",
-      "startBlock": "34462282",
-      "name": "alpha_multi_account_v3"
-    }
-  ],
-  "deploy_urls": {
-    "analytics": "analytics_bnb_8_2",
-    "main": "main_bnb_8_2",
-    "events": "events_bnb_8_2",
-    "userprofile": "userprofile_bnb_8_2"
-  }
+	"network": "bsc",
+	"contracts": [
+		{
+			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
+			"abi": "symmio",
+			"version": "0_8_2",
+			"startBlock": "34345963"
+		},
+		{
+			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
+			"abi": "symmio",
+			"version": "0_8_0",
+			"startBlock": "29380515",
+			"endBlock": "34345963"
+		},
+		{
+			"address": "0x650a2D6C263A93cFF5EdD41f836ce832F05A1cF3",
+			"abi": "symmioMultiAccount",
+			"version": "0_8_2",
+			"startBlock": "34462282",
+			"name": "alpha_multi_account_v3"
+		}
+	],
+	"deploy_urls": {
+		"analytics": "analytics_bnb_8_2",
+		"main": "main_bnb_8_2",
+		"events": "events_bnb_8_2",
+		"userprofile": "userprofile_bnb_8_2"
+	}
 }

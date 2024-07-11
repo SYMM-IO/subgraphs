@@ -1,12 +1,13 @@
 {
-  "PartyA": [
-    "AllocatePartyA",
-    "DeallocatePartyA",
-    "LiquidatePartyA"
-  ],
-  "PartyB": [
-    "AllocateForPartyB",
-    "DeallocateForPartyB",
-    "LiquidatePartyB"
-  ]
+	"PartyA": ["AllocatePartyA", "DeallocatePartyA", "LiquidatePartyA"],
+	"PartyB": ["AllocateForPartyB", "DeallocateForPartyB", "LiquidatePartyB"],
+	"Liquidator": [
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"LiquidatePartyA",
+		"LiquidatePositionsPartyA",
+		"LiquidatePendingPositionsPartyA",
+		"LiquidatePartyB",
+		"LiquidatePositionsPartyB"
+	]
 }
