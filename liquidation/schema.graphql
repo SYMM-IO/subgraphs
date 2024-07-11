@@ -39,3 +39,9 @@ type PartyB @entity {
 	upnl: BigInt
 	GlobalCounter: BigInt!
 }
+
+type Liquidator @entity {
+	id: ID!
+	profit: BigInt!
+	balance: BigInt!
+}

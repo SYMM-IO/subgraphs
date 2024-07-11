@@ -11,8 +11,16 @@ import yaml
 
 
 class Contract:
-    def __init__(self, address: str, abi: str, version: str, startBlock: str, endBlock: Optional[str] = None,
-                 name: Optional[str] = None, events: List[Any] = None):
+    def __init__(
+        self,
+        address: str,
+        abi: str,
+        version: str,
+        startBlock: str,
+        endBlock: Optional[str] = None,
+        name: Optional[str] = None,
+        events: List[Any] = None,
+    ):
         self.address = address
         self.abi = abi
         self.version = version
@@ -22,7 +30,7 @@ class Contract:
         self.events = events or []
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Contract':
+    def from_dict(cls, data: Dict[str, Any]) -> "Contract":
         return cls(**data)
 
     def path(self) -> str:
@@ -30,16 +38,18 @@ class Contract:
 
 
 class Config:
-    def __init__(self, network: str, contracts: List[Contract], deploy_urls: Dict[str, str]):
+    def __init__(
+        self, network: str, contracts: List[Contract], deploy_urls: Dict[str, str]
+    ):
         self.network = network
         self.contracts = contracts
         self.deploy_urls = deploy_urls
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Config':
-        contracts = [Contract.from_dict(c) for c in data['contracts']]
-        deploy_urls = data['deploy_urls']
-        return cls(data['network'], contracts, deploy_urls)
+    def from_dict(cls, data: Dict[str, Any]) -> "Config":
+        contracts = [Contract.from_dict(c) for c in data["contracts"]]
+        deploy_urls = data["deploy_urls"]
+        return cls(data["network"], contracts, deploy_urls)
 
 
 @dataclasses.dataclass
@@ -74,7 +84,7 @@ def create_schema_file(target_module, target_config):
     common_models_dir = os.path.join("./common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
-            "./schema.graphql", "w"
+        "./schema.graphql", "w"
     ) as dest_file:
         dest_file.write("# Imported Models\n")
         for model in os.listdir(common_models_dir):
@@ -106,14 +116,18 @@ export function handle{event_name}(event: {event_name}): void {{
 }}
         """
     imports_code += "\n\n"
-    with open(os.path.join(target_module, f"src_{contract.path()}.ts"), "w") as src_file:
+    with open(
+        os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
+    ) as src_file:
         src_file.write(imports_code)
-        src_file.write(f"import {{Version}} from \"../common/BaseHandler\"")
+        src_file.write(f'import {{Version}} from "../common/BaseHandler"')
         src_file.write(handlers_code)
 
 
 def create_handler_classes(target_module, contract: Contract):
-    with open(os.path.join(target_module, "subgraph_config.json"), "r") as target_config_file:
+    with open(
+        os.path.join(target_module, "subgraph_config.json"), "r"
+    ) as target_config_file:
         target_config = json.load(target_config_file)
 
     for event in contract.events:
@@ -128,7 +142,7 @@ def create_handler_classes(target_module, contract: Contract):
 
         super_calls = []
         for model in target_config["importModels"]:
-            super_calls.append(f"        super.handle{model}(\"{contract.version}\")")
+            super_calls.append(f'        super.handle{model}("{contract.version}")')
         super_calls_str = "\n".join(super_calls)
 
         with open(handler_file_path, "w") as handler_file:
@@ -157,14 +171,18 @@ def get_scheme_models():
 
 def get_needed_events_for(models, target_module, contract: Contract):
     try:
-        with open(os.path.join("./common", f"deps_{contract.path()}.json"), "r") as deps_file:
+        with open(
+            os.path.join("./common", f"deps_{contract.path()}.json"), "r"
+        ) as deps_file:
             common_dependencies = json.load(deps_file)
     except Exception as _:
         print(f"Dependencies file for common for {contract.path()} not found")
         common_dependencies = []
 
     try:
-        with open(os.path.join(target_module, f"deps_{contract.path()}.json"), "r") as deps_file:
+        with open(
+            os.path.join(target_module, f"deps_{contract.path()}.json"), "r"
+        ) as deps_file:
             target_dependencies = json.load(deps_file)
     except Exception as _:
         print(f"Dependencies file for {target_module} for {contract.path()} not found")
@@ -205,7 +223,9 @@ def get_events_with_signatures(needed_events, contract: Contract) -> List[Event]
 
 
 def prepare_module(config: Config, target_module: str):
-    with open(os.path.join(target_module, "subgraph_config.json"), "r") as target_config_file:
+    with open(
+        os.path.join(target_module, "subgraph_config.json"), "r"
+    ) as target_config_file:
         target_config = json.load(target_config_file)
 
     create_schema_file(target_module, target_config)
@@ -213,23 +233,25 @@ def prepare_module(config: Config, target_module: str):
 
     events_debts = []
     for contract in config.contracts:
-        needed_events = get_needed_events_for(models, target_module, contract) + events_debts
+        needed_events = (
+            get_needed_events_for(models, target_module, contract) + events_debts
+        )
         events = get_events_with_signatures(needed_events, contract)
         for e in events:
             if e.signature is None:
                 events_debts.append(e.name)
-        contract.events = list({(e.name, e.signature): e for e in events if e.signature is not None}.values())
+        contract.events = list(
+            {
+                (e.name, e.signature): e for e in events if e.signature is not None
+            }.values()
+        )
 
     subgraph_config = {
-        "specVersion": "0.0.4",
+        "specVersion": "1.2.0",
         "description": f"{target_module} Subgraph of SYMMIO",
-        "schema": {
-            "file": "./schema.graphql"
-        },
-        "indexerHints": {
-            "prune": "auto"
-        },
-        "dataSources": []
+        "schema": {"file": "./schema.graphql"},
+        "indexerHints": {"prune": "auto"},
+        "dataSources": [],
     }
 
     for contract in config.contracts:
@@ -242,23 +264,22 @@ def prepare_module(config: Config, target_module: str):
             "source": {
                 "address": contract.address,
                 "abi": contract.path(),
-                "startBlock": int(contract.startBlock)
+                "startBlock": int(contract.startBlock),
             },
             "mapping": {
                 "kind": "ethereum/events",
                 "apiVersion": "0.0.6",
                 "language": "wasm/assemblyscript",
                 "entities": ["Account"],
-                "abis": [{
-                    "name": contract.path(),
-                    "file": f"./abis/{contract.path()}.json"
-                }],
-                "eventHandlers": [{
-                    "event": event.signature,
-                    "handler": f"handle{event.name}"
-                } for event in contract.events],
-                "file": f"./{target_module}/src_{contract.path()}.ts"
-            }
+                "abis": [
+                    {"name": contract.path(), "file": f"./abis/{contract.path()}.json"}
+                ],
+                "eventHandlers": [
+                    {"event": event.signature, "handler": f"handle{event.name}"}
+                    for event in contract.events
+                ],
+                "file": f"./{target_module}/src_{contract.path()}.ts",
+            },
         }
         if contract.endBlock:
             source_config["source"]["endBlock"] = int(contract.endBlock)
@@ -282,9 +303,7 @@ def main():
     parser.add_argument(
         "--create-handlers", action="store_true", help="Create the handler files"
     )
-    parser.add_argument(
-        "--deploy", action="store_true", help="Deploy the module"
-    )
+    parser.add_argument("--deploy", action="store_true", help="Deploy the module")
     parser.add_argument(
         "--mantle", action="store_true", help="Deployment is on mantle or not"
     )
@@ -309,7 +328,7 @@ def main():
         for contract in config.contracts:
             create_handler_classes(args.module_name, contract)
 
-    for abi_path in set(f'{c.path()}.json' for c in config.contracts):
+    for abi_path in set(f"{c.path()}.json" for c in config.contracts):
         copy_abi_files(abi_path)
 
     subprocess.run(["graph", "codegen"], check=True)
@@ -318,8 +337,18 @@ def main():
     if args.deploy:
         deploy_url = config.deploy_urls[args.module_name]
         if args.mantle:
-            subprocess.run(["graph", "deploy", deploy_url, "--node", "https://subgraph-api.mantle.xyz/deploy",
-                            "--ipfs", "https://subgraph-api.mantle.xyz/ipfs"], check=True)
+            subprocess.run(
+                [
+                    "graph",
+                    "deploy",
+                    deploy_url,
+                    "--node",
+                    "https://subgraph-api.mantle.xyz/deploy",
+                    "--ipfs",
+                    "https://subgraph-api.mantle.xyz/ipfs",
+                ],
+                check=True,
+            )
         else:
             subprocess.run(["graph", "deploy", "--studio", deploy_url], check=True)
 

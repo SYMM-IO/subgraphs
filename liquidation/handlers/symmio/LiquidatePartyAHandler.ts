@@ -1,12 +1,13 @@
 import {
 	LiquidatePartyAHandler as CommonLiquidatePartyAHandler
 } from "../../../common/handlers/symmio/LiquidatePartyAHandler"
-import {PartyA} from "../../../generated/schema"
-import {BigInt, ethereum, log} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
-import {getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_2} from "../../../common/contract_utils_0_8_2";
-import {getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0} from "../../../common/contract_utils_0_8_0";
-import {LiquidatePartyA} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import { PartyA } from "../../../generated/schema"
+import { BigInt, ethereum, log } from "@graphprotocol/graph-ts";
+import { Version } from "../../../common/BaseHandler";
+import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_2 } from "../../../common/contract_utils_0_8_2";
+import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0 } from "../../../common/contract_utils_0_8_0";
+import { LiquidatePartyA } from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import { update_liquidator } from "./utils";
 
 export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 
@@ -20,6 +21,7 @@ export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 			case Version.v_0_8_2: {
 				// @ts-ignore
 				const e = changetype<LiquidatePartyA>(_event)
+				update_liquidator(e);
 				const balanceInfoOfPartyA = getBalanceInfoOfPartyA_0_8_2(event.address, event.params.partyA)
 				if (!balanceInfoOfPartyA) {
 					log.error('getBalanceInfoOfPartyA_0_8_2 crashed!', [])
