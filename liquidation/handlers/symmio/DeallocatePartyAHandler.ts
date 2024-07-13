@@ -2,7 +2,7 @@ import {
 	DeallocatePartyAHandler as CommonDeallocatePartyAHandler
 } from "../../../common/handlers/symmio/DeallocatePartyAHandler"
 import {getGlobalCounterAndInc} from "../../../common/utils"
-import {PartyA} from "../../../generated/schema"
+import { Liquidator, PartyA } from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 
@@ -27,5 +27,10 @@ export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T>
 		deAllocateEntity.blockNumber = event.block.number
 		deAllocateEntity.GlobalCounter = globalCounter
 		deAllocateEntity.save()
+		let liquidator = Liquidator.load(event.params.user.toHexString());
+		if (liquidator) {
+			liquidator.balance = liquidator.balance.minus(event.params.amount);
+			liquidator.save()
+		}
 	}
 }

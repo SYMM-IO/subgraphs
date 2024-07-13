@@ -2,7 +2,7 @@ import {
 	AllocatePartyAHandler as CommonAllocatePartyAHandler
 } from "../../../common/handlers/symmio/AllocatePartyAHandler"
 import {getGlobalCounterAndInc} from "../../../common/utils"
-import {PartyA} from "../../../generated/schema"
+import { Liquidator, PartyA } from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 
@@ -28,5 +28,10 @@ export class AllocatePartyAHandler<T> extends CommonAllocatePartyAHandler<T> {
 		allocateEntity.blockNumber = event.block.number
 		allocateEntity.GlobalCounter = globalCounter
 		allocateEntity.save()
+		let liquidator = Liquidator.load(event.params.user.toHexString());
+		if (liquidator) {
+			liquidator.balance = liquidator.balance.plus(event.params.amount)
+			liquidator.save()
+		}
 	}
 }
