@@ -31,6 +31,7 @@ export class SettlePartyALiquidationHandler<T> {
 					liquidator.balance = newBalance;
 					liquidator.save();
 				}
+				partyALiquidator.Liquidators = null;
 				break;
 			}
 			case Version.v_0_8_0: {
