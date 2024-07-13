@@ -42,6 +42,14 @@ type PartyB @entity {
 
 type Liquidator @entity {
 	id: ID!
+	liquidatorAddress: Bytes!
 	profit: BigInt!
 	balance: BigInt!
+}
+
+type PartyALiquidator @entity {
+    id: ID!
+    PartyA: Bytes!
+    Liquidators: [Liquidator!]
+	timeStamp: BigInt!
 }

@@ -8,6 +8,13 @@
 		"LiquidatePositionsPartyA",
 		"LiquidatePendingPositionsPartyA",
 		"LiquidatePartyB",
-		"LiquidatePositionsPartyB"
+		"LiquidatePositionsPartyB",
+		"SettlePartyALiquidation"
+	],
+	"PartyALiquidator": [
+		"LiquidatePartyA",
+		"LiquidatePositionsPartyA",
+		"LiquidatePendingPositionsPartyA",
+		"SettlePartyALiquidation"
 	]
 }
