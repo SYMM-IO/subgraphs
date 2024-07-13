@@ -1,8 +1,11 @@
 import {BaseHandler, Version} from "../../BaseHandler"
 import {InitialQuote, Quote} from "../../../generated/schema"
 import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote&analitics&user"
-import {ethereum} from "@graphprotocol/graph-ts"
-import {getQuote} from "../../utils"
+import {BigInt, ethereum} from "@graphprotocol/graph-ts"
+import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2";
+import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
+import {SendQuote as SendQuote_0_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import {SendQuote as SendQuote_0_8_0} from "../../../generated/symmio_0_8_0/symmio_0_8_0";
 
 export class OpenPositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -20,11 +23,29 @@ export class OpenPositionHandler<T> extends BaseHandler {
 
 		const initialEntity = InitialQuote.load(quote.initialData!)!
 
-		let q = getQuote(event.params.quoteId, event.address)
-		const newCva = q.lockedValues.cva
-		const newPartyAmm = q.lockedValues.partyAmm
-		const newPartyBmm = q.lockedValues.partyBmm
-		const newLF = q.lockedValues.lf
+		let newCva: BigInt
+		let newPartyAmm: BigInt
+		let newPartyBmm: BigInt
+		let newLF: BigInt
+
+		switch (version) {
+			case Version.v_0_8_2: {
+				let q = getQuote_0_8_2(event.address, event.params.quoteId)!
+				newCva = q.lockedValues.cva
+				newPartyAmm = q.lockedValues.partyAmm
+				newPartyBmm = q.lockedValues.partyBmm
+				newLF = q.lockedValues.lf
+				break
+			}
+			case Version.v_0_8_0: {
+				let q = getQuote_0_8_0(event.address, event.params.quoteId)!
+				newCva = q.lockedValues.cva
+				newPartyAmm = q.lockedValues.mm
+				newPartyBmm = q.lockedValues.mm
+				newLF = q.lockedValues.lf
+				break
+			}
+		}
 
 		quote.cva = newCva
 		quote.partyAmm = newPartyAmm

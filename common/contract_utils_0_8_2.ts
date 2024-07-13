@@ -1,4 +1,4 @@
-import {Address, BigInt} from "@graphprotocol/graph-ts"
+import {Address, BigInt, log} from "@graphprotocol/graph-ts"
 import {
 	symmio_0_8_2,
 	symmio_0_8_2__balanceInfoOfPartyAResult,
@@ -29,4 +29,15 @@ export function getBalanceInfoOfPartyB(address: Address, partyA: Address, partyB
 	const contract = symmio_0_8_2.bind(address)
 	let result = contract.try_balanceInfoOfPartyB(partyB, partyA)
 	return result.reverted ? null : result.value
+}
+
+export function symbolIdToSymbolName(symbolId: BigInt, contractAddress: Address): string {
+	let symmioContract = symmio_0_8_2.bind(contractAddress)
+	let callResult = symmioContract.try_symbolNameById([symbolId])
+	if (callResult.reverted) {
+		log.error("error in symbol bind", [])
+		return ""
+	} else {
+		return callResult.value[0]
+	}
 }

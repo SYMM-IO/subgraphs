@@ -2,7 +2,8 @@ import {BaseHandler, Version} from "../../BaseHandler"
 import {Quote} from "../../../generated/schema"
 import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote&analitics&user"
 import {BigInt, ethereum, log} from "@graphprotocol/graph-ts"
-import {getQuote} from "../../utils"
+import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2";
+import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
 
 export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -13,9 +14,20 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 			let quote = Quote.load(quoteId.toString())!
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.quoteStatus = 8
-			const result = getQuote(quoteId, event.address)
+			let getAveragePrice: BigInt
+			switch (version) {
+				case Version.v_0_8_2: {
+					let q = getQuote_0_8_2(event.address, quoteId)!
+					getAveragePrice = q.avgClosedPrice
+					break
+				}
+				case Version.v_0_8_0: {
+					let q = getQuote_0_8_0(event.address, quoteId)!
+					getAveragePrice = q.avgClosedPrice
+					break
+				}
+			}
 			const getclosedAmount = quote.quantity!
-			let getAveragePrice = result[16].toBigInt()
 			let LiquidateAmount = getclosedAmount.minus(quote.closedAmount!)
 			quote.liquidateAmount = LiquidateAmount
 			if (getAveragePrice.gt(BigInt.fromI32(0))) {
