@@ -3,7 +3,7 @@ import {
 } from "../../../common/handlers/symmio/AcceptCancelRequestHandler"
 import {getQuote, symbolIdToSymbolName} from "../../../common/utils"
 import {removeQuoteFromPendingList} from "../../../common/utils/quote"
-import {initialHelper,} from "../../../common/utils/quote&analitics&user"
+import {initialQuoteBuilder_0_8_0,} from "../../../common/utils/quote&analitics&user"
 
 import {Quote} from "../../../generated/schema"
 import {ethereum} from "@graphprotocol/graph-ts";
@@ -25,7 +25,7 @@ export class AcceptCancelRequestHandler<T> extends CommonAcceptCancelRequestHand
 			quote.quoteStatus = event.params.quoteStatus
 
 			const quoteData = getQuote(quote.quoteId, event.address)
-			let initialQuote = initialHelper(quoteData)
+			let initialQuote = initialQuoteBuilder_0_8_0(quoteData)
 			initialQuote.symbol = symbolIdToSymbolName(initialQuote.symbolId, event.address)
 			initialQuote.save()
 			quote.partyA = initialQuote.partyA

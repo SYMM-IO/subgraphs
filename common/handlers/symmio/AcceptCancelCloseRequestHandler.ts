@@ -1,10 +1,19 @@
 import {BaseHandler, Version} from "../../BaseHandler"
 import {InitialQuote, Quote} from "../../../generated/schema"
-import {initialHelper, setEventTimestampAndTransactionHashAndAction} from "../../utils/quote&analitics&user"
+import {
+	initialQuoteBuilder_0_8_0,
+	initialQuoteBuilder_0_8_2,
+	setEventTimestampAndTransactionHashAndAction
+} from "../../utils/quote&analitics&user"
 import {ethereum, log} from "@graphprotocol/graph-ts"
-import {symbolIdToSymbolName} from "../../utils"
-import {getQuote as getQuote_0_8_2} from "../../contract_utils_0_8_2";
-import {getQuote as getQuote_0_8_0} from "../../contract_utils_0_8_0";
+import {
+	getQuote as getQuote_0_8_2,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_2
+} from "../../../common/contract_utils_0_8_2";
+import {
+	getQuote as getQuote_0_8_0,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_0
+} from "../../../common/contract_utils_0_8_0";
 
 export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -34,8 +43,13 @@ export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
 						log.error('accept cancel bind crashed!', [])
 						return;
 					}
-					let Result = chainQuote as ethereum.Tuple
-					initialNewEntity = initialHelper(Result)
+					initialNewEntity = initialQuoteBuilder_0_8_2(chainQuote)
+					if (initialNewEntity) {
+						const symbol = symbolIdToSymbolName_0_8_2(initialNewEntity.symbolId, event.address)
+						if (symbol) {
+							initialNewEntity.symbol = symbol
+						}
+					}
 					break
 				}
 				case Version.v_0_8_0: {
@@ -44,15 +58,14 @@ export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
 						log.error('accept cancel bind crashed!', [])
 						return;
 					}
-					let Result = chainQuote as ethereum.Tuple
-					initialNewEntity = initialHelper(Result)
+					initialNewEntity = initialQuoteBuilder_0_8_0(chainQuote)
+					if (initialNewEntity) {
+						const symbol = symbolIdToSymbolName_0_8_0(initialNewEntity.symbolId, event.address)
+						if (symbol) {
+							initialNewEntity.symbol = symbol
+						}
+					}
 					break
-				}
-			}
-			if (initialNewEntity) {
-				const symbol = symbolIdToSymbolName(initialNewEntity.symbolId, event.address)
-				if (symbol) {
-					initialNewEntity.symbol = symbol
 				}
 			}
 			initialNewEntity.save()
