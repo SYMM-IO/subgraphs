@@ -7,7 +7,7 @@ import { Version } from "../../../common/BaseHandler";
 import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_2 } from "../../../common/contract_utils_0_8_2";
 import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0 } from "../../../common/contract_utils_0_8_0";
 import { LiquidatePartyA } from "../../../generated/symmio_0_8_2/symmio_0_8_2";
-import { update_liquidator } from "./utils";
+import { addLiquidator, update_liquidator } from "./utils";
 
 export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 
@@ -35,6 +35,7 @@ export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 				entity.totalUnrealizedLoss = e.params.totalUnrealizedLoss
 				entity.upnl = e.params.upnl
 				entity.allocatedBalance = e.params.allocatedBalance
+				addLiquidator(e)
 				break
 			}
 			case Version.v_0_8_0: {
