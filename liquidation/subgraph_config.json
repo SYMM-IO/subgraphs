@@ -1,5 +1,3 @@
 {
-  "importModels": [
-    "GlobalCounter"
-  ]
+	"importModels": ["GlobalCounter", "DebugEntity"]
 }

@@ -10,7 +10,6 @@ export class LiquidatePositionsPartyAHandler<T> {
         // @ts-ignore
         const event = changetype<T>(_event)
 
-        update_liquidator(event);
         switch (version) {
             case Version.v_0_8_2: {
                 // @ts-ignore
