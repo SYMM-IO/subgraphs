@@ -21,7 +21,6 @@ export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 			case Version.v_0_8_2: {
 				// @ts-ignore
 				const e = changetype<LiquidatePartyA>(_event)
-				update_liquidator(e);
 				const balanceInfoOfPartyA = getBalanceInfoOfPartyA_0_8_2(event.address, event.params.partyA)
 				if (!balanceInfoOfPartyA) {
 					log.error('getBalanceInfoOfPartyA_0_8_2 crashed!', [])

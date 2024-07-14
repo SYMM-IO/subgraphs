@@ -48,8 +48,8 @@ type Liquidator @entity {
 }
 
 type PartyALiquidator @entity {
-    id: ID!
-    PartyA: Bytes!
-    Liquidators: [Liquidator!]
+	id: ID!
+	PartyA: Bytes!
+	Liquidators: [Bytes!]
 	timeStamp: BigInt!
 }
