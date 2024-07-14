@@ -1,6 +1,18 @@
 import { Address, BigInt, Bytes, ethereum, log } from '@graphprotocol/graph-ts'
 import { symmio, symmio__getQuoteResultValue0Struct } from "../generated/symmio/symmio"
-import { InitialQuote } from "../generated/schema"
+import { InitialQuote, GlobalCounter, PartyA, ResultEntity, PartyApartyB } from "../generated/schema"
+
+export function getGlobalCounterAndInc(): BigInt {
+    let entity = GlobalCounter.load("GLOBAL")
+    if (!entity) {
+        entity = new GlobalCounter("GLOBAL")
+        entity.GlobalCounter = BigInt.fromI32(0)
+    } else {
+        entity.GlobalCounter = entity.GlobalCounter.plus(BigInt.fromI32(1))
+    }
+    entity.save()
+    return entity.GlobalCounter
+}
 
 export function initialHelper(resultArr: ethereum.Tuple): InitialQuote {
     let entity = new InitialQuote(resultArr[0].toBigInt().toString())
@@ -63,7 +75,42 @@ export function allocatedBalanceOfPartyB(partyB: Address, partyA: Address, contr
     }
 }
 
-export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__getQuoteResultValue0Struct {
+export function getQuote(quoteId: BigInt, contractAddress: Address): symmio__getQuoteResultValue0Struct | null {
     let symmioContract = symmio.bind(contractAddress)
-    return symmioContract.getQuote(quoteId)
+    let callResult = symmioContract.try_getQuote(quoteId)
+    if (callResult.reverted) {
+        log.error("error in get quote calling", [])
+        return null
+    }
+    return callResult.value
+}
+
+
+export function removeQuoteFromPendingList(quoteId: BigInt): void {
+    let quote = ResultEntity.load(quoteId.toString())
+    if (quote) {
+
+        let partyAEntity = PartyA.load(quote.partyA.toHexString())
+        if (partyAEntity) {
+            partyAEntity.GlobalCounter = getGlobalCounterAndInc()
+            let temp = partyAEntity.quoteUntilLiquid!.slice(0)
+            const indexA = temp.indexOf(quoteId)
+            temp.splice(indexA, 1)
+            partyAEntity.quoteUntilLiquid = temp.slice(0)
+            partyAEntity.save()
+        }
+        let partyB = quote.partyB
+        if (partyB) {
+            let partyAPartyBEntity = PartyApartyB.load(quote.partyA.toHexString() + '-' + partyB.toHexString())
+            if (partyAPartyBEntity) {
+                partyAPartyBEntity.GlobalCounter = getGlobalCounterAndInc()
+                let temp = partyAPartyBEntity.quoteUntilLiquid!.slice(0)
+                const indexB = temp.indexOf(quoteId)
+                temp.splice(indexB, 1)
+                partyAPartyBEntity.quoteUntilLiquid = temp.slice(0)
+                partyAPartyBEntity.save()
+
+            }
+        }
+    }
 }

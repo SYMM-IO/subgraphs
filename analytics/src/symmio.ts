@@ -116,6 +116,7 @@ rolesNames.set('0x23288e74cb14deb13fd69e749986e8975f19aa3efb14b2fe5e9b512d772f19
 rolesNames.set('0x5e17fc5225d4a099df75359ce1f405503ca79498a8dc46a7d583235a0ee45c16', 'LIQUIDATOR_ROLE')
 rolesNames.set('0x905e7c6bceabadb31a2ebbb666d0d6df4dfb3156f376c424680851d38988ea84', 'SUSPENDER_ROLE')
 rolesNames.set('0xc785f0e55c16138ca0f8448186fa6229be092a3a83db3c5d63c9286723c5a2c4', 'DISPUTE_ROLE')
+rolesNames.set("0x931c8e73074924ecdce1f1602777505305e234e4ae359fdf7ed84d5fd0cfdbee", "AFFILIATE_MANAGER_ROLE")
 
 // //////////////////////////////////// CONTROL ////////////////////////////////////////
 export function handleAddSymbol(event: AddSymbol): void {

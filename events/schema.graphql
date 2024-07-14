@@ -11,6 +11,7 @@ type ActiveEmergencyMode @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type AddSymbol @entity(immutable: true) {
@@ -30,6 +31,7 @@ type AddSymbol @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type DeactiveEmergencyMode @entity(immutable: true) {
@@ -42,6 +44,7 @@ type DeactiveEmergencyMode @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type DeregisterPartyB @entity(immutable: true) {
@@ -55,6 +58,7 @@ type DeregisterPartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type PauseAccounting @entity(immutable: true) {
@@ -67,6 +71,7 @@ type PauseAccounting @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type PauseGlobal @entity(immutable: true) {
@@ -79,6 +84,7 @@ type PauseGlobal @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type PauseLiquidation @entity(immutable: true) {
@@ -91,6 +97,7 @@ type PauseLiquidation @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type PausePartyAActionsE @entity(immutable: true) {
@@ -103,6 +110,7 @@ type PausePartyAActionsE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type PausePartyBActionsE @entity(immutable: true) {
@@ -115,6 +123,7 @@ type PausePartyBActionsE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type RegisterPartyB @entity(immutable: true) {
@@ -127,6 +136,7 @@ type RegisterPartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type RoleGranted @entity(immutable: true) {
@@ -140,6 +150,7 @@ type RoleGranted @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type RoleRevoked @entity(immutable: true) {
@@ -153,6 +164,7 @@ type RoleRevoked @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetBalanceLimitPerUser @entity(immutable: true) {
@@ -165,6 +177,7 @@ type SetBalanceLimitPerUser @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetCollateral @entity(immutable: true) {
@@ -177,6 +190,7 @@ type SetCollateral @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetDeallocateCooldown @entity(immutable: true) {
@@ -190,6 +204,7 @@ type SetDeallocateCooldown @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetFeeCollector @entity(immutable: true) {
@@ -203,6 +218,7 @@ type SetFeeCollector @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetForceCancelCloseCooldown @entity(immutable: true) {
@@ -216,6 +232,7 @@ type SetForceCancelCloseCooldown @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetForceCancelCooldown @entity(immutable: true) {
@@ -229,6 +246,7 @@ type SetForceCancelCooldown @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetForceCloseCooldown @entity(immutable: true) {
@@ -242,6 +260,7 @@ type SetForceCloseCooldown @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetForceCloseGapRatio @entity(immutable: true) {
@@ -255,6 +274,7 @@ type SetForceCloseGapRatio @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetLiquidationTimeout @entity(immutable: true) {
@@ -268,6 +288,7 @@ type SetLiquidationTimeout @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetLiquidatorShare @entity(immutable: true) {
@@ -281,6 +302,7 @@ type SetLiquidatorShare @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetMuonConfig @entity(immutable: true) {
@@ -295,6 +317,7 @@ type SetMuonConfig @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetMuonIdsE @entity(immutable: true) {
@@ -310,6 +333,7 @@ type SetMuonIdsE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetPartyBEmergencyStatusE @entity(immutable: true) {
@@ -323,6 +347,7 @@ type SetPartyBEmergencyStatusE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetPendingQuotesValidLength @entity(immutable: true) {
@@ -336,6 +361,7 @@ type SetPendingQuotesValidLength @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSuspendedAddressE @entity(immutable: true) {
@@ -349,6 +375,7 @@ type SetSuspendedAddressE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSymbolAcceptableValuesE @entity(immutable: true) {
@@ -365,6 +392,7 @@ type SetSymbolAcceptableValuesE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSymbolFundingState @entity(immutable: true) {
@@ -379,6 +407,7 @@ type SetSymbolFundingState @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSymbolMaxLeverage @entity(immutable: true) {
@@ -393,6 +422,7 @@ type SetSymbolMaxLeverage @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSymbolMaxSlippage @entity(immutable: true) {
@@ -407,6 +437,7 @@ type SetSymbolMaxSlippage @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSymbolTradingFee @entity(immutable: true) {
@@ -421,6 +452,7 @@ type SetSymbolTradingFee @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSymbolValidationState @entity(immutable: true) {
@@ -435,6 +467,7 @@ type SetSymbolValidationState @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type UnpauseAccounting @entity(immutable: true) {
@@ -447,6 +480,7 @@ type UnpauseAccounting @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type UnpauseGlobal @entity(immutable: true) {
@@ -459,6 +493,7 @@ type UnpauseGlobal @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type UnpauseLiquidation @entity(immutable: true) {
@@ -471,6 +506,7 @@ type UnpauseLiquidation @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type UnpausePartyAActionsE @entity(immutable: true) {
@@ -483,6 +519,7 @@ type UnpausePartyAActionsE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type UnpausePartyBActionsE @entity(immutable: true) {
@@ -495,6 +532,7 @@ type UnpausePartyBActionsE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type DisputeForLiquidation @entity(immutable: true) {
@@ -508,6 +546,7 @@ type DisputeForLiquidation @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type FullyLiquidatedPartyB @entity(immutable: true) {
@@ -521,6 +560,7 @@ type FullyLiquidatedPartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type LiquidatePartyA @entity(immutable: true) {
@@ -537,6 +577,7 @@ type LiquidatePartyA @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type LiquidatePartyB @entity(immutable: true) {
@@ -553,6 +594,7 @@ type LiquidatePartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type LiquidatePendingPositionsPartyA @entity(immutable: true) {
@@ -566,6 +608,7 @@ type LiquidatePendingPositionsPartyA @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type LiquidatePositionsPartyA @entity(immutable: true) {
@@ -580,6 +623,7 @@ type LiquidatePositionsPartyA @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type LiquidatePositionsPartyB @entity(immutable: true) {
@@ -595,6 +639,7 @@ type LiquidatePositionsPartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type LiquidationDisputed @entity(immutable: true) {
@@ -607,6 +652,7 @@ type LiquidationDisputed @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SetSymbolsPricesE @entity(immutable: true) {
@@ -622,6 +668,7 @@ type SetSymbolsPricesE @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SettlePartyALiquidation @entity(immutable: true) {
@@ -636,6 +683,7 @@ type SettlePartyALiquidation @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type ExpireQuote @entity(immutable: true) {
@@ -649,6 +697,7 @@ type ExpireQuote @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type ForceCancelCloseRequest @entity(immutable: true) {
@@ -662,6 +711,7 @@ type ForceCancelCloseRequest @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type ForceCancelQuote @entity(immutable: true) {
@@ -675,6 +725,7 @@ type ForceCancelQuote @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type ForceClosePosition @entity(immutable: true) {
@@ -692,6 +743,7 @@ type ForceClosePosition @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type RequestToCancelCloseRequest @entity(immutable: true) {
@@ -707,6 +759,7 @@ type RequestToCancelCloseRequest @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type RequestToCancelQuote @entity(immutable: true) {
@@ -722,6 +775,7 @@ type RequestToCancelQuote @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type RequestToClosePosition @entity(immutable: true) {
@@ -741,6 +795,7 @@ type RequestToClosePosition @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type SendQuote @entity(immutable: true) {
@@ -767,6 +822,7 @@ type SendQuote @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type AllocateForPartyB @entity(immutable: true) {
@@ -781,6 +837,7 @@ type AllocateForPartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type AllocatePartyA @entity(immutable: true) {
@@ -794,6 +851,7 @@ type AllocatePartyA @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type DeallocateForPartyB @entity(immutable: true) {
@@ -808,6 +866,7 @@ type DeallocateForPartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type DeallocatePartyA @entity(immutable: true) {
@@ -821,6 +880,7 @@ type DeallocatePartyA @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type Deposit @entity(immutable: true) {
@@ -835,6 +895,7 @@ type Deposit @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type TransferAllocation @entity(immutable: true) {
@@ -849,6 +910,7 @@ type TransferAllocation @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type Withdraw @entity(immutable: true) {
@@ -863,6 +925,7 @@ type Withdraw @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type AcceptCancelCloseRequest @entity(immutable: true) {
@@ -876,6 +939,7 @@ type AcceptCancelCloseRequest @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type AcceptCancelRequest @entity(immutable: true) {
@@ -889,6 +953,7 @@ type AcceptCancelRequest @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type AllocatePartyB @entity(immutable: true) {
@@ -903,6 +968,7 @@ type AllocatePartyB @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type ChargeFundingRate @entity(immutable: true) {
@@ -918,6 +984,7 @@ type ChargeFundingRate @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type EmergencyClosePosition @entity(immutable: true) {
@@ -935,6 +1002,7 @@ type EmergencyClosePosition @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type FillCloseRequest @entity(immutable: true) {
@@ -952,6 +1020,7 @@ type FillCloseRequest @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type LockQuote @entity(immutable: true) {
@@ -965,6 +1034,7 @@ type LockQuote @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type OpenPosition @entity(immutable: true) {
@@ -981,6 +1051,7 @@ type OpenPosition @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }
 
 type UnlockQuote @entity(immutable: true) {
@@ -995,4 +1066,5 @@ type UnlockQuote @entity(immutable: true) {
   counterId: Int!
   logIndex: BigInt!
   blockHash: Bytes!
+  transactionFrom: Bytes!
 }

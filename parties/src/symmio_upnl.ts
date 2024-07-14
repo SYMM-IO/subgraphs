@@ -9,48 +9,47 @@ import {
     symmio as symmio
 } from "../generated/symmio/symmio"
 import { ResultPartyA, ResultPartyB, } from "../generated/schema"
+import { getGlobalCounterAndInc } from "./helper"
 
 export function handleAllocatePartyA(
     event: AllocatePartyAEvent
 ): void {
     let allocateEntity = ResultPartyA.load(event.params.user.toHex())
+    let globalCounter = getGlobalCounterAndInc()
     if (allocateEntity) {
-        allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
-    } else {
-        let allocateEntity = new ResultPartyA(event.params.user.toHex())
-        allocateEntity.amount = event.params.amount
-        allocateEntity.partyA = event.params.user
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
 
+        allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
+    } else {
+        allocateEntity = new ResultPartyA(event.params.user.toHex())
+        allocateEntity.index = globalCounter
+        allocateEntity.partyA = event.params.user
+        allocateEntity.amount = event.params.amount
     }
+    allocateEntity.timeStamp = event.block.timestamp
+    allocateEntity.trHash = event.transaction.hash
+    allocateEntity.blockNumber = event.block.number
+    allocateEntity.GlobalCounter = globalCounter
+    allocateEntity.save()
 }
 
 export function handleDeallocatePartyA(
     event: DeallocatePartyAEvent
 ): void {
-    let allocateEntity = ResultPartyA.load(event.params.user.toHex())
-    if (allocateEntity) {
-        allocateEntity.amount = allocateEntity.amount.minus(event.params.amount)
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
+    let deAllocateEntity = ResultPartyA.load(event.params.user.toHex())
+    let globalCounter = getGlobalCounterAndInc()
+    if (deAllocateEntity) {
+        deAllocateEntity.amount = deAllocateEntity.amount.minus(event.params.amount)
     } else {
-        let allocateEntity = new ResultPartyA(event.params.user.toHex())
-        allocateEntity.partyA = event.params.user
-        allocateEntity.amount = event.params.amount
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
+        deAllocateEntity = new ResultPartyA(event.params.user.toHex())
+        deAllocateEntity.index = globalCounter
+        deAllocateEntity.partyA = event.params.user
+        deAllocateEntity.amount = event.params.amount
     }
+    deAllocateEntity.timeStamp = event.block.timestamp
+    deAllocateEntity.trHash = event.transaction.hash
+    deAllocateEntity.blockNumber = event.block.number
+    deAllocateEntity.GlobalCounter = globalCounter
+    deAllocateEntity.save()
 }
 
 
@@ -59,22 +58,24 @@ export function handleAllocatePartyB(
 ): void {
 
     let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+    let globalCounter = getGlobalCounterAndInc()
     if (allocateEntity) {
         allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
         allocateEntity.timeStamp = event.block.timestamp
         allocateEntity.trHash = event.transaction.hash
         allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
     } else {
-        let allocateEntity = new ResultPartyB(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+        allocateEntity = new ResultPartyB(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+        allocateEntity.index = globalCounter
         allocateEntity.amount = event.params.amount
         allocateEntity.partyA = event.params.partyA
         allocateEntity.partyB = event.params.partyB
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
     }
+    allocateEntity.timeStamp = event.block.timestamp
+    allocateEntity.trHash = event.transaction.hash
+    allocateEntity.blockNumber = event.block.number
+    allocateEntity.GlobalCounter = globalCounter
+    allocateEntity.save()
 }
 
 
@@ -82,79 +83,82 @@ export function handleAllocateForPartyB(
     event: AllocateForPartyBEvent
 ): void {
     let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+    let globalCounter = getGlobalCounterAndInc()
     if (allocateEntity) {
         allocateEntity.amount = allocateEntity.amount.plus(event.params.amount)
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
     } else {
-        let allocateEntity = new ResultPartyB(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+        allocateEntity = new ResultPartyB(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
+        allocateEntity.index = globalCounter
         allocateEntity.amount = event.params.amount
         allocateEntity.partyA = event.params.partyA
         allocateEntity.partyB = event.params.partyB
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
     }
+    allocateEntity.timeStamp = event.block.timestamp
+    allocateEntity.trHash = event.transaction.hash
+    allocateEntity.blockNumber = event.block.number
+    allocateEntity.GlobalCounter = globalCounter
+    allocateEntity.save()
 }
 
 export function handleDeallocateForPartyB(
     event: DeallocateForPartyBEvent
 ): void {
-    let allocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
-    if (allocateEntity) {
-        allocateEntity.amount = allocateEntity.amount.minus(event.params.amount)
-        allocateEntity.timeStamp = event.block.timestamp
-        allocateEntity.trHash = event.transaction.hash
-        allocateEntity.blockNumber = event.block.number
-        allocateEntity.save()
-    } else {
+    let deAllocateEntity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())!
 
-    }
+    deAllocateEntity.amount = deAllocateEntity.amount.minus(event.params.amount)
+    deAllocateEntity.timeStamp = event.block.timestamp
+    deAllocateEntity.trHash = event.transaction.hash
+    deAllocateEntity.blockNumber = event.block.number
+    deAllocateEntity.GlobalCounter = getGlobalCounterAndInc()
+    deAllocateEntity.save()
+
 }
 
 
 export function handleLiquidatePartyA(
     event: LiquidatePartyAEvent
 ): void {
-    let entity = ResultPartyA.load(event.params.partyA.toHex())
-    if (entity) {
-        const balanceInfoOfPartyA = symmio.bind(event.address).balanceInfoOfPartyA(event.params.partyA)
+    let entity = ResultPartyA.load(event.params.partyA.toHex())!
 
-        entity.liquidatePartyATimeStamp = event.block.timestamp
-        entity.trHashLiquidate = event.transaction.hash
-        entity.liquidateAllocatedBalance = balanceInfoOfPartyA.value0
-        entity.liquidateCva = balanceInfoOfPartyA.value1
-        entity.liquidateLf = balanceInfoOfPartyA.value2
-        entity.liquidatePendingCva = balanceInfoOfPartyA.value5
-        entity.liquidatePendingLf = balanceInfoOfPartyA.value6
-        entity.timeStamp = event.block.timestamp
-        entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
-        entity.upnl = event.params.upnl
-        entity.allocatedBalance = event.params.allocatedBalance
-        entity.save()
-    }
+    const balanceInfoOfPartyA = symmio.bind(event.address).balanceInfoOfPartyA(event.params.partyA)
+    entity.liquidatePartyATimeStamp = event.block.timestamp
+    entity.trHashLiquidate = event.transaction.hash
+    entity.liquidateAllocatedBalance = balanceInfoOfPartyA.value0
+    entity.liquidateCva = balanceInfoOfPartyA.value1
+    entity.liquidateLf = balanceInfoOfPartyA.value2
+    entity.liquidatePendingCva = balanceInfoOfPartyA.value5
+    entity.liquidatePendingLf = balanceInfoOfPartyA.value6
+    entity.timeStamp = event.block.timestamp
+    entity.blockNumber = event.block.number
+    entity.trHash = event.transaction.hash
+    entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
+    entity.upnl = event.params.upnl
+    entity.allocatedBalance = event.params.allocatedBalance
+    entity.GlobalCounter = getGlobalCounterAndInc()
+    entity.save()
+
 }
 
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
-    let entity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())
-    if (entity) {
-        const balanceInfoOfPartyB = symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB, event.params.partyA)
+    let entity = ResultPartyB.load(event.params.partyA.toHex() + '-' + event.params.partyB.toHex())!
 
-        entity.liquidatePartyBTimeStamp = event.block.timestamp
-        entity.trHashLiquidate = event.transaction.hash
-        entity.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
-        entity.liquidateCva = balanceInfoOfPartyB.value1
-        entity.liquidateLf = balanceInfoOfPartyB.value2
-        entity.liquidatePendingCva = balanceInfoOfPartyB.value5
-        entity.liquidatePendingLf = balanceInfoOfPartyB.value6
-        entity.partyBAllocatedBalance = event.params.partyBAllocatedBalance
-        entity.upnl = event.params.upnl
-        entity.timeStamp = event.block.timestamp
-        entity.save()
-    }
+    const balanceInfoOfPartyB = symmio.bind(event.address).balanceInfoOfPartyB(event.params.partyB, event.params.partyA)
+
+    entity.liquidatePartyBTimeStamp = event.block.timestamp
+    entity.trHashLiquidate = event.transaction.hash
+    entity.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
+    entity.liquidateCva = balanceInfoOfPartyB.value1
+    entity.liquidateLf = balanceInfoOfPartyB.value2
+    entity.liquidatePendingCva = balanceInfoOfPartyB.value5
+    entity.liquidatePendingLf = balanceInfoOfPartyB.value6
+    entity.partyBAllocatedBalance = event.params.partyBAllocatedBalance
+    entity.upnl = event.params.upnl
+    entity.timeStamp = event.block.timestamp
+    entity.blockNumber = event.block.number
+    entity.trHash = event.transaction.hash
+    entity.GlobalCounter = getGlobalCounterAndInc()
+    entity.save()
+
 }
 
 
