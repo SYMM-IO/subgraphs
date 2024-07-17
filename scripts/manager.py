@@ -1,58 +1,16 @@
 import argparse
-import dataclasses
 import json
 import os
 import re
 import subprocess
 import sys
+from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
 
 import yaml
 
 
-class Contract:
-    def __init__(
-            self,
-            address: str,
-            abi: str,
-            version: str,
-            startBlock: str,
-            endBlock: Optional[str] = None,
-            name: Optional[str] = None,
-            events: List[Any] = None,
-    ):
-        self.address = address
-        self.abi = abi
-        self.version = version
-        self.startBlock = startBlock
-        self.endBlock = endBlock
-        self.name = name
-        self.events = events or []
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Contract":
-        return cls(**data)
-
-    def path(self) -> str:
-        return f"{self.abi}_{self.version}"
-
-
-class Config:
-    def __init__(
-            self, network: str, contracts: List[Contract], deploy_urls: Dict[str, str]
-    ):
-        self.network = network
-        self.contracts = contracts
-        self.deploy_urls = deploy_urls
-
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Config":
-        contracts = [Contract.from_dict(c) for c in data["contracts"]]
-        deploy_urls = data["deploy_urls"]
-        return cls(data["network"], contracts, deploy_urls)
-
-
-@dataclasses.dataclass
+@dataclass
 class Event:
     source: str
     signature: str
@@ -61,11 +19,37 @@ class Event:
     handler_name: str
 
 
+@dataclass
+class Contract:
+    address: str
+    abi: str
+    version: str
+    startBlock: str
+    endBlock: Optional[str] = None
+    name: Optional[str] = None
+    events: List[Event] = field(default_factory=list)
+
+    def path(self) -> str:
+        return f"{self.abi}_{self.version}"
+
+
+@dataclass
+class Config:
+    network: str
+    contracts: List[Contract]
+    deploy_urls: Dict[str, str]
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "Config":
+        contracts = [Contract(**c) for c in data["contracts"]]
+        return cls(data["network"], contracts, data["deploy_urls"])
+
+
 def json_to_yaml(json_data):
     return yaml.dump(json_data, default_flow_style=False)
 
 
-def copy_abi_files(abi_path):
+def copy_abi_files(abi_path: str):
     root_abis_dir = "./configs/abis"
     subgraph_abis_dir = "./abis"
 
@@ -76,13 +60,12 @@ def copy_abi_files(abi_path):
 
     if os.path.exists(source):
         with open(source, "r") as src_file, open(destination_path, "w") as dest_file:
-            content = src_file.read()
-            dest_file.write(content)
+            dest_file.write(src_file.read())
     else:
-        raise Exception(f"Source ABI not found: {abi_path}")
+        raise FileNotFoundError(f"Source ABI not found: {abi_path}")
 
 
-def create_schema_file(target_module, target_config):
+def create_schema_file(target_module: str, target_config: Dict[str, Any]):
     common_models_dir = os.path.join("./common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
@@ -98,32 +81,28 @@ def create_schema_file(target_module, target_config):
         dest_file.write(src_file.read())
 
 
-def generate_src_ts(target_module, contract: Contract):
-    imports_code = ""
-    handlers_code = ""
+def generate_src_ts(target_module: str, contract: Contract):
+    imports = set()
+    handlers_code = []
+
     for event in contract.events:
-        source = event.source
-        event_name = event.name
-        handler_class_name = event_name + "Handler"
+        # Add imports to a set to avoid duplicates
+        imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
+        imports.add(f"import {{{event.numbered_name}}} from '../generated/{event.source}/{event.source}'")
 
-        imports_code += f"""
-import {{{handler_class_name}}} from "./handlers/{contract.abi}/{handler_class_name}"
-import {{{event.numbered_name}}} from "../generated/{source}/{source}"
-"""
-
-        handlers_code += f"""
+        handlers_code.append(f"""
 export function {event.handler_name}(event: {event.numbered_name}): void {{
-    let handler = new {handler_class_name}<{event.numbered_name}>()
+    let handler = new {event.name}Handler<{event.numbered_name}>()
     handler.handle(event, Version.v_{contract.version})
 }}
-        """
-    imports_code += "\n\n"
-    with open(
-            os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
-    ) as src_file:
-        src_file.write(imports_code)
-        src_file.write(f'import {{Version}} from "../common/BaseHandler"')
-        src_file.write(handlers_code)
+        """)
+
+    imports.add("import {Version} from '../common/BaseHandler'")
+
+    with open(os.path.join(target_module, f"src_{contract.path()}.ts"), "w") as src_file:
+        src_file.write('\n'.join(sorted(imports)))  # Sort imports for consistency
+        src_file.write('\n\n')  # Add a blank line between imports and handlers
+        src_file.write('\n'.join(handlers_code))
 
 
 def get_scheme_models():
@@ -133,51 +112,38 @@ def get_scheme_models():
     return [match[0] for match in pattern.findall(schema_content)]
 
 
-def get_needed_events_for(models, target_module, contract: Contract):
-    try:
-        with open(
-                os.path.join("./common", f"deps_{contract.path()}.json"), "r"
-        ) as deps_file:
-            common_dependencies = json.load(deps_file)
-    except Exception as _:
-        print(f"Dependencies file for common for {contract.path()} not found")
-        common_dependencies = []
-
-    try:
-        with open(
-                os.path.join(target_module, f"deps_{contract.path()}.json"), "r"
-        ) as deps_file:
-            target_dependencies = json.load(deps_file)
-    except Exception as _:
-        print(f"Dependencies file for {target_module} for {contract.path()} not found")
-        target_dependencies = []
+def get_needed_events_for(models: List[str], target_module: str, contract: Contract) -> List[str]:
+    common_dependencies = load_dependencies(os.path.join("./common", f"deps_{contract.path()}.json"))
+    target_dependencies = load_dependencies(os.path.join(target_module, f"deps_{contract.path()}.json"))
 
     events = []
     for model in models:
-        if model in common_dependencies:
-            events += common_dependencies[model]
-        if model in target_dependencies:
-            events += target_dependencies[model]
+        events.extend(common_dependencies.get(model, []))
+        events.extend(target_dependencies.get(model, []))
     return list(set(events))
 
 
-def get_event_signature(event_name, abi_file_path) -> List[str]:
+def load_dependencies(file_path: str) -> Dict[str, List[str]]:
+    try:
+        with open(file_path, "r") as deps_file:
+            return json.load(deps_file)
+    except FileNotFoundError:
+        print(f"Dependencies file not found: {file_path}")
+        return {}
+
+
+def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
     with open(abi_file_path, "r") as file:
         abi = json.load(file)
 
-    sigs = []
-    for entry in abi:
-        if entry["type"] == "event" and entry["name"] == event_name:
-            input_types = [
-                ("indexed " if input["indexed"] else "") + input["type"]
-                for input in entry["inputs"]
-            ]
-            event_signature = f"{event_name}({','.join(input_types)})"
-            sigs.append(event_signature)
-    return sigs
+    return [
+        f"{entry['name']}({','.join(('indexed ' if input['indexed'] else '') + input['type'] for input in entry['inputs'])})"
+        for entry in abi
+        if entry["type"] == "event" and entry["name"] == event_name
+    ]
 
 
-def get_events_with_signatures(needed_events, contract: Contract) -> List[Event]:
+def get_events_with_signatures(needed_events: List[str], contract: Contract) -> List[Event]:
     events = []
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
@@ -190,9 +156,7 @@ def get_events_with_signatures(needed_events, contract: Contract) -> List[Event]
 
 
 def prepare_module(config: Config, target_module: str):
-    with open(
-            os.path.join(target_module, "subgraph_config.json"), "r"
-    ) as target_config_file:
+    with open(os.path.join(target_module, "subgraph_config.json"), "r") as target_config_file:
         target_config = json.load(target_config_file)
 
     create_schema_file(target_module, target_config)
@@ -208,9 +172,7 @@ def prepare_module(config: Config, target_module: str):
             if e.signature is None:
                 events_debts.append(e.name)
             else:
-                if e.name not in event_counter:
-                    event_counter[e.name] = 0
-                event_counter[e.name] += 1
+                event_counter[e.name] = event_counter.get(e.name, 0) + 1
                 if event_counter[e.name] > 1:
                     e.handler_name = f"handle{e.name}{event_counter[e.name] - 1}"
                     e.numbered_name = f"{e.name}{event_counter[e.name] - 1}"
@@ -225,7 +187,7 @@ def prepare_module(config: Config, target_module: str):
     }
 
     for contract in config.contracts:
-        if len(contract.events) == 0:
+        if not contract.events:
             continue
         source_config = {
             "kind": "ethereum/contract",
@@ -245,7 +207,7 @@ def prepare_module(config: Config, target_module: str):
                     {"name": contract.path(), "file": f"./abis/{contract.path()}.json"}
                 ],
                 "eventHandlers": [
-                    {"event": event.signature, "handler": f"{event.handler_name}"}
+                    {"event": event.signature, "handler": event.handler_name}
                     for event in contract.events
                 ],
                 "file": f"./{target_module}/src_{contract.path()}.ts",
@@ -267,16 +229,9 @@ def main():
     parser = argparse.ArgumentParser(description="Module preparation script.")
     parser.add_argument("config_file", type=str, help="Configuration file path")
     parser.add_argument("module_name", type=str, help="Target module name")
-    parser.add_argument(
-        "--create-src", action="store_true", help="Create the src_symmio_0_8_2.ts file"
-    )
-    parser.add_argument(
-        "--create-handlers", action="store_true", help="Create the handler files"
-    )
+    parser.add_argument("--create-src", action="store_true", help="Create the src_symmio_0_8_2.ts file")
     parser.add_argument("--deploy", action="store_true", help="Deploy the module")
-    parser.add_argument(
-        "--mantle", action="store_true", help="Deployment is on mantle or not"
-    )
+    parser.add_argument("--mantle", action="store_true", help="Deployment is on mantle or not")
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
@@ -291,12 +246,8 @@ def main():
 
     if args.create_src:
         for contract in config.contracts:
-            if len(contract.events) > 0:
+            if contract.events:
                 generate_src_ts(args.module_name, contract)
-
-    if args.create_handlers:
-        for contract in config.contracts:
-            create_handler_classes(args.module_name, contract)
 
     for abi_path in set(f"{c.path()}.json" for c in config.contracts):
         copy_abi_files(abi_path)
@@ -306,21 +257,18 @@ def main():
 
     if args.deploy:
         deploy_url = config.deploy_urls[args.module_name]
+        deploy_command = [
+            "graph",
+            "deploy",
+            "--studio" if not args.mantle else deploy_url,
+            deploy_url,
+        ]
         if args.mantle:
-            subprocess.run(
-                [
-                    "graph",
-                    "deploy",
-                    deploy_url,
-                    "--node",
-                    "https://subgraph-api.mantle.xyz/deploy",
-                    "--ipfs",
-                    "https://subgraph-api.mantle.xyz/ipfs",
-                ],
-                check=True,
-            )
-        else:
-            subprocess.run(["graph", "deploy", "--studio", deploy_url], check=True)
+            deploy_command.extend([
+                "--node", "https://subgraph-api.mantle.xyz/deploy",
+                "--ipfs", "https://subgraph-api.mantle.xyz/ipfs",
+            ])
+        subprocess.run(deploy_command, check=True)
 
 
 if __name__ == "__main__":
