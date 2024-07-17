@@ -12,14 +12,14 @@ import yaml
 
 class Contract:
     def __init__(
-        self,
-        address: str,
-        abi: str,
-        version: str,
-        startBlock: str,
-        endBlock: Optional[str] = None,
-        name: Optional[str] = None,
-        events: List[Any] = None,
+            self,
+            address: str,
+            abi: str,
+            version: str,
+            startBlock: str,
+            endBlock: Optional[str] = None,
+            name: Optional[str] = None,
+            events: List[Any] = None,
     ):
         self.address = address
         self.abi = abi
@@ -39,7 +39,7 @@ class Contract:
 
 class Config:
     def __init__(
-        self, network: str, contracts: List[Contract], deploy_urls: Dict[str, str]
+            self, network: str, contracts: List[Contract], deploy_urls: Dict[str, str]
     ):
         self.network = network
         self.contracts = contracts
@@ -57,6 +57,8 @@ class Event:
     source: str
     signature: str
     name: str
+    numbered_name: str
+    handler_name: str
 
 
 def json_to_yaml(json_data):
@@ -84,7 +86,7 @@ def create_schema_file(target_module, target_config):
     common_models_dir = os.path.join("./common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
-        "./schema.graphql", "w"
+            "./schema.graphql", "w"
     ) as dest_file:
         dest_file.write("# Imported Models\n")
         for model in os.listdir(common_models_dir):
@@ -106,60 +108,22 @@ def generate_src_ts(target_module, contract: Contract):
 
         imports_code += f"""
 import {{{handler_class_name}}} from "./handlers/{contract.abi}/{handler_class_name}"
-import {{{event_name}}} from "../generated/{source}/{source}"
+import {{{event.numbered_name}}} from "../generated/{source}/{source}"
 """
 
         handlers_code += f"""
-export function handle{event_name}(event: {event_name}): void {{
-    let handler = new {handler_class_name}<{event_name}>()
+export function {event.handler_name}(event: {event.numbered_name}): void {{
+    let handler = new {handler_class_name}<{event.numbered_name}>()
     handler.handle(event, Version.v_{contract.version})
 }}
         """
     imports_code += "\n\n"
     with open(
-        os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
+            os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
     ) as src_file:
         src_file.write(imports_code)
         src_file.write(f'import {{Version}} from "../common/BaseHandler"')
         src_file.write(handlers_code)
-
-
-def create_handler_classes(target_module, contract: Contract):
-    with open(
-        os.path.join(target_module, "subgraph_config.json"), "r"
-    ) as target_config_file:
-        target_config = json.load(target_config_file)
-
-    for event in contract.events:
-        source = event["source"]
-        event_name = event["name"]
-        handler_class_name = event_name + "Handler"
-        handler_file_name = handler_class_name + ".ts"
-        handler_dir_path = os.path.join(target_module, "handlers")
-        if not os.path.exists(handler_dir_path):
-            os.makedirs(handler_dir_path)
-        handler_file_path = os.path.join(handler_dir_path, handler_file_name)
-
-        super_calls = []
-        for model in target_config["importModels"]:
-            super_calls.append(f'        super.handle{model}("{contract.version}")')
-        super_calls_str = "\n".join(super_calls)
-
-        with open(handler_file_path, "w") as handler_file:
-            handler_file.write(
-                f"""
-import {{{handler_class_name} as Common{handler_class_name}}} from "../../common/handlers/{handler_file_name[:-3]}"
-import {{{event_name}}} from "../../generated/{source}/{source}"
-
-export class {handler_class_name} extends Common{handler_class_name} {{
-
-    handle(_event: ethereum.Event, version: Version): void {{
-        super.handle(_event, version)
-{super_calls_str}
-    }}
-}}
-"""
-            )
 
 
 def get_scheme_models():
@@ -172,7 +136,7 @@ def get_scheme_models():
 def get_needed_events_for(models, target_module, contract: Contract):
     try:
         with open(
-            os.path.join("./common", f"deps_{contract.path()}.json"), "r"
+                os.path.join("./common", f"deps_{contract.path()}.json"), "r"
         ) as deps_file:
             common_dependencies = json.load(deps_file)
     except Exception as _:
@@ -181,7 +145,7 @@ def get_needed_events_for(models, target_module, contract: Contract):
 
     try:
         with open(
-            os.path.join(target_module, f"deps_{contract.path()}.json"), "r"
+                os.path.join(target_module, f"deps_{contract.path()}.json"), "r"
         ) as deps_file:
             target_dependencies = json.load(deps_file)
     except Exception as _:
@@ -197,10 +161,11 @@ def get_needed_events_for(models, target_module, contract: Contract):
     return list(set(events))
 
 
-def get_event_signature(event_name, abi_file_path):
+def get_event_signature(event_name, abi_file_path) -> List[str]:
     with open(abi_file_path, "r") as file:
         abi = json.load(file)
 
+    sigs = []
     for entry in abi:
         if entry["type"] == "event" and entry["name"] == event_name:
             input_types = [
@@ -208,8 +173,8 @@ def get_event_signature(event_name, abi_file_path):
                 for input in entry["inputs"]
             ]
             event_signature = f"{event_name}({','.join(input_types)})"
-            return event_signature
-    return None
+            sigs.append(event_signature)
+    return sigs
 
 
 def get_events_with_signatures(needed_events, contract: Contract) -> List[Event]:
@@ -217,14 +182,16 @@ def get_events_with_signatures(needed_events, contract: Contract) -> List[Event]
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
     for event in needed_events:
-        sig = get_event_signature(event, abi_file)
-        events.append(Event(source=source, name=event, signature=sig))
+        sigs = get_event_signature(event, abi_file)
+        for sig in sigs:
+            events.append(
+                Event(source=source, name=event, signature=sig, handler_name=f"handle{event}", numbered_name=event))
     return events
 
 
 def prepare_module(config: Config, target_module: str):
     with open(
-        os.path.join(target_module, "subgraph_config.json"), "r"
+            os.path.join(target_module, "subgraph_config.json"), "r"
     ) as target_config_file:
         target_config = json.load(target_config_file)
 
@@ -233,18 +200,21 @@ def prepare_module(config: Config, target_module: str):
 
     events_debts = []
     for contract in config.contracts:
-        needed_events = (
-            get_needed_events_for(models, target_module, contract) + events_debts
-        )
+        needed_events = get_needed_events_for(models, target_module, contract) + events_debts
         events = get_events_with_signatures(needed_events, contract)
+
+        event_counter = {}
         for e in events:
             if e.signature is None:
                 events_debts.append(e.name)
-        contract.events = list(
-            {
-                (e.name, e.signature): e for e in events if e.signature is not None
-            }.values()
-        )
+            else:
+                if e.name not in event_counter:
+                    event_counter[e.name] = 0
+                event_counter[e.name] += 1
+                if event_counter[e.name] > 1:
+                    e.handler_name = f"handle{e.name}{event_counter[e.name] - 1}"
+                    e.numbered_name = f"{e.name}{event_counter[e.name] - 1}"
+        contract.events = events
 
     subgraph_config = {
         "specVersion": "1.2.0",
@@ -275,7 +245,7 @@ def prepare_module(config: Config, target_module: str):
                     {"name": contract.path(), "file": f"./abis/{contract.path()}.json"}
                 ],
                 "eventHandlers": [
-                    {"event": event.signature, "handler": f"handle{event.name}"}
+                    {"event": event.signature, "handler": f"{event.handler_name}"}
                     for event in contract.events
                 ],
                 "file": f"./{target_module}/src_{contract.path()}.ts",
