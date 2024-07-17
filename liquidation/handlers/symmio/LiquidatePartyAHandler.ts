@@ -7,7 +7,7 @@ import { Version } from "../../../common/BaseHandler";
 import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_2 } from "../../../common/contract_utils_0_8_2";
 import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0 } from "../../../common/contract_utils_0_8_0";
 import { LiquidatePartyA } from "../../../generated/symmio_0_8_2/symmio_0_8_2";
-import { addLiquidator, update_liquidator } from "./utils";
+import { addLiquidator } from "./utils";
 
 export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 
