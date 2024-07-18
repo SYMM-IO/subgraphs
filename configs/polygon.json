@@ -10,6 +10,12 @@
 		{
 			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
 			"abi": "symmio",
+			"version": "0_8_1",
+			"startBlock": "49420747"
+		},
+		{
+			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
+			"abi": "symmio",
 			"version": "0_8_0",
 			"startBlock": "49420747",
 			"endBlock": "49420748"

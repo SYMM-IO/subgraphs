@@ -8,11 +8,11 @@ import {AllocatePartyA} from "../generated/symmio_0_8_0/symmio_0_8_0"
 import {LiquidatePartyBHandler} from "./handlers/symmio/LiquidatePartyBHandler"
 import {LiquidatePartyB} from "../generated/symmio_0_8_0/symmio_0_8_0"
 
-import {LiquidatePartyAHandler} from "./handlers/symmio/LiquidatePartyAHandler"
-import {LiquidatePartyA} from "../generated/symmio_0_8_0/symmio_0_8_0"
-
 import {DeallocateForPartyBHandler} from "./handlers/symmio/DeallocateForPartyBHandler"
 import {DeallocateForPartyB} from "../generated/symmio_0_8_0/symmio_0_8_0"
+
+import {LiquidatePartyAHandler} from "./handlers/symmio/LiquidatePartyAHandler"
+import {LiquidatePartyA} from "../generated/symmio_0_8_0/symmio_0_8_0"
 
 import {DeallocatePartyAHandler} from "./handlers/symmio/DeallocatePartyAHandler"
 import {DeallocatePartyA} from "../generated/symmio_0_8_0/symmio_0_8_0"
@@ -34,13 +34,13 @@ export function handleLiquidatePartyB(event: LiquidatePartyB): void {
     handler.handle(event, Version.v_0_8_0)
 }
         
-export function handleLiquidatePartyA(event: LiquidatePartyA): void {
-    let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
+export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
+    let handler = new DeallocateForPartyBHandler<DeallocateForPartyB>()
     handler.handle(event, Version.v_0_8_0)
 }
         
-export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
-    let handler = new DeallocateForPartyBHandler<DeallocateForPartyB>()
+export function handleLiquidatePartyA(event: LiquidatePartyA): void {
+    let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
     handler.handle(event, Version.v_0_8_0)
 }
         

@@ -18,7 +18,8 @@ export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 		super.handleGlobalCounter()
 		let entity = PartyA.load(event.params.partyA.toHex())!
 		switch (version) {
-			case Version.v_0_8_2: {
+			case Version.v_0_8_2:
+			case Version.v_0_8_1: {
 				// @ts-ignore
 				const e = changetype<LiquidatePartyA>(_event)
 				const balanceInfoOfPartyA = getBalanceInfoOfPartyA_0_8_2(event.address, event.params.partyA)
@@ -31,9 +32,11 @@ export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 				entity.liquidateLf = balanceInfoOfPartyA.value2
 				entity.liquidatePendingCva = balanceInfoOfPartyA.value5
 				entity.liquidatePendingLf = balanceInfoOfPartyA.value6
-				entity.totalUnrealizedLoss = e.params.totalUnrealizedLoss
-				entity.upnl = e.params.upnl
-				entity.allocatedBalance = e.params.allocatedBalance
+				if (version == Version.v_0_8_2) {
+					entity.totalUnrealizedLoss = e.params.totalUnrealizedLoss
+					entity.upnl = e.params.upnl
+					entity.allocatedBalance = e.params.allocatedBalance
+				}
 				addLiquidator(e)
 				break
 			}

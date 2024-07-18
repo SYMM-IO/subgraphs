@@ -14,6 +14,7 @@ export class LiquidatePendingPositionsPartyAHandler<T> {
                 // @ts-ignore
                 const e = changetype<LiquidatePendingPositionsPartyA>(_event)
                 addLiquidator(e)
+                break
             }
             case Version.v_0_8_0: {
 

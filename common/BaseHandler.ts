@@ -1,8 +1,9 @@
-import {BigInt, ethereum} from "@graphprotocol/graph-ts"
-import {getGlobalCounterAndInc} from "./utils"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { getGlobalCounterAndInc } from "./utils"
 
 export enum Version {
 	v_0_8_0,
+	v_0_8_1,
 	v_0_8_2,
 	v_0_8_3
 }
