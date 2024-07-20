@@ -1,0 +1,8 @@
+{
+  "WithdrawRequest": [
+    "WithdrawRequestEvent",
+    "WithdrawRequestCanceled",
+    "WithdrawRequestAcceptedEvent",
+    "WithdrawClaimedEvent"
+  ]
+}
