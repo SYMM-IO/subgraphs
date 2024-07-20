@@ -1,0 +1,20 @@
+{
+	"network": "bsc",
+	"contracts": [
+		{
+			"address": "0x7f632d4327C083064e632845ADaE8Fad2ccBA6eE",
+			"abi": "off_chain_vault",
+			"version": "1",
+			"startBlock": "38477004"
+		},
+		{
+			"address": "0x0379e4F69Dd7D6898d7e4e879Ee7A4F4DF7583bd",
+			"abi": "on_chain_vault",
+			"version": "1",
+			"startBlock": "38477057"
+		}
+	],
+	"deploy_urls": {
+		"main": "vaults_main_bnb_1"
+	}
+}
