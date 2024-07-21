@@ -8,6 +8,10 @@ export enum Version {
 	v_0_8_3
 }
 
+export enum VaultVersion {
+	v_1,
+}
+
 export class BaseHandler {
 
 	constructor() {
