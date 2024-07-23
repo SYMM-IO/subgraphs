@@ -1,0 +1,10 @@
+type WithdrawRequest @entity {
+	id: ID!
+	timestamp: BigInt!
+	sender: Bytes!
+	receiver: Bytes!
+	amount: BigInt!
+	status: Int!
+	paybackRatio: BigInt
+	source: Bytes!
+}
