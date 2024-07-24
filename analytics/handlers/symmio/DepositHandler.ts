@@ -1,10 +1,10 @@
-import {DepositHandler as CommonDepositHandler} from "../../../common/handlers/symmio/DepositHandler"
-import {Account, BalanceChange} from "../../../generated/schema"
-import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
-import {getConfiguration, newUserAndAccount} from "../../utils/builders";
+import { DepositHandler as CommonDepositHandler } from "../../../common/handlers/symmio/DepositHandler"
+import { Account, BalanceChange } from "../../../generated/schema"
+import { ethereum } from "@graphprotocol/graph-ts";
+import { Version } from "../../../common/BaseHandler";
+import { getConfiguration, newUserAndAccount } from "../../utils/builders";
 
-import {updateActivityTimestamps, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import { updateActivityTimestamps, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
 
 export class DepositHandler<T> extends CommonDepositHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -13,6 +13,7 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 		super.handle(_event, version)
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
+		super.handleAccount(_event, version)
 		newUserAndAccount(event.params.user, event.block, event.transaction)
 
 		let account = Account.load(event.params.user.toHexString())!
