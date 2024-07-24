@@ -9,7 +9,7 @@ package-lock.json
 .idea/
 pnpm-lock.yaml
 yarn-error.log
-./abis
+./abis/*
 events/abis/
 .env
 
