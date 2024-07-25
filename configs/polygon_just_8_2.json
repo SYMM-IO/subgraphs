@@ -12,7 +12,7 @@
 			"abi": "symmioMultiAccount",
 			"version": "0_8_2",
 			"startBlock": "49420747",
-			"name": "MultiAccount1"
+			"name": "MultiAccount"
 		}
 	],
 	"deploy_urls": {
