@@ -39,23 +39,19 @@ export class LiquidatePartyBHandler<T> extends CommonLiquidatePartyBHandler<T> {
 				break
 			}
 			case Version.v_0_8_1: {
-				// @ts-ignore
-				// const e = changetype<LiquidatePartyB_0_8_1>(_event)
-				// const balanceInfoOfPartyB = getBalanceInfoOfPartyB_0_8_2(event.address, event.params.partyA, event.params.partyB)
-				// if (!balanceInfoOfPartyB) {
-				// 	log.error('getBalanceInfoOfPartyB_0_8_2 crashed!', [])
-				// 	return
-				// }
-				// entity.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
-				// entity.liquidateCva = balanceInfoOfPartyB.value1
-				// entity.liquidateLf = balanceInfoOfPartyB.value2
-				// entity.liquidatePendingCva = balanceInfoOfPartyB.value5
-				// entity.liquidatePendingLf = balanceInfoOfPartyB.value6
-				// if (version == Version.v_0_8_1) {
-				// 	entity.partyBAllocatedBalance = e.params.partyBAllocatedBalance
-				// 	entity.upnl = e.params.upnl
-				// }
-				// break
+				//@ts-ignore
+				const e = changetype<LiquidatePartyB_0_8_1>(_event)
+				const balanceInfoOfPartyB = getBalanceInfoOfPartyB_0_8_2(event.address, event.params.partyA, event.params.partyB)
+				if (!balanceInfoOfPartyB) {
+					log.error('getBalanceInfoOfPartyB_0_8_2 crashed!', [])
+					return
+				}
+				entity.liquidateAllocatedBalance = balanceInfoOfPartyB.value0
+				entity.liquidateCva = balanceInfoOfPartyB.value1
+				entity.liquidateLf = balanceInfoOfPartyB.value2
+				entity.liquidatePendingCva = balanceInfoOfPartyB.value5
+				entity.liquidatePendingLf = balanceInfoOfPartyB.value6
+				break
 			}
 			case Version.v_0_8_0: {
 				const balanceInfoOfPartyB = getBalanceInfoOfPartyB_0_8_0(event.address, event.params.partyA, event.params.partyB)
