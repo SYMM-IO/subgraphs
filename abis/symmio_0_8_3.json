@@ -6564,25 +6564,6 @@
 				"internalType": "address",
 				"name": "partyA",
 				"type": "address"
-			}
-		],
-		"name": "LiquidatePendingPositionsPartyA",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "liquidator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
 			},
 			{
 				"indexed": false,
@@ -6624,31 +6605,6 @@
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256[]",
-				"name": "quoteIds",
-				"type": "uint256[]"
-			}
-		],
-		"name": "LiquidatePositionsPartyA",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "liquidator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
 				"name": "partyB",
 				"type": "address"
 			},
@@ -6674,37 +6630,6 @@
 				"indexed": false,
 				"internalType": "uint256[]",
 				"name": "closeIds",
-				"type": "uint256[]"
-			}
-		],
-		"name": "LiquidatePositionsPartyB",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "liquidator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyB",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256[]",
-				"name": "quoteIds",
 				"type": "uint256[]"
 			}
 		],
