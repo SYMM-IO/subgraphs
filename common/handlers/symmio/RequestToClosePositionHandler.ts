@@ -2,6 +2,7 @@ import { BaseHandler, Version } from "../../BaseHandler"
 import { Quote } from "../../../generated/schema"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote&analitics&user"
 import { ethereum } from "@graphprotocol/graph-ts";
+import { RequestToClosePosition as RequestToClosePosition_0_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3";
 
 export class RequestToClosePositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -15,7 +16,9 @@ export class RequestToClosePositionHandler<T> extends BaseHandler {
 		quote.quantityToClose = event.params.quantityToClose
 		quote.quoteStatus = event.params.quoteStatus
 		if (version == Version.v_0_8_3) {
-			quote.closeId = event.params.closeId
+			// @ts-ignore
+			const e = changetype<RequestToClosePosition_0_8_3>(_event)
+			quote.closeId = e.params.closeId
 		}
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'RequestToClosePosition', _event)

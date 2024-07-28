@@ -1,9 +1,9 @@
-import {BaseHandler, Version} from "../../BaseHandler"
-import {BigInt, Bytes, ethereum,} from "@graphprotocol/graph-ts"
-import {EventsTimestamp, InitialQuote, Quote, TransactionsHash} from "../../../generated/schema"
-import {initialQuoteBuilder_0_8_0, initialQuoteBuilder_0_8_2,} from "../../utils/quote&analitics&user"
-import {SendQuote as SendQuote_0_8_0} from "../../../generated/symmio_0_8_0/symmio_0_8_0";
-import {SendQuote as SendQuote_0_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import { BaseHandler, Version } from "../../BaseHandler"
+import { BigInt, Bytes, ethereum, } from "@graphprotocol/graph-ts"
+import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../../generated/schema"
+import { initialQuoteBuilder_0_8_0, initialQuoteBuilder_0_8_2, } from "../../utils/quote&analitics&user"
+import { SendQuote as SendQuote_0_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0";
+import { SendQuote as SendQuote_0_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2";
 import {
 	getQuote as getQuote_0_8_2,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_2

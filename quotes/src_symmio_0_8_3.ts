@@ -164,6 +164,7 @@ export function handleSetSymbolsPrices1(event: SetSymbolsPrices1): void {
 
 
 export function handleRequestToClosePosition(event: RequestToClosePosition): void {
+    event.params.closeId
     let handler = new RequestToClosePositionHandler<RequestToClosePosition>()
     handler.handle(event, Version.v_0_8_3)
 }
