@@ -39,6 +39,7 @@ type Quote @entity {
 	closedPrice: BigInt # done
 	closeDeadline: BigInt
 	quantityToClose: BigInt
+	closeId: BigInt
 
 	# closed
 	closedAmount: BigInt

@@ -245,25 +245,6 @@
 				"internalType": "uint256",
 				"name": "quoteId",
 				"type": "uint256"
-			}
-		],
-		"name": "ExpireQuote",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "enum QuoteStatus",
-				"name": "quoteStatus",
-				"type": "uint8"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "quoteId",
-				"type": "uint256"
 			},
 			{
 				"indexed": false,
