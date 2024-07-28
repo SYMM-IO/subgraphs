@@ -15,19 +15,6 @@
 			"endBlock": "59068459"
 		},
 		{
-			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
-			"abi": "symmio",
-			"version": "0_8_1",
-			"startBlock": "49420747"
-		},
-		{
-			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
-			"abi": "symmio",
-			"version": "0_8_0",
-			"startBlock": "49420747",
-			"endBlock": "49420746"
-		},
-		{
 			"address": "0xffE2C25404525D2D4351D75177B92F18D9DaF4Af",
 			"abi": "symmioMultiAccount",
 			"version": "0_8_2",

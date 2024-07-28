@@ -8,10 +8,8 @@ import { EmergencyClosePositionHandler } from './handlers/symmio/EmergencyCloseP
 import { EmergencyClosePosition } from '../generated/symmio_0_8_3/symmio_0_8_3'
 import { ExpireQuoteCloseHandler } from './handlers/symmio/ExpireQuoteCloseHandler'
 import { ExpireQuoteClose } from '../generated/symmio_0_8_3/symmio_0_8_3'
-import { ExpireQuoteHandler } from './handlers/symmio/ExpireQuoteHandler'
 import { ExpireQuoteOpenHandler } from './handlers/symmio/ExpireQuoteOpenHandler'
 import { ExpireQuoteOpen } from '../generated/symmio_0_8_3/symmio_0_8_3'
-import { ExpireQuote } from '../generated/symmio_0_8_3/symmio_0_8_3'
 import { FillCloseRequestHandler } from './handlers/symmio/FillCloseRequestHandler'
 import { FillCloseRequest } from '../generated/symmio_0_8_3/symmio_0_8_3'
 import { ForceCancelCloseRequestHandler } from './handlers/symmio/ForceCancelCloseRequestHandler'
@@ -182,11 +180,6 @@ export function handleForceClosePosition(event: ForceClosePosition): void {
     handler.handle(event, Version.v_0_8_3)
 }
 
-
-export function handleExpireQuote(event: ExpireQuote): void {
-    let handler = new ExpireQuoteHandler<ExpireQuote>()
-    handler.handle(event, Version.v_0_8_3)
-}
 
 
 export function handleOpenPosition(event: OpenPosition): void {
