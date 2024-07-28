@@ -6680,31 +6680,6 @@
 		"type": "event"
 	},
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address[]",
-				"name": "partyBs",
-				"type": "address[]"
-			},
-			{
-				"indexed": false,
-				"internalType": "int256[]",
-				"name": "amounts",
-				"type": "int256[]"
-			}
-		],
-		"name": "SettlePartyALiquidation",
-		"type": "event"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
