@@ -2,18 +2,17 @@
 	"network": "bsc",
 	"contracts": [
 		{
-			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
+			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
 			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "34345962",
-			"endBlock": "34345962"
+			"endBlock": "34345960"
 		},
 		{
 			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
 			"abi": "symmio",
 			"version": "0_8_0",
-			"startBlock": "34345963",
-			"endBlock": "34345962"
+			"startBlock": "34345963"
 		},
 		{
 			"address": "0x058Ba7574d8bC66F1a1DCc44bb5B18894D4190e0",
