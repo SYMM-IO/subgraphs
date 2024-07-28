@@ -5475,31 +5475,6 @@
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "partyB",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "AllocateForPartyB",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			},
@@ -5513,25 +5488,6 @@
 				"indexed": false,
 				"internalType": "uint256",
 				"name": "newAllocatedBalance",
-				"type": "uint256"
-			}
-		],
-		"name": "AllocatePartyA",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
 				"type": "uint256"
 			}
 		],
@@ -5575,31 +5531,6 @@
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "partyB",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "DeallocateForPartyB",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			},
@@ -5613,25 +5544,6 @@
 				"indexed": false,
 				"internalType": "uint256",
 				"name": "newAllocatedBalance",
-				"type": "uint256"
-			}
-		],
-		"name": "DeallocatePartyA",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
 				"type": "uint256"
 			}
 		],
@@ -6493,43 +6405,6 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "uint256",
-				"name": "allocatedBalance",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "int256",
-				"name": "upnl",
-				"type": "int256"
-			},
-			{
-				"indexed": false,
-				"internalType": "int256",
-				"name": "totalUnrealizedLoss",
-				"type": "int256"
-			}
-		],
-		"name": "LiquidatePartyA",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "liquidator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256[]",
 				"name": "quoteIds",
 				"type": "uint256[]"
@@ -6768,37 +6643,6 @@
 				"internalType": "bytes",
 				"name": "liquidationId",
 				"type": "bytes"
-			}
-		],
-		"name": "SetSymbolsPrices",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "liquidator",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "partyA",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256[]",
-				"name": "symbolIds",
-				"type": "uint256[]"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256[]",
-				"name": "prices",
-				"type": "uint256[]"
 			}
 		],
 		"name": "SetSymbolsPrices",
