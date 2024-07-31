@@ -1,5 +1,6 @@
 #! /bin/bash
 
+echo "Cleaning old build files..."
 rm -rf ./build
 rm -rf ./generated
 rm ./schema.graphql

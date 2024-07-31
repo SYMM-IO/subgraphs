@@ -1,7 +1,7 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { EditAccountNameHandler as CommonEditAccountNameHandler } from "../../../common/handlers/symmioMultiAccount/EditAccountNameHandler"
 import { Version } from "../../../common/BaseHandler";
-import { Account } from "../../generated/schema";
+import { Account } from "../../../generated/schema";
 
 export class EditAccountNameHandler<T> extends CommonEditAccountNameHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
