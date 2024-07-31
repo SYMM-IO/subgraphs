@@ -4,9 +4,11 @@ import os
 import re
 import subprocess
 import sys
-import yaml
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
+
+import yaml
 
 
 @dataclass
@@ -24,6 +26,7 @@ class Contract:
     abi: str
     version: str
     startBlock: str
+    fake: bool
     endBlock: Optional[str] = None
     name: Optional[str] = None
     events: List[Event] = field(default_factory=list)
@@ -40,8 +43,14 @@ class Config:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Config":
-        contracts = [Contract(**c) for c in data["contracts"]]
+        contracts = [Contract(**c, fake=False) for c in data["contracts"]]
         return cls(data["network"], contracts, data["deploy_urls"])
+
+
+abi_versions = {
+    "symmio": ["0_8_0", "0_8_2", "0_8_3"],
+    "symmioMultiAccount": ["0_8_0", "0_8_2"]
+}
 
 
 def json_to_yaml(json_data):
@@ -190,8 +199,36 @@ def prepare_module(config: Config, target_module: str):
         needed_events = set(get_needed_events_for(models, target_module, contract))
         all_needed_events.update(needed_events)
 
-    # Second pass: Process events for each contract
-    for contract in config.contracts:
+    # Create a set of all unique ABIs
+    unique_abis = set(contract.abi for contract in config.contracts)
+
+    # Create a list to store all contracts, including the new versions
+    all_contracts = []
+
+    # Second pass: Process events for each contract and add missing versions
+    for abi in unique_abis:
+        versions = abi_versions[abi]
+        max_start_block = max(int(c.startBlock) for c in config.contracts if c.abi == abi)
+
+        for version in versions:
+            existing_contract = next((c for c in config.contracts if c.abi == abi and c.version == version), None)
+
+            if existing_contract:
+                all_contracts.append(existing_contract)
+            else:
+                new_contract = Contract(
+                    fake=True,
+                    address=next(c.address for c in config.contracts if c.abi == abi),
+                    abi=abi,
+                    version=version,
+                    startBlock=str(max_start_block),
+                    endBlock=str(max_start_block),
+                    name=next((c.name for c in config.contracts if c.abi == abi and c.name), None)
+                )
+                all_contracts.append(new_contract)
+
+    # Process events for all contracts
+    for contract in all_contracts:
         events = get_events_with_signatures(list(all_needed_events), contract)
 
         event_counter = {}
@@ -211,10 +248,14 @@ def prepare_module(config: Config, target_module: str):
         "indexerHints": {"prune": "auto"},
         "dataSources": [],
     }
-
-    for contract in config.contracts:
+    contract_indexes = defaultdict(int)
+    for contract in all_contracts:
         if not contract.events:
             continue
+        copy_abi_files(f"{contract.path()}.json")
+        contract_events = contract.events
+        if contract.fake:
+            contract_events = [contract.events[0]]
         source_config = {
             "kind": "ethereum/contract",
             "name": contract.path(),
@@ -234,15 +275,20 @@ def prepare_module(config: Config, target_module: str):
                 ],
                 "eventHandlers": [
                     {"event": event.signature, "handler": event.handler_name}
-                    for event in contract.events
+                    for event in contract_events
                 ],
                 "file": f"./{target_module}/src_{contract.path()}.ts",
             },
         }
         if contract.endBlock:
             source_config["source"]["endBlock"] = int(contract.endBlock)
-        if contract.name:
-            source_config["name"] += f"_{contract.name}"
+
+        # Increment the count for this (abi, version) pair
+        contract_indexes[(contract.abi, contract.version)] += 1
+
+        # Only append a number if there are multiple contracts with the same abi and version
+        if contract_indexes[(contract.abi, contract.version)] > 1:
+            source_config["name"] += f"_{contract_indexes[(contract.abi, contract.version)]}"
 
         subgraph_config["dataSources"].append(source_config)
 
@@ -268,6 +314,8 @@ def main():
         print(f"Configuration file {args.config_file} does not exist!")
         sys.exit(1)
 
+    subprocess.run(["./scripts/clean.sh"], check=True)
+
     with open(args.config_file, "r") as f:
         config_data = json.load(f)
     config = Config.from_dict(config_data)
@@ -278,9 +326,6 @@ def main():
         for contract in config.contracts:
             if contract.events:
                 generate_src_ts(args.module_name, contract)
-
-    for abi_path in set(f"{c.path()}.json" for c in config.contracts):
-        copy_abi_files(abi_path)
 
     subprocess.run(["graph", "codegen"], check=True)
     subprocess.run(["graph", "build"], check=True)
