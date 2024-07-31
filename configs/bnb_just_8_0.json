@@ -4,20 +4,6 @@
 		{
 			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
 			"abi": "symmio",
-			"version": "0_8_3",
-			"startBlock": "34345962",
-			"endBlock": "34345960"
-		},
-		{
-			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
-			"abi": "symmio",
-			"version": "0_8_2",
-			"startBlock": "34345962",
-			"endBlock": "34345960"
-		},
-		{
-			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
-			"abi": "symmio",
 			"version": "0_8_0",
 			"startBlock": "34345963"
 		},
