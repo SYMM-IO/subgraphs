@@ -4,6 +4,13 @@
 		{
 			"address": "0x52e2230cdb80edebdadafcf24033608c9a636d7d",
 			"abi": "symmio",
+			"version": "0_8_3",
+			"startBlock": "8443806",
+			"endBlock": "8443806"
+		},
+		{
+			"address": "0x52e2230cdb80edebdadafcf24033608c9a636d7d",
+			"abi": "symmio",
 			"version": "0_8_0",
 			"startBlock": "2228875",
 			"endBlock": "8443807"
