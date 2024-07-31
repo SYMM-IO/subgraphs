@@ -1,5 +1,5 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { BigInt, Bytes, ethereum, } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, ethereum, log, } from "@graphprotocol/graph-ts"
 import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../../generated/schema"
 import { initialQuoteBuilder_0_8_0, initialQuoteBuilder_0_8_2, } from "../../utils/quote&analitics&user"
 import { SendQuote as SendQuote_0_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0";
@@ -106,6 +106,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.transactionsHash = event.params.quoteId.toString()
 		quote.action = "SendQuote"
 		quote.save()
+		log.debug('event send quote seen. quoteId={}', [quote.quoteId.toString()])
 
 		EventTimestampEntity.SendQuote = event.block.timestamp
 		EventTimestampEntity.save()
