@@ -17,6 +17,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
+		log.debug('send qoute seen. quoteId={}', [event.params.quoteId.toString()])  // TODO: remove after debug
 		let quote = new Quote(event.params.quoteId.toString())
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteId = event.params.quoteId
