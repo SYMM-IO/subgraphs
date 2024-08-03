@@ -1,5 +1,5 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
-import { Account, PriceCheck, Quote, Symbol, TradeHistory } from "../../../generated/schema";
+import { Account, DebugEntity, PriceCheck, Quote, Symbol, TradeHistory } from "../../../generated/schema";
 import { BigInt, log } from "@graphprotocol/graph-ts";
 import { unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
 import { PRICE_CHECK } from "../../config";
@@ -10,6 +10,9 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	let quote = Quote.load(event.params.quoteId.toString())
 	if (!quote) {
 		log.debug('quote not exist. quoteId {}', [event.params.quoteId.toString()])
+		let db = new DebugEntity('handleClose')
+		db.message = `quote not exist. quoteId ${event.params.quoteId.toString()}`
+		db.save()
 		return
 	}
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
