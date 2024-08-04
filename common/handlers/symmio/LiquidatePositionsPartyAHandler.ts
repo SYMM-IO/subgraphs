@@ -12,6 +12,7 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 			let quote = Quote.load(quoteId.toString())!
 			quote.quoteStatus = 8
 			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)
+			quote.liquidatedSide = 0
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LiquidatePositionsPartyA', _event)
 		}
