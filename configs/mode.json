@@ -1,0 +1,24 @@
+{
+	"network": "mode-mainnet",
+	"contracts": [
+		{
+			"address": "0x3d17f073cCb9c3764F105550B0BCF9550477D266",
+			"abi": "symmio",
+			"version": "0_8_2",
+			"startBlock": "11261499"
+		},
+		{
+			"address": "0x8Ab178C07184ffD44F0ADfF4eA2ce6cFc33F3b86",
+			"abi": "symmioMultiAccount",
+			"version": "0_8_2",
+			"startBlock": "11298774",
+			"name": "cloverfield_multi_account"
+		}
+	],
+	"deploy_urls": {
+		"analytics": "analytics_mode",
+		"main": "main_mode",
+		"events": "events_mode",
+		"userprofile": "userprofile_mode"
+	}
+}
