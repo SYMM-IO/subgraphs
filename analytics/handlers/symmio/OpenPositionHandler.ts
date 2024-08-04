@@ -1,13 +1,12 @@
 import {
 	OpenPositionHandlerWithAccount as CommonOpenPositionHandler
 } from "../../../common/handlers/symmio/OpenPositionHandlerWithAccount"
-import {Account, PriceCheck, Quote, Symbol, TradeHistory} from "../../../generated/schema"
+import {Account, Quote, Symbol, TradeHistory} from "../../../generated/schema"
 import {BigInt, ethereum} from "@graphprotocol/graph-ts"
 import {Version} from "../../../common/BaseHandler";
 import {QuoteStatus} from "../../utils/constants";
 
 import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
-import {PRICE_CHECK} from "../../config";
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -37,17 +36,6 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 
 		let quote = Quote.load(event.params.quoteId.toString())!
 		const symbol = Symbol.load(quote.symbolId!.toString())!
-
-		if (PRICE_CHECK) {
-			let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
-			priceCheck.event = "OpenPosition"
-			priceCheck.symbol = symbol.name
-			priceCheck.givenPrice = event.params.openedPrice
-			priceCheck.timestamp = event.block.timestamp
-			priceCheck.transaction = event.transaction.hash
-			priceCheck.additionalInfo = quote.id
-			priceCheck.save()
-		}
 
 		let tradingFee = event.params.filledAmount
 			.times(quote.openedPrice!)

@@ -1,8 +1,7 @@
-import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
-import { Account, PriceCheck, Quote, Symbol, TradeHistory } from "../../../generated/schema";
-import { BigInt, log } from "@graphprotocol/graph-ts";
-import { unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
-import { PRICE_CHECK } from "../../config";
+import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
+import {Account, Quote, TradeHistory} from "../../../generated/schema";
+import {BigInt, log} from "@graphprotocol/graph-ts";
+import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
 
 export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	// @ts-ignore
@@ -20,23 +19,12 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	history.quote = event.params.quoteId
 	history.save()
 
-	if (PRICE_CHECK) {
-		let priceCheck = new PriceCheck(event.transaction.hash.toHexString() + event.transactionLogIndex.toString())
-		priceCheck.event = name
-		priceCheck.symbol = Symbol.load(quote.symbolId!.toString())!.name
-		priceCheck.givenPrice = event.params.closedPrice
-		priceCheck.timestamp = event.block.timestamp
-		priceCheck.transaction = event.transaction.hash
-		priceCheck.additionalInfo = quote.id
-		priceCheck.save()
-	}
-
 	let account = Account.load(event.params.partyA.toHexString())!
 
 	const pnl = unDecimal(
 		(quote.positionType == 0
-			? BigInt.fromString("1")
-			: BigInt.fromString("1").neg()
+				? BigInt.fromString("1")
+				: BigInt.fromString("1").neg()
 		)
 			.times(event.params.closedPrice.minus(quote.openedPrice!))
 			.times(event.params.filledAmount),
