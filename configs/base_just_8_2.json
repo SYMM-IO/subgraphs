@@ -34,6 +34,13 @@
 			"version": "0_8_2",
 			"startBlock": "12933620",
 			"name": "beFi_multi_account"
+		},
+		{
+			"address": "0xF7F56d7E02D5c7bF33525AE2eecB049a17Ef4580",
+			"abi": "symmioMultiAccount",
+			"version": "0_8_2",
+			"startBlock": "15908605",
+			"name": "cloverfield_multi_account"
 		}
 	],
 	"deploy_urls": {

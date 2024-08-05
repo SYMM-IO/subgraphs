@@ -20,6 +20,13 @@
 			"version": "0_8_2",
 			"startBlock": "499689",
 			"name": "multi_account_intentx"
+		},
+		{
+			"address": "0xE59D420c979Cd433DD1F2673991667D4DeAf01ae",
+			"abi": "symmioMultiAccount",
+			"version": "0_8_2",
+			"startBlock": "4897807",
+			"name": "multi_account_cloverfield"
 		}
 	],
 	"deploy_urls": {
