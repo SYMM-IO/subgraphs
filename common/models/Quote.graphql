@@ -49,6 +49,7 @@ type Quote @entity {
 	# liquidation
 	liquidatePrice: BigInt
 	liquidateAmount: BigInt
+	liquidatedSide: Int
 
 	# funding rate
 	fundingRateFee: BigInt

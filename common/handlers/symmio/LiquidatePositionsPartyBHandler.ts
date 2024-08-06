@@ -13,6 +13,7 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 			let quoteId = event.params.quoteIds[i]
 			let quote = Quote.load(quoteId.toString())!
 			quote.globalCounter = super.handleGlobalCounter()
+			quote.liquidatedSide = 1
 			quote.quoteStatus = 8
 			let getAveragePrice: BigInt
 			switch (version) {
