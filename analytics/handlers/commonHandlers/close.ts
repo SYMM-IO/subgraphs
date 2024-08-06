@@ -1,7 +1,7 @@
-import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
-import {Account, Quote, TradeHistory} from "../../../generated/schema";
-import {BigInt, log} from "@graphprotocol/graph-ts";
-import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
+import { Account, DebugEntity, Quote, TradeHistory } from "../../../generated/schema";
+import { BigInt, log } from "@graphprotocol/graph-ts";
+import { unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
 
 export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	// @ts-ignore
@@ -9,6 +9,9 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	let quote = Quote.load(event.params.quoteId.toString())
 	if (!quote) {
 		log.debug('quote not exist. quoteId {}', [event.params.quoteId.toString()])
+		let db = new DebugEntity('handleClose')
+		db.message = `quote not exist. quoteId ${event.params.quoteId.toString()}`
+		db.save()
 		return
 	}
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
@@ -23,8 +26,8 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 
 	const pnl = unDecimal(
 		(quote.positionType == 0
-				? BigInt.fromString("1")
-				: BigInt.fromString("1").neg()
+			? BigInt.fromString("1")
+			: BigInt.fromString("1").neg()
 		)
 			.times(event.params.closedPrice.minus(quote.openedPrice!))
 			.times(event.params.filledAmount),
