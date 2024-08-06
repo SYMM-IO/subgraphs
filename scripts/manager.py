@@ -213,10 +213,9 @@ def prepare_module(config: Config, target_module: str):
         max_start_block = max(int(c.startBlock) for c in config.contracts if c.abi == abi)
 
         for version in versions:
-            existing_contract = next((c for c in config.contracts if c.abi == abi and c.version == version), None)
-
-            if existing_contract:
-                all_contracts.append(existing_contract)
+            existing_contracts = [c for c in config.contracts if c.abi == abi and c.version == version]
+            for ex in existing_contracts:
+                all_contracts.append(ex)
             else:
                 new_contract = Contract(
                     fake=True,

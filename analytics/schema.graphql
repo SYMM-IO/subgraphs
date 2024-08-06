@@ -170,16 +170,6 @@ type OpenInterest @entity {
     timestamp: BigInt!
 }
 
-type PriceCheck @entity{
-    id: ID!
-    givenPrice: BigInt!
-    symbol: String!
-    additionalInfo: String!
-    event: String!
-    timestamp: BigInt!
-    transaction: Bytes!
-}
-
 type Configuration @entity{
     id: ID!
     collateral: Bytes!
