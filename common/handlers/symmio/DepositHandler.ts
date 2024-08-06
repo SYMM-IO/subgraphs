@@ -1,8 +1,7 @@
-import { BaseHandler, Version } from "../../BaseHandler"
-import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
-import { Account, DebugEntity } from "../../../generated/schema";
-import { createNewAccount } from "../../utils/analytics&user_profile";
-import { newUserAndAccount } from "../../../analytics/utils/builders";
+import {BaseHandler, Version} from "../../BaseHandler"
+import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
+import {Account} from "../../../generated/schema";
+import {newUserAndAccount} from "../../../analytics/utils/builders";
 
 export class DepositHandler<T> extends BaseHandler {
 	handleAccount(_event: ethereum.Event, version: Version): void {

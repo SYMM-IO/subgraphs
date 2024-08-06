@@ -336,9 +336,12 @@ def main():
         deploy_command = [
             "graph",
             "deploy",
-            "--studio" if not args.mantle else deploy_url,
-            deploy_url,
         ]
+        if args.mantle:
+            deploy_command.extend([deploy_url])
+        else:
+            deploy_command.extend(["--studio", deploy_url])
+
         if args.mantle:
             deploy_command.extend(
                 [
