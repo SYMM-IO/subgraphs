@@ -1,5 +1,5 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
-import { Account, Quote, TradeHistory } from "../../../generated/schema";
+import { Account, DebugEntity, Quote, TradeHistory } from "../../../generated/schema";
 import { BigInt, log } from "@graphprotocol/graph-ts";
 import { unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
 
