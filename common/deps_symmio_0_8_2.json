@@ -21,7 +21,8 @@
     "AddAccount"
   ],
   "Symbol": [
-    "AddSymbol"
+    "AddSymbol",
+    "SetSymbolTradingFeeHandler"
   ],
   "Account": [
     "AllocatePartyA",

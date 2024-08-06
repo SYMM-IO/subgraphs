@@ -37,8 +37,8 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_mantle_8_2",
-		"main": "main_mantle_8_2",
-		"events": "events_mantle_8_2"
+		"analytics": "analytics_mantle",
+		"main": "main_mantle",
+		"events": "events_mantle"
 	}
 }
