@@ -1,59 +1,62 @@
 import {AcceptCancelCloseRequestHandler} from './handlers/symmio/AcceptCancelCloseRequestHandler'
-import {AcceptCancelCloseRequest} from '../generated/symmio_0_8_3/symmio_0_8_3'
+import {
+    AcceptCancelCloseRequest,
+    AcceptCancelRequest,
+    AddSymbol,
+    AllocateForPartyB,
+    AllocatePartyA,
+    ChargeFundingRate,
+    DeallocateForPartyB,
+    DeallocatePartyA,
+    Deposit,
+    EmergencyClosePosition,
+    FillCloseRequest,
+    ForceCancelCloseRequest,
+    ForceCancelQuote,
+    ForceClosePosition,
+    LiquidatePositionsPartyA,
+    LiquidatePositionsPartyB,
+    LockQuote,
+    OpenPosition,
+    RequestToCancelCloseRequest,
+    RequestToCancelQuote,
+    RequestToClosePosition,
+    RoleGranted,
+    RoleRevoked,
+    SendQuote,
+    SetCollateral,
+    SetSymbolTradingFee,
+    UnlockQuote,
+    Withdraw
+} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {AcceptCancelRequestHandler} from './handlers/symmio/AcceptCancelRequestHandler'
-import {AcceptCancelRequest} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {AddSymbolHandler} from './handlers/symmio/AddSymbolHandler'
-import {AddSymbol} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {AllocateForPartyBHandler} from './handlers/symmio/AllocateForPartyBHandler'
-import {AllocateForPartyB} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {AllocatePartyAHandler} from './handlers/symmio/AllocatePartyAHandler'
-import {AllocatePartyA} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {ChargeFundingRateHandler} from './handlers/symmio/ChargeFundingRateHandler'
-import {ChargeFundingRate} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {DeallocateForPartyBHandler} from './handlers/symmio/DeallocateForPartyBHandler'
-import {DeallocateForPartyB} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {DeallocatePartyAHandler} from './handlers/symmio/DeallocatePartyAHandler'
-import {DeallocatePartyA} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {DepositHandler} from './handlers/symmio/DepositHandler'
-import {Deposit} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {EmergencyClosePositionHandler} from './handlers/symmio/EmergencyClosePositionHandler'
-import {EmergencyClosePosition} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {FillCloseRequestHandler} from './handlers/symmio/FillCloseRequestHandler'
-import {FillCloseRequest} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {ForceCancelCloseRequestHandler} from './handlers/symmio/ForceCancelCloseRequestHandler'
-import {ForceCancelCloseRequest} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {ForceCancelQuoteHandler} from './handlers/symmio/ForceCancelQuoteHandler'
-import {ForceCancelQuote} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {ForceClosePositionHandler} from './handlers/symmio/ForceClosePositionHandler'
-import {ForceClosePosition} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {LiquidatePositionsPartyAHandler} from './handlers/symmio/LiquidatePositionsPartyAHandler'
-import {LiquidatePositionsPartyA} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {LiquidatePositionsPartyBHandler} from './handlers/symmio/LiquidatePositionsPartyBHandler'
-import {LiquidatePositionsPartyB} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
-import {LockQuote} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
-import {OpenPosition} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {RequestToCancelCloseRequestHandler} from './handlers/symmio/RequestToCancelCloseRequestHandler'
-import {RequestToCancelCloseRequest} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {RequestToCancelQuoteHandler} from './handlers/symmio/RequestToCancelQuoteHandler'
-import {RequestToCancelQuote} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {RequestToClosePositionHandler} from './handlers/symmio/RequestToClosePositionHandler'
-import {RequestToClosePosition} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {RoleGrantedHandler} from './handlers/symmio/RoleGrantedHandler'
-import {RoleGranted} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {RoleRevokedHandler} from './handlers/symmio/RoleRevokedHandler'
-import {RoleRevoked} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {SendQuoteHandler} from './handlers/symmio/SendQuoteHandler'
-import {SendQuote} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {SetCollateralHandler} from './handlers/symmio/SetCollateralHandler'
-import {SetCollateral} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {UnlockQuoteHandler} from './handlers/symmio/UnlockQuoteHandler'
-import {UnlockQuote} from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {Version} from '../common/BaseHandler'
 import {WithdrawHandler} from './handlers/symmio/WithdrawHandler'
-import {Withdraw} from '../generated/symmio_0_8_3/symmio_0_8_3'
-
+import {SetSymbolTradingFeeHandler} from "./handlers/symmio/SetSymbolTradingFeeHandler";
 
 export function handleAllocatePartyA(event: AllocatePartyA): void {
     let handler = new AllocatePartyAHandler<AllocatePartyA>()
@@ -173,7 +176,11 @@ export function handleWithdraw(event: Withdraw): void {
     let handler = new WithdrawHandler<Withdraw>()
     handler.handle(event, Version.v_0_8_3)
 }
-        
+
+export function handleSetSymbolTradingFee(event: SetSymbolTradingFee): void {
+    let handler = new SetSymbolTradingFeeHandler<SetSymbolTradingFee>()
+    handler.handle(event, Version.v_0_8_3)
+}
 
 export function handleRequestToClosePosition(event: RequestToClosePosition): void {
     let handler = new RequestToClosePositionHandler<RequestToClosePosition>()

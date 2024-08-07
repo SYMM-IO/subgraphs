@@ -4,13 +4,6 @@
 		{
 			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
 			"abi": "symmio",
-			"version": "0_8_3",
-			"startBlock": "210771536",
-			"endBlock": "210771535"
-		},
-		{
-			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
-			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "210771536"
 		},
@@ -20,6 +13,13 @@
 			"version": "0_8_2",
 			"startBlock": "210771536",
 			"name": "multi_account_pear"
+		},
+		{
+			"address": "0x6a3C63Ed5e558a4c4810ecC980ba6075476602D6",
+			"abi": "symmioMultiAccount",
+			"version": "0_8_2",
+			"startBlock": "222717579",
+			"name": "multi_account_cloverfield"
 		}
 	],
 	"deploy_urls": {

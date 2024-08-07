@@ -5,7 +5,7 @@ import {
 import {Version} from "../../../common/BaseHandler";
 
 export class SetSymbolTradingFeeHandler<T> extends CommonSetSymbolTradingFeeHandler<T> {
-	handleSymbol(_event: ethereum.Event, version: Version) {
+	handleSymbol(_event: ethereum.Event, version: Version): void {
 		super.handleSymbol(_event, version)
 	}
 }
