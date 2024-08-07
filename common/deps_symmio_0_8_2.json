@@ -22,7 +22,7 @@
   ],
   "Symbol": [
     "AddSymbol",
-    "SetSymbolTradingFeeHandler"
+    "SetSymbolTradingFee"
   ],
   "Account": [
     "AllocatePartyA",
