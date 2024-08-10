@@ -23,14 +23,14 @@ export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
 }
         
 
-export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
-    let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
+export function handleLiquidatePartyA(event: LiquidatePartyA): void {
+    let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
     handler.handle(event, Version.v_0_8_3)
 }
         
 
-export function handleDeallocatePartyA(event: DeallocatePartyA): void {
-    let handler = new DeallocatePartyAHandler<DeallocatePartyA>()
+export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
+    let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
     handler.handle(event, Version.v_0_8_3)
 }
         
@@ -41,8 +41,8 @@ export function handleAllocatePartyA(event: AllocatePartyA): void {
 }
         
 
-export function handleAllocateForPartyB(event: AllocateForPartyB): void {
-    let handler = new AllocateForPartyBHandler<AllocateForPartyB>()
+export function handleDeallocatePartyA(event: DeallocatePartyA): void {
+    let handler = new DeallocatePartyAHandler<DeallocatePartyA>()
     handler.handle(event, Version.v_0_8_3)
 }
         
@@ -53,8 +53,8 @@ export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
 }
         
 
-export function handleLiquidatePartyA(event: LiquidatePartyA): void {
-    let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
+export function handleAllocateForPartyB(event: AllocateForPartyB): void {
+    let handler = new AllocateForPartyBHandler<AllocateForPartyB>()
     handler.handle(event, Version.v_0_8_3)
 }
         

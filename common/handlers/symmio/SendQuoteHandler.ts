@@ -54,6 +54,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		let initialNewEntity: InitialQuote
 		let symbolName: string
 		switch (version) {
+			case Version.v_0_8_3:
 			case Version.v_0_8_2: {
 				// @ts-ignore
 				const e = changetype<SendQuote_0_8_2>(_event)
@@ -84,8 +85,8 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.maxFundingRate = initialNewEntity.tradingFee
 		initialQuote.tradingFee = initialNewEntity.tradingFee
 
-		quote.symbol = symbolName
-		initialQuote.symbol = symbolName
+		quote.symbol = symbolName!
+		initialQuote.symbol = symbolName!
 
 		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
