@@ -85,8 +85,8 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.maxFundingRate = initialNewEntity.tradingFee
 		initialQuote.tradingFee = initialNewEntity.tradingFee
 
-		quote.symbol = symbolName!
-		initialQuote.symbol = symbolName!
+		quote.symbol = symbolName
+		initialQuote.symbol = symbolName
 
 		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
