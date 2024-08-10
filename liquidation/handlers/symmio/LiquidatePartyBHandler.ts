@@ -1,15 +1,13 @@
 import {
 	LiquidatePartyBHandler as CommonLiquidatePartyBHandler
 } from "../../../common/handlers/symmio/LiquidatePartyBHandler"
-import { PartyB } from "../../../generated/schema"
-import { BigInt, ethereum, log } from "@graphprotocol/graph-ts";
-import { Version } from "../../../common/BaseHandler";
-import { getBalanceInfoOfPartyB as getBalanceInfoOfPartyB_0_8_2 } from "../../../common/contract_utils_0_8_2";
-import { getBalanceInfoOfPartyB as getBalanceInfoOfPartyB_0_8_0 } from "../../../common/contract_utils_0_8_0";
-import { LiquidatePartyB } from "../../../generated/symmio_0_8_2/symmio_0_8_2";
-import { LiquidatePartyB as LiquidatePartyB_0_8_1 } from "../../../generated/symmio_0_8_1/symmio_0_8_1";
-
-import { update_liquidator } from "./utils";
+import {PartyB} from "../../../generated/schema"
+import {BigInt, ethereum, log} from "@graphprotocol/graph-ts";
+import {Version} from "../../../common/BaseHandler";
+import {getBalanceInfoOfPartyB as getBalanceInfoOfPartyB_0_8_2} from "../../../common/contract_utils_0_8_2";
+import {getBalanceInfoOfPartyB as getBalanceInfoOfPartyB_0_8_0} from "../../../common/contract_utils_0_8_0";
+import {LiquidatePartyB} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import {LiquidatePartyB as LiquidatePartyB_0_8_1} from "../../../generated/symmio_0_8_1/symmio_0_8_1";
 
 export class LiquidatePartyBHandler<T> extends CommonLiquidatePartyBHandler<T> {
 

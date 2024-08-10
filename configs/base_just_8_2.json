@@ -47,6 +47,7 @@
 		"analytics": "analytics_base_8_2",
 		"main": "main_base_8_2",
 		"events": "events_base_8_2",
-		"userprofile": "userprofile_base_8_2"
+		"userprofile": "userprofile_base_8_2",
+		"liquidation": "liquidation_base"
 	}
 }
