@@ -69,6 +69,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				initialQuote.partyBmm = e.params.partyBmm
 				quote.tradingFee = e.params.tradingFee
 				const q = getQuote_0_8_3(event.address, event.params.quoteId)!
+				quote.maxFundingRate = initialQuote.maxFundingRate = q.maxFundingRate
 				initialNewEntity = initialQuoteBuilder_0_8_3(q)
 				symbolName = symbolIdToSymbolName_0_8_3(event.params.symbolId, event.address)
 				break
@@ -82,6 +83,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				initialQuote.partyBmm = e.params.partyBmm
 				quote.tradingFee = e.params.tradingFee
 				const q = getQuote_0_8_2(event.address, event.params.quoteId)!
+				quote.maxFundingRate = initialQuote.maxFundingRate = q.maxFundingRate
 				initialNewEntity = initialQuoteBuilder_0_8_2(q)
 				symbolName = symbolIdToSymbolName_0_8_2(event.params.symbolId, event.address)
 				break
@@ -96,11 +98,11 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				quote.tradingFee = BigInt.zero() // Not available in event
 				const q = getQuote_0_8_0(event.address, event.params.quoteId)!
 				initialNewEntity = initialQuoteBuilder_0_8_0(q)
+				quote.maxFundingRate = initialNewEntity.tradingFee
 				symbolName = symbolIdToSymbolName_0_8_0(event.params.symbolId, event.address)
 				break
 			}
 		}
-		quote.maxFundingRate = initialNewEntity.tradingFee
 		initialQuote.tradingFee = initialNewEntity.tradingFee
 
 		quote.symbol = symbolName

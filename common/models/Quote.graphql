@@ -83,6 +83,7 @@ type InitialQuote @entity {
 	symbol: String!
 	partyBsWhiteList: [Bytes!]
 	timeStamp: BigInt!
+	maxFundingRate: BigInt
 }
 
 type EventsTimestamp @entity {
