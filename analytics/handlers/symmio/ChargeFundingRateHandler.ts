@@ -1,14 +1,15 @@
 import {
 	ChargeFundingRateHandler as CommonChargeFundingRateHandler
 } from "../../../common/handlers/symmio/ChargeFundingRateHandler"
-import {Account, GlobalFee, Quote} from "../../../generated/schema"
-import {BigInt, ethereum} from "@graphprotocol/graph-ts"
-import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2"
-import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0"
-import {FACTOR} from "../../../common/utils"
-import {Version} from "../../../common/BaseHandler";
+import { Account, GlobalFee, Quote } from "../../../generated/schema"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
+import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
+import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
+import { FACTOR } from "../../../common/utils"
+import { Version } from "../../../common/BaseHandler";
 
-import {unDecimal, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import { unDecimal, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
 
 export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,6 +28,11 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 			let funding: BigInt
 			switch (version) {
+				case Version.v_0_8_3: {
+					let chainQuote = getQuote_0_8_3(event.address, BigInt.fromString(quote.id))!
+					funding = unDecimal((chainQuote.openedPrice.minus(quote.openedPrice!).abs()).times(openAmount))
+					break
+				}
 				case Version.v_0_8_2: {
 					let chainQuote = getQuote_0_8_2(event.address, BigInt.fromString(quote.id))!
 					funding = unDecimal((chainQuote.openedPrice.minus(quote.openedPrice!).abs()).times(openAmount))
