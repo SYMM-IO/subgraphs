@@ -1,11 +1,12 @@
-import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
-import {Version} from "../../../common/BaseHandler";
-import {BigInt} from "@graphprotocol/graph-ts";
-import {Account, Quote, TradeHistory} from "../../../generated/schema";
-import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2";
-import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
-import {QuoteStatus} from "../../utils/constants";
-import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
+import { Version } from "../../../common/BaseHandler";
+import { BigInt } from "@graphprotocol/graph-ts";
+import { Account, Quote, TradeHistory } from "../../../generated/schema";
+import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2";
+import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3";
+import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0";
+import { QuoteStatus } from "../../utils/constants";
+import { unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
 
 export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt): void {
 	// @ts-ignore
@@ -16,6 +17,13 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	let liquidAmount: BigInt;
 	let liquidPrice: BigInt;
 	switch (version) {
+		case Version.v_0_8_3: {
+			const chainQuote = getQuote_0_8_3(event.address, qId)
+			if (chainQuote == null) return
+			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
+			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
+			break
+		}
 		case Version.v_0_8_2: {
 			const chainQuote = getQuote_0_8_2(event.address, qId)
 			if (chainQuote == null) return
