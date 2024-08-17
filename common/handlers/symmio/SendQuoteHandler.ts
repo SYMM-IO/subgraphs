@@ -1,9 +1,15 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, Bytes, ethereum, log, } from "@graphprotocol/graph-ts"
 import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../../generated/schema"
-import { initialQuoteBuilder_0_8_0, initialQuoteBuilder_0_8_2, } from "../../utils/quote&analitics&user"
+import { initialQuoteBuilder_0_8_0, initialQuoteBuilder_0_8_2, initialQuoteBuilder_0_8_3, } from "../../utils/quote&analitics&user"
 import { SendQuote as SendQuote_0_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0";
 import { SendQuote as SendQuote_0_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import { SendQuote as SendQuote_0_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3";
+
+import {
+	getQuote as getQuote_0_8_3,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_3
+} from "../../../common/contract_utils_0_8_3";
 import {
 	getQuote as getQuote_0_8_2,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_2
@@ -54,6 +60,20 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		let initialNewEntity: InitialQuote
 		let symbolName: string
 		switch (version) {
+			case Version.v_0_8_3: {
+				// @ts-ignore
+				const e = changetype<SendQuote_0_8_3>(_event)
+				quote.partyAmm = e.params.partyAmm
+				quote.partyBmm = e.params.partyBmm
+				initialQuote.partyAmm = e.params.partyAmm
+				initialQuote.partyBmm = e.params.partyBmm
+				quote.tradingFee = e.params.tradingFee
+				const q = getQuote_0_8_3(event.address, event.params.quoteId)!
+				quote.maxFundingRate = initialQuote.maxFundingRate = q.maxFundingRate
+				initialNewEntity = initialQuoteBuilder_0_8_3(q)
+				symbolName = symbolIdToSymbolName_0_8_3(event.params.symbolId, event.address)
+				break
+			}
 			case Version.v_0_8_2: {
 				// @ts-ignore
 				const e = changetype<SendQuote_0_8_2>(_event)
@@ -63,6 +83,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				initialQuote.partyBmm = e.params.partyBmm
 				quote.tradingFee = e.params.tradingFee
 				const q = getQuote_0_8_2(event.address, event.params.quoteId)!
+				quote.maxFundingRate = initialQuote.maxFundingRate = q.maxFundingRate
 				initialNewEntity = initialQuoteBuilder_0_8_2(q)
 				symbolName = symbolIdToSymbolName_0_8_2(event.params.symbolId, event.address)
 				break
@@ -77,11 +98,11 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				quote.tradingFee = BigInt.zero() // Not available in event
 				const q = getQuote_0_8_0(event.address, event.params.quoteId)!
 				initialNewEntity = initialQuoteBuilder_0_8_0(q)
+				quote.maxFundingRate = initialNewEntity.tradingFee
 				symbolName = symbolIdToSymbolName_0_8_0(event.params.symbolId, event.address)
 				break
 			}
 		}
-		quote.maxFundingRate = initialNewEntity.tradingFee
 		initialQuote.tradingFee = initialNewEntity.tradingFee
 
 		quote.symbol = symbolName

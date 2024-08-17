@@ -48,10 +48,10 @@ class Config:
 
 
 abi_versions = {
-    "symmio": ["0_8_0", "0_8_2", "0_8_3"],
+    "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3"],
     "symmioMultiAccount": ["0_8_0", "0_8_2"],
     "off_chain_vault": ["1"],
-    "on_chain_vault": ["1"]
+    "on_chain_vault": ["1"],
 }
 
 
@@ -79,7 +79,7 @@ def create_schema_file(target_module: str, target_config: Dict[str, Any]):
     common_models_dir = os.path.join("./common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
-            "./schema.graphql", "w"
+        "./schema.graphql", "w"
     ) as dest_file:
         dest_file.write("# Imported Models\n")
         for model in os.listdir(common_models_dir):
@@ -104,17 +104,19 @@ def generate_src_ts(target_module: str, contract: Contract):
             f"import {{{event.numbered_name}}} from '../generated/{event.source}/{event.source}'"
         )
 
-        handlers_code.append(f"""
+        handlers_code.append(
+            f"""
 export function {event.handler_name}(event: {event.numbered_name}): void {{
     let handler = new {event.name}Handler<{event.numbered_name}>()
     handler.handle(event, Version.v_{contract.version})
 }}
-        """)
+        """
+        )
 
     imports.add("import {Version} from '../common/BaseHandler'")
 
     with open(
-            os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
+        os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
     ) as src_file:
         src_file.write("\n".join(sorted(imports)))  # Sort imports for consistency
         src_file.write("\n\n")  # Add a blank line between imports and handlers
@@ -129,7 +131,7 @@ def get_scheme_models():
 
 
 def get_needed_events_for(
-        models: List[str], target_module: str, contract: Contract
+    models: List[str], target_module: str, contract: Contract
 ) -> List[str]:
     common_dependencies = load_dependencies(
         os.path.join("./common", f"deps_{contract.path()}.json")
@@ -166,7 +168,7 @@ def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
 
 
 def get_events_with_signatures(
-        needed_events: List[str], contract: Contract
+    needed_events: List[str], contract: Contract
 ) -> List[Event]:
     events = []
     source = contract.path()
@@ -188,7 +190,7 @@ def get_events_with_signatures(
 
 def prepare_module(config: Config, target_module: str):
     with open(
-            os.path.join(target_module, "subgraph_config.json"), "r"
+        os.path.join(target_module, "subgraph_config.json"), "r"
     ) as target_config_file:
         target_config = json.load(target_config_file)
 
@@ -210,10 +212,14 @@ def prepare_module(config: Config, target_module: str):
     # Second pass: Process events for each contract and add missing versions
     for abi in unique_abis:
         versions = abi_versions[abi]
-        max_start_block = max(int(c.startBlock) for c in config.contracts if c.abi == abi)
+        max_start_block = max(
+            int(c.startBlock) for c in config.contracts if c.abi == abi
+        )
 
         for version in versions:
-            existing_contracts = [c for c in config.contracts if c.abi == abi and c.version == version]
+            existing_contracts = [
+                c for c in config.contracts if c.abi == abi and c.version == version
+            ]
             for ex in existing_contracts:
                 all_contracts.append(ex)
             else:
@@ -224,7 +230,10 @@ def prepare_module(config: Config, target_module: str):
                     version=version,
                     startBlock=str(max_start_block),
                     endBlock=str(max_start_block),
-                    name=next((c.name for c in config.contracts if c.abi == abi and c.name), None)
+                    name=next(
+                        (c.name for c in config.contracts if c.abi == abi and c.name),
+                        None,
+                    ),
                 )
                 all_contracts.append(new_contract)
 
@@ -289,7 +298,9 @@ def prepare_module(config: Config, target_module: str):
 
         # Only append a number if there are multiple contracts with the same abi and version
         if contract_indexes[(contract.abi, contract.version)] > 1:
-            source_config["name"] += f"_{contract_indexes[(contract.abi, contract.version)]}"
+            source_config[
+                "name"
+            ] += f"_{contract_indexes[(contract.abi, contract.version)]}"
 
         subgraph_config["dataSources"].append(source_config)
 
