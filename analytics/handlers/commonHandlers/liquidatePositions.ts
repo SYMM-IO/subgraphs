@@ -54,6 +54,12 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 			.closeTradeVolume(additionalVolume)
 			.symbolId(quote.symbolId!)
 	)
-
+	if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
+		updateHistories(
+			new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp)
+				.closeTradeVolume(additionalVolume)
+				.symbolId(quote.symbolId!)
+		)
+	}
 	updateDailyOpenInterest(event.block.timestamp, unDecimal(liquidAmount.times(quote.openedPrice!)), false, account.accountSource)
 }
