@@ -48,6 +48,13 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 				.symbolId(quote.symbolId!)
 				.tradingFee(tradingFee)
 		)
+		if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
+			updateHistories(
+				new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp)
+					.openTradeVolume(history.volume)
+					.symbolId(quote.symbolId!)
+			)
+		}
 		updateDailyOpenInterest(event.block.timestamp, history.volume, true, account.accountSource)
 	}
 }

@@ -1,7 +1,7 @@
-import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
-import { Account, DebugEntity, Quote, TradeHistory } from "../../../generated/schema";
-import { BigInt, log } from "@graphprotocol/graph-ts";
-import { unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
+import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
+import {Account, DebugEntity, Quote, TradeHistory} from "../../../generated/schema";
+import {BigInt, log} from "@graphprotocol/graph-ts";
+import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
 
 export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	// @ts-ignore
@@ -26,8 +26,8 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 
 	const pnl = unDecimal(
 		(quote.positionType == 0
-			? BigInt.fromString("1")
-			: BigInt.fromString("1").neg()
+				? BigInt.fromString("1")
+				: BigInt.fromString("1").neg()
 		)
 			.times(event.params.closedPrice.minus(quote.openedPrice!))
 			.times(event.params.filledAmount),
@@ -46,6 +46,12 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 			.loss(loss)
 			.profit(profit)
 	)
-
+	if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
+		updateHistories(
+			new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp)
+				.closeTradeVolume(additionalVolume)
+				.symbolId(quote.symbolId!)
+		)
+	}
 	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.openedPrice!)), false, account.accountSource)
 }
