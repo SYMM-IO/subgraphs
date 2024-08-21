@@ -50,7 +50,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		)
 		if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 			updateHistories(
-				new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp)
+				new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp, account.accountSource)
 					.openTradeVolume(history.volume)
 					.symbolId(quote.symbolId!)
 			)

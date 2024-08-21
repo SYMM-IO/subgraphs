@@ -48,7 +48,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 		updateHistories(
-			new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp)
+			new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp, account.accountSource)
 				.closeTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!)
 		)

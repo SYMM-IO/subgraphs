@@ -1,5 +1,5 @@
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
-import {Account} from "../../generated/schema";
+import {Account, DebugEntity} from "../../generated/schema";
 import {
 	getDailyHistoryForTimestamp,
 	getDailySymbolTradesHistory,
@@ -71,6 +71,7 @@ export function updateActivityTimestamps(account: Account, timestamp: BigInt): v
 
 export class UpdateHistoriesParams {
 	account: Account;
+	accountSource: Bytes | null;
 	timestamp: BigInt;
 	_openTradeVolume: BigInt = BigInt.zero();
 	_closeTradeVolume: BigInt = BigInt.zero();
@@ -86,8 +87,11 @@ export class UpdateHistoriesParams {
 	_loss: BigInt = BigInt.zero();
 	_profit: BigInt = BigInt.zero();
 
-	constructor(account: Account, timestamp: BigInt) {
+	constructor(account: Account, timestamp: BigInt, accountSource: Bytes | null = Bytes.empty()) {
 		this.account = account;
+		if (accountSource === null || accountSource.length == 0)
+			accountSource = account.accountSource
+		this.accountSource = accountSource;
 		this.timestamp = timestamp;
 	}
 
@@ -176,6 +180,10 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.fundingPaid = dh.fundingPaid.plus(params._fundingPaid)
 	dh.fundingReceived = dh.fundingReceived.plus(params._fundingReceived)
 	dh.updateTimestamp = timestamp
+	let de = new DebugEntity("Updated history for account at" + timestamp.toString())
+	de.message = account.id
+	de.trigger = openTradeVolume.plus(closeTradeVolume)
+	de.save()
 	dh.save()
 
 	const th = getTotalHistory(timestamp, account.accountSource)
