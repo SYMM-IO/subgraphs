@@ -1,12 +1,12 @@
-import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum";
-import { Version } from "../../../common/BaseHandler";
-import { BigInt } from "@graphprotocol/graph-ts";
-import { Account, Quote, TradeHistory } from "../../../generated/schema";
-import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2";
-import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3";
-import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0";
-import { QuoteStatus } from "../../utils/constants";
-import { unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
+import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
+import {Version} from "../../../common/BaseHandler";
+import {BigInt} from "@graphprotocol/graph-ts";
+import {Account, Quote, TradeHistory} from "../../../generated/schema";
+import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2";
+import {getQuote as getQuote_0_8_3} from "../../../common/contract_utils_0_8_3";
+import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
+import {QuoteStatus} from "../../utils/constants";
+import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
 
 export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt): void {
 	// @ts-ignore
@@ -56,7 +56,7 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 		updateHistories(
-			new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp)
+			new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp, account.accountSource)
 				.closeTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!)
 		)
