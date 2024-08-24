@@ -1,22 +1,20 @@
 import {
 	ChargeFundingRateHandler as CommonChargeFundingRateHandler
 } from "../../../common/handlers/symmio/ChargeFundingRateHandler"
-import { Account, GlobalFee, Quote } from "../../../generated/schema"
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
-import { FACTOR } from "../../../common/utils"
-import { Version } from "../../../common/BaseHandler";
+import {Account, Quote} from "../../../generated/schema"
+import {BigInt, ethereum} from "@graphprotocol/graph-ts"
+import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2"
+import {getQuote as getQuote_0_8_3} from "../../../common/contract_utils_0_8_3"
+import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0"
+import {Version} from "../../../common/BaseHandler";
 
-import { unDecimal, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
+import {unDecimal, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
 
 export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
-		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
@@ -44,17 +42,6 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 					break
 				}
 			}
-			const fee = quote.openedPrice!.times(rate).times(openAmount).div(FACTOR).div(FACTOR)
-
-			let globalEntity = GlobalFee.load("GlobalEntity")
-			if (!globalEntity) {
-				globalEntity = new GlobalFee("GlobalEntity")
-				globalEntity.globalFee = BigInt.fromI32(0)
-			}
-			globalEntity.latestTimestamp = event.block.timestamp
-			globalEntity.globalFee = globalEntity.globalFee.plus(fee)
-			globalEntity.save()
-
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
@@ -70,5 +57,6 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 					.fundingReceived(fundingReceived)
 			)
 		}
+		super.handleQuote(_event, version)
 	}
 }

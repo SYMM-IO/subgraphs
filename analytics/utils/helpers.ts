@@ -89,7 +89,7 @@ export class UpdateHistoriesParams {
 
 	constructor(account: Account, timestamp: BigInt, accountSource: Bytes | null = Bytes.empty()) {
 		this.account = account;
-		if (accountSource === null || accountSource.length == 0)
+		if (accountSource === null || accountSource == Bytes.empty() || accountSource.length == 0)
 			accountSource = account.accountSource
 		this.accountSource = accountSource;
 		this.timestamp = timestamp;
@@ -167,7 +167,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	const openTradeVolume = params._openTradeVolume;
 	const closeTradeVolume = params._closeTradeVolume;
 
-	const dh = getDailyHistoryForTimestamp(timestamp, account.accountSource)
+	const dh = getDailyHistoryForTimestamp(timestamp, params.accountSource)
 	dh.tradeVolume = dh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume))
 	dh.openTradeVolume = dh.openTradeVolume.plus(openTradeVolume)
 	dh.closeTradeVolume = dh.closeTradeVolume.plus(closeTradeVolume)
