@@ -18,7 +18,6 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.quoteStatus = 4
 		quote.quantity = event.params.filledAmount
 		quote.initialOpenedPrice = event.params.openedPrice
-		quote.fundingRateOpenedPrice = event.params.openedPrice
 
 		const initialEntity = InitialQuote.load(quote.initialData!)!
 

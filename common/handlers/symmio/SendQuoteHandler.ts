@@ -39,7 +39,8 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.marketPrice = event.params.marketPrice
 		quote.averageClosedPrice = BigInt.fromI32(0)
 		quote.closedAmount = BigInt.fromI32(0)
-		quote.fundingRateFee = BigInt.fromI32(0)
+		quote.userPaidFunding = BigInt.fromI32(0)
+		quote.userReceivedFunding = BigInt.fromI32(0)
 		quote.blockNumber = event.block.number
 
 		let initialQuote = new InitialQuote(event.params.quoteId.toString())

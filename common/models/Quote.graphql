@@ -52,8 +52,8 @@ type Quote @entity {
 	liquidatedSide: Int
 
 	# funding rate
-	fundingRateFee: BigInt
-	fundingRateOpenedPrice: BigInt
+	userPaidFunding: BigInt
+	userReceivedFunding: BigInt
 
 	# timestamps
 	timeStamp: BigInt!
