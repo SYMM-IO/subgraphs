@@ -180,10 +180,6 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.fundingPaid = dh.fundingPaid.plus(params._fundingPaid)
 	dh.fundingReceived = dh.fundingReceived.plus(params._fundingReceived)
 	dh.updateTimestamp = timestamp
-	let de = new DebugEntity("Updated history for account at" + timestamp.toString())
-	de.message = account.id
-	de.trigger = openTradeVolume.plus(closeTradeVolume)
-	de.save()
 	dh.save()
 
 	const th = getTotalHistory(timestamp, account.accountSource)
