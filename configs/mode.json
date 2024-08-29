@@ -17,7 +17,7 @@
 	],
 	"deploy_urls": {
 		"analytics": "analytics_mode",
-		"main": "main_mode",
+		"quotes": "main_mode",
 		"events": "events_mode",
 		"userprofile": "userprofile_mode"
 	}

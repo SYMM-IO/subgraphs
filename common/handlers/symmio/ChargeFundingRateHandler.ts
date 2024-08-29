@@ -1,10 +1,10 @@
 import {BaseHandler, Version} from "../../BaseHandler"
 import {BigInt, ethereum} from "@graphprotocol/graph-ts";
 import {GlobalFee, Quote} from "../../../generated/schema";
-import {unDecimal} from "../../../analytics/utils/helpers";
 import {getQuote as getQuote_0_8_3} from "../../contract_utils_0_8_3";
 import {getQuote as getQuote_0_8_2} from "../../contract_utils_0_8_2";
 import {getQuote as getQuote_0_8_0} from "../../contract_utils_0_8_0";
+import {unDecimal} from "../../utils";
 
 export class ChargeFundingRateHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {

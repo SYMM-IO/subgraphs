@@ -15,3 +15,7 @@ export function getGlobalCounterAndInc(): BigInt {
 	entity.save()
 	return entity.counter
 }
+
+export function unDecimal(value: BigInt): BigInt {
+	return value.div(FACTOR)
+}
