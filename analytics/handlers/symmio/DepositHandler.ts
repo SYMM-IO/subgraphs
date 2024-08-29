@@ -1,4 +1,4 @@
-import { DepositHandler as CommonDepositHandler } from "../../../common/handlers/symmio/DepositHandler"
+import { DepositWithAccountHandler as CommonDepositHandler } from "../../../common/handlers/symmio/DepositWithAccountHandler"
 import { Account, BalanceChange } from "../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts";
 import { Version } from "../../../common/BaseHandler";

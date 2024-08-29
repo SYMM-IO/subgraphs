@@ -1,4 +1,4 @@
-import { DepositForPartyBHandler as CommondepositForPartyBHandler } from "../../../common/handlers/symmio/DepositForPartyBHandler"
+import { DepositForPartyBWithAccountHandler as CommonDepositForPartyBHandler } from "../../../common/handlers/symmio/DepositForPartyBWithAccountHandler"
 import { Account, BalanceChange } from "../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts";
 import { Version } from "../../../common/BaseHandler";
@@ -6,7 +6,7 @@ import { getConfiguration, newUserAndAccount } from "../../utils/builders";
 
 import { updateActivityTimestamps, updateHistories, UpdateHistoriesParams } from "../../utils/helpers";
 
-export class DepositForPartyBHandler<T> extends CommondepositForPartyBHandler<T> {
+export class DepositForPartyBHandler<T> extends CommonDepositForPartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
