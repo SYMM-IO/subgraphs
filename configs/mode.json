@@ -18,6 +18,7 @@
 	"deploy_urls": {
 		"analytics": "analytics_mode",
 		"quotes": "main_mode",
+		"liquidation": "liquidation_mode",
 		"events": "events_mode",
 		"userprofile": "userprofile_mode"
 	}
