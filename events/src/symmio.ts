@@ -255,6 +255,34 @@ export function handleDeactiveEmergencyMode(
   entity.save()
 }
 
+export function handleSettlePartyALiquidation(
+  event: SettlePartyALiquidationEvent
+): void {
+  let entity = new SettlePartyALiquidation(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "SettlePartyALiquidationEvent"
+  entity.counterId = cId.eventId
+  entity.amounts = event.params.amounts
+  entity.liquidationId = event.params.liquidationId
+  entity.partyA = event.params.partyA
+  entity.partyBs = bytesToArr(event.params.partyBs)
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
 export function handleDeregisterPartyB(event: DeregisterPartyBEvent): void {
   let entity = new DeregisterPartyB(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -556,7 +584,7 @@ export function handleSetFeeCollector(event: SetFeeCollectorEvent): void {
   entity.counterId = cId.eventId
   entity.oldFeeCollector = event.params.oldFeeCollector
   entity.newFeeCollector = event.params.newFeeCollector
-  event.params.affiliate
+  entity.affiliate = event.params.affiliate
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -636,10 +664,10 @@ export function handleSetForceCloseCooldowns(
   cId.save()
   entity.action = "SetForceCloseCooldown"
   entity.counterId = cId.eventId
-  event.params.newForceCloseFirstCooldown
-  event.params.newForceCloseSecondCooldown
-  event.params.oldForceCloseFirstCooldown
-  event.params.oldForceCloseSecondCooldown
+  entity.newForceCloseFirstCooldown = event.params.newForceCloseFirstCooldown
+  entity.newForceCloseSecondCooldown = event.params.newForceCloseSecondCooldown
+  entity.oldForceCloseFirstCooldown = event.params.oldForceCloseFirstCooldown
+  entity.oldForceCloseSecondCooldown = event.params.oldForceCloseSecondCooldown
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -667,7 +695,7 @@ export function handleSetForceCloseGapRatio(
   entity.counterId = cId.eventId
   entity.oldForceCloseGapRatio = event.params.oldForceCloseGapRatio
   entity.newForceCloseGapRatio = event.params.newForceCloseGapRatio
-  event.params.symbolId
+  entity.symbolId = event.params.symbolId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
