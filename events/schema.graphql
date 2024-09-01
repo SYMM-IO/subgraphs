@@ -1036,3 +1036,147 @@ type UnlockQuote @entity(immutable: true) {
 	logIndex: BigInt!
 	blockHash: Bytes!
 }
+
+type RegisterAffiliate @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type DeregisterAffiliate @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AddBridge @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RemoveBridge @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type TransferToBridge @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type WithdrawReceivedBridgeValue @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type WithdrawReceivedBridgeValues @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type SuspendBridgeTransaction @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RestoreBridgeTransaction @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type SetInvalidBridgedAmountsPool @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type InternalTransfer @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type DeferredLiquidatePartyA @entity(immutable: true) {
+	id: Bytes!
+	action: String!
+
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	counterId: Int!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}

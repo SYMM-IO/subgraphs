@@ -254,8 +254,6 @@ dataSources:
           handler: handleSuspendBridgeTransaction
         - event: RestoreBridgeTransaction(uint256,uint256)
           handler: handleRestoreBridgeTransaction
-        - event: WithdrawReceivedBridgeValues(uint256[])
-          handler: handleWithdrawReceivedBridgeValues
         - event: SetInvalidBridgedAmountsPool(address,address)
           handler: handleSetInvalidBridgedAmountsPool
         - event: InternalTransfer(address,address,uint256,uint256)

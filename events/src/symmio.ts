@@ -71,7 +71,19 @@ import {
   FillCloseRequest as FillCloseRequestEvent,
   LockQuote as LockQuoteEvent,
   OpenPosition as OpenPositionEvent,
-  UnlockQuote as UnlockQuoteEvent
+  UnlockQuote as UnlockQuoteEvent,
+  RegisterAffiliate as RegisterAffiliateEvent,
+  DeregisterAffiliate as DeregisterAffiliateEvent,
+  AddBridge as AddBridgeEvent,
+  RemoveBridge as RemoveBridgeEvent,
+  TransferToBridge as TransferToBridgeEvent,
+  WithdrawReceivedBridgeValue as WithdrawReceivedBridgeValueEvent,
+  WithdrawReceivedBridgeValues as WithdrawReceivedBridgeValuesEvent,
+  SuspendBridgeTransaction as SuspendBridgeTransactionEvent,
+  RestoreBridgeTransaction as RestoreBridgeTransactionEvent,
+  SetInvalidBridgedAmountsPool as SetInvalidBridgedAmountsPoolEvent,
+  InternalTransfer as InternalTransferEvent,
+  DeferredLiquidatePartyA as DeferredLiquidatePartyAEvent
 } from "../generated/symmio/symmio"
 import {
   ActiveEmergencyMode,
@@ -147,7 +159,18 @@ import {
   UnlockQuote,
   CounterId,
   ExpireQuoteOpen,
-  ExpireQuoteClose
+  ExpireQuoteClose,
+  DeregisterAffiliate,
+  AddBridge,
+  RemoveBridge,
+  TransferToBridge,
+  WithdrawReceivedBridgeValue,
+  WithdrawReceivedBridgeValues,
+  SuspendBridgeTransaction,
+  RestoreBridgeTransaction,
+  SetInvalidBridgedAmountsPool,
+  InternalTransfer,
+  DeferredLiquidatePartyA
 } from "../generated/schema"
 import { bigIntToArr, bytesToArr } from "./helper"
 import { BigInt } from "@graphprotocol/graph-ts"
@@ -189,7 +212,7 @@ export function handleAddSymbol(event: AddSymbolEvent): void {
   entity.action = "AddSymbol"
 
   entity.counterId = cId.eventId
-  entity.symbolId = event.params.id
+  entity.symbolId = event.params.symbolId
   entity.name = event.params.name
   entity.minAcceptableQuoteValue = event.params.minAcceptableQuoteValue
   entity.minAcceptablePortionLF = event.params.minAcceptablePortionLF
@@ -884,7 +907,7 @@ export function handleSetSymbolFundingState(
   cId.save()
   entity.action = "SetSymbolFundingState"
   entity.counterId = cId.eventId
-  entity.symbolId = event.params.id
+  entity.symbolId = event.params.symbolId
   entity.fundingRateEpochDuration = event.params.fundingRateEpochDuration
   entity.fundingRateWindowTime = event.params.fundingRateWindowTime
 
@@ -996,7 +1019,7 @@ export function handleSetSymbolValidationState(
   cId.save()
   entity.action = "SetSymbolValidationState"
   entity.counterId = cId.eventId
-  entity.symbolId = event.params.id
+  entity.symbolId = event.params.symbolId
   entity.oldState = event.params.oldState
   entity.isValid = event.params.isValid
 
@@ -1212,32 +1235,6 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
   entity.save()
 }
 
-export function handleLiquidatePartyAOld(event: LiquidatePartyAOldEvent): void {
-  let entity = new LiquidatePartyA(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  let cId = CounterId.load("main")
-  if (!cId) {
-    cId = new CounterId("main")
-    cId.eventId = 0
-  }
-  cId.eventId += 1;
-  cId.save()
-  entity.action = "LiquidatePartyA"
-  entity.counterId = cId.eventId
-  entity.liquidator = event.params.liquidator
-  entity.partyA = event.params.partyA
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.logIndex = event.logIndex
-  entity.blockHash = event.block.hash
-  entity.save()
-}
-
-
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
   let entity = new LiquidatePartyB(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -1256,32 +1253,6 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
   entity.partyA = event.params.partyA
   entity.upnl = event.params.upnl
   entity.partyBAllocatedBalance = event.params.partyBAllocatedBalance
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.logIndex = event.logIndex
-  entity.blockHash = event.block.hash
-  entity.save()
-}
-
-export function handleLiquidatePartyBOld(event: LiquidatePartyBOldEvent): void {
-  let entity = new LiquidatePartyB(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  let cId = CounterId.load("main")
-  if (!cId) {
-    cId = new CounterId("main")
-    cId.eventId = 0
-  }
-  cId.eventId += 1;
-  cId.save()
-  entity.action = "LiquidatePartyB"
-  entity.counterId = cId.eventId
-  entity.liquidator = event.params.liquidator
-  entity.partyB = event.params.partyB
-  entity.partyA = event.params.partyA
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1457,33 +1428,6 @@ export function handleOldSettlePartyALiquidation(
   entity.partyBs = bytesToArr(event.params.partyBs)
   entity.amounts = bigIntToArr(event.params.amounts)
   entity.liquidationId = event.params.liquidationId
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.logIndex = event.logIndex
-  entity.blockHash = event.block.hash
-  entity.save()
-}
-
-export function handleSettlePartyALiquidation(
-  event: newSettlePartyALiquidationEvent
-): void {
-  let entity = new SettlePartyALiquidation(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  let cId = CounterId.load("main")
-  if (!cId) {
-    cId = new CounterId("main")
-    cId.eventId = 0
-  }
-  cId.eventId += 1;
-  cId.save()
-  entity.action = "SettlePartyALiquidation"
-  entity.counterId = cId.eventId
-  entity.partyA = event.params.partyA
-  entity.partyBs = bytesToArr(event.params.partyBs)
-  entity.amounts = bigIntToArr(event.params.amounts)
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -2187,6 +2131,284 @@ export function handleUnlockQuote(event: UnlockQuoteEvent): void {
   entity.partyB = event.params.partyB
   entity.quoteId = event.params.quoteId
   entity.quoteStatus = event.params.quoteStatus
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+
+
+export function handleRegisterAffiliate(event: RegisterAffiliateEvent): void {
+  let entity = new RegisterAffiliate(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "RegisterAffiliate"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleDeregisterAffiliate(event: DeregisterAffiliateEvent): void {
+  let entity = new DeregisterAffiliate(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "DeregisterAffiliate"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleAddBridge(event: AddBridgeEvent): void {
+  let entity = new AddBridge(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "AddBridge"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleRemoveBridge(event: RemoveBridgeEvent): void {
+  let entity = new RemoveBridge(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "RemoveBridge"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleTransferToBridge(event: TransferToBridgeEvent): void {
+  let entity = new TransferToBridge(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "TransferToBridge"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleWithdrawReceivedBridgeValue(event: WithdrawReceivedBridgeValueEvent): void {
+  let entity = new WithdrawReceivedBridgeValue(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "WithdrawReceivedBridgeValue"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleWithdrawReceivedBridgeValues(event: WithdrawReceivedBridgeValuesEvent): void {
+  let entity = new WithdrawReceivedBridgeValues(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "WithdrawReceivedBridgeValues"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleSuspendBridgeTransaction(event: SuspendBridgeTransactionEvent): void {
+  let entity = new SuspendBridgeTransaction(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "SuspendBridgeTransaction"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleRestoreBridgeTransaction(event: RestoreBridgeTransactionEvent): void {
+  let entity = new RestoreBridgeTransaction(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "RestoreBridgeTransaction"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleSetInvalidBridgedAmountsPool(event: SetInvalidBridgedAmountsPoolEvent): void {
+  let entity = new SetInvalidBridgedAmountsPool(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "SetInvalidBridgedAmountsPool"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleInternalTransfer(event: InternalTransferEvent): void {
+  let entity = new InternalTransfer(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "InternalTransfer"
+  entity.counterId = cId.eventId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyAEvent): void {
+  let entity = new DeferredLiquidatePartyA(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "DeferredLiquidatePartyA"
+  entity.counterId = cId.eventId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
