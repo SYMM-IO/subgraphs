@@ -170,7 +170,8 @@ import {
   RestoreBridgeTransaction,
   SetInvalidBridgedAmountsPool,
   InternalTransfer,
-  DeferredLiquidatePartyA
+  DeferredLiquidatePartyA,
+  RegisterAffiliate
 } from "../generated/schema"
 import { bigIntToArr, bytesToArr } from "./helper"
 import { BigInt } from "@graphprotocol/graph-ts"
@@ -620,7 +621,7 @@ export function handleSetForceCancelCooldown(
   entity.save()
 }
 
-export function handleSetForceCloseCooldown(
+export function handleSetForceCloseCooldowns(
   event: SetForceCloseCooldownEvent
 ): void {
   let entity = new SetForceCloseCooldown(
@@ -2156,6 +2157,7 @@ export function handleRegisterAffiliate(event: RegisterAffiliateEvent): void {
   cId.save()
   entity.action = "RegisterAffiliate"
   entity.counterId = cId.eventId
+  entity.affilate = event.params.affilate
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -2179,6 +2181,7 @@ export function handleDeregisterAffiliate(event: DeregisterAffiliateEvent): void
   cId.save()
   entity.action = "DeregisterAffiliate"
   entity.counterId = cId.eventId
+  entity.affilate = event.params.affilate
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -2202,7 +2205,7 @@ export function handleAddBridge(event: AddBridgeEvent): void {
   cId.save()
   entity.action = "AddBridge"
   entity.counterId = cId.eventId
-
+  entity.bridge = event.params.bridge
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2225,7 +2228,7 @@ export function handleRemoveBridge(event: RemoveBridgeEvent): void {
   cId.save()
   entity.action = "RemoveBridge"
   entity.counterId = cId.eventId
-
+  entity.bridge = event.params.bridge
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2248,7 +2251,10 @@ export function handleTransferToBridge(event: TransferToBridgeEvent): void {
   cId.save()
   entity.action = "TransferToBridge"
   entity.counterId = cId.eventId
-
+  entity.amount = event.params.amount
+  entity.bridgeAddress = event.params.bridgeAddress
+  entity.transactionId = event.params.transactionId
+  entity.user = event.params.user
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2271,7 +2277,7 @@ export function handleWithdrawReceivedBridgeValue(event: WithdrawReceivedBridgeV
   cId.save()
   entity.action = "WithdrawReceivedBridgeValue"
   entity.counterId = cId.eventId
-
+  entity.transactionId = event.params.transactionId
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2294,7 +2300,7 @@ export function handleWithdrawReceivedBridgeValues(event: WithdrawReceivedBridge
   cId.save()
   entity.action = "WithdrawReceivedBridgeValues"
   entity.counterId = cId.eventId
-
+  entity.transactionIds = event.params.transactionIds
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2317,7 +2323,7 @@ export function handleSuspendBridgeTransaction(event: SuspendBridgeTransactionEv
   cId.save()
   entity.action = "SuspendBridgeTransaction"
   entity.counterId = cId.eventId
-
+  entity.transactionId = event.params.transactionId
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2340,7 +2346,8 @@ export function handleRestoreBridgeTransaction(event: RestoreBridgeTransactionEv
   cId.save()
   entity.action = "RestoreBridgeTransaction"
   entity.counterId = cId.eventId
-
+  entity.transactionId = event.params.transactionId
+  entity.validAmount = event.params.validAmount
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2363,7 +2370,8 @@ export function handleSetInvalidBridgedAmountsPool(event: SetInvalidBridgedAmoun
   cId.save()
   entity.action = "SetInvalidBridgedAmountsPool"
   entity.counterId = cId.eventId
-
+  entity.newInvalidBridgedAmountsPool = event.params.newInvalidBridgedAmountsPool
+  entity.oldInvalidBridgedAmountsPool = event.params.oldInvalidBridgedAmountsPool
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2386,7 +2394,10 @@ export function handleInternalTransfer(event: InternalTransferEvent): void {
   cId.save()
   entity.action = "InternalTransfer"
   entity.counterId = cId.eventId
-
+  entity.amount = event.params.amount
+  entity.sender = event.params.sender
+  entity.user = event.params.user
+  entity.userNewAllocatedBalance = event.params.userNewAllocatedBalance
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -2409,7 +2420,15 @@ export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyAEven
   cId.save()
   entity.action = "DeferredLiquidatePartyA"
   entity.counterId = cId.eventId
-
+  entity.allocatedBalance = event.params.allocatedBalance
+  entity.liquidationAllocatedBalance = event.params.liquidationAllocatedBalance
+  entity.liquidationBlockNumber = event.params.liquidationBlockNumber
+  entity.liquidationId = event.params.liquidationId
+  entity.liquidationTimestamp = event.params.liquidationTimestamp
+  entity.liquidator = event.params.liquidator
+  entity.partyA = event.params.partyA
+  entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
+  entity.upnl = event.params.upnl
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
