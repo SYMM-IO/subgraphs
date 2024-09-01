@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: symmio
-    network: "{{network}}"
+    network: "blast-mainnet"
     source:
-      address: "{{ symmioAddress }}"
+      address: "0x3d17f073cCb9c3764F105550B0BCF9550477D266"
       abi: symmio
-      startBlock: {{ symmioStartBlock }}
+      startBlock: 236513
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -88,7 +88,7 @@ dataSources:
         - UnlockQuote
       abis:
         - name: symmio
-          file: ./abis/symmio.json
+          file: ../configs/abis/symmio_0_8_3.json
       eventHandlers:
         - event: ActiveEmergencyMode()
           handler: handleActiveEmergencyMode
@@ -120,21 +120,21 @@ dataSources:
           handler: handleSetCollateral
         - event: SetDeallocateCooldown(uint256,uint256)
           handler: handleSetDeallocateCooldown
-        - event: SetFeeCollector(address,address)
+        - event: SetFeeCollector(address,address,address)
           handler: handleSetFeeCollector
         - event: SetForceCancelCloseCooldown(uint256,uint256)
           handler: handleSetForceCancelCloseCooldown
         - event: SetForceCancelCooldown(uint256,uint256)
           handler: handleSetForceCancelCooldown
-        - event: SetForceCloseCooldown(uint256,uint256)
-          handler: handleSetForceCloseCooldown
-        - event: SetForceCloseGapRatio(uint256,uint256)
+        - event: SetForceCloseCooldowns(uint256,uint256,uint256,uint256)
+          handler: handleSetForceCloseCooldowns
+        - event: SetForceCloseGapRatio(uint256,uint256,uint256)
           handler: handleSetForceCloseGapRatio
         - event: SetLiquidationTimeout(uint256,uint256)
           handler: handleSetLiquidationTimeout
         - event: SetLiquidatorShare(uint256,uint256)
           handler: handleSetLiquidatorShare
-        - event: SetMuonConfig(uint256,uint256,uint256)
+        - event: SetMuonConfig(uint256,uint256)
           handler: handleSetMuonConfig
         - event: SetMuonIds(uint256,address,uint256,uint8)
           handler: handleSetMuonIds
@@ -166,55 +166,51 @@ dataSources:
           handler: handleUnpausePartyAActions
         - event: UnpausePartyBActions()
           handler: handleUnpausePartyBActions
-        - event: DisputeForLiquidation(address,address)
+        - event: DisputeForLiquidation(address,address,bytes)
           handler: handleDisputeForLiquidation
         - event: FullyLiquidatedPartyB(address,address)
           handler: handleFullyLiquidatedPartyB
-        - event: LiquidatePartyA(address,address,uint256,int256,int256)
+        - event: LiquidatePartyA(address,address,uint256,int256,int256,bytes)
           handler: handleLiquidatePartyA
-        - event: LiquidatePartyA(address,address)
-          handler: handleLiquidatePartyAOld
         - event: LiquidatePartyB(address,address,address,uint256,int256)
           handler: handleLiquidatePartyB
-        - event: LiquidatePartyB(address,address,address)
-          handler: handleLiquidatePartyBOld
-        - event: LiquidatePendingPositionsPartyA(address,address)
+        - event: LiquidatePendingPositionsPartyA(address,address,uint256[],uint256[],bytes)
           handler: handleLiquidatePendingPositionsPartyA
-        - event: LiquidatePositionsPartyA(address,address,uint256[])
+        - event: LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)
           handler: handleLiquidatePositionsPartyA
-        - event: LiquidatePositionsPartyB(address,address,address,uint256[])
+        - event: LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])
           handler: handleLiquidatePositionsPartyB
         - event: LiquidationDisputed(address)
           handler: handleLiquidationDisputed
-        - event: SetSymbolsPrices(address,address,uint256[],uint256[])
+        - event: SetSymbolsPrices(address,address,uint256[],uint256[],bytes)
           handler: handleSetSymbolsPrices
-        - event: SettlePartyALiquidation(address,address[],int256[])
+        - event: SettlePartyALiquidation(address,address[],int256[],bytes)
           handler: handleSettlePartyALiquidation
-        - event: SettlePartyALiquidation(address,address[])
-          handler: handleOldSettlePartyALiquidation
-        - event: ExpireQuote(uint8,uint256)
-          handler: handleExpireQuote
-        - event: ForceCancelCloseRequest(uint256,uint8)
+        - event: ExpireQuoteOpen(uint8,uint256)
+          handler: handleExpireQuoteOpen
+        - event: ExpireQuoteClose(uint8,uint256,uint256)
+          handler: handleExpireQuoteClose
+        - event: ForceCancelCloseRequest(uint256,uint8,uint256)
           handler: handleForceCancelCloseRequest
         - event: ForceCancelQuote(uint256,uint8)
           handler: handleForceCancelQuote
-        - event: ForceClosePosition(uint256,address,address,uint256,uint256,uint8)
+        - event: ForceClosePosition(uint256,address,address,uint256,uint256,uint8,uint256)
           handler: handleForceClosePosition
-        - event: RequestToCancelCloseRequest(address,address,uint256,uint8)
+        - event: RequestToCancelCloseRequest(address,address,uint256,uint8,uint256)
           handler: handleRequestToCancelCloseRequest
         - event: RequestToCancelQuote(address,address,uint8,uint256)
           handler: handleRequestToCancelQuote
-        - event: RequestToClosePosition(address,address,uint256,uint256,uint256,uint8,uint256,uint8)
+        - event: RequestToClosePosition(address,address,uint256,uint256,uint256,uint8,uint256,uint8,uint256)
           handler: handleRequestToClosePosition
         - event: SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
           handler: handleSendQuote
-        - event: AllocateForPartyB(address,address,uint256)
+        - event: AllocateForPartyB(address,address,uint256,uint256)
           handler: handleAllocateForPartyB
-        - event: AllocatePartyA(address,uint256)
+        - event: AllocatePartyA(address,uint256,uint256)
           handler: handleAllocatePartyA
-        - event: DeallocateForPartyB(address,address,uint256)
+        - event: DeallocateForPartyB(address,address,uint256,uint256)
           handler: handleDeallocateForPartyB
-        - event: DeallocatePartyA(address,uint256)
+        - event: DeallocatePartyA(address,uint256,uint256)
           handler: handleDeallocatePartyA
         - event: Deposit(address,address,uint256)
           handler: handleDeposit
@@ -222,7 +218,7 @@ dataSources:
           handler: handleTransferAllocation
         - event: Withdraw(address,address,uint256)
           handler: handleWithdraw
-        - event: AcceptCancelCloseRequest(uint256,uint8)
+        - event: AcceptCancelCloseRequest(uint256,uint8,uint256)
           handler: handleAcceptCancelCloseRequest
         - event: AcceptCancelRequest(uint256,uint8)
           handler: handleAcceptCancelRequest
@@ -230,9 +226,9 @@ dataSources:
           handler: handleAllocatePartyB
         - event: ChargeFundingRate(address,address,uint256[],int256[])
           handler: handleChargeFundingRate
-        - event: EmergencyClosePosition(uint256,address,address,uint256,uint256,uint8)
+        - event: EmergencyClosePosition(uint256,address,address,uint256,uint256,uint8,uint256)
           handler: handleEmergencyClosePosition
-        - event: FillCloseRequest(uint256,address,address,uint256,uint256,uint8)
+        - event: FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)
           handler: handleFillCloseRequest
         - event: LockQuote(address,uint256)
           handler: handleLockQuote
@@ -240,4 +236,30 @@ dataSources:
           handler: handleOpenPosition
         - event: UnlockQuote(address,uint256,uint8)
           handler: handleUnlockQuote
+        - event: RegisterAffiliate(address)
+          handler: handleRegisterAffiliate
+        - event: DeregisterAffiliate(address)
+          handler: handleDeregisterAffiliate
+        - event: AddBridge(address)
+          handler: handleAddBridge
+        - event: RemoveBridge(address)
+          handler: handleRemoveBridge
+        - event: TransferToBridge(address,uint256,address,uint256)
+          handler: handleTransferToBridge
+        - event: WithdrawReceivedBridgeValue(uint256)
+          handler: handleWithdrawReceivedBridgeValue
+        - event: WithdrawReceivedBridgeValues(uint256[])
+          handler: handleWithdrawReceivedBridgeValues
+        - event: SuspendBridgeTransaction(uint256)
+          handler: handleSuspendBridgeTransaction
+        - event: RestoreBridgeTransaction(uint256,uint256)
+          handler: handleRestoreBridgeTransaction
+        - event: WithdrawReceivedBridgeValues(uint256[])
+          handler: handleWithdrawReceivedBridgeValues
+        - event: SetInvalidBridgedAmountsPool(address,address)
+          handler: handleSetInvalidBridgedAmountsPool
+        - event: InternalTransfer(address,address,uint256,uint256)
+          handler: handleInternalTransfer
+        - event: DeferredLiquidatePartyA(address,address,uint256,int256,int256,bytes,uint256,uint256,uint256)
+          handler: handleDeferredLiquidatePartyA
       file: ./src/symmio.ts

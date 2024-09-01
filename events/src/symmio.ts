@@ -17,7 +17,7 @@ import {
   SetFeeCollector as SetFeeCollectorEvent,
   SetForceCancelCloseCooldown as SetForceCancelCloseCooldownEvent,
   SetForceCancelCooldown as SetForceCancelCooldownEvent,
-  SetForceCloseCooldown as SetForceCloseCooldownEvent,
+  SetForceCloseCooldowns as SetForceCloseCooldownEvent,
   SetForceCloseGapRatio as SetForceCloseGapRatioEvent,
   SetLiquidationTimeout as SetLiquidationTimeoutEvent,
   SetLiquidatorShare as SetLiquidatorShareEvent,
@@ -40,17 +40,15 @@ import {
   DisputeForLiquidation as DisputeForLiquidationEvent,
   FullyLiquidatedPartyB as FullyLiquidatedPartyBEvent,
   LiquidatePartyA as LiquidatePartyAEvent,
-  LiquidatePartyA1 as LiquidatePartyAOldEvent,
   LiquidatePartyB as LiquidatePartyBEvent,
-  LiquidatePartyB1 as LiquidatePartyBOldEvent,
   LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyAEvent,
   LiquidatePositionsPartyA as LiquidatePositionsPartyAEvent,
   LiquidatePositionsPartyB as LiquidatePositionsPartyBEvent,
   LiquidationDisputed as LiquidationDisputedEvent,
   SetSymbolsPrices as SetSymbolsPricesEvent,
   SettlePartyALiquidation as SettlePartyALiquidationEvent,
-  SettlePartyALiquidation1 as newSettlePartyALiquidationEvent,
-  ExpireQuote as ExpireQuoteEvent,
+  ExpireQuoteOpen as ExpireQuoteOpenEvent,
+  ExpireQuoteClose as ExpireQuoteCloseEvent,
   ForceCancelCloseRequest as ForceCancelCloseRequestEvent,
   ForceCancelQuote as ForceCancelQuoteEvent,
   ForceClosePosition as ForceClosePositionEvent,
@@ -124,7 +122,6 @@ import {
   LiquidationDisputed,
   SetSymbolsPricesE,
   SettlePartyALiquidation,
-  ExpireQuote,
   ForceCancelCloseRequest,
   ForceCancelQuote,
   ForceClosePosition,
@@ -148,7 +145,9 @@ import {
   LockQuote,
   OpenPosition,
   UnlockQuote,
-  CounterId
+  CounterId,
+  ExpireQuoteOpen,
+  ExpireQuoteClose
 } from "../generated/schema"
 import { bigIntToArr, bytesToArr } from "./helper"
 import { BigInt } from "@graphprotocol/graph-ts"
@@ -533,6 +532,7 @@ export function handleSetFeeCollector(event: SetFeeCollectorEvent): void {
   entity.counterId = cId.eventId
   entity.oldFeeCollector = event.params.oldFeeCollector
   entity.newFeeCollector = event.params.newFeeCollector
+  event.params.affiliate
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -612,8 +612,10 @@ export function handleSetForceCloseCooldown(
   cId.save()
   entity.action = "SetForceCloseCooldown"
   entity.counterId = cId.eventId
-  entity.oldForceCloseCooldown = event.params.oldForceCloseCooldown
-  entity.newForceCloseCooldown = event.params.newForceCloseCooldown
+  event.params.newForceCloseFirstCooldown
+  event.params.newForceCloseSecondCooldown
+  event.params.oldForceCloseFirstCooldown
+  event.params.oldForceCloseSecondCooldown
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -641,6 +643,7 @@ export function handleSetForceCloseGapRatio(
   entity.counterId = cId.eventId
   entity.oldForceCloseGapRatio = event.params.oldForceCloseGapRatio
   entity.newForceCloseGapRatio = event.params.newForceCloseGapRatio
+  event.params.symbolId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -718,7 +721,6 @@ export function handleSetMuonConfig(event: SetMuonConfigEvent): void {
   entity.counterId = cId.eventId
   entity.upnlValidTime = event.params.upnlValidTime
   entity.priceValidTime = event.params.priceValidTime
-  entity.priceQuantityValidTime = event.params.priceQuantityValidTime
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1143,6 +1145,7 @@ export function handleDisputeForLiquidation(
   entity.counterId = cId.eventId
   entity.liquidator = event.params.liquidator
   entity.partyA = event.params.partyA
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1198,6 +1201,7 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
   entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
   entity.upnl = event.params.upnl
   entity.allocatedBalance = event.params.allocatedBalance
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1305,6 +1309,9 @@ export function handleLiquidatePendingPositionsPartyA(
   entity.counterId = cId.eventId
   entity.liquidator = event.params.liquidator
   entity.partyA = event.params.partyA
+  entity.liquidatedAmounts = event.params.liquidatedAmounts
+  entity.quoteIds = event.params.quoteIds
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1333,6 +1340,9 @@ export function handleLiquidatePositionsPartyA(
   entity.liquidator = event.params.liquidator
   entity.partyA = event.params.partyA
   entity.quoteIds = event.params.quoteIds
+  entity.closeIds = event.params.closeIds
+  entity.liquidatedAmounts = event.params.liquidatedAmounts
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1361,8 +1371,9 @@ export function handleLiquidatePositionsPartyB(
   entity.liquidator = event.params.liquidator
   entity.partyB = event.params.partyB
   entity.partyA = event.params.partyA
-
   entity.quoteIds = bigIntToArr(event.params.quoteIds)
+  entity.closeIds = event.params.closeIds
+  entity.liquidatedAmounts = event.params.liquidatedAmounts
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1416,6 +1427,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
   entity.partyA = event.params.partyA
   entity.symbolIds = bigIntToArr(event.params.symbolIds)
   entity.prices = bigIntToArr(event.params.prices)
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1443,7 +1455,8 @@ export function handleOldSettlePartyALiquidation(
   entity.counterId = cId.eventId
   entity.partyA = event.params.partyA
   entity.partyBs = bytesToArr(event.params.partyBs)
-
+  entity.amounts = bigIntToArr(event.params.amounts)
+  entity.liquidationId = event.params.liquidationId
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -1481,8 +1494,8 @@ export function handleSettlePartyALiquidation(
   entity.save()
 }
 
-export function handleExpireQuote(event: ExpireQuoteEvent): void {
-  let entity = new ExpireQuote(
+export function handleExpireQuoteOpen(event: ExpireQuoteOpenEvent): void {
+  let entity = new ExpireQuoteOpen(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
   let cId = CounterId.load("main")
@@ -1496,6 +1509,32 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
   entity.counterId = cId.eventId
   entity.quoteStatus = event.params.quoteStatus
   entity.quoteId = event.params.quoteId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleExpireQuoteClose(event: ExpireQuoteCloseEvent): void {
+  let entity = new ExpireQuoteClose(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "ExpireQuote"
+  entity.counterId = cId.eventId
+  entity.quoteStatus = event.params.quoteStatus
+  entity.quoteId = event.params.quoteId
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1523,6 +1562,7 @@ export function handleForceCancelCloseRequest(
   entity.counterId = cId.eventId
   entity.quoteId = event.params.quoteId
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1577,7 +1617,7 @@ export function handleForceClosePosition(event: ForceClosePositionEvent): void {
   entity.filledAmount = event.params.filledAmount
   entity.closedPrice = event.params.closedPrice
   entity.quoteStatus = event.params.quoteStatus
-
+  entity.closeId = event.params.closeId
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
@@ -1606,6 +1646,7 @@ export function handleRequestToCancelCloseRequest(
   entity.partyB = event.params.partyB
   entity.quoteId = event.params.quoteId
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1668,6 +1709,7 @@ export function handleRequestToClosePosition(
   entity.orderType = event.params.orderType
   entity.deadline = event.params.deadline
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1736,6 +1778,7 @@ export function handleAllocateForPartyB(event: AllocateForPartyBEvent): void {
   entity.partyB = event.params.partyB
   entity.partyA = event.params.partyA
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1761,6 +1804,7 @@ export function handleAllocatePartyA(event: AllocatePartyAEvent): void {
   entity.counterId = cId.eventId
   entity.user = event.params.user
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1789,6 +1833,7 @@ export function handleDeallocateForPartyB(
   entity.partyB = event.params.partyB
   entity.partyA = event.params.partyA
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1814,6 +1859,7 @@ export function handleDeallocatePartyA(event: DeallocatePartyAEvent): void {
   entity.counterId = cId.eventId
   entity.user = event.params.user
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1919,6 +1965,7 @@ export function handleAcceptCancelCloseRequest(
   entity.counterId = cId.eventId
   entity.quoteId = event.params.quoteId
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -2030,6 +2077,7 @@ export function handleEmergencyClosePosition(
   entity.filledAmount = event.params.filledAmount
   entity.closedPrice = event.params.closedPrice
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -2059,6 +2107,7 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
   entity.filledAmount = event.params.filledAmount
   entity.closedPrice = event.params.closedPrice
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
