@@ -1,34 +1,9 @@
-type User @entity {
-    id: ID!
-    address: Bytes!
-    timestamp: BigInt!
-    transaction: Bytes!
-}
-
 type UserActivity @entity {
     id: ID!
     user: Bytes!
     accountSource: Bytes
     timestamp: BigInt!
     updateTimestamp: BigInt
-}
-
-type Account @entity {
-    id: ID!
-    user: Bytes!
-    timestamp: BigInt!
-    blockNumber: BigInt!
-    name: String
-    quotesCount: BigInt!
-    positionsCount: BigInt!
-    lastActivityTimestamp: BigInt!
-    deposit: BigInt!
-    withdraw: BigInt!
-    allocated: BigInt!
-    deallocated: BigInt!
-    transaction: Bytes!
-    updateTimestamp: BigInt!
-    accountSource: Bytes
 }
 
 type BalanceChange @entity {
@@ -54,39 +29,6 @@ type TradeHistory @entity {
     quote: BigInt!
 }
 
-type Quote @entity {
-    id: ID!
-    account: Bytes!
-    partyBsWhiteList: [Bytes!]
-    symbolId: BigInt!
-    symbolName: String!
-    positionType: Int!
-    orderType: Int!
-    openOrderType: Int!
-    price: BigInt!
-    marketPrice: BigInt!
-    openedPrice: BigInt
-    openPrice: BigInt
-    deadline: BigInt!
-    quantity: BigInt!
-    cva: BigInt!
-    partyAmm: BigInt!
-    partyBmm: BigInt!
-    lf: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    closedAmount: BigInt!
-    avgClosedPrice: BigInt!
-    partyB: Bytes
-    collateral: Bytes!
-    liquidatedSide: Int
-    fundingPaid: BigInt!
-    fundingReceived: BigInt!
-    timestamp: BigInt!
-    updateTimestamp: BigInt!
-    transaction: Bytes!
-}
-
 type DailyHistory @entity {
     id: ID!
     quotesCount: BigInt!
@@ -106,6 +48,22 @@ type DailyHistory @entity {
     fundingReceived: BigInt!
     accountSource: Bytes
     updateTimestamp: BigInt!
+    timestamp: BigInt!
+}
+
+type WeeklyHistory @entity {
+    id: ID!
+    tradeVolume: BigInt!
+    activeUsers: BigInt!
+    accountSource: Bytes
+    timestamp: BigInt!
+}
+
+type MonthlyHistory @entity {
+    id: ID!
+    tradeVolume: BigInt!
+    activeUsers: BigInt!
+    accountSource: Bytes
     timestamp: BigInt!
 }
 
@@ -129,16 +87,50 @@ type TotalHistory @entity {
     timestamp: BigInt!
 }
 
-type Symbol @entity {
-    id: ID!
-    name: String!
-    tradingFee: BigInt!
-    timestamp: BigInt!
-    blockNumber: BigInt!
-    updateTimestamp: BigInt!
+
+type DailyUserHistory @entity {
+	id: ID!
+	account: Bytes!
+	quotesCount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	accAllocate: BigInt!
+	accDeallocate: BigInt!
+	platformFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	accountSource: Bytes
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
 }
 
-type SymbolTradeVolume @entity {
+type TotalUserHistory @entity {
+	id: ID!
+	account: Bytes!
+	quotesCount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	platformFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	accountSource: Bytes
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
+type SymbolTradeHistory @entity {
     id: ID!
     symbolId: BigInt!
     timestamp: BigInt!
@@ -147,56 +139,35 @@ type SymbolTradeVolume @entity {
     accountSource: Bytes
 }
 
+type DailySymbolTradesHistory @entity {
+	id: ID! # account_source + account + symbolId
+	updateTimestamp: BigInt!
+	account: Bytes!
+	accountSource: Bytes
+	symbolId: BigInt!
+	totalTrades: BigInt!
+	fundingReceived: BigInt!
+	fundingPaid: BigInt!
+	platformFeePaid: BigInt!
+}
+
+type TotalSymbolTradesHistory @entity {
+	id: ID! # account_source + account + symbolId
+	updateTimestamp: BigInt!
+	account: Bytes!
+	accountSource: Bytes
+	symbolId: BigInt!
+	totalTrades: BigInt!
+	fundingReceived: BigInt!
+	fundingPaid: BigInt!
+	platformFeePaid: BigInt!
+}
+
 type OpenInterest @entity {
     id: ID!
     amount: BigInt!
     accumulatedAmount: BigInt!
     timestamp: BigInt!
-}
-
-type PriceCheck @entity{
-    id: ID!
-    givenPrice: BigInt!
-    symbol: String!
-    additionalInfo: String!
-    event: String!
-    timestamp: BigInt!
-    transaction: Bytes!
-}
-
-type PartyALiquidation @entity{
-    id: ID!
-    partyA: Bytes!
-    liquidator: Bytes!
-    liquidationType: Int!
-    timestamp: BigInt!
-    transaction: Bytes!
-    liquidateAllocatedBalance:BigInt
-    liquidateCva:BigInt
-    liquidatePendingCva:BigInt
-    liquidateLf:BigInt
-    liquidatePendingLf:BigInt
-}
-
-type PartyBLiquidation @entity{
-    id: ID!
-    partyA: Bytes!
-    partyB: Bytes!
-    liquidator: Bytes!
-    timestamp: BigInt!
-    transaction: Bytes!
-    liquidateAllocatedBalance:BigInt
-    liquidateCva:BigInt
-    liquidatePendingCva:BigInt
-    liquidateLf:BigInt
-    liquidatePendingLf:BigInt
-}
-
-type PartyALiquidationDisputed @entity{
-    id: ID!
-    partyA: Bytes!
-    timestamp: BigInt!
-    transaction: Bytes!
 }
 
 type Configuration @entity{
@@ -210,6 +181,7 @@ type GrantedRole @entity{
     id: ID!
     role: String!
     user: Bytes!
+    contract: Bytes
     grantTransaction: Bytes
     revokeTransaction: Bytes
     updateTimestamp: BigInt!

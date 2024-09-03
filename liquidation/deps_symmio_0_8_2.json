@@ -1,0 +1,6 @@
+{
+	"PartyA": ["AllocatePartyA", "DeallocatePartyA", "LiquidatePartyA"],
+	"PartyB": ["AllocateForPartyB", "DeallocateForPartyB", "LiquidatePartyB"],
+	"Liquidator": ["AllocatePartyA", "DeallocatePartyA", "LiquidatePartyA", "SettlePartyALiquidation", "SetSymbolsPrices"],
+	"PartyALiquidator": ["LiquidatePartyA", "SettlePartyALiquidation"]
+}

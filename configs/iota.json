@@ -1,0 +1,17 @@
+{
+	"network": "iota",
+	"contracts": [
+		{
+			"address": "0x464873026877c9D947E2778a1B4cB4A3CbC688F0",
+			"abi": "symmio",
+			"version": "0_8_2",
+			"startBlock": "415946"
+		}
+	],
+	"deploy_urls": {
+		"analytics": "analytics_iota_8_3",
+		"main": "main_iota_8_3",
+		"events": "events_iota_8_3",
+		"userprofile": "userprofile_iota_8_3"
+	}
+}

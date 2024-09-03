@@ -1,0 +1,15 @@
+import {
+	AllocateForPartyBHandler as CommonAllocateForPartyBHandler
+} from "../../../common/handlers/symmio/AllocateForPartyBWithAccountHandler"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {Version} from "../../../common/BaseHandler";
+
+
+export class AllocateForPartyBHandler<T> extends CommonAllocateForPartyBHandler<T> {
+	handle(_event: ethereum.Event, version: Version): void {
+		super.handle(_event, version)
+		super.handleQuote(_event, version)
+		super.handleSymbol(_event, version)
+		super.handleAccount(_event, version)
+	}
+}
