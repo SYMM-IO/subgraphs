@@ -17,7 +17,7 @@ import {
   SetFeeCollector as SetFeeCollectorEvent,
   SetForceCancelCloseCooldown as SetForceCancelCloseCooldownEvent,
   SetForceCancelCooldown as SetForceCancelCooldownEvent,
-  SetForceCloseCooldown as SetForceCloseCooldownEvent,
+  SetForceCloseCooldowns as SetForceCloseCooldownEvent,
   SetForceCloseGapRatio as SetForceCloseGapRatioEvent,
   SetLiquidationTimeout as SetLiquidationTimeoutEvent,
   SetLiquidatorShare as SetLiquidatorShareEvent,
@@ -40,17 +40,15 @@ import {
   DisputeForLiquidation as DisputeForLiquidationEvent,
   FullyLiquidatedPartyB as FullyLiquidatedPartyBEvent,
   LiquidatePartyA as LiquidatePartyAEvent,
-  LiquidatePartyA1 as LiquidatePartyAOldEvent,
   LiquidatePartyB as LiquidatePartyBEvent,
-  LiquidatePartyB1 as LiquidatePartyBOldEvent,
   LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyAEvent,
   LiquidatePositionsPartyA as LiquidatePositionsPartyAEvent,
   LiquidatePositionsPartyB as LiquidatePositionsPartyBEvent,
   LiquidationDisputed as LiquidationDisputedEvent,
   SetSymbolsPrices as SetSymbolsPricesEvent,
   SettlePartyALiquidation as SettlePartyALiquidationEvent,
-  SettlePartyALiquidation1 as newSettlePartyALiquidationEvent,
-  ExpireQuote as ExpireQuoteEvent,
+  ExpireQuoteOpen as ExpireQuoteOpenEvent,
+  ExpireQuoteClose as ExpireQuoteCloseEvent,
   ForceCancelCloseRequest as ForceCancelCloseRequestEvent,
   ForceCancelQuote as ForceCancelQuoteEvent,
   ForceClosePosition as ForceClosePositionEvent,
@@ -73,7 +71,19 @@ import {
   FillCloseRequest as FillCloseRequestEvent,
   LockQuote as LockQuoteEvent,
   OpenPosition as OpenPositionEvent,
-  UnlockQuote as UnlockQuoteEvent
+  UnlockQuote as UnlockQuoteEvent,
+  RegisterAffiliate as RegisterAffiliateEvent,
+  DeregisterAffiliate as DeregisterAffiliateEvent,
+  AddBridge as AddBridgeEvent,
+  RemoveBridge as RemoveBridgeEvent,
+  TransferToBridge as TransferToBridgeEvent,
+  WithdrawReceivedBridgeValue as WithdrawReceivedBridgeValueEvent,
+  WithdrawReceivedBridgeValues as WithdrawReceivedBridgeValuesEvent,
+  SuspendBridgeTransaction as SuspendBridgeTransactionEvent,
+  RestoreBridgeTransaction as RestoreBridgeTransactionEvent,
+  SetInvalidBridgedAmountsPool as SetInvalidBridgedAmountsPoolEvent,
+  InternalTransfer as InternalTransferEvent,
+  DeferredLiquidatePartyA as DeferredLiquidatePartyAEvent
 } from "../generated/symmio/symmio"
 import {
   ActiveEmergencyMode,
@@ -124,7 +134,6 @@ import {
   LiquidationDisputed,
   SetSymbolsPricesE,
   SettlePartyALiquidation,
-  ExpireQuote,
   ForceCancelCloseRequest,
   ForceCancelQuote,
   ForceClosePosition,
@@ -148,7 +157,21 @@ import {
   LockQuote,
   OpenPosition,
   UnlockQuote,
-  CounterId
+  CounterId,
+  ExpireQuoteOpen,
+  ExpireQuoteClose,
+  DeregisterAffiliate,
+  AddBridge,
+  RemoveBridge,
+  TransferToBridge,
+  WithdrawReceivedBridgeValue,
+  WithdrawReceivedBridgeValues,
+  SuspendBridgeTransaction,
+  RestoreBridgeTransaction,
+  SetInvalidBridgedAmountsPool,
+  InternalTransfer,
+  DeferredLiquidatePartyA,
+  RegisterAffiliate
 } from "../generated/schema"
 import { bigIntToArr, bytesToArr } from "./helper"
 import { BigInt } from "@graphprotocol/graph-ts"
@@ -173,7 +196,6 @@ export function handleActiveEmergencyMode(
   entity.transactionHash = event.transaction.hash
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -191,7 +213,7 @@ export function handleAddSymbol(event: AddSymbolEvent): void {
   entity.action = "AddSymbol"
 
   entity.counterId = cId.eventId
-  entity.symbolId = event.params.id
+  entity.symbolId = event.params.symbolId
   entity.name = event.params.name
   entity.minAcceptableQuoteValue = event.params.minAcceptableQuoteValue
   entity.minAcceptablePortionLF = event.params.minAcceptablePortionLF
@@ -206,7 +228,6 @@ export function handleAddSymbol(event: AddSymbolEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -231,7 +252,34 @@ export function handleDeactiveEmergencyMode(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
+  entity.save()
+}
+
+export function handleSettlePartyALiquidation(
+  event: SettlePartyALiquidationEvent
+): void {
+  let entity = new SettlePartyALiquidation(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "SettlePartyALiquidationEvent"
+  entity.counterId = cId.eventId
+  entity.amounts = event.params.amounts
+  entity.liquidationId = event.params.liquidationId
+  entity.partyA = event.params.partyA
+  entity.partyBs = bytesToArr(event.params.partyBs)
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
   entity.save()
 }
 
@@ -257,7 +305,6 @@ export function handleDeregisterPartyB(event: DeregisterPartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -280,7 +327,6 @@ export function handlePauseAccounting(event: PauseAccountingEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -303,7 +349,6 @@ export function handlePauseGlobal(event: PauseGlobalEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -326,7 +371,6 @@ export function handlePauseLiquidation(event: PauseLiquidationEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -349,7 +393,6 @@ export function handlePausePartyAActions(event: PausePartyAActionsEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -372,7 +415,6 @@ export function handlePausePartyBActions(event: PausePartyBActionsEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -397,7 +439,6 @@ export function handleRegisterPartyB(event: RegisterPartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -423,7 +464,6 @@ export function handleRoleGranted(event: RoleGrantedEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -449,7 +489,6 @@ export function handleRoleRevoked(event: RoleRevokedEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -476,7 +515,6 @@ export function handleSetBalanceLimitPerUser(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -501,7 +539,6 @@ export function handleSetCollateral(event: SetCollateralEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -529,7 +566,6 @@ export function handleSetDeallocateCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -548,6 +584,7 @@ export function handleSetFeeCollector(event: SetFeeCollectorEvent): void {
   entity.counterId = cId.eventId
   entity.oldFeeCollector = event.params.oldFeeCollector
   entity.newFeeCollector = event.params.newFeeCollector
+  entity.affiliate = event.params.affiliate
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -555,7 +592,6 @@ export function handleSetFeeCollector(event: SetFeeCollectorEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -583,7 +619,6 @@ export function handleSetForceCancelCloseCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -611,11 +646,10 @@ export function handleSetForceCancelCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
-export function handleSetForceCloseCooldown(
+export function handleSetForceCloseCooldowns(
   event: SetForceCloseCooldownEvent
 ): void {
   let entity = new SetForceCloseCooldown(
@@ -630,8 +664,10 @@ export function handleSetForceCloseCooldown(
   cId.save()
   entity.action = "SetForceCloseCooldown"
   entity.counterId = cId.eventId
-  entity.oldForceCloseCooldown = event.params.oldForceCloseCooldown
-  entity.newForceCloseCooldown = event.params.newForceCloseCooldown
+  entity.newForceCloseFirstCooldown = event.params.newForceCloseFirstCooldown
+  entity.newForceCloseSecondCooldown = event.params.newForceCloseSecondCooldown
+  entity.oldForceCloseFirstCooldown = event.params.oldForceCloseFirstCooldown
+  entity.oldForceCloseSecondCooldown = event.params.oldForceCloseSecondCooldown
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -639,7 +675,6 @@ export function handleSetForceCloseCooldown(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -660,6 +695,7 @@ export function handleSetForceCloseGapRatio(
   entity.counterId = cId.eventId
   entity.oldForceCloseGapRatio = event.params.oldForceCloseGapRatio
   entity.newForceCloseGapRatio = event.params.newForceCloseGapRatio
+  entity.symbolId = event.params.symbolId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -667,7 +703,6 @@ export function handleSetForceCloseGapRatio(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -695,7 +730,6 @@ export function handleSetLiquidationTimeout(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -721,7 +755,6 @@ export function handleSetLiquidatorShare(event: SetLiquidatorShareEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -740,7 +773,6 @@ export function handleSetMuonConfig(event: SetMuonConfigEvent): void {
   entity.counterId = cId.eventId
   entity.upnlValidTime = event.params.upnlValidTime
   entity.priceValidTime = event.params.priceValidTime
-  entity.priceQuantityValidTime = event.params.priceQuantityValidTime
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -748,7 +780,6 @@ export function handleSetMuonConfig(event: SetMuonConfigEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -776,7 +807,6 @@ export function handleSetMuonIds(event: SetMuonIdsEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -804,7 +834,6 @@ export function handleSetPartyBEmergencyStatus(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -832,7 +861,6 @@ export function handleSetPendingQuotesValidLength(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -860,7 +888,6 @@ export function handleSetSuspendedAddress(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -891,7 +918,6 @@ export function handleSetSymbolAcceptableValues(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -910,7 +936,7 @@ export function handleSetSymbolFundingState(
   cId.save()
   entity.action = "SetSymbolFundingState"
   entity.counterId = cId.eventId
-  entity.symbolId = event.params.id
+  entity.symbolId = event.params.symbolId
   entity.fundingRateEpochDuration = event.params.fundingRateEpochDuration
   entity.fundingRateWindowTime = event.params.fundingRateWindowTime
 
@@ -920,7 +946,6 @@ export function handleSetSymbolFundingState(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -949,7 +974,6 @@ export function handleSetSymbolMaxLeverage(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -978,7 +1002,6 @@ export function handleSetSymbolMaxSlippage(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1007,7 +1030,6 @@ export function handleSetSymbolTradingFee(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1026,7 +1048,7 @@ export function handleSetSymbolValidationState(
   cId.save()
   entity.action = "SetSymbolValidationState"
   entity.counterId = cId.eventId
-  entity.symbolId = event.params.id
+  entity.symbolId = event.params.symbolId
   entity.oldState = event.params.oldState
   entity.isValid = event.params.isValid
 
@@ -1036,7 +1058,6 @@ export function handleSetSymbolValidationState(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1060,7 +1081,6 @@ export function handleUnpauseAccounting(event: UnpauseAccountingEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1084,7 +1104,6 @@ export function handleUnpauseGlobal(event: UnpauseGlobalEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1108,7 +1127,6 @@ export function handleUnpauseLiquidation(event: UnpauseLiquidationEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1134,7 +1152,6 @@ export function handleUnpausePartyAActions(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1160,7 +1177,6 @@ export function handleUnpausePartyBActions(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1181,6 +1197,7 @@ export function handleDisputeForLiquidation(
   entity.counterId = cId.eventId
   entity.liquidator = event.params.liquidator
   entity.partyA = event.params.partyA
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1188,7 +1205,6 @@ export function handleDisputeForLiquidation(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1216,7 +1232,6 @@ export function handleFullyLiquidatedPartyB(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1238,6 +1253,7 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
   entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
   entity.upnl = event.params.upnl
   entity.allocatedBalance = event.params.allocatedBalance
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1245,36 +1261,8 @@ export function handleLiquidatePartyA(event: LiquidatePartyAEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
-
-export function handleLiquidatePartyAOld(event: LiquidatePartyAOldEvent): void {
-  let entity = new LiquidatePartyA(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  let cId = CounterId.load("main")
-  if (!cId) {
-    cId = new CounterId("main")
-    cId.eventId = 0
-  }
-  cId.eventId += 1;
-  cId.save()
-  entity.action = "LiquidatePartyA"
-  entity.counterId = cId.eventId
-  entity.liquidator = event.params.liquidator
-  entity.partyA = event.params.partyA
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.logIndex = event.logIndex
-  entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
-  entity.save()
-}
-
 
 export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
   let entity = new LiquidatePartyB(
@@ -1301,34 +1289,6 @@ export function handleLiquidatePartyB(event: LiquidatePartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
-  entity.save()
-}
-
-export function handleLiquidatePartyBOld(event: LiquidatePartyBOldEvent): void {
-  let entity = new LiquidatePartyB(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  let cId = CounterId.load("main")
-  if (!cId) {
-    cId = new CounterId("main")
-    cId.eventId = 0
-  }
-  cId.eventId += 1;
-  cId.save()
-  entity.action = "LiquidatePartyB"
-  entity.counterId = cId.eventId
-  entity.liquidator = event.params.liquidator
-  entity.partyB = event.params.partyB
-  entity.partyA = event.params.partyA
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.logIndex = event.logIndex
-  entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1349,6 +1309,9 @@ export function handleLiquidatePendingPositionsPartyA(
   entity.counterId = cId.eventId
   entity.liquidator = event.params.liquidator
   entity.partyA = event.params.partyA
+  entity.liquidatedAmounts = event.params.liquidatedAmounts
+  entity.quoteIds = event.params.quoteIds
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1356,7 +1319,6 @@ export function handleLiquidatePendingPositionsPartyA(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1378,6 +1340,9 @@ export function handleLiquidatePositionsPartyA(
   entity.liquidator = event.params.liquidator
   entity.partyA = event.params.partyA
   entity.quoteIds = event.params.quoteIds
+  entity.closeIds = event.params.closeIds
+  entity.liquidatedAmounts = event.params.liquidatedAmounts
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1385,7 +1350,6 @@ export function handleLiquidatePositionsPartyA(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1407,8 +1371,9 @@ export function handleLiquidatePositionsPartyB(
   entity.liquidator = event.params.liquidator
   entity.partyB = event.params.partyB
   entity.partyA = event.params.partyA
-
   entity.quoteIds = bigIntToArr(event.params.quoteIds)
+  entity.closeIds = event.params.closeIds
+  entity.liquidatedAmounts = event.params.liquidatedAmounts
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1416,7 +1381,6 @@ export function handleLiquidatePositionsPartyB(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1443,7 +1407,6 @@ export function handleLiquidationDisputed(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1464,6 +1427,7 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
   entity.partyA = event.params.partyA
   entity.symbolIds = bigIntToArr(event.params.symbolIds)
   entity.prices = bigIntToArr(event.params.prices)
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1471,7 +1435,6 @@ export function handleSetSymbolsPrices(event: SetSymbolsPricesEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1492,35 +1455,8 @@ export function handleOldSettlePartyALiquidation(
   entity.counterId = cId.eventId
   entity.partyA = event.params.partyA
   entity.partyBs = bytesToArr(event.params.partyBs)
-
-  entity.blockNumber = event.block.number
-  entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
-
-  entity.logIndex = event.logIndex
-  entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
-  entity.save()
-}
-
-export function handleSettlePartyALiquidation(
-  event: newSettlePartyALiquidationEvent
-): void {
-  let entity = new SettlePartyALiquidation(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
-  )
-  let cId = CounterId.load("main")
-  if (!cId) {
-    cId = new CounterId("main")
-    cId.eventId = 0
-  }
-  cId.eventId += 1;
-  cId.save()
-  entity.action = "SettlePartyALiquidation"
-  entity.counterId = cId.eventId
-  entity.partyA = event.params.partyA
-  entity.partyBs = bytesToArr(event.params.partyBs)
   entity.amounts = bigIntToArr(event.params.amounts)
+  entity.liquidationId = event.params.liquidationId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1528,12 +1464,11 @@ export function handleSettlePartyALiquidation(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
-export function handleExpireQuote(event: ExpireQuoteEvent): void {
-  let entity = new ExpireQuote(
+export function handleExpireQuoteOpen(event: ExpireQuoteOpenEvent): void {
+  let entity = new ExpireQuoteOpen(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
   let cId = CounterId.load("main")
@@ -1554,7 +1489,32 @@ export function handleExpireQuote(event: ExpireQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
+  entity.save()
+}
+
+export function handleExpireQuoteClose(event: ExpireQuoteCloseEvent): void {
+  let entity = new ExpireQuoteClose(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "ExpireQuote"
+  entity.counterId = cId.eventId
+  entity.quoteStatus = event.params.quoteStatus
+  entity.quoteId = event.params.quoteId
+  entity.closeId = event.params.closeId
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
   entity.save()
 }
 
@@ -1575,6 +1535,7 @@ export function handleForceCancelCloseRequest(
   entity.counterId = cId.eventId
   entity.quoteId = event.params.quoteId
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1582,7 +1543,6 @@ export function handleForceCancelCloseRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1608,7 +1568,6 @@ export function handleForceCancelQuote(event: ForceCancelQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1631,14 +1590,13 @@ export function handleForceClosePosition(event: ForceClosePositionEvent): void {
   entity.filledAmount = event.params.filledAmount
   entity.closedPrice = event.params.closedPrice
   entity.quoteStatus = event.params.quoteStatus
-
+  entity.closeId = event.params.closeId
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1661,6 +1619,7 @@ export function handleRequestToCancelCloseRequest(
   entity.partyB = event.params.partyB
   entity.quoteId = event.params.quoteId
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1668,7 +1627,6 @@ export function handleRequestToCancelCloseRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1698,7 +1656,6 @@ export function handleRequestToCancelQuote(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1725,6 +1682,7 @@ export function handleRequestToClosePosition(
   entity.orderType = event.params.orderType
   entity.deadline = event.params.deadline
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1732,7 +1690,6 @@ export function handleRequestToClosePosition(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1770,7 +1727,6 @@ export function handleSendQuote(event: SendQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
 
   if (event.block.number.ge(BigInt.fromI32(34693893))) {
     entity.tradingFee = event.params.tradingFee
@@ -1795,6 +1751,7 @@ export function handleAllocateForPartyB(event: AllocateForPartyBEvent): void {
   entity.partyB = event.params.partyB
   entity.partyA = event.params.partyA
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1802,7 +1759,6 @@ export function handleAllocateForPartyB(event: AllocateForPartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1821,6 +1777,7 @@ export function handleAllocatePartyA(event: AllocatePartyAEvent): void {
   entity.counterId = cId.eventId
   entity.user = event.params.user
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1828,7 +1785,6 @@ export function handleAllocatePartyA(event: AllocatePartyAEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1850,6 +1806,7 @@ export function handleDeallocateForPartyB(
   entity.partyB = event.params.partyB
   entity.partyA = event.params.partyA
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1857,7 +1814,6 @@ export function handleDeallocateForPartyB(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1876,6 +1832,7 @@ export function handleDeallocatePartyA(event: DeallocatePartyAEvent): void {
   entity.counterId = cId.eventId
   entity.user = event.params.user
   entity.amount = event.params.amount
+  entity.newAllocatedBalance = event.params.newAllocatedBalance
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1883,7 +1840,6 @@ export function handleDeallocatePartyA(event: DeallocatePartyAEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1910,7 +1866,6 @@ export function handleDeposit(event: DepositEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1937,7 +1892,6 @@ export function handleTransferAllocation(event: TransferAllocationEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1964,7 +1918,6 @@ export function handleWithdraw(event: WithdrawEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -1985,6 +1938,7 @@ export function handleAcceptCancelCloseRequest(
   entity.counterId = cId.eventId
   entity.quoteId = event.params.quoteId
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -1992,7 +1946,6 @@ export function handleAcceptCancelCloseRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2020,7 +1973,6 @@ export function handleAcceptCancelRequest(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2047,7 +1999,6 @@ export function handleAllocatePartyB(event: AllocatePartyBEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2075,7 +2026,6 @@ export function handleChargeFundingRate(event: ChargeFundingRateEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2100,6 +2050,7 @@ export function handleEmergencyClosePosition(
   entity.filledAmount = event.params.filledAmount
   entity.closedPrice = event.params.closedPrice
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -2107,7 +2058,6 @@ export function handleEmergencyClosePosition(
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2130,6 +2080,7 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
   entity.filledAmount = event.params.filledAmount
   entity.closedPrice = event.params.closedPrice
   entity.quoteStatus = event.params.quoteStatus
+  entity.closeId = event.params.closeId
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
@@ -2137,7 +2088,6 @@ export function handleFillCloseRequest(event: FillCloseRequestEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2163,7 +2113,6 @@ export function handleLockQuote(event: LockQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2192,7 +2141,6 @@ export function handleOpenPosition(event: OpenPositionEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
   entity.save()
 }
 
@@ -2219,6 +2167,301 @@ export function handleUnlockQuote(event: UnlockQuoteEvent): void {
 
   entity.logIndex = event.logIndex
   entity.blockHash = event.block.hash
-  entity.transactionFrom = event.transaction.from
+  entity.save()
+}
+
+
+
+export function handleRegisterAffiliate(event: RegisterAffiliateEvent): void {
+  let entity = new RegisterAffiliate(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "RegisterAffiliate"
+  entity.counterId = cId.eventId
+  entity.affilate = event.params.affilate
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleDeregisterAffiliate(event: DeregisterAffiliateEvent): void {
+  let entity = new DeregisterAffiliate(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "DeregisterAffiliate"
+  entity.counterId = cId.eventId
+  entity.affilate = event.params.affilate
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleAddBridge(event: AddBridgeEvent): void {
+  let entity = new AddBridge(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "AddBridge"
+  entity.counterId = cId.eventId
+  entity.bridge = event.params.bridge
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleRemoveBridge(event: RemoveBridgeEvent): void {
+  let entity = new RemoveBridge(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "RemoveBridge"
+  entity.counterId = cId.eventId
+  entity.bridge = event.params.bridge
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleTransferToBridge(event: TransferToBridgeEvent): void {
+  let entity = new TransferToBridge(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "TransferToBridge"
+  entity.counterId = cId.eventId
+  entity.amount = event.params.amount
+  entity.bridgeAddress = event.params.bridgeAddress
+  entity.transactionId = event.params.transactionId
+  entity.user = event.params.user
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleWithdrawReceivedBridgeValue(event: WithdrawReceivedBridgeValueEvent): void {
+  let entity = new WithdrawReceivedBridgeValue(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "WithdrawReceivedBridgeValue"
+  entity.counterId = cId.eventId
+  entity.transactionId = event.params.transactionId
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleWithdrawReceivedBridgeValues(event: WithdrawReceivedBridgeValuesEvent): void {
+  let entity = new WithdrawReceivedBridgeValues(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "WithdrawReceivedBridgeValues"
+  entity.counterId = cId.eventId
+  entity.transactionIds = event.params.transactionIds
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleSuspendBridgeTransaction(event: SuspendBridgeTransactionEvent): void {
+  let entity = new SuspendBridgeTransaction(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "SuspendBridgeTransaction"
+  entity.counterId = cId.eventId
+  entity.transactionId = event.params.transactionId
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleRestoreBridgeTransaction(event: RestoreBridgeTransactionEvent): void {
+  let entity = new RestoreBridgeTransaction(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "RestoreBridgeTransaction"
+  entity.counterId = cId.eventId
+  entity.transactionId = event.params.transactionId
+  entity.validAmount = event.params.validAmount
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleSetInvalidBridgedAmountsPool(event: SetInvalidBridgedAmountsPoolEvent): void {
+  let entity = new SetInvalidBridgedAmountsPool(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "SetInvalidBridgedAmountsPool"
+  entity.counterId = cId.eventId
+  entity.newInvalidBridgedAmountsPool = event.params.newInvalidBridgedAmountsPool
+  entity.oldInvalidBridgedAmountsPool = event.params.oldInvalidBridgedAmountsPool
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleInternalTransfer(event: InternalTransferEvent): void {
+  let entity = new InternalTransfer(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "InternalTransfer"
+  entity.counterId = cId.eventId
+  entity.amount = event.params.amount
+  entity.sender = event.params.sender
+  entity.user = event.params.user
+  entity.userNewAllocatedBalance = event.params.userNewAllocatedBalance
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
+  entity.save()
+}
+
+export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyAEvent): void {
+  let entity = new DeferredLiquidatePartyA(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  let cId = CounterId.load("main")
+  if (!cId) {
+    cId = new CounterId("main")
+    cId.eventId = 0
+  }
+  cId.eventId += 1;
+  cId.save()
+  entity.action = "DeferredLiquidatePartyA"
+  entity.counterId = cId.eventId
+  entity.allocatedBalance = event.params.allocatedBalance
+  entity.liquidationAllocatedBalance = event.params.liquidationAllocatedBalance
+  entity.liquidationBlockNumber = event.params.liquidationBlockNumber
+  entity.liquidationId = event.params.liquidationId
+  entity.liquidationTimestamp = event.params.liquidationTimestamp
+  entity.liquidator = event.params.liquidator
+  entity.partyA = event.params.partyA
+  entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
+  entity.upnl = event.params.upnl
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.logIndex = event.logIndex
+  entity.blockHash = event.block.hash
   entity.save()
 }
