@@ -2,6 +2,7 @@ import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
 import {Account, DebugEntity, Quote, TradeHistory} from "../../../generated/schema";
 import {BigInt, log} from "@graphprotocol/graph-ts";
 import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import {USER_PROFILE} from "../../config";
 
 export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	// @ts-ignore
@@ -14,13 +15,15 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 		db.save()
 		return
 	}
-	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
-	history.volume = history.volume.plus(additionalVolume)
-	history.updateTimestamp = event.block.timestamp
-	history.quoteStatus = quote.quoteStatus
-	history.quote = event.params.quoteId
-	history.save()
+	if (!USER_PROFILE) {
+		let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
+		history.volume = history.volume.plus(additionalVolume)
+		history.updateTimestamp = event.block.timestamp
+		history.quoteStatus = quote.quoteStatus
+		history.quote = event.params.quoteId
+		history.save()
+	}
 
 	let account = Account.load(event.params.partyA.toHexString())!
 

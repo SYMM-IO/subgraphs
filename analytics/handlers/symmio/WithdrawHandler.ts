@@ -5,6 +5,7 @@ import {Version} from "../../../common/BaseHandler";
 import {getConfiguration, newUserAndAccount} from "../../utils/builders";
 
 import {updateActivityTimestamps, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import {USER_PROFILE} from "../../config";
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,21 +23,22 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		account.updateTimestamp = event.block.timestamp
 		account.save()
 		updateActivityTimestamps(account, event.block.timestamp)
-		let withdraw = new BalanceChange(
-			event.transaction.hash.toHex() + "-" + event.logIndex.toHexString(),
-		)
-		withdraw.type = "WITHDRAW"
-		withdraw.timestamp = event.block.timestamp
-		withdraw.blockNumber = event.block.number
-		withdraw.transaction = event.transaction.hash
-		withdraw.amount = event.params.amount
-		withdraw.account = event.params.sender
-		withdraw.collateral = getConfiguration(event).collateral
-		withdraw.save()
-
+		if (!USER_PROFILE) {
+			let withdraw = new BalanceChange(
+				event.transaction.hash.toHex() + "-" + event.logIndex.toHexString(),
+			)
+			withdraw.type = "WITHDRAW"
+			withdraw.timestamp = event.block.timestamp
+			withdraw.blockNumber = event.block.number
+			withdraw.transaction = event.transaction.hash
+			withdraw.amount = event.params.amount
+			withdraw.account = event.params.sender
+			withdraw.collateral = getConfiguration(event).collateral
+			withdraw.save()
+		}
 		updateHistories(
 			new UpdateHistoriesParams(account, event.block.timestamp)
-				.withdraw(withdraw.amount)
+				.withdraw(event.params.amount)
 		)
 	}
 }
