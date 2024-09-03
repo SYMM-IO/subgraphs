@@ -7,11 +7,11 @@ import {getQuote as getQuote_0_8_3} from "../../../common/contract_utils_0_8_3";
 import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
 import {QuoteStatus} from "../../utils/constants";
 import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import {USER_PROFILE} from "../../config";
 
 export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
-	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!
 	const quote = Quote.load(qId.toString())!
 
 	let liquidAmount: BigInt;
@@ -39,14 +39,16 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 			break
 		}
 	}
-
 	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
-	history.volume = history.volume.plus(additionalVolume)
-	history.quoteStatus = QuoteStatus.LIQUIDATED
-	history.updateTimestamp = event.block.timestamp
-	history.quote = qId
-	history.save()
 
+	if (!USER_PROFILE) {
+		let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!
+		history.volume = history.volume.plus(additionalVolume)
+		history.quoteStatus = QuoteStatus.LIQUIDATED
+		history.updateTimestamp = event.block.timestamp
+		history.quote = qId
+		history.save()
+	}
 	let account = Account.load(quote.partyA.toHexString())!
 
 	updateHistories(

@@ -1,1 +1,1 @@
-export const USER_PROFILE: boolean = false
+export const USER_PROFILE: boolean = true

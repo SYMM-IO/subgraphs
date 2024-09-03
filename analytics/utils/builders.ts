@@ -202,7 +202,7 @@ export function getDailyUserHistoryForTimestamp(
 	const id =
 		dateStr +
 		"_" +
-		(account.accountSource === null ? "null" : account.accountSource.toHexString()) +
+		(account.accountSource === null ? "null" : account.accountSource!.toHexString()) +
 		"_" +
 		account.id;
 	let dh = DailyUserHistory.load(id);
@@ -239,9 +239,9 @@ export function getTotalUserHistory(
 	account: Account
 ): TotalUserHistory {
 	const id =
-		(account.accountSource === null ? "null" : account.accountSource.toHexString()) +
+		(account.accountSource === null ? "null" : account.accountSource!.toHexString()) +
 		"_" +
-		account;
+		account.id;
 	let th = TotalUserHistory.load(id);
 	if (th == null) {
 		th = new TotalUserHistory(id);
