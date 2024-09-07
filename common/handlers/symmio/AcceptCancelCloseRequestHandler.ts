@@ -1,15 +1,20 @@
-import {BaseHandler, Version} from "../../BaseHandler"
-import {InitialQuote, Quote} from "../../../generated/schema"
+import { BaseHandler, Version } from "../../BaseHandler"
+import { InitialQuote, Quote } from "../../../generated/schema"
 import {
 	initialQuoteBuilder_0_8_0,
 	initialQuoteBuilder_0_8_2,
+	initialQuoteBuilder_0_8_3,
 	setEventTimestampAndTransactionHashAndAction
 } from "../../utils/quote&analitics&user"
-import {ethereum, log} from "@graphprotocol/graph-ts"
+import { ethereum, log } from "@graphprotocol/graph-ts"
 import {
 	getQuote as getQuote_0_8_2,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_2
 } from "../../../common/contract_utils_0_8_2";
+import {
+	getQuote as getQuote_0_8_3,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_3
+} from "../../../common/contract_utils_0_8_3";
 import {
 	getQuote as getQuote_0_8_0,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_0
@@ -37,6 +42,21 @@ export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
 
 			let initialNewEntity: InitialQuote
 			switch (version) {
+				case Version.v_0_8_3: {
+					const chainQuote = getQuote_0_8_3(event.address, event.params.quoteId)
+					if (chainQuote == null) {
+						log.error('accept cancel bind crashed!', [])
+						return;
+					}
+					initialNewEntity = initialQuoteBuilder_0_8_3(chainQuote)
+					if (initialNewEntity) {
+						const symbol = symbolIdToSymbolName_0_8_3(initialNewEntity.symbolId, event.address)
+						if (symbol) {
+							initialNewEntity.symbol = symbol
+						}
+					}
+					break
+				}
 				case Version.v_0_8_2: {
 					const chainQuote = getQuote_0_8_2(event.address, event.params.quoteId)
 					if (chainQuote == null) {

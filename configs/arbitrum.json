@@ -4,8 +4,15 @@
 		{
 			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
 			"abi": "symmio",
+			"version": "0_8_3",
+			"startBlock": "249345343"
+		},
+		{
+			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+			"abi": "symmio",
 			"version": "0_8_2",
-			"startBlock": "210771536"
+			"startBlock": "210771536",
+			"endBlock": "249345343"
 		},
 		{
 			"address": "0x6273242a7E88b3De90822b31648C212215caaFE4",
