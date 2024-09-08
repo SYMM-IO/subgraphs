@@ -41,6 +41,13 @@
 			"version": "0_8_2",
 			"startBlock": "15908605",
 			"name": "cloverfield_multi_account"
+		},
+		{
+			"address": "0x8a98f69139534Ef85775b473082CE4Af1373cd63",
+			"abi": "symmioMultiAccount",
+			"version": "0_8_2",
+			"startBlock": "19460596",
+			"name": "vibe_multi_account"
 		}
 	],
 	"deploy_urls": {
