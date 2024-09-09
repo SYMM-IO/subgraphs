@@ -5,14 +5,14 @@
 			"address": "0x2Ecc7da3Cc98d341F987C85c3D9FC198570838B5",
 			"abi": "symmio",
 			"version": "0_8_3",
-			"startBlock": "34345963",
-			"endBlock": "34345963"
+			"startBlock": "68788650"
 		},
 		{
 			"address": "0x2Ecc7da3Cc98d341F987C85c3D9FC198570838B5",
 			"abi": "symmio",
 			"version": "0_8_2",
-			"startBlock": "61972155"
+			"startBlock": "61972155",
+			"endBlock": "68788650"
 		},
 		{
 			"address": "0x2Ecc7da3Cc98d341F987C85c3D9FC198570838B5",
