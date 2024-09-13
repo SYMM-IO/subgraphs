@@ -54,6 +54,6 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 		quote.averageClosedPrice = (quote.closedAmount!.times(quote.averageClosedPrice!).plus(event.params.filledAmount.times(event.params.closedPrice))).div(quote.closedAmount!.plus(event.params.filledAmount))
 		quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'FillCloseRequest', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'FillCloseRequest', _event)
 	}
 }

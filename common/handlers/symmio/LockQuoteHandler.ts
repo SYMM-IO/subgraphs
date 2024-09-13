@@ -13,6 +13,6 @@ export class LockQuoteHandler<T> extends BaseHandler {
 		quote.partyB = event.params.partyB
 		quote.quoteStatus = 1
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LockQuote', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'LockQuote', _event)
 	}
 }

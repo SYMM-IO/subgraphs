@@ -16,8 +16,7 @@ export class EmergencyClosePositionHandler<T> extends BaseHandler {
 		quote.quoteStatus = event.params.quoteStatus
 		quote.averageClosedPrice = (quote.closedAmount!.times(quote.averageClosedPrice!).plus(event.params.filledAmount.times(event.params.closedPrice))).div(quote.closedAmount!.plus(event.params.filledAmount))
 		quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
-		quote.timeStamp = event.block.timestamp
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'EmergencyClosePosition', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'EmergencyClosePosition', _event)
 	}
 }

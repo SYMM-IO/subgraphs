@@ -12,6 +12,6 @@ export class ForceCancelCloseRequestHandler<T> extends BaseHandler {
 		quote.quoteId = event.params.quoteId
 		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'ForceCancelCloseRequest', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'ForceCancelCloseRequest', _event)
 	}
 }

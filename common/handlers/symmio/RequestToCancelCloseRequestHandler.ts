@@ -11,7 +11,7 @@ export class RequestToCancelCloseRequestHandler<T> extends BaseHandler {
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'RequestToCancelCloseRequest', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'RequestToCancelCloseRequest', _event)
 
 	}
 }

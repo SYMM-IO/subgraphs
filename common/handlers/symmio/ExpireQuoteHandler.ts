@@ -12,6 +12,6 @@ export class ExpireQuoteHandler<T> extends BaseHandler {
 		quote.quoteId = event.params.quoteId
 		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'ExpireQuote', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'ExpireQuote', _event)
 	}
 }

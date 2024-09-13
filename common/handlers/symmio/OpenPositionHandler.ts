@@ -1,10 +1,10 @@
-import { BaseHandler, Version } from "../../BaseHandler"
-import { InitialQuote, Quote } from "../../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote&analitics&user"
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2";
-import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3";
-import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0";
+import {BaseHandler, Version} from "../../BaseHandler"
+import {Quote} from "../../../generated/schema"
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote&analitics&user"
+import {BigInt, ethereum} from "@graphprotocol/graph-ts"
+import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2";
+import {getQuote as getQuote_0_8_3} from "../../../common/contract_utils_0_8_3";
+import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
 
 export class OpenPositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -18,8 +18,6 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.quoteStatus = 4
 		quote.quantity = event.params.filledAmount
 		quote.initialOpenedPrice = event.params.openedPrice
-
-		const initialEntity = InitialQuote.load(quote.initialData!)!
 
 		let newCva: BigInt
 		let newPartyAmm: BigInt
@@ -57,13 +55,11 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.partyAmm = newPartyAmm
 		quote.partyBmm = newPartyBmm
 		quote.lf = newLF
-		initialEntity.cva = newCva
-		initialEntity.partyAmm = newPartyAmm
-		initialEntity.partyBmm = newPartyBmm
-		initialEntity.lf = newLF
-		initialEntity.quantity = event.params.filledAmount
-		initialEntity.save()
+		quote.initialCva = newCva
+		quote.initialPartyAmm = newPartyAmm
+		quote.initialPartyBmm = newPartyBmm
+		quote.initialLf = newLF
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'OpenPosition', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'OpenPosition', _event)
 	}
 }

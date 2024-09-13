@@ -28,6 +28,6 @@ export class RequestToClosePositionHandler<T> extends BaseHandler {
 			quote.closeId = e.params.closeId
 		}
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'RequestToClosePosition', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'RequestToClosePosition', _event)
 	}
 }

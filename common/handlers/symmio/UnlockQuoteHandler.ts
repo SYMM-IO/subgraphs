@@ -13,6 +13,6 @@ export class UnlockQuoteHandler<T> extends BaseHandler {
 		quote.partyB = null
 		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'UnlockQuote', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'UnlockQuote', _event)
 	}
 }

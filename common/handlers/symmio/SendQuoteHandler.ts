@@ -1,10 +1,9 @@
-import { BaseHandler, Version } from "../../BaseHandler"
-import { BigInt, Bytes, ethereum, log, } from "@graphprotocol/graph-ts"
-import { EventsTimestamp, InitialQuote, Quote, TransactionsHash } from "../../../generated/schema"
-import { initialQuoteBuilder_0_8_0, initialQuoteBuilder_0_8_2, initialQuoteBuilder_0_8_3, } from "../../utils/quote&analitics&user"
-import { SendQuote as SendQuote_0_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0";
-import { SendQuote as SendQuote_0_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2";
-import { SendQuote as SendQuote_0_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3";
+import {BaseHandler, Version} from "../../BaseHandler"
+import {BigInt, Bytes, ethereum,} from "@graphprotocol/graph-ts"
+import {Quote} from "../../../generated/schema"
+import {SendQuote as SendQuote_0_8_0} from "../../../generated/symmio_0_8_0/symmio_0_8_0";
+import {SendQuote as SendQuote_0_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import {SendQuote as SendQuote_0_8_3} from "../../../generated/symmio_0_8_3/symmio_0_8_3";
 
 import {
 	getQuote as getQuote_0_8_3,
@@ -18,6 +17,7 @@ import {
 	getQuote as getQuote_0_8_0,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_0
 } from "../../../common/contract_utils_0_8_0";
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote&analitics&user";
 
 export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -43,22 +43,9 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.userReceivedFunding = BigInt.fromI32(0)
 		quote.blockNumber = event.block.number
 
-		let initialQuote = new InitialQuote(event.params.quoteId.toString())
-		quote.initialData = initialQuote.id
-		initialQuote.quoteId = event.params.quoteId
-		initialQuote.orderTypeOpen = event.params.orderType
-		initialQuote.partyA = event.params.partyA
-		initialQuote.symbolId = event.params.symbolId
-		initialQuote.positionType = event.params.positionType
-		initialQuote.requestedOpenPrice = event.params.price
-		initialQuote.quantity = event.params.quantity
-		initialQuote.cva = event.params.cva
-		initialQuote.lf = event.params.lf
-		initialQuote.deadline = event.params.deadline
-		initialQuote.quoteStatus = 0
-		initialQuote.marketPrice = event.params.marketPrice
+		quote.initialCva = event.params.cva
+		quote.initialLf = event.params.lf
 
-		let initialNewEntity: InitialQuote
 		let symbolName: string
 		switch (version) {
 			case Version.v_0_8_3: {
@@ -66,12 +53,11 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				const e = changetype<SendQuote_0_8_3>(_event)
 				quote.partyAmm = e.params.partyAmm
 				quote.partyBmm = e.params.partyBmm
-				initialQuote.partyAmm = e.params.partyAmm
-				initialQuote.partyBmm = e.params.partyBmm
+				quote.initialPartyAmm = e.params.partyAmm
+				quote.initialPartyBmm = e.params.partyBmm
 				quote.tradingFee = e.params.tradingFee
 				const q = getQuote_0_8_3(event.address, event.params.quoteId)!
-				quote.maxFundingRate = initialQuote.maxFundingRate = q.maxFundingRate
-				initialNewEntity = initialQuoteBuilder_0_8_3(q)
+				quote.maxFundingRate = q.maxFundingRate
 				symbolName = symbolIdToSymbolName_0_8_3(event.params.symbolId, event.address)
 				break
 			}
@@ -80,12 +66,11 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				const e = changetype<SendQuote_0_8_2>(_event)
 				quote.partyAmm = e.params.partyAmm
 				quote.partyBmm = e.params.partyBmm
-				initialQuote.partyAmm = e.params.partyAmm
-				initialQuote.partyBmm = e.params.partyBmm
+				quote.initialPartyAmm = e.params.partyAmm
+				quote.initialPartyBmm = e.params.partyBmm
 				quote.tradingFee = e.params.tradingFee
 				const q = getQuote_0_8_2(event.address, event.params.quoteId)!
-				quote.maxFundingRate = initialQuote.maxFundingRate = q.maxFundingRate
-				initialNewEntity = initialQuoteBuilder_0_8_2(q)
+				quote.maxFundingRate = q.maxFundingRate
 				symbolName = symbolIdToSymbolName_0_8_2(event.params.symbolId, event.address)
 				break
 			}
@@ -94,20 +79,17 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				const e = changetype<SendQuote_0_8_0>(_event)
 				quote.partyAmm = e.params.mm
 				quote.partyBmm = e.params.mm
-				initialQuote.partyAmm = e.params.mm
-				initialQuote.partyBmm = e.params.mm
+				quote.initialPartyAmm = e.params.mm
+				quote.initialPartyBmm = e.params.mm
 				quote.tradingFee = BigInt.zero() // Not available in event
 				const q = getQuote_0_8_0(event.address, event.params.quoteId)!
-				initialNewEntity = initialQuoteBuilder_0_8_0(q)
-				quote.maxFundingRate = initialNewEntity.tradingFee
+				quote.maxFundingRate = q.maxInterestRate
 				symbolName = symbolIdToSymbolName_0_8_0(event.params.symbolId, event.address)
 				break
 			}
 		}
-		initialQuote.tradingFee = initialNewEntity.tradingFee
 
 		quote.symbol = symbolName
-		initialQuote.symbol = symbolName
 
 		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
@@ -115,24 +97,9 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				partyBsWhiteList.push(event.params.partyBsWhiteList[i])
 			}
 			quote.partyBsWhiteList = partyBsWhiteList
-			initialQuote.partyBsWhiteList = partyBsWhiteList
 		}
-
-		initialQuote.timeStamp = event.block.timestamp
-		initialQuote.save()
-
-		quote.timeStamp = event.block.timestamp
-		let EventTimestampEntity = new EventsTimestamp(event.params.quoteId.toString())
-		quote.eventsTimestamp = event.params.quoteId.toString()
-		let TransactionsHashEntity = new TransactionsHash(event.params.quoteId.toString())
-		quote.transactionsHash = event.params.quoteId.toString()
-		quote.action = "SendQuote"
+		quote.timestamp = event.block.timestamp
 		quote.save()
-		log.debug('event send quote seen. quoteId={}', [quote.quoteId.toString()])
-
-		EventTimestampEntity.SendQuote = event.block.timestamp
-		EventTimestampEntity.save()
-		TransactionsHashEntity.SendQuote = event.transaction.hash
-		TransactionsHashEntity.save()
+		setEventTimestampAndTransactionHashAndAction(quote, "SendQuote", event);
 	}
 }

@@ -48,7 +48,7 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 				log.debug(`get total fill amount: ${getclosedAmount} , past total fill amount: ${quote.closedAmount!.toString()}\nQuoteId: ${quote.quoteId}`, [])
 			}
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LiquidatePositionsPartyA', _event)
+			setEventTimestampAndTransactionHashAndAction(quote, 'LiquidatePositionsPartyA', _event)
 		}
 	}
 }

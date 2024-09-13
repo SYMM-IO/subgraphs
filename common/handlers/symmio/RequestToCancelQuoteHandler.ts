@@ -13,7 +13,7 @@ export class RequestToCancelQuoteHandler<T> extends BaseHandler {
 		quote.partyA = event.params.partyA
 		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'RequestToCancelQuote', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'RequestToCancelQuote', _event)
 
 	}
 }

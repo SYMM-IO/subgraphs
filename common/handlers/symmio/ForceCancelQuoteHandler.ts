@@ -12,6 +12,6 @@ export class ForceCancelQuoteHandler<T> extends BaseHandler {
 		quote.quoteId = event.params.quoteId
 		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'ForceCancelQuote', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, 'ForceCancelQuote', _event)
 	}
 }

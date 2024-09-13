@@ -34,21 +34,21 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 					break
 				}
 			}
-			const getclosedAmount = quote.quantity!
-			let LiquidateAmount = getclosedAmount.minus(quote.closedAmount!)
-			quote.liquidateAmount = LiquidateAmount
+			const getClosedAmount = quote.quantity!
+			let liqAmount = getClosedAmount.minus(quote.closedAmount!)
+			quote.liquidateAmount = liqAmount
 			let debugEntity = new DebugEntity('liquidatePrice'.concat(event.transaction.hash.toHexString()).concat(event.transaction.index.toHexString()))
 			debugEntity.message = 'getAveragePrice'
 			debugEntity.trigger = getAveragePrice
 			debugEntity.save()
 
 			if (getAveragePrice.gt(BigInt.fromI32(0))) {
-				quote.liquidatePrice = ((getAveragePrice.times(getclosedAmount)).minus(quote.averageClosedPrice!.times(quote.closedAmount!))).div(LiquidateAmount)
+				quote.liquidatePrice = ((getAveragePrice.times(getClosedAmount)).minus(quote.averageClosedPrice!.times(quote.closedAmount!))).div(liqAmount)
 			} else {
-				log.debug(`get total fill amount: ${getclosedAmount} , past total fill amount: ${quote.closedAmount!.toString()}\nQuoteId: ${quote.quoteId}`, [])
+				log.debug(`get total fill amount: ${getClosedAmount} , past total fill amount: ${quote.closedAmount!.toString()}\nQuoteId: ${quote.quoteId}`, [])
 			}
 			quote.save()
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'LiquidatePositionsPartyB', _event)
+			setEventTimestampAndTransactionHashAndAction(quote, 'LiquidatePositionsPartyB', _event)
 		}
 	}
 }

@@ -10,14 +10,11 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 		const event = changetype<T>(_event)
 		let quote = Quote.load(event.params.quoteId.toString())
 		if (quote) {
-
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.blockNumber = event.block.number
 			quote.quoteStatus = event.params.quoteStatus
-			quote.timeStamp = event.block.timestamp
 			quote.save()
-
-			setEventTimestampAndTransactionHashAndAction(quote.eventsTimestamp, 'AcceptCancelRequest', _event)
+			setEventTimestampAndTransactionHashAndAction(quote, 'AcceptCancelRequest', _event)
 		}
 	}
 }
