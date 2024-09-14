@@ -46,6 +46,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 
 			quote.userPaidFunding = quote.userPaidFunding!.plus(fundingPaid)
 			quote.userReceivedFunding = quote.userReceivedFunding!.plus(fundingReceived)
+			quote.save()
 
 			let globalEntity = GlobalFee.load("GlobalEntity")
 			if (!globalEntity) {
