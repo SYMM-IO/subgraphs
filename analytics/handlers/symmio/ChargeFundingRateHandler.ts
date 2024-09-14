@@ -45,7 +45,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
-			if (paid)
+			if (!paid)
 				fundingPaid = funding
 			else
 				fundingReceived = funding

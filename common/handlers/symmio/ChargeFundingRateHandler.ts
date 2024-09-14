@@ -39,7 +39,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
-			if (paid)
+			if (!paid)
 				fundingPaid = funding
 			else
 				fundingReceived = funding
@@ -54,7 +54,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 				globalEntity.globalFee = BigInt.fromI32(0)
 			}
 			globalEntity.latestTimestamp = event.block.timestamp
-			if (paid)
+			if (!paid)
 				globalEntity.globalFee = globalEntity.globalFee.plus(funding)
 			else
 				globalEntity.globalFee = globalEntity.globalFee.minus(funding)
