@@ -2,11 +2,13 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import textwrap
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -69,10 +71,9 @@ def copy_abi_files(abi_path: str):
     os.makedirs(os.path.dirname(destination_path), exist_ok=True)
 
     if os.path.exists(source):
-        with open(source, "r") as src_file, open(destination_path, "w") as dest_file:
-            dest_file.write(src_file.read())
+        shutil.copyfile(source, destination_path)
     else:
-        raise FileNotFoundError(f"Source ABI not found: {abi_path}")
+        raise FileNotFoundError(f"Source ABI not found: {source}")
 
 
 def create_schema_file(target_module: str, target_config: Dict[str, Any]):
@@ -96,21 +97,21 @@ def generate_src_ts(target_module: str, contract: Contract):
     handlers_code = []
 
     for event in contract.events:
-        # Add imports to a set to avoid duplicates
         imports.add(
             f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'"
         )
         imports.add(
             f"import {{{event.numbered_name}}} from '../generated/{event.source}/{event.source}'"
         )
-
         handlers_code.append(
-            f"""
-export function {event.handler_name}(event: {event.numbered_name}): void {{
-    let handler = new {event.name}Handler<{event.numbered_name}>()
-    handler.handle(event, Version.v_{contract.version})
-}}
-        """
+            textwrap.dedent(
+                f"""
+                export function {event.handler_name}(event: {event.numbered_name}): void {{
+                    let handler = new {event.name}Handler<{event.numbered_name}>()
+                    handler.handle(event, Version.v_{contract.version})
+                }}
+                """
+            )
         )
 
     imports.add("import {Version} from '../common/BaseHandler'")
@@ -118,16 +119,124 @@ export function {event.handler_name}(event: {event.numbered_name}): void {{
     with open(
         os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
     ) as src_file:
-        src_file.write("\n".join(sorted(imports)))  # Sort imports for consistency
-        src_file.write("\n\n")  # Add a blank line between imports and handlers
+        src_file.write("\n".join(sorted(imports)))
+        src_file.write("\n\n")
         src_file.write("\n".join(handlers_code))
 
+#
+# def generate_handler_files(target_module: str, contract: Contract):
+#     for event in contract.events:
+#         handler_dir = os.path.join(target_module, "handlers", contract.abi)
+#         os.makedirs(handler_dir, exist_ok=True)
+#         handler_file_path = os.path.join(handler_dir, f"{event.name}Handler.ts")
+#
+#         content = textwrap.dedent(f"""\
+#             import {{
+#                 {event.name}Handler as Common{event.name}Handler
+#             }} from "../../../common/handlers/{contract.abi}/{event.name}Handler"
+#             import {{ethereum}} from "@graphprotocol/graph-ts";
+#             import {{Version}} from "../../../common/BaseHandler";
+#
+#             export class {event.name}Handler<T> extends Common{event.name}Handler<T> {{
+#                 handle(_event: ethereum.Event, version: Version): void {{
+#                     // @ts-ignore
+#                     const event = changetype<T>(_event)
+#                     super.handle(_event, version)
+#
+#                 }}
+#             }}
+#             """)
+#
+#         with open(handler_file_path, "w") as handler_file:
+#             handler_file.write(content)
+#
+
+def get_event_inputs(event_name: str, abi_file_path: str) -> List[Dict[str, Any]]:
+    with open(abi_file_path, "r") as file:
+        abi = json.load(file)
+
+    for entry in abi:
+        if entry["type"] == "event" and entry["name"] == event_name:
+            return entry["inputs"]
+    return []
+
+def generate_handler_files(target_module: str, contract: Contract, simple_mapping: bool = False):
+    for event in contract.events:
+        handler_dir = os.path.join(target_module, 'handlers', contract.abi)
+        os.makedirs(handler_dir, exist_ok=True)
+        handler_file_path = os.path.join(handler_dir, f"{event.name}Handler.ts")
+
+        content = generate_handler_content(event, contract, simple_mapping)
+
+        with open(handler_file_path, 'w') as handler_file:
+            handler_file.write(content)
+
+def generate_handler_content(event, contract: Contract, simple_mapping: bool) -> str:
+    if simple_mapping:
+        return generate_simple_mapping_content(event, contract)
+    else:
+        return generate_default_content(event, contract)
+
+def generate_simple_mapping_content(event, contract: Contract) -> str:
+    content = f"""
+import {{ {event.name} as {event.name}Entity }} from "../../../generated/schema";
+import {{ {event.name}Handler as Common{event.name}Handler }} from "../../../common/handlers/{contract.abi}/{event.name}Handler"
+import {{ethereum}} from "@graphprotocol/graph-ts";
+import {{Version}} from "../../../common/BaseHandler";
+
+export class {event.name}Handler<T> extends Common{event.name}Handler<T> {{
+    handle(_event: ethereum.Event, version: Version): void {{
+        // @ts-ignore
+        const event = changetype<T>(_event)
+        super.handle(_event, version)
+
+        let entity = new {event.name}Entity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+"""
+
+    for input in get_event_inputs(event.name, f"./abis/{contract.path()}.json"):
+        content += f"        entity.{input['name']} = event.params.{input['name']};\n"
+
+    content += """
+        entity.blockTimestamp = event.block.timestamp;
+        entity.transactionHash = event.transaction.hash;
+        entity.save();
+    }
+}
+"""
+    return textwrap.dedent(content)
+
+def generate_default_content(event, contract: Contract) -> str:
+    return textwrap.dedent(f"""
+        import {{ {event.name}Handler as Common{event.name}Handler }} from "../../../common/handlers/{contract.abi}/{event.name}Handler"
+        import {{ethereum}} from "@graphprotocol/graph-ts";
+        import {{Version}} from "../../../common/BaseHandler";
+
+        export class {event.name}Handler<T> extends Common{event.name}Handler<T> {{
+            handle(_event: ethereum.Event, version: Version): void {{
+                // @ts-ignore
+                const event = changetype<T>(_event)
+                super.handle(_event, version)
+
+            }}
+        }}
+    """)
 
 def get_scheme_models():
     with open("./schema.graphql", "r") as schema_file:
         schema_content = schema_file.read()
-    pattern = re.compile(r"\btype\s+(\w+)(\s+@\w+)?\s*{", re.MULTILINE)
+    pattern = re.compile(
+        r"\btype\s+(\w+)((?:\s+@\w+(?:\([^)]*\))?)*)\s*{", re.MULTILINE
+    )
     return [match[0] for match in pattern.findall(schema_content)]
+
+
+def load_dependencies(file_path: str) -> Dict[str, List[str]]:
+    try:
+        with open(file_path, "r") as deps_file:
+            return json.load(deps_file)
+    except FileNotFoundError:
+        print(f"Dependencies file not found: {file_path}")
+        return {}
 
 
 def get_needed_events_for(
@@ -147,24 +256,20 @@ def get_needed_events_for(
     return list(set(events))
 
 
-def load_dependencies(file_path: str) -> Dict[str, List[str]]:
-    try:
-        with open(file_path, "r") as deps_file:
-            return json.load(deps_file)
-    except FileNotFoundError:
-        print(f"Dependencies file not found: {file_path}")
-        return {}
-
-
 def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
     with open(abi_file_path, "r") as file:
         abi = json.load(file)
 
-    return [
-        f"{entry['name']}({','.join(('indexed ' if input['indexed'] else '') + input['type'] for input in entry['inputs'])})"
-        for entry in abi
-        if entry["type"] == "event" and entry["name"] == event_name
-    ]
+    signatures = []
+    for entry in abi:
+        if entry["type"] == "event" and entry["name"] == event_name:
+            inputs = [
+                ("indexed " if input["indexed"] else "") + input["type"]
+                for input in entry["inputs"]
+            ]
+            signature = f"{entry['name']}({','.join(inputs)})"
+            signatures.append(signature)
+    return signatures
 
 
 def get_events_with_signatures(
@@ -181,7 +286,9 @@ def get_events_with_signatures(
                     source=source,
                     name=event,
                     signature=sig,
-                    handler_name=f"handle{event}",
+                    handler_name=f"handle{event}"
+                    if not contract.fake
+                    else "handleIgnoredEvent",
                     numbered_name=event,
                 )
             )
@@ -220,8 +327,8 @@ def prepare_module(config: Config, target_module: str):
             existing_contracts = [
                 c for c in config.contracts if c.abi == abi and c.version == version
             ]
-            for ex in existing_contracts:
-                all_contracts.append(ex)
+            if existing_contracts:
+                all_contracts.extend(existing_contracts)
             else:
                 new_contract = Contract(
                     fake=True,
@@ -287,20 +394,18 @@ def prepare_module(config: Config, target_module: str):
                     {"event": event.signature, "handler": event.handler_name}
                     for event in contract_events
                 ],
-                "file": f"./{target_module}/src_{contract.path()}.ts",
+                "file": f"./{target_module}/src_{contract.path() if not contract.fake else "fake"}.ts",
             },
         }
         if contract.endBlock:
             source_config["source"]["endBlock"] = int(contract.endBlock)
 
-        # Increment the count for this (abi, version) pair
         contract_indexes[(contract.abi, contract.version)] += 1
 
-        # Only append a number if there are multiple contracts with the same abi and version
         if contract_indexes[(contract.abi, contract.version)] > 1:
-            source_config[
-                "name"
-            ] += f"_{contract_indexes[(contract.abi, contract.version)]}"
+            source_config["name"] += (
+                f"_{contract_indexes[(contract.abi, contract.version)]}"
+            )
 
         subgraph_config["dataSources"].append(source_config)
 
@@ -313,8 +418,12 @@ def main():
     parser = argparse.ArgumentParser(description="Module preparation script.")
     parser.add_argument("config_file", type=str, help="Configuration file path")
     parser.add_argument("module_name", type=str, help="Target module name")
+    parser.add_argument("--create-src", action="store_true", help="Create the src file")
     parser.add_argument(
-        "--create-src", action="store_true", help="Create the src_symmio_0_8_2.ts file"
+        "--create-handlers", action="store_true", help="Create the handler files"
+    )
+    parser.add_argument(
+            "--simple-mapping", action="store_true", help="Generate simple handler mappings"
     )
     parser.add_argument("--deploy", action="store_true", help="Deploy the module")
     parser.add_argument(
@@ -339,17 +448,19 @@ def main():
             if contract.events:
                 generate_src_ts(args.module_name, contract)
 
+    if args.create_handlers:
+        for contract in config.contracts:
+            generate_handler_files(args.module_name, contract, args.simple_mapping)
+
     subprocess.run(["graph", "codegen"], check=True)
     subprocess.run(["graph", "build"], check=True)
 
     if args.deploy:
         deploy_url = config.deploy_urls[args.module_name]
-        deploy_command = [
-            "graph",
-            "deploy",
-        ]
+        deploy_command = ["graph", "deploy"]
+
         if args.mantle:
-            deploy_command.extend([deploy_url])
+            deploy_command.append(deploy_url)
         else:
             deploy_command.extend(["--studio", deploy_url])
 
