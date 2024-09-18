@@ -1,6 +1,7 @@
 import {SetMuonConfig as SetMuonConfigEntity} from "../../../generated/schema";
-import {ethereum} from "@graphprotocol/graph-ts";
+import {BigInt, ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {SetMuonConfig as SetMuonConfig_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
 
 export class SetMuonConfigHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -10,7 +11,14 @@ export class SetMuonConfigHandler<T> {
 		let entity = new SetMuonConfigEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
 		entity.upnlValidTime = event.params.upnlValidTime;
 		entity.priceValidTime = event.params.priceValidTime;
-		entity.priceQuantityValidTime = event.params.priceQuantityValidTime;
+
+		if (version == Version.v_0_8_2) {
+			// @ts-ignore
+			const e = changetype<SetMuonConfig_8_2>(_event)
+			entity.priceQuantityValidTime = e.params.priceQuantityValidTime;
+		} else {
+			entity.priceQuantityValidTime = BigInt.zero();
+		}
 
 		entity.blockTimestamp = event.block.timestamp;
 		entity.transactionHash = event.transaction.hash;

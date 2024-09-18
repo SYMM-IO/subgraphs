@@ -1,6 +1,7 @@
 import {AddSymbol as AddSymbolEntity} from "../../../generated/schema";
 import {BigInt, ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {AddSymbol as AddSymbol_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
 
 export class AddSymbolHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -9,7 +10,9 @@ export class AddSymbolHandler<T> {
 
 		let entity = new AddSymbolEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
 		if (version == Version.v_0_8_2) {
-			entity.symbolId = event.params.id;
+			// @ts-ignore
+			const e = changetype<AddSymbol_8_2>(_event)
+			entity.symbolId = e.params.id;
 		} else {
 			entity.symbolId = BigInt.zero();
 		}

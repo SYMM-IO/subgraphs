@@ -1,6 +1,7 @@
 import {SetSymbolValidationState as SetSymbolValidationStateEntity} from "../../../generated/schema";
 import {BigInt, ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {SetSymbolValidationState as SetSymbolValidationState_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
 
 export class SetSymbolValidationStateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -9,7 +10,9 @@ export class SetSymbolValidationStateHandler<T> {
 
 		let entity = new SetSymbolValidationStateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
 		if (version == Version.v_0_8_2) {
-			entity.symbolId = event.params.id;
+			// @ts-ignore
+			const e = changetype<SetSymbolValidationState_8_2>(_event)
+			entity.symbolId = e.params.id;
 		} else {
 			entity.symbolId = BigInt.zero();
 		}
