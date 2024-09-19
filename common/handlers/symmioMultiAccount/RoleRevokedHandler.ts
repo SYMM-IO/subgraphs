@@ -1,4 +1,4 @@
-import {BaseHandler} from "../../BaseHandler"
+import {BaseHandler, BaseMultiAccountHandler} from "../../BaseHandler"
 
-export class RoleRevokedHandler<T> extends BaseHandler {
+export class RoleRevokedHandler<T> extends BaseMultiAccountHandler {
 }

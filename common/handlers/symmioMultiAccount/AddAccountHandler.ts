@@ -1,10 +1,10 @@
 import {ethereum} from "@graphprotocol/graph-ts"
-import {BaseHandler, Version} from "../../BaseHandler"
+import {BaseMultiAccountHandler, MultiAccountVersion} from "../../BaseHandler"
 import {User} from "../../../generated/schema"
 import {createNewAccount, createNewUser} from "../../utils/analytics&user_profile"
 
-export class AddAccountHandler<T> extends BaseHandler {
-	handleAccount(_event: ethereum.Event, version: Version): void {
+export class AddAccountHandler<T> extends BaseMultiAccountHandler {
+	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		let user = User.load(event.params.user.toHexString())

@@ -3,16 +3,14 @@ import {
 	AddAccountHandler as CommonAddAccountHandler
 } from "../../../common/handlers/symmioMultiAccount/AddAccountHandler"
 import {User} from "../../../generated/schema"
-import {Version} from "../../../common/BaseHandler";
+import {MultiAccountVersion} from "../../../common/BaseHandler";
 import {getDailyHistoryForTimestamp, getTotalHistory} from "../../utils/builders";
 
 export class AddAccountHandler<T> extends CommonAddAccountHandler<T> {
-	handle(_event: ethereum.Event, version: Version): void {
+	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
-		super.handleQuote(_event, version)
-		super.handleSymbol(_event, version)
 
 		let user = User.load(event.params.user.toHexString())
 		super.handleAccount(_event, version)

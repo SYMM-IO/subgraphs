@@ -1,5 +1,5 @@
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getGlobalCounterAndInc } from "./utils"
+import {BigInt, ethereum} from "@graphprotocol/graph-ts"
+import {getGlobalCounterAndInc} from "./utils"
 
 export enum Version {
 	v_0_8_0,
@@ -9,6 +9,10 @@ export enum Version {
 }
 
 export enum VaultVersion {
+	v_1,
+}
+
+export enum MultiAccountVersion {
 	v_1,
 }
 
@@ -27,6 +31,22 @@ export class BaseHandler {
 	}
 
 	handleSymbol(_event: ethereum.Event, version: Version): void {
+	}
+
+	handleGlobalCounter(): BigInt {
+		return getGlobalCounterAndInc()
+	}
+}
+
+export class BaseMultiAccountHandler {
+
+	constructor() {
+	}
+
+	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
+	}
+
+	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
 	}
 
 	handleGlobalCounter(): BigInt {

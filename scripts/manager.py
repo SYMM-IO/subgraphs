@@ -51,7 +51,7 @@ class Config:
 
 abi_versions = {
     "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3"],
-    "symmioMultiAccount": ["0_8_0", "0_8_2"],
+    "symmioMultiAccount": ["1"],
     "off_chain_vault": ["1"],
     "on_chain_vault": ["1"],
 }
@@ -80,7 +80,7 @@ def create_schema_file(target_module: str, target_config: Dict[str, Any]):
     common_models_dir = os.path.join("./common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
-        "./schema.graphql", "w"
+            "./schema.graphql", "w"
     ) as dest_file:
         dest_file.write("# Imported Models\n")
         for model in os.listdir(common_models_dir):
@@ -96,7 +96,10 @@ def generate_src_ts(target_module: str, contract: Contract):
     imports = set()
     handlers_code = []
 
-    for event in contract.events:
+    # Sort events by name
+    sorted_events = sorted(contract.events, key=lambda e: e.name)
+
+    for event in sorted_events:
         imports.add(
             f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'"
         )
@@ -117,39 +120,12 @@ def generate_src_ts(target_module: str, contract: Contract):
     imports.add("import {Version} from '../common/BaseHandler'")
 
     with open(
-        os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
+            os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
     ) as src_file:
         src_file.write("\n".join(sorted(imports)))
         src_file.write("\n\n")
         src_file.write("\n".join(handlers_code))
 
-#
-# def generate_handler_files(target_module: str, contract: Contract):
-#     for event in contract.events:
-#         handler_dir = os.path.join(target_module, "handlers", contract.abi)
-#         os.makedirs(handler_dir, exist_ok=True)
-#         handler_file_path = os.path.join(handler_dir, f"{event.name}Handler.ts")
-#
-#         content = textwrap.dedent(f"""\
-#             import {{
-#                 {event.name}Handler as Common{event.name}Handler
-#             }} from "../../../common/handlers/{contract.abi}/{event.name}Handler"
-#             import {{ethereum}} from "@graphprotocol/graph-ts";
-#             import {{Version}} from "../../../common/BaseHandler";
-#
-#             export class {event.name}Handler<T> extends Common{event.name}Handler<T> {{
-#                 handle(_event: ethereum.Event, version: Version): void {{
-#                     // @ts-ignore
-#                     const event = changetype<T>(_event)
-#                     super.handle(_event, version)
-#
-#                 }}
-#             }}
-#             """)
-#
-#         with open(handler_file_path, "w") as handler_file:
-#             handler_file.write(content)
-#
 
 def get_event_inputs(event_name: str, abi_file_path: str) -> List[Dict[str, Any]]:
     with open(abi_file_path, "r") as file:
@@ -159,6 +135,7 @@ def get_event_inputs(event_name: str, abi_file_path: str) -> List[Dict[str, Any]
         if entry["type"] == "event" and entry["name"] == event_name:
             return entry["inputs"]
     return []
+
 
 def generate_handler_files(target_module: str, contract: Contract, simple_mapping: bool = False):
     for event in contract.events:
@@ -171,11 +148,13 @@ def generate_handler_files(target_module: str, contract: Contract, simple_mappin
         with open(handler_file_path, 'w') as handler_file:
             handler_file.write(content)
 
+
 def generate_handler_content(event, contract: Contract, simple_mapping: bool) -> str:
     if simple_mapping:
         return generate_simple_mapping_content(event, contract)
     else:
         return generate_default_content(event, contract)
+
 
 def generate_simple_mapping_content(event, contract: Contract) -> str:
     content = f"""
@@ -205,6 +184,7 @@ export class {event.name}Handler<T> extends Common{event.name}Handler<T> {{
 """
     return textwrap.dedent(content)
 
+
 def generate_default_content(event, contract: Contract) -> str:
     return textwrap.dedent(f"""
         import {{ {event.name}Handler as Common{event.name}Handler }} from "../../../common/handlers/{contract.abi}/{event.name}Handler"
@@ -220,6 +200,7 @@ def generate_default_content(event, contract: Contract) -> str:
             }}
         }}
     """)
+
 
 def get_scheme_models():
     with open("./schema.graphql", "r") as schema_file:
@@ -240,7 +221,7 @@ def load_dependencies(file_path: str) -> Dict[str, List[str]]:
 
 
 def get_needed_events_for(
-    models: List[str], target_module: str, contract: Contract
+        models: List[str], target_module: str, contract: Contract
 ) -> List[str]:
     common_dependencies = load_dependencies(
         os.path.join("./common", f"deps_{contract.path()}.json")
@@ -273,7 +254,7 @@ def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
 
 
 def get_events_with_signatures(
-    needed_events: List[str], contract: Contract
+        needed_events: List[str], contract: Contract
 ) -> List[Event]:
     events = []
     source = contract.path()
@@ -297,7 +278,7 @@ def get_events_with_signatures(
 
 def prepare_module(config: Config, target_module: str):
     with open(
-        os.path.join(target_module, "subgraph_config.json"), "r"
+            os.path.join(target_module, "subgraph_config.json"), "r"
     ) as target_config_file:
         target_config = json.load(target_config_file)
 
@@ -423,7 +404,7 @@ def main():
         "--create-handlers", action="store_true", help="Create the handler files"
     )
     parser.add_argument(
-            "--simple-mapping", action="store_true", help="Generate simple handler mappings"
+        "--simple-mapping", action="store_true", help="Generate simple handler mappings"
     )
     parser.add_argument("--deploy", action="store_true", help="Deploy the module")
     parser.add_argument(

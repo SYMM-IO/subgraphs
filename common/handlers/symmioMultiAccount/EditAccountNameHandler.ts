@@ -1,5 +1,5 @@
-import { BaseHandler } from "../../BaseHandler"
+import {BaseMultiAccountHandler} from "../../BaseHandler"
 
-export class EditAccountNameHandler<T> extends BaseHandler {
+export class EditAccountNameHandler<T> extends BaseMultiAccountHandler {
 
 }

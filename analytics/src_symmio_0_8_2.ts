@@ -61,80 +61,14 @@ import {Version} from '../common/BaseHandler'
 import {WithdrawHandler} from './handlers/symmio/WithdrawHandler'
 
 
+export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
+	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
 export function handleAcceptCancelRequest(event: AcceptCancelRequest): void {
 	let handler = new AcceptCancelRequestHandler<AcceptCancelRequest>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleLockQuote(event: LockQuote): void {
-	let handler = new LockQuoteHandler<LockQuote>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleAllocateForPartyB(event: AllocateForPartyB): void {
-	let handler = new AllocateForPartyBHandler<AllocateForPartyB>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleEmergencyClosePosition(event: EmergencyClosePosition): void {
-	let handler = new EmergencyClosePositionHandler<EmergencyClosePosition>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleFillCloseRequest(event: FillCloseRequest): void {
-	let handler = new FillCloseRequestHandler<FillCloseRequest>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleForceCancelQuote(event: ForceCancelQuote): void {
-	let handler = new ForceCancelQuoteHandler<ForceCancelQuote>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleRequestToCancelQuote(event: RequestToCancelQuote): void {
-	let handler = new RequestToCancelQuoteHandler<RequestToCancelQuote>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleSetSymbolTradingFee(event: SetSymbolTradingFee): void {
-	let handler = new SetSymbolTradingFeeHandler<SetSymbolTradingFee>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleRoleRevoked(event: RoleRevoked): void {
-	let handler = new RoleRevokedHandler<RoleRevoked>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleOpenPosition(event: OpenPosition): void {
-	let handler = new OpenPositionHandler<OpenPosition>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleForceClosePosition(event: ForceClosePosition): void {
-	let handler = new ForceClosePositionHandler<ForceClosePosition>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleForceCancelCloseRequest(event: ForceCancelCloseRequest): void {
-	let handler = new ForceCancelCloseRequestHandler<ForceCancelCloseRequest>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
-	let handler = new DeallocateForPartyBHandler<DeallocateForPartyB>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
@@ -145,32 +79,26 @@ export function handleAddSymbol(event: AddSymbol): void {
 }
 
 
+export function handleAllocateForPartyB(event: AllocateForPartyB): void {
+	let handler = new AllocateForPartyBHandler<AllocateForPartyB>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleAllocatePartyA(event: AllocatePartyA): void {
+	let handler = new AllocatePartyAHandler<AllocatePartyA>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
 export function handleChargeFundingRate(event: ChargeFundingRate): void {
 	let handler = new ChargeFundingRateHandler<ChargeFundingRate>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
 
-export function handleRequestToCancelCloseRequest(event: RequestToCancelCloseRequest): void {
-	let handler = new RequestToCancelCloseRequestHandler<RequestToCancelCloseRequest>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleSendQuote(event: SendQuote): void {
-	let handler = new SendQuoteHandler<SendQuote>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyB): void {
-	let handler = new LiquidatePositionsPartyBHandler<LiquidatePositionsPartyB>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
-export function handleWithdraw(event: Withdraw): void {
-	let handler = new WithdrawHandler<Withdraw>()
+export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
+	let handler = new DeallocateForPartyBHandler<DeallocateForPartyB>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
@@ -181,20 +109,14 @@ export function handleDeallocatePartyA(event: DeallocatePartyA): void {
 }
 
 
-export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
-	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
-	handler.handle(event, Version.v_0_8_2)
-}
-
-
 export function handleDeposit(event: Deposit): void {
 	let handler = new DepositHandler<Deposit>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
 
-export function handleSetCollateral(event: SetCollateral): void {
-	let handler = new SetCollateralHandler<SetCollateral>()
+export function handleEmergencyClosePosition(event: EmergencyClosePosition): void {
+	let handler = new EmergencyClosePositionHandler<EmergencyClosePosition>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
@@ -205,20 +127,26 @@ export function handleExpireQuote(event: ExpireQuote): void {
 }
 
 
-export function handleRoleGranted(event: RoleGranted): void {
-	let handler = new RoleGrantedHandler<RoleGranted>()
+export function handleFillCloseRequest(event: FillCloseRequest): void {
+	let handler = new FillCloseRequestHandler<FillCloseRequest>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
 
-export function handleUnlockQuote(event: UnlockQuote): void {
-	let handler = new UnlockQuoteHandler<UnlockQuote>()
+export function handleForceCancelCloseRequest(event: ForceCancelCloseRequest): void {
+	let handler = new ForceCancelCloseRequestHandler<ForceCancelCloseRequest>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
 
-export function handleRequestToClosePosition(event: RequestToClosePosition): void {
-	let handler = new RequestToClosePositionHandler<RequestToClosePosition>()
+export function handleForceCancelQuote(event: ForceCancelQuote): void {
+	let handler = new ForceCancelQuoteHandler<ForceCancelQuote>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleForceClosePosition(event: ForceClosePosition): void {
+	let handler = new ForceClosePositionHandler<ForceClosePosition>()
 	handler.handle(event, Version.v_0_8_2)
 }
 
@@ -229,8 +157,79 @@ export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyA):
 }
 
 
-export function handleAllocatePartyA(event: AllocatePartyA): void {
-	let handler = new AllocatePartyAHandler<AllocatePartyA>()
+export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyB): void {
+	let handler = new LiquidatePositionsPartyBHandler<LiquidatePositionsPartyB>()
 	handler.handle(event, Version.v_0_8_2)
 }
-        
+
+
+export function handleLockQuote(event: LockQuote): void {
+	let handler = new LockQuoteHandler<LockQuote>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleOpenPosition(event: OpenPosition): void {
+	let handler = new OpenPositionHandler<OpenPosition>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleRequestToCancelCloseRequest(event: RequestToCancelCloseRequest): void {
+	let handler = new RequestToCancelCloseRequestHandler<RequestToCancelCloseRequest>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleRequestToCancelQuote(event: RequestToCancelQuote): void {
+	let handler = new RequestToCancelQuoteHandler<RequestToCancelQuote>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleRequestToClosePosition(event: RequestToClosePosition): void {
+	let handler = new RequestToClosePositionHandler<RequestToClosePosition>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleRoleGranted(event: RoleGranted): void {
+	let handler = new RoleGrantedHandler<RoleGranted>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleRoleRevoked(event: RoleRevoked): void {
+	let handler = new RoleRevokedHandler<RoleRevoked>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleSendQuote(event: SendQuote): void {
+	let handler = new SendQuoteHandler<SendQuote>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleSetCollateral(event: SetCollateral): void {
+	let handler = new SetCollateralHandler<SetCollateral>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleSetSymbolTradingFee(event: SetSymbolTradingFee): void {
+	let handler = new SetSymbolTradingFeeHandler<SetSymbolTradingFee>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleUnlockQuote(event: UnlockQuote): void {
+	let handler = new UnlockQuoteHandler<UnlockQuote>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleWithdraw(event: Withdraw): void {
+	let handler = new WithdrawHandler<Withdraw>()
+	handler.handle(event, Version.v_0_8_2)
+}

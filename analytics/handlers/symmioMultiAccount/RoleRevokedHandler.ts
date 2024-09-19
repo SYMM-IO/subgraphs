@@ -1,16 +1,16 @@
-import {RoleRevokedHandler as CommonRoleRevokedHandler} from "../../../common/handlers/symmioMultiAccount/RoleRevokedHandler"
+import {
+	RoleRevokedHandler as CommonRoleRevokedHandler
+} from "../../../common/handlers/symmioMultiAccount/RoleRevokedHandler"
 import {GrantedRole} from "../../../generated/schema"
 import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
+import {MultiAccountVersion} from "../../../common/BaseHandler";
 import {rolesNames} from "../../utils/constants";
 
 export class RoleRevokedHandler<T> extends CommonRoleRevokedHandler<T> {
-	handle(_event: ethereum.Event, version: Version): void {
+	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
-		super.handleQuote(_event, version)
-		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
 		let id =

@@ -1,16 +1,14 @@
 import {RoleGrantedHandler as CommonRoleGrantedHandler} from "../../../common/handlers/symmioMultiAccount/RoleGrantedHandler"
 import {GrantedRole} from "../../../generated/schema"
 import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
+import {MultiAccountVersion, Version} from "../../../common/BaseHandler";
 import {rolesNamesMultiAccount} from "../../utils/constants";
 
 export class RoleGrantedHandler<T> extends CommonRoleGrantedHandler<T> {
-	handle(_event: ethereum.Event, version: Version): void {
+	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
-		super.handleQuote(_event, version)
-		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
 		let id =

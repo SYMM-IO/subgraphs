@@ -1,38 +1,38 @@
 {
-	"network": "arbitrum-one",
-	"contracts": [
-		{
-			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
-			"abi": "symmio",
-			"version": "0_8_3",
-			"startBlock": "249345343"
-		},
-		{
-			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
-			"abi": "symmio",
-			"version": "0_8_2",
-			"startBlock": "210771536",
-			"endBlock": "249345343"
-		},
-		{
-			"address": "0x6273242a7E88b3De90822b31648C212215caaFE4",
-			"abi": "symmioMultiAccount",
-			"version": "0_8_2",
-			"startBlock": "210771536",
-			"name": "multi_account_pear"
-		},
-		{
-			"address": "0x6a3C63Ed5e558a4c4810ecC980ba6075476602D6",
-			"abi": "symmioMultiAccount",
-			"version": "0_8_2",
-			"startBlock": "222717579",
-			"name": "multi_account_cloverfield"
-		}
-	],
-	"deploy_urls": {
-		"analytics": "analytics_arbitrum_8_2",
-		"main": "main_arbitrum_8_2",
-		"events": "events_arbitrum_8_2",
-		"userprofile": "userprofile_arbitrum_8_2"
-	}
+  "network": "arbitrum-one",
+  "contracts": [
+    {
+      "address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+      "abi": "symmio",
+      "version": "0_8_3",
+      "startBlock": "249345343"
+    },
+    {
+      "address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+      "abi": "symmio",
+      "version": "0_8_2",
+      "startBlock": "210771536",
+      "endBlock": "249345343"
+    },
+    {
+      "address": "0x6273242a7E88b3De90822b31648C212215caaFE4",
+      "abi": "symmioMultiAccount",
+      "version": "1",
+      "startBlock": "210771536",
+      "name": "multi_account_pear"
+    },
+    {
+      "address": "0x6a3C63Ed5e558a4c4810ecC980ba6075476602D6",
+      "abi": "symmioMultiAccount",
+      "version": "1",
+      "startBlock": "222717579",
+      "name": "multi_account_cloverfield"
+    }
+  ],
+  "deploy_urls": {
+    "analytics": "analytics_arbitrum",
+    "main": "main_arbitrum_8_2",
+    "events": "events_arbitrum",
+    "userprofile": "userprofile_arbitrum_8_2"
+  }
 }
