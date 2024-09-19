@@ -1,5 +1,5 @@
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
-import {Account, DebugEntity} from "../../generated/schema";
+import {Account} from "../../generated/schema";
 import {
 	getDailyHistoryForTimestamp,
 	getDailySymbolTradesHistory,
@@ -14,7 +14,6 @@ import {
 	getWeeklyHistoryForTimestamp
 } from "./builders";
 import {isSameDay, isSameMonth, isSameWeek, startOfDay} from "./time";
-import {USER_PROFILE} from "../config";
 
 export function unDecimal(value: BigInt): BigInt {
 	return value.div(BigInt.fromString("10").pow(18))
@@ -197,42 +196,40 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	th.updateTimestamp = timestamp
 	th.save()
 
-	if (USER_PROFILE) {
-		const duh = getDailyUserHistoryForTimestamp(timestamp, account)
-		duh.openTradeVolume = duh.openTradeVolume.plus(openTradeVolume)
-		duh.closeTradeVolume = duh.closeTradeVolume.plus(closeTradeVolume)
-		duh.platformFeePaid = duh.platformFeePaid.plus(params._tradingFee)
-		duh.allocate = duh.allocate.plus(params._allocate)
-		duh.accAllocate = duh.accAllocate.plus(params._allocate)
-		duh.deallocate = duh.deallocate.plus(params._deallocate)
-		duh.accDeallocate = duh.accDeallocate.plus(params._deallocate)
-		duh.deposit = duh.deposit.plus(params._deposit)
-		duh.withdraw = duh.withdraw.plus(params._withdraw)
-		duh.quotesCount = duh.quotesCount.plus(params._quotesCount)
-		duh.fundingPaid = duh.fundingPaid.plus(params._fundingPaid)
-		duh.fundingReceived = duh.fundingReceived.plus(params._fundingReceived)
-		duh.loss = duh.loss.plus(params._loss)
-		duh.profit = duh.profit.plus(params._profit)
-		duh.updateTimestamp = timestamp
-		duh.save()
+	const duh = getDailyUserHistoryForTimestamp(timestamp, account)
+	duh.openTradeVolume = duh.openTradeVolume.plus(openTradeVolume)
+	duh.closeTradeVolume = duh.closeTradeVolume.plus(closeTradeVolume)
+	duh.platformFeePaid = duh.platformFeePaid.plus(params._tradingFee)
+	duh.allocate = duh.allocate.plus(params._allocate)
+	duh.accAllocate = duh.accAllocate.plus(params._allocate)
+	duh.deallocate = duh.deallocate.plus(params._deallocate)
+	duh.accDeallocate = duh.accDeallocate.plus(params._deallocate)
+	duh.deposit = duh.deposit.plus(params._deposit)
+	duh.withdraw = duh.withdraw.plus(params._withdraw)
+	duh.quotesCount = duh.quotesCount.plus(params._quotesCount)
+	duh.fundingPaid = duh.fundingPaid.plus(params._fundingPaid)
+	duh.fundingReceived = duh.fundingReceived.plus(params._fundingReceived)
+	duh.loss = duh.loss.plus(params._loss)
+	duh.profit = duh.profit.plus(params._profit)
+	duh.updateTimestamp = timestamp
+	duh.save()
 
-		const tuh = getTotalUserHistory(timestamp, account)
-		tuh.openTradeVolume = tuh.openTradeVolume.plus(openTradeVolume)
-		tuh.closeTradeVolume = tuh.closeTradeVolume.plus(closeTradeVolume)
-		tuh.platformFeePaid = tuh.platformFeePaid.plus(params._tradingFee)
-		tuh.allocate = tuh.allocate.plus(params._allocate)
-		tuh.allocate = tuh.allocate.plus(params._allocate)
-		tuh.deallocate = tuh.deallocate.plus(params._deallocate)
-		tuh.deposit = tuh.deposit.plus(params._deposit)
-		tuh.withdraw = tuh.withdraw.plus(params._withdraw)
-		tuh.quotesCount = tuh.quotesCount.plus(params._quotesCount)
-		tuh.fundingPaid = tuh.fundingPaid.plus(params._fundingPaid)
-		tuh.fundingReceived = tuh.fundingReceived.plus(params._fundingReceived)
-		tuh.loss = tuh.loss.plus(params._loss)
-		tuh.profit = tuh.profit.plus(params._profit)
-		tuh.updateTimestamp = timestamp
-		tuh.save()
-	}
+	const tuh = getTotalUserHistory(timestamp, account)
+	tuh.openTradeVolume = tuh.openTradeVolume.plus(openTradeVolume)
+	tuh.closeTradeVolume = tuh.closeTradeVolume.plus(closeTradeVolume)
+	tuh.platformFeePaid = tuh.platformFeePaid.plus(params._tradingFee)
+	tuh.allocate = tuh.allocate.plus(params._allocate)
+	tuh.allocate = tuh.allocate.plus(params._allocate)
+	tuh.deallocate = tuh.deallocate.plus(params._deallocate)
+	tuh.deposit = tuh.deposit.plus(params._deposit)
+	tuh.withdraw = tuh.withdraw.plus(params._withdraw)
+	tuh.quotesCount = tuh.quotesCount.plus(params._quotesCount)
+	tuh.fundingPaid = tuh.fundingPaid.plus(params._fundingPaid)
+	tuh.fundingReceived = tuh.fundingReceived.plus(params._fundingReceived)
+	tuh.loss = tuh.loss.plus(params._loss)
+	tuh.profit = tuh.profit.plus(params._profit)
+	tuh.updateTimestamp = timestamp
+	tuh.save()
 
 	if (params._symbolId.gt(BigInt.zero())) {
 		let stv = getSymbolTradeHistory(params._symbolId, timestamp, account.accountSource)
@@ -240,32 +237,30 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		stv.updateTimestamp = timestamp
 		stv.save()
 
-		if (USER_PROFILE) {
-			const dst = getDailySymbolTradesHistory(
-				timestamp,
-				account.account,
-				account.accountSource,
-				params._symbolId,
-			)
-			dst.totalTrades = dst.totalTrades.plus(BigInt.fromString("1"))
-			dst.platformFeePaid = dst.platformFeePaid.plus(params._tradingFee)
-			dst.fundingPaid = dst.fundingPaid.plus(params._fundingPaid)
-			dst.fundingReceived = dst.fundingReceived.plus(params._fundingReceived)
-			dst.updateTimestamp = timestamp
-			dst.save()
+		const dst = getDailySymbolTradesHistory(
+			timestamp,
+			account.account,
+			account.accountSource,
+			params._symbolId,
+		)
+		dst.totalTrades = dst.totalTrades.plus(BigInt.fromString("1"))
+		dst.platformFeePaid = dst.platformFeePaid.plus(params._tradingFee)
+		dst.fundingPaid = dst.fundingPaid.plus(params._fundingPaid)
+		dst.fundingReceived = dst.fundingReceived.plus(params._fundingReceived)
+		dst.updateTimestamp = timestamp
+		dst.save()
 
-			const tst = getTotalSymbolTradesHistory(
-				timestamp,
-				account.account,
-				account.accountSource,
-				params._symbolId,
-			)
-			tst.totalTrades = tst.totalTrades.plus(BigInt.fromString("1"))
-			tst.platformFeePaid = tst.platformFeePaid.plus(params._tradingFee)
-			tst.fundingPaid = tst.fundingPaid.plus(params._fundingPaid)
-			tst.fundingReceived = tst.fundingReceived.plus(params._fundingReceived)
-			tst.updateTimestamp = timestamp
-			tst.save()
-		}
+		const tst = getTotalSymbolTradesHistory(
+			timestamp,
+			account.account,
+			account.accountSource,
+			params._symbolId,
+		)
+		tst.totalTrades = tst.totalTrades.plus(BigInt.fromString("1"))
+		tst.platformFeePaid = tst.platformFeePaid.plus(params._tradingFee)
+		tst.fundingPaid = tst.fundingPaid.plus(params._fundingPaid)
+		tst.fundingReceived = tst.fundingReceived.plus(params._fundingReceived)
+		tst.updateTimestamp = timestamp
+		tst.save()
 	}
 }

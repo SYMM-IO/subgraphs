@@ -7,7 +7,6 @@ import {Version} from "../../../common/BaseHandler";
 import {QuoteStatus} from "../../utils/constants";
 
 import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
-import {USER_PROFILE} from "../../config";
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,20 +21,18 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		let volume = unDecimal(
 			event.params.filledAmount.times(event.params.openedPrice),
 		)
-		if (!USER_PROFILE) {
-			let history = new TradeHistory(
-				account.id + "-" + event.params.quoteId.toString(),
-			)
-			history.account = event.params.partyA
-			history.timestamp = event.block.timestamp
-			history.blockNumber = event.block.number
-			history.transaction = event.transaction.hash
-			history.volume = volume
-			history.quoteStatus = QuoteStatus.OPENED
-			history.quote = event.params.quoteId
-			history.updateTimestamp = event.block.timestamp
-			history.save()
-		}
+		let history = new TradeHistory(
+			account.id + "-" + event.params.quoteId.toString(),
+		)
+		history.account = event.params.partyA
+		history.timestamp = event.block.timestamp
+		history.blockNumber = event.block.number
+		history.transaction = event.transaction.hash
+		history.volume = volume
+		history.quoteStatus = QuoteStatus.OPENED
+		history.quote = event.params.quoteId
+		history.updateTimestamp = event.block.timestamp
+		history.save()
 
 		let quote = Quote.load(event.params.quoteId.toString())!
 		const symbol = Symbol.load(quote.symbolId!.toString())!
