@@ -32,3 +32,32 @@ export enum QuoteStatus {
 	LIQUIDATED,
 	EXPIRED,
 }
+
+export enum BalanceChangeType {
+	ALLOCATE,
+	DEALLOCATE,
+	PLATFORM_FEE_IN,
+	PLATFORM_FEE_OUT,
+	REALIZED_PNL_IN,
+	REALIZED_PNL_OUT,
+	CVA_IN,
+	CVA_OUT,
+	LF_IN,
+	LF_OUT,
+	DEPOSIT,
+	WITHDRAW,
+}
+
+export let balanceChangeTypes = new Map<number, string>()
+balanceChangeTypes.set(BalanceChangeType.ALLOCATE, "ALLOCATE")
+balanceChangeTypes.set(BalanceChangeType.DEALLOCATE, "DEALLOCATE")
+balanceChangeTypes.set(BalanceChangeType.PLATFORM_FEE_IN, "PLATFORM_FEE_IN")
+balanceChangeTypes.set(BalanceChangeType.PLATFORM_FEE_OUT, "PLATFORM_FEE_OUT")
+balanceChangeTypes.set(BalanceChangeType.REALIZED_PNL_IN, "REALIZED_PNL_IN")
+balanceChangeTypes.set(BalanceChangeType.REALIZED_PNL_OUT, "REALIZED_PNL_OUT")
+balanceChangeTypes.set(BalanceChangeType.CVA_IN, "CVA_IN")
+balanceChangeTypes.set(BalanceChangeType.CVA_OUT, "CVA_OUT")
+balanceChangeTypes.set(BalanceChangeType.LF_IN, "LF_IN")
+balanceChangeTypes.set(BalanceChangeType.LF_OUT, "LF_OUT")
+balanceChangeTypes.set(BalanceChangeType.DEPOSIT, "DEPOSIT")
+balanceChangeTypes.set(BalanceChangeType.WITHDRAW, "WITHDRAW")

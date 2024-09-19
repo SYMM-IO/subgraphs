@@ -7,6 +7,7 @@ import {Version} from "../../../common/BaseHandler";
 import {getConfiguration} from "../../utils/builders";
 
 import {updateActivityTimestamps, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import {BalanceChangeType, balanceChangeTypes} from "../../utils/constants";
 
 export class DepositHandler<T> extends CommonDepositHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,7 +23,7 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 		let deposit = new BalanceChange(
 			event.transaction.hash.toHex() + "-" + event.logIndex.toHexString(),
 		)
-		deposit.type = "DEPOSIT"
+		deposit.type = balanceChangeTypes.get(BalanceChangeType.DEPOSIT)
 		deposit.timestamp = event.block.timestamp
 		deposit.blockNumber = event.block.number
 		deposit.transaction = event.transaction.hash
