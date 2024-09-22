@@ -53,5 +53,5 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 				.symbolId(quote.symbolId!)
 		)
 	}
-	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.openedPrice!)), false, account.accountSource)
+	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.initialOpenedPrice!)), false, account.accountSource)
 }

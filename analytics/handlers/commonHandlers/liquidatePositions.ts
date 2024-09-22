@@ -60,5 +60,5 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 				.symbolId(quote.symbolId!)
 		)
 	}
-	updateDailyOpenInterest(event.block.timestamp, unDecimal(liquidAmount.times(quote.openedPrice!)), false, account.accountSource)
+	updateDailyOpenInterest(event.block.timestamp, unDecimal(liquidAmount.times(quote.initialOpenedPrice!)), false, account.accountSource)
 }
