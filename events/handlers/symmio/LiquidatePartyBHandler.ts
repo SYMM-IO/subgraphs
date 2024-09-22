@@ -15,6 +15,7 @@ export class LiquidatePartyBHandler<T>{
 		entity.upnl = event.params.upnl;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

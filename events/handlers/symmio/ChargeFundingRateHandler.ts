@@ -14,6 +14,7 @@ export class ChargeFundingRateHandler<T>  {
 		entity.rates = event.params.rates;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

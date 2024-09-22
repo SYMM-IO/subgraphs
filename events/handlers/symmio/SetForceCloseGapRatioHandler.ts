@@ -12,6 +12,7 @@ export class SetForceCloseGapRatioHandler<T>  {
 		entity.newForceCloseGapRatio = event.params.newForceCloseGapRatio;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

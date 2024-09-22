@@ -12,6 +12,7 @@ export class SetDeallocateCooldownHandler<T> {
 		entity.newDeallocateCooldown = event.params.newDeallocateCooldown;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

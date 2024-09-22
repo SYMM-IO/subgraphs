@@ -9,6 +9,7 @@ export class UnpausePartyBActionsHandler<T> {
 
 		let entity = new UnpausePartyBActionsEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

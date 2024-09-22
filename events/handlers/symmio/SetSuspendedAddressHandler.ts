@@ -12,6 +12,7 @@ export class SetSuspendedAddressHandler<T> {
 		entity.isSuspended = event.params.isSuspended;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

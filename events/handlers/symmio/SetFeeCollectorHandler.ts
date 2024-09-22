@@ -12,6 +12,7 @@ export class SetFeeCollectorHandler<T>  {
 		entity.newFeeCollector = event.params.newFeeCollector;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

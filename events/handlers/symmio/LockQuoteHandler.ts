@@ -12,6 +12,7 @@ export class LockQuoteHandler<T> {
 		entity.quoteId = event.params.quoteId;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

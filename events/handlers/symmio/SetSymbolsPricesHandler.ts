@@ -14,6 +14,7 @@ export class SetSymbolsPricesHandler<T>  {
 		entity.prices = event.params.prices;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

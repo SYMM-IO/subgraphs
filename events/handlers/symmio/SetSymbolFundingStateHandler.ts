@@ -20,6 +20,7 @@ export class SetSymbolFundingStateHandler<T> {
 		entity.fundingRateWindowTime = event.params.fundingRateWindowTime;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

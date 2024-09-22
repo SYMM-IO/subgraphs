@@ -13,6 +13,7 @@ export class WithdrawHandler<T>  {
 		entity.amount = event.params.amount;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

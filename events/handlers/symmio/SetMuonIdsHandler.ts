@@ -14,6 +14,7 @@ export class SetMuonIdsHandler<T> {
 		entity.parity = event.params.parity;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

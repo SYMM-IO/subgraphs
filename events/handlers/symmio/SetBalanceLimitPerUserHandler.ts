@@ -11,6 +11,7 @@ export class SetBalanceLimitPerUserHandler<T>{
 		entity.balanceLimitPerUser = event.params.balanceLimitPerUser;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

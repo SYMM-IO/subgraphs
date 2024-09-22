@@ -13,6 +13,7 @@ export class SetSymbolMaxSlippageHandler<T> {
 		entity.maxSlippage = event.params.maxSlippage;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

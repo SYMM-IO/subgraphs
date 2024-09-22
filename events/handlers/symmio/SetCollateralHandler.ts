@@ -11,6 +11,7 @@ export class SetCollateralHandler<T> {
 		entity.collateral = event.params.collateral;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

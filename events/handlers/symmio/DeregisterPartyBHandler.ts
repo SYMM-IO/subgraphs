@@ -12,6 +12,7 @@ export class DeregisterPartyBHandler<T> {
 		entity.index = event.params.index;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

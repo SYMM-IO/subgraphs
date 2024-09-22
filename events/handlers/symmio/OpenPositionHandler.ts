@@ -15,6 +15,7 @@ export class OpenPositionHandler<T> {
 		entity.openedPrice = event.params.openedPrice;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

@@ -12,6 +12,7 @@ export class RoleGrantedHandler<T> {
 		entity.user = event.params.account;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

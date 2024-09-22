@@ -19,6 +19,7 @@ export class SettlePartyALiquidationHandler<T>  {
 		entity.amounts = event.params.amounts;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

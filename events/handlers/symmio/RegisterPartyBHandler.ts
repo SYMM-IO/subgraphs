@@ -11,6 +11,7 @@ export class RegisterPartyBHandler<T>{
 		entity.partyB = event.params.partyB;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}

@@ -31,6 +31,7 @@ export class SendQuoteHandler<T> {
 		entity.deadline = event.params.deadline;
 
 		entity.blockTimestamp = event.block.timestamp;
+		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
 		entity.save();
 	}
