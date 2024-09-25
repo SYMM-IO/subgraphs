@@ -30,7 +30,7 @@
     }
   ],
   "deploy_urls": {
-    "analytics": "analytics_arbitrum",
+    "analytics": "analytics_arbitrum_8_2",
     "main": "main_arbitrum_8_2",
     "events": "events_arbitrum",
     "userprofile": "userprofile_arbitrum_8_2"
