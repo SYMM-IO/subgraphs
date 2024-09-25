@@ -8,11 +8,18 @@
 			"startBlock": "11261499"
 		},
 		{
-			"address": "0x8Ab178C07184ffD44F0ADfF4eA2ce6cFc33F3b86",
+			"address": "0x3adc81CC43d9e1636de9cbac764Afcb1F3ae6cde",
 			"abi": "symmioMultiAccount",
-			"version": "0_8_2",
+			"version": "1",
 			"startBlock": "11298774",
 			"name": "cloverfield_multi_account"
+		},
+		{
+			"address": "0xC0ff4B56f62f20bA45f4229CC6BAaD986FA2a904",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "12951603",
+			"name": "bmx_multi_account"
 		}
 	],
 	"deploy_urls": {

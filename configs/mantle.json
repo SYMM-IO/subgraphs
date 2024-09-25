@@ -24,14 +24,14 @@
 		{
 			"address": "0xECbd0788bB5a72f9dFDAc1FFeAAF9B7c2B26E456",
 			"abi": "symmioMultiAccount",
-			"version": "0_8_2",
+			"version": "1",
 			"startBlock": "61972155",
 			"name": "multi_account_intentx"
 		},
 		{
 			"address": "0xfA8A07fcB6204Ce2229C244a26F42563A72f369E",
 			"abi": "symmioMultiAccount",
-			"version": "0_8_2",
+			"version": "1",
 			"startBlock": "65237918",
 			"name": "multi_account_cloverfield"
 		}

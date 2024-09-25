@@ -24,7 +24,7 @@
 		{
 			"address": "0x650a2D6C263A93cFF5EdD41f836ce832F05A1cF3",
 			"abi": "symmioMultiAccount",
-			"version": "0_8_2",
+			"version": "1",
 			"startBlock": "34462282",
 			"name": "alpha_multi_account_v3"
 		}
