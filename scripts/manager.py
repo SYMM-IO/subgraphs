@@ -347,7 +347,7 @@ def prepare_module(config: Config, target_module: str):
         "specVersion": "1.2.0",
         "description": f"{target_module} Subgraph of SYMMIO",
         "schema": {"file": "./schema.graphql"},
-        "indexerHints": {"prune": "auto"},
+        "indexerHints": {"prune": "never"},
         "dataSources": [],
     }
     contract_indexes = defaultdict(int)

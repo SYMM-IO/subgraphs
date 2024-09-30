@@ -1,5 +1,5 @@
 {
-	"network": "blast-mainnet",
+	"network": "blast",
 	"contracts": [
 		{
 			"address": "0x3d17f073cCb9c3764F105550B0BCF9550477D266",
