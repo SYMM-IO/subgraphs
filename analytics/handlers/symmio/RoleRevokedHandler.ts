@@ -2,7 +2,7 @@ import {RoleRevokedHandler as CommonRoleRevokedHandler} from "../../../common/ha
 import {GrantedRole} from "../../../generated/schema"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
-import {rolesNames} from "../../utils/constants";
+import {getRoleName} from "../../utils/constants";
 
 export class RoleRevokedHandler<T> extends CommonRoleRevokedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -14,7 +14,7 @@ export class RoleRevokedHandler<T> extends CommonRoleRevokedHandler<T> {
 		super.handleAccount(_event, version)
 
 		let id =
-			rolesNames.get(event.params.role.toHexString()) +
+			getRoleName(event.params.role.toHexString()) +
 			"_" +
 			event.params.user.toHexString() +
 			"_" +
@@ -22,7 +22,7 @@ export class RoleRevokedHandler<T> extends CommonRoleRevokedHandler<T> {
 		let gr = GrantedRole.load(id)
 		if (gr == null) {
 			gr = new GrantedRole(id)
-			gr.role = rolesNames.get(event.params.role.toHexString()) || event.params.role.toHexString()
+			gr.role = getRoleName(event.params.role.toHexString())
 			gr.user = event.params.user
 			gr.contract = event.address
 		}
