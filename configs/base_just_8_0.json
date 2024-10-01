@@ -5,15 +5,13 @@
 			"address": "0x52e2230cdb80edebdadafcf24033608c9a636d7d",
 			"abi": "symmio",
 			"version": "0_8_0",
-			"startBlock": "2228875",
-			"endBlock": "8450000"
+			"startBlock": "2228875"
 		},
 		{
 			"address": "0x724796d2e9143920b1b58651b04e1ed201b8cc98",
 			"abi": "symmioMultiAccount",
 			"version": "1",
 			"startBlock": "5897272",
-			"endBlock": "8450000",
 			"name": "intentx_multi_account_v1"
 		},
 		{
@@ -21,7 +19,6 @@
 			"abi": "symmioMultiAccount",
 			"version": "1",
 			"startBlock": "2230256",
-			"endBlock": "8450000",
 			"name": "based_multi_account_v1"
 		}
 	],

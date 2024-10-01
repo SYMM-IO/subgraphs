@@ -1,0 +1,22 @@
+{
+	"network": "fantom",
+	"contracts": [
+		{
+			"address": "0x155713e2F8E7bCeBB8aB107fa7377e9ca37A6F03",
+			"abi": "symmio",
+			"version": "0_8_0",
+			"startBlock": "68411968",
+			"endBlock": "60000000"
+		},
+		{
+			"address": "0x0937bC09b8D073E4F1abE85470969475f714Ca6c",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "57794244",
+			"endBlock": "60000000",
+			"name": "cloverfield_multi_account_v1"
+		}
+	],
+	"deploy_urls": {
+	}
+}
