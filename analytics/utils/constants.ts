@@ -17,7 +17,7 @@ rolesNames.set("0x61c92169ef077349011ff0b1383c894d86c5f0b41d986366b58a6cf31e93be
 rolesNames.set("0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf75a", "UNPAUSER_ROLE")
 rolesNames.set("0x0000000000000000000000000000000000000000000000000000000000000000", "DEFAULT_ADMIN_ROLE")
 
-export function getRoleName(key: string) {
+export function getRoleName(key: string): string {
 	if (rolesNames.has(key))
 		return rolesNames.get(key)
 	return key
