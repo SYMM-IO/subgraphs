@@ -5,15 +5,13 @@
 			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
 			"abi": "symmio",
 			"version": "0_8_0",
-			"startBlock": "29380515",
-			"endBlock": "34500000"
+			"startBlock": "29380515"
 		},
 		{
 			"address": "0x058Ba7574d8bC66F1a1DCc44bb5B18894D4190e0",
 			"abi": "symmioMultiAccount",
 			"version": "1",
 			"startBlock": "29380910",
-			"endBlock": "34500000",
 			"name": "alpha_v1"
 		},
 		{
@@ -21,7 +19,6 @@
 			"abi": "symmioMultiAccount",
 			"version": "1",
 			"startBlock": "31651896",
-			"endBlock": "34500000",
 			"name": "alpha_v2"
 		},
 		{
@@ -29,14 +26,11 @@
 			"abi": "symmioMultiAccount",
 			"version": "1",
 			"startBlock": "29470776",
-			"endBlock": "34500000",
 			"name": "cloverfield"
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_bnb_8_2",
-		"main": "main_bnb_8_2",
-		"events": "events_bnb_8_2",
-		"userprofile": "userprofile_bnb_8_2"
+		"analytics": "bnb_0_8_0_analytics",
+		"events": "bnb_0_8_0_events"
 	}
 }
