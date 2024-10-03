@@ -32,6 +32,7 @@ class Contract:
     endBlock: Optional[str] = None
     name: Optional[str] = None
     events: List[Event] = field(default_factory=list)
+    dependencies: List[str] = field(default_factory=list)
 
     def path(self) -> str:
         return f"{self.abi}_{self.version}"
@@ -384,6 +385,9 @@ def prepare_module(config: Config, target_module: str):
         }
         if contract.endBlock:
             source_config["source"]["endBlock"] = int(contract.endBlock)
+
+        if len(contract.dependencies) > 0:
+            source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in contract.dependencies]
 
         contract_indexes[(contract.abi, contract.version)] += 1
 
