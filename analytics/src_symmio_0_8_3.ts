@@ -2,6 +2,7 @@ import {AcceptCancelCloseRequestHandler} from './handlers/symmio/AcceptCancelClo
 import {
 	AcceptCancelCloseRequest,
 	AcceptCancelRequest,
+	AddBridge,
 	AddSymbol,
 	AllocateForPartyB,
 	AllocatePartyA,
@@ -17,10 +18,16 @@ import {
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
 	ForceClosePosition,
+	LiquidatePartyA,
+	LiquidatePartyA1,
+	LiquidatePartyB,
+	LiquidatePendingPositionsPartyA,
+	LiquidatePendingPositionsPartyA1,
 	LiquidatePositionsPartyA,
 	LiquidatePositionsPartyB,
 	LockQuote,
 	OpenPosition,
+	RegisterPartyB,
 	RequestToCancelCloseRequest,
 	RequestToCancelQuote,
 	RequestToClosePosition,
@@ -33,6 +40,7 @@ import {
 	Withdraw
 } from '../generated/symmio_0_8_3/symmio_0_8_3'
 import {AcceptCancelRequestHandler} from './handlers/symmio/AcceptCancelRequestHandler'
+import {AddBridgeHandler} from './handlers/symmio/AddBridgeHandler'
 import {AddSymbolHandler} from './handlers/symmio/AddSymbolHandler'
 import {AllocateForPartyBHandler} from './handlers/symmio/AllocateForPartyBHandler'
 import {AllocatePartyAHandler} from './handlers/symmio/AllocatePartyAHandler'
@@ -48,10 +56,14 @@ import {FillCloseRequestHandler} from './handlers/symmio/FillCloseRequestHandler
 import {ForceCancelCloseRequestHandler} from './handlers/symmio/ForceCancelCloseRequestHandler'
 import {ForceCancelQuoteHandler} from './handlers/symmio/ForceCancelQuoteHandler'
 import {ForceClosePositionHandler} from './handlers/symmio/ForceClosePositionHandler'
+import {LiquidatePartyAHandler} from './handlers/symmio/LiquidatePartyAHandler'
+import {LiquidatePartyBHandler} from './handlers/symmio/LiquidatePartyBHandler'
+import {LiquidatePendingPositionsPartyAHandler} from './handlers/symmio/LiquidatePendingPositionsPartyAHandler'
 import {LiquidatePositionsPartyAHandler} from './handlers/symmio/LiquidatePositionsPartyAHandler'
 import {LiquidatePositionsPartyBHandler} from './handlers/symmio/LiquidatePositionsPartyBHandler'
 import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
+import {RegisterPartyBHandler} from './handlers/symmio/RegisterPartyBHandler'
 import {RequestToCancelCloseRequestHandler} from './handlers/symmio/RequestToCancelCloseRequestHandler'
 import {RequestToCancelQuoteHandler} from './handlers/symmio/RequestToCancelQuoteHandler'
 import {RequestToClosePositionHandler} from './handlers/symmio/RequestToClosePositionHandler'
@@ -73,6 +85,12 @@ export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest):
 
 export function handleAcceptCancelRequest(event: AcceptCancelRequest): void {
 	let handler = new AcceptCancelRequestHandler<AcceptCancelRequest>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleAddBridge(event: AddBridge): void {
+	let handler = new AddBridgeHandler<AddBridge>()
 	handler.handle(event, Version.v_0_8_3)
 }
 
@@ -167,6 +185,36 @@ export function handleForceClosePosition(event: ForceClosePosition): void {
 }
 
 
+export function handleLiquidatePartyA(event: LiquidatePartyA): void {
+	let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleLiquidatePartyA1(event: LiquidatePartyA1): void {
+	let handler = new LiquidatePartyAHandler<LiquidatePartyA1>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleLiquidatePartyB(event: LiquidatePartyB): void {
+	let handler = new LiquidatePartyBHandler<LiquidatePartyB>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPositionsPartyA): void {
+	let handler = new LiquidatePendingPositionsPartyAHandler<LiquidatePendingPositionsPartyA>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleLiquidatePendingPositionsPartyA1(event: LiquidatePendingPositionsPartyA1): void {
+	let handler = new LiquidatePendingPositionsPartyAHandler<LiquidatePendingPositionsPartyA1>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+
 export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyA): void {
 	let handler = new LiquidatePositionsPartyAHandler<LiquidatePositionsPartyA>()
 	handler.handle(event, Version.v_0_8_3)
@@ -187,6 +235,12 @@ export function handleLockQuote(event: LockQuote): void {
 
 export function handleOpenPosition(event: OpenPosition): void {
 	let handler = new OpenPositionHandler<OpenPosition>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleRegisterPartyB(event: RegisterPartyB): void {
+	let handler = new RegisterPartyBHandler<RegisterPartyB>()
 	handler.handle(event, Version.v_0_8_3)
 }
 

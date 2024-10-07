@@ -17,7 +17,8 @@ import {
 	getQuote as getQuote_0_8_0,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_0
 } from "../../../common/contract_utils_0_8_0";
-import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote&analitics&user";
+
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
 
 export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {

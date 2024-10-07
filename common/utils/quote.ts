@@ -1,4 +1,4 @@
-import {BigInt} from "@graphprotocol/graph-ts"
+import {BigInt, ethereum} from "@graphprotocol/graph-ts"
 import {PartyA, PartyBPartyA, Quote} from "../../generated/schema"
 import {getGlobalCounterAndInc} from "../utils"
 
@@ -29,4 +29,13 @@ export function removeQuoteFromPendingList(quoteId: BigInt): void {
 			}
 		}
 	}
+}
+
+export function setEventTimestampAndTransactionHashAndAction(quote: Quote, eventName: string, _event: ethereum.Event): void {
+	quote.setBigInt("timestamp" + eventName, _event.block.timestamp)
+	quote.setBytes("txHash" + eventName, _event.transaction.hash)
+	quote.action = eventName
+	quote.timestamp = _event.block.timestamp
+	quote.blockNumber = _event.block.number
+	quote.save()
 }

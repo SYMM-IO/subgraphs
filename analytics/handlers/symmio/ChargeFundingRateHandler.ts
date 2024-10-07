@@ -23,6 +23,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			const rate = event.params.rates[i]
 			let quote = Quote.load(quoteId.toString())!
 			let account = Account.load(quote.partyA.toHexString())!
+			let solverAccount = Account.load(quote.partyB!.toHexString())
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 			let funding: BigInt
 			switch (version) {
@@ -51,7 +52,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 				fundingReceived = funding
 
 			updateHistories(
-				new UpdateHistoriesParams(account, event.block.timestamp)
+				new UpdateHistoriesParams(account, solverAccount, event.block.timestamp)
 					.symbolId(quote.symbolId!)
 					.fundingPaid(fundingPaid)
 					.fundingReceived(fundingReceived)

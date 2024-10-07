@@ -37,9 +37,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_mantle",
-		"main": "main_mantle",
-		"events": "events_mantle",
-		"liquidation": "liquidation_mantle"
+		"analytics": "mantle_analytics",
+		"events": "mantle_events"
 	}
 }

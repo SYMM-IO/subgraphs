@@ -1,8 +1,8 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { DebugEntity, Quote } from "../../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote&analitics&user"
 import { ethereum, log } from "@graphprotocol/graph-ts";
 import { RequestToClosePosition as RequestToClosePosition_0_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3";
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
 
 export class RequestToClosePositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {

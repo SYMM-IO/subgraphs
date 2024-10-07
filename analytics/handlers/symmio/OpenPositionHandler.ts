@@ -42,19 +42,24 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 			.times(symbol.tradingFee)
 			.div(BigInt.fromString("10").pow(36))
 
+		const partyB = event.params.partyB.toHexString()
+		let solverAccount = Account.load(partyB)!
+
 		updateHistories(
-			new UpdateHistoriesParams(account, event.block.timestamp)
+			new UpdateHistoriesParams(account, solverAccount, event.block.timestamp)
 				.openTradeVolume(volume)
 				.symbolId(quote.symbolId!)
+				.positionsCount(BigInt.fromI32(1))
 				.tradingFee(tradingFee)
 		)
 		if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 			updateHistories(
-				new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp, account.accountSource)
+				new UpdateHistoriesParams(solverAccount, null, event.block.timestamp, account.accountSource)
 					.openTradeVolume(volume)
+					.positionsCount(BigInt.fromI32(1))
 					.symbolId(quote.symbolId!)
 			)
 		}
-		updateDailyOpenInterest(event.block.timestamp, volume, true, account.accountSource)
+		updateDailyOpenInterest(event.block.timestamp, volume, true, solverAccount, account.accountSource)
 	}
 }

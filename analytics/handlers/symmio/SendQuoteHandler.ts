@@ -20,8 +20,8 @@ export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 		updateActivityTimestamps(account, event.block.timestamp)
 
 		updateHistories(
-			new UpdateHistoriesParams(account, event.block.timestamp)
+			new UpdateHistoriesParams(account, null, event.block.timestamp)
 				.quotesCount(BigInt.fromString("1"))
-		)
+		);
 	}
 }

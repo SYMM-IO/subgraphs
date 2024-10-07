@@ -33,7 +33,7 @@ export class AllocatePartyAHandler<T> extends CommonAllocatePartyAHandler<T> {
 			allocate.save()
 		}
 		updateHistories(
-			new UpdateHistoriesParams(account, event.block.timestamp)
+			new UpdateHistoriesParams(account, null, event.block.timestamp)
 				.allocate(event.params.amount)
 		)
 	}

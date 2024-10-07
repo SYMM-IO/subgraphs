@@ -1,10 +1,10 @@
 import { DebugEntity, Quote } from "../../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote&analitics&user"
 import { BaseHandler, Version } from "../../BaseHandler"
 import { ethereum } from "@graphprotocol/graph-ts";
 import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3";
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2";
 import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0";
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
 
 export class FillCloseRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {

@@ -33,6 +33,14 @@
     "DeallocateForPartyB",
     "SendQuote",
     "OpenPosition",
-    "RequestToClosePosition"
+    "RequestToClosePosition",
+    "RequestToClosePosition",
+    "LiquidatePartyA",
+    "LiquidatePositionsPartyA",
+    "LiquidatePendingPositionsPartyA",
+    "LiquidatePartyB",
+    "LiquidatePositionsPartyB",
+    "RegisterPartyB",
+    "AddBridge"
   ]
 }

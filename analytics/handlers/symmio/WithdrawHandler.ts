@@ -1,10 +1,11 @@
 import {WithdrawHandler as CommonWithdrawHandler} from "../../../common/handlers/symmio/WithdrawHandler"
-import {Account, BalanceChange} from "../../../generated/schema"
+import {BalanceChange} from "../../../generated/schema"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
-import {getConfiguration, newUserAndAccount} from "../../utils/builders";
+import {getConfiguration} from "../../utils/builders";
 
 import {updateActivityTimestamps, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import {AccountType, createNewAccountIfNotExists} from "../../../common/utils/builders";
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -15,8 +16,7 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
 
-		newUserAndAccount(event.params.sender, event.block, event.transaction)
-		let account = Account.load(event.params.sender.toHexString())!
+		let account = createNewAccountIfNotExists(event.params.sender, event.params.sender, null, AccountType.UNKNOWN, event.block, event.transaction)
 		account.globalCounter = globalCounter
 		account.withdraw = account.withdraw.plus(event.params.amount)
 		account.updateTimestamp = event.block.timestamp
@@ -34,7 +34,7 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		withdraw.collateral = getConfiguration(event).collateral
 		withdraw.save()
 		updateHistories(
-			new UpdateHistoriesParams(account, event.block.timestamp)
+			new UpdateHistoriesParams(account, null, event.block.timestamp)
 				.withdraw(event.params.amount)
 		)
 	}

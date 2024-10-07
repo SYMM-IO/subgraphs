@@ -36,6 +36,7 @@ type DailyHistory @entity {
     tradeVolume: BigInt!
     openTradeVolume: BigInt!
     closeTradeVolume: BigInt!
+    liquidateTradeVolume: BigInt!
     deposit: BigInt!
     withdraw: BigInt!
     allocate: BigInt!
@@ -47,6 +48,22 @@ type DailyHistory @entity {
     openInterest: BigInt!
     fundingPaid: BigInt!
     fundingReceived: BigInt!
+    accountSource: Bytes
+    updateTimestamp: BigInt!
+    timestamp: BigInt!
+}
+
+type SolverDailyHistory @entity{
+    id: ID!
+    tradeVolume: BigInt!
+    openTradeVolume: BigInt!
+    closeTradeVolume: BigInt!
+    openInterest: BigInt!
+    averagePositionSize: BigInt!
+    positionsCount: BigInt!
+    fundingPaid: BigInt!
+    fundingReceived: BigInt!
+    solver: Bytes!
     accountSource: Bytes
     updateTimestamp: BigInt!
     timestamp: BigInt!

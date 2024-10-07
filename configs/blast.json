@@ -37,9 +37,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_blast_8_2",
-		"liquidation": "liquidation_blast",
-		"main": "main_blast_8_2",
-		"events": "events_blast_8_2"
+		"analytics": "blast_analytics",
+		"events": "blast_events"
 	}
 }

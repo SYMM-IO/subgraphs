@@ -81,7 +81,7 @@ def create_schema_file(target_module: str, target_config: Dict[str, Any]):
     common_models_dir = os.path.join("./common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
-        "./schema.graphql", "w"
+            "./schema.graphql", "w"
     ) as dest_file:
         dest_file.write("# Imported Models\n")
         for model in os.listdir(common_models_dir):
@@ -121,7 +121,7 @@ def generate_src_ts(target_module: str, contract: Contract):
     imports.add("import {Version} from '../common/BaseHandler'")
 
     with open(
-        os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
+            os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
     ) as src_file:
         src_file.write("\n".join(sorted(imports)))
         src_file.write("\n\n")
@@ -139,7 +139,7 @@ def get_event_inputs(event_name: str, abi_file_path: str) -> List[Dict[str, Any]
 
 
 def generate_handler_files(
-    target_module: str, contract: Contract, simple_mapping: bool = False
+        target_module: str, contract: Contract, simple_mapping: bool = False
 ):
     for event in contract.events:
         handler_dir = os.path.join(target_module, "handlers", contract.abi)
@@ -226,7 +226,7 @@ def load_dependencies(file_path: str) -> Dict[str, List[str]]:
 
 
 def get_needed_events_for(
-    models: List[str], target_module: str, contract: Contract
+        models: List[str], target_module: str, contract: Contract
 ) -> List[str]:
     common_dependencies = load_dependencies(
         os.path.join("./common", f"deps_{contract.path()}.json")
@@ -259,7 +259,7 @@ def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
 
 
 def get_events_with_signatures(
-    needed_events: List[str], contract: Contract
+        needed_events: List[str], contract: Contract
 ) -> List[Event]:
     events = []
     source = contract.path()
@@ -283,7 +283,7 @@ def get_events_with_signatures(
 
 def prepare_module(config: Config, target_module: str):
     with open(
-        os.path.join(target_module, "subgraph_config.json"), "r"
+            os.path.join(target_module, "subgraph_config.json"), "r"
     ) as target_config_file:
         target_config = json.load(target_config_file)
 
@@ -387,7 +387,8 @@ def prepare_module(config: Config, target_module: str):
             source_config["source"]["endBlock"] = int(contract.endBlock)
 
         if len(contract.dependencies) > 0:
-            source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in contract.dependencies]
+            source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in
+                                                 contract.dependencies]
 
         contract_indexes[(contract.abi, contract.version)] += 1
 
@@ -407,6 +408,7 @@ def main():
     parser = argparse.ArgumentParser(description="Module preparation script.")
     parser.add_argument("config_file", type=str, help="Configuration file path")
     parser.add_argument("module_name", type=str, help="Target module name")
+    parser.add_argument("version", type=str, nargs='?', help="Deployment version")
     parser.add_argument("--create-src", action="store_true", help="Create the src file")
     parser.add_argument(
         "--create-handlers", action="store_true", help="Create the handler files"
@@ -415,9 +417,6 @@ def main():
         "--simple-mapping", action="store_true", help="Generate simple handler mappings"
     )
     parser.add_argument("--deploy", action="store_true", help="Deploy the module")
-    parser.add_argument(
-        "--mantle", action="store_true", help="Deployment is on mantle or not"
-    )
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
@@ -445,23 +444,12 @@ def main():
     subprocess.run(["graph", "build"], check=True)
 
     if args.deploy:
+        if args.version is None:
+            raise Exception("Version should be provided in deploy with --version")
+
         deploy_url = config.deploy_urls[args.module_name]
-        deploy_command = ["graph", "deploy"]
+        deploy_command = ["goldsky", "subgraph", "deploy", f"{deploy_url}/{args.version}", "--path", "build"]
 
-        if args.mantle:
-            deploy_command.append(deploy_url)
-        else:
-            deploy_command.extend(["--studio", deploy_url])
-
-        if args.mantle:
-            deploy_command.extend(
-                [
-                    "--node",
-                    "https://subgraph-api.mantle.xyz/deploy",
-                    "--ipfs",
-                    "https://subgraph-api.mantle.xyz/ipfs",
-                ]
-            )
         subprocess.run(deploy_command, check=True)
 
 

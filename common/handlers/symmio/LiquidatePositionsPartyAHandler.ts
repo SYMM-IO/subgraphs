@@ -1,12 +1,21 @@
-import { BaseHandler, Version } from "../../BaseHandler"
-import { DebugEntity, Quote } from "../../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote&analitics&user"
-import { BigInt, ethereum, log } from "@graphprotocol/graph-ts";
-import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2";
-import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3";
-import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0";
+import {BaseHandler, Version} from "../../BaseHandler"
+import {DebugEntity, Quote} from "../../../generated/schema"
+import {BigInt, ethereum, log} from "@graphprotocol/graph-ts";
+import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2";
+import {getQuote as getQuote_0_8_3} from "../../../common/contract_utils_0_8_3";
+import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
+import {AccountType, createNewAccountIfNotExists} from "../../utils/builders";
 
 export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
+
+	handleAccount(_event: ethereum.Event, version: Version): void {
+		super.handleAccount(_event, version);
+		// @ts-ignore
+		const event = changetype<T>(_event)
+		createNewAccountIfNotExists(event.params.liquidator, event.params.liquidator, null, AccountType.LIQUIDATOR, event.block, event.transaction)
+	}
+
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)

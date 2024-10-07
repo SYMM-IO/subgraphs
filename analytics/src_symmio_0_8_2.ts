@@ -15,10 +15,14 @@ import {
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
 	ForceClosePosition,
+	LiquidatePartyA,
+	LiquidatePartyB,
+	LiquidatePendingPositionsPartyA,
 	LiquidatePositionsPartyA,
 	LiquidatePositionsPartyB,
 	LockQuote,
 	OpenPosition,
+	RegisterPartyB,
 	RequestToCancelCloseRequest,
 	RequestToCancelQuote,
 	RequestToClosePosition,
@@ -44,10 +48,14 @@ import {FillCloseRequestHandler} from './handlers/symmio/FillCloseRequestHandler
 import {ForceCancelCloseRequestHandler} from './handlers/symmio/ForceCancelCloseRequestHandler'
 import {ForceCancelQuoteHandler} from './handlers/symmio/ForceCancelQuoteHandler'
 import {ForceClosePositionHandler} from './handlers/symmio/ForceClosePositionHandler'
+import {LiquidatePartyAHandler} from './handlers/symmio/LiquidatePartyAHandler'
+import {LiquidatePartyBHandler} from './handlers/symmio/LiquidatePartyBHandler'
+import {LiquidatePendingPositionsPartyAHandler} from './handlers/symmio/LiquidatePendingPositionsPartyAHandler'
 import {LiquidatePositionsPartyAHandler} from './handlers/symmio/LiquidatePositionsPartyAHandler'
 import {LiquidatePositionsPartyBHandler} from './handlers/symmio/LiquidatePositionsPartyBHandler'
 import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
+import {RegisterPartyBHandler} from './handlers/symmio/RegisterPartyBHandler'
 import {RequestToCancelCloseRequestHandler} from './handlers/symmio/RequestToCancelCloseRequestHandler'
 import {RequestToCancelQuoteHandler} from './handlers/symmio/RequestToCancelQuoteHandler'
 import {RequestToClosePositionHandler} from './handlers/symmio/RequestToClosePositionHandler'
@@ -151,6 +159,24 @@ export function handleForceClosePosition(event: ForceClosePosition): void {
 }
 
 
+export function handleLiquidatePartyA(event: LiquidatePartyA): void {
+	let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleLiquidatePartyB(event: LiquidatePartyB): void {
+	let handler = new LiquidatePartyBHandler<LiquidatePartyB>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPositionsPartyA): void {
+	let handler = new LiquidatePendingPositionsPartyAHandler<LiquidatePendingPositionsPartyA>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
 export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyA): void {
 	let handler = new LiquidatePositionsPartyAHandler<LiquidatePositionsPartyA>()
 	handler.handle(event, Version.v_0_8_2)
@@ -171,6 +197,12 @@ export function handleLockQuote(event: LockQuote): void {
 
 export function handleOpenPosition(event: OpenPosition): void {
 	let handler = new OpenPositionHandler<OpenPosition>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleRegisterPartyB(event: RegisterPartyB): void {
+	let handler = new RegisterPartyBHandler<RegisterPartyB>()
 	handler.handle(event, Version.v_0_8_2)
 }
 

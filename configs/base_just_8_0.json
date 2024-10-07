@@ -23,10 +23,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_base_8_2",
-		"main": "main_base_8_2",
-		"events": "events_base_8_2",
-		"userprofile": "userprofile_base_8_2",
-		"liquidation": "liquidation_base"
+		"analytics": "base_0_8_0_analytics",
+		"events": "base_0_8_0_events"
 	}
 }

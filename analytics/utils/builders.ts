@@ -1,4 +1,4 @@
-import {Address, BigInt, Bytes} from "@graphprotocol/graph-ts";
+import {BigInt, Bytes} from "@graphprotocol/graph-ts";
 import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
 import {
 	Account,
@@ -8,6 +8,7 @@ import {
 	DailyUserHistory,
 	MonthlyHistory,
 	OpenInterest,
+	SolverDailyHistory,
 	SymbolTradeHistory,
 	TotalHistory,
 	TotalSymbolTradesHistory,
@@ -15,16 +16,7 @@ import {
 	UserActivity,
 	WeeklyHistory
 } from "../../generated/schema";
-import {createNewAccount, createNewUser} from "../../common/utils/analytics&user_profile";
 import {startOfDay, startOfMonth, startOfWeek} from "./time";
-
-export function newUserAndAccount(userAddress: Address, block: ethereum.Block, transaction: ethereum.Transaction): void {
-	let account = Account.load(userAddress.toHexString())
-	if (account == null) {
-		let user = createNewUser(userAddress, block, transaction)
-		createNewAccount(userAddress, user, null, block, transaction)
-	}
-}
 
 export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): DailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
@@ -40,6 +32,7 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.tradeVolume = BigInt.zero()
 		dh.openTradeVolume = BigInt.zero()
 		dh.closeTradeVolume = BigInt.zero()
+		dh.liquidateTradeVolume = BigInt.zero()
 		dh.allocate = BigInt.zero()
 		dh.deallocate = BigInt.zero()
 		dh.newUsers = BigInt.zero()
@@ -53,6 +46,29 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.save()
 	}
 	return dh
+}
+
+export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null): SolverDailyHistory {
+	const dateStr = startOfDay(timestamp).getTime().toString()
+	const id = dateStr + "_" + solver.toHexString() + "_" + (accountSource === null ? "null" : accountSource.toHexString())
+	let sdh = SolverDailyHistory.load(id)
+	if (sdh == null) {
+		sdh = new SolverDailyHistory(id)
+		sdh.updateTimestamp = timestamp
+		sdh.timestamp = timestamp
+		sdh.tradeVolume = BigInt.zero()
+		sdh.openTradeVolume = BigInt.zero()
+		sdh.closeTradeVolume = BigInt.zero()
+		sdh.openInterest = BigInt.zero()
+		sdh.positionsCount = BigInt.zero()
+		sdh.averagePositionSize = BigInt.zero()
+		sdh.fundingPaid = BigInt.zero()
+		sdh.fundingReceived = BigInt.zero()
+		sdh.accountSource = accountSource
+		sdh.solver = solver
+		sdh.save()
+	}
+	return sdh
 }
 
 export function getWeeklyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): WeeklyHistory {

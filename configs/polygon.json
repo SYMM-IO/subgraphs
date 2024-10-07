@@ -37,8 +37,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_polygon_8_2",
-		"main": "main_polygon_8_2",
-		"events": "events_polygon_8_2"
+		"analytics": "polygon_analytics",
+		"events": "polygon_events"
 	}
 }

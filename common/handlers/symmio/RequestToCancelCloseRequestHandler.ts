@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { Quote } from "../../../generated/schema"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote&analitics&user"
 import { ethereum } from "@graphprotocol/graph-ts";
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
 
 export class RequestToCancelCloseRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {

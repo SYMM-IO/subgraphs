@@ -9,9 +9,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_iota_8_3",
-		"main": "main_iota_8_3",
-		"events": "events_iota_8_3",
-		"userprofile": "userprofile_iota_8_3"
+		"analytics": "iota_analytics",
+		"events": "iota_events"
 	}
 }

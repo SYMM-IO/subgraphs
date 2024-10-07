@@ -23,6 +23,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	history.save()
 
 	let account = Account.load(event.params.partyA.toHexString())!
+	let solverAccount = Account.load(quote.partyB!.toHexString())!
 
 	const pnl = unDecimal(
 		(quote.positionType == 0
@@ -40,7 +41,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 		loss = pnl
 
 	updateHistories(
-		new UpdateHistoriesParams(account, event.block.timestamp)
+		new UpdateHistoriesParams(account, solverAccount, event.block.timestamp)
 			.closeTradeVolume(additionalVolume)
 			.symbolId(quote.symbolId!)
 			.loss(loss)
@@ -48,10 +49,10 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 		updateHistories(
-			new UpdateHistoriesParams(Account.load(quote.partyB!.toHexString())!, event.block.timestamp, account.accountSource)
+			new UpdateHistoriesParams(solverAccount, null, event.block.timestamp, account.accountSource)
 				.closeTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!)
 		)
 	}
-	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.initialOpenedPrice!)), false, account.accountSource)
+	updateDailyOpenInterest(event.block.timestamp, unDecimal(event.params.filledAmount.times(quote.initialOpenedPrice!)), false, solverAccount, account.accountSource)
 }

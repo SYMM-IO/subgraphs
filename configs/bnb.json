@@ -30,9 +30,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "analytics_bnb_8_2",
-		"main": "main_bnb_8_2",
-		"events": "events_bnb_8_2",
-		"userprofile": "userprofile_bnb_8_2"
+		"analytics": "bnb_analytics",
+		"events": "bnb_events"
 	}
 }

@@ -50,7 +50,7 @@ export enum BalanceChangeType {
 	DEPOSIT,
 	WITHDRAW,
 }
-
+// @ts-ignore
 export let balanceChangeTypes = new Map<number, string>()
 balanceChangeTypes.set(BalanceChangeType.ALLOCATE, "ALLOCATE")
 balanceChangeTypes.set(BalanceChangeType.DEALLOCATE, "DEALLOCATE")

@@ -6,6 +6,7 @@ import {
 	getDailyUserHistoryForTimestamp,
 	getMonthlyHistoryForTimestamp,
 	getOpenInterest,
+	getSolverDailyHistoryForTimestamp,
 	getSymbolTradeHistory,
 	getTotalHistory,
 	getTotalSymbolTradesHistory,
@@ -23,25 +24,30 @@ export function diffInSeconds(timestamp1: BigInt, timestamp2: BigInt): BigInt {
 	return timestamp1.minus(timestamp2)
 }
 
-export function updateDailyOpenInterest(blockTimestamp: BigInt, value: BigInt, increase: boolean, accountSource: Bytes | null): void {
+export function updateDailyOpenInterest(blockTimestamp: BigInt, value: BigInt, increase: boolean, solver: Account, accountSource: Bytes | null): void {
 	let oi = getOpenInterest(blockTimestamp, accountSource)
 	let dh = getDailyHistoryForTimestamp(blockTimestamp, accountSource)
+	let sdh = getSolverDailyHistoryForTimestamp(blockTimestamp, solver.account, accountSource)
 
 	const sod = BigInt.fromString((startOfDay(blockTimestamp).getTime() / 1000).toString())
 
 	if (isSameDay(blockTimestamp, oi.timestamp)) {
 		oi.accumulatedAmount = oi.accumulatedAmount.plus(diffInSeconds(blockTimestamp, oi.timestamp).times(oi.amount))
 		dh.openInterest = oi.accumulatedAmount.div(diffInSeconds(blockTimestamp, sod))
+		sdh.openInterest = oi.accumulatedAmount.div(diffInSeconds(blockTimestamp, sod))
 	} else {
 		dh.openInterest = oi.accumulatedAmount.div(BigInt.fromString("86400"))
+		sdh.openInterest = oi.accumulatedAmount.div(BigInt.fromString("86400"))
 		oi.accumulatedAmount = diffInSeconds(blockTimestamp, sod).times(oi.amount)
 	}
 	oi.amount = increase ? oi.amount.plus(value) : oi.amount.minus(value)
 	oi.timestamp = blockTimestamp
 	dh.updateTimestamp = blockTimestamp
+	sdh.updateTimestamp = blockTimestamp
 
 	oi.save()
 	dh.save()
+	sdh.save()
 }
 
 export function updateActivityTimestamps(account: Account, timestamp: BigInt): void {
@@ -70,10 +76,12 @@ export function updateActivityTimestamps(account: Account, timestamp: BigInt): v
 
 export class UpdateHistoriesParams {
 	account: Account;
+	solver: Account | null;
 	accountSource: Bytes | null;
 	timestamp: BigInt;
 	_openTradeVolume: BigInt = BigInt.zero();
 	_closeTradeVolume: BigInt = BigInt.zero();
+	_liquidateTradeVolume: BigInt = BigInt.zero();
 	_symbolId: BigInt = BigInt.zero();
 	_tradingFee: BigInt = BigInt.zero();
 	_allocate: BigInt = BigInt.zero();
@@ -85,9 +93,11 @@ export class UpdateHistoriesParams {
 	_fundingReceived: BigInt = BigInt.zero();
 	_loss: BigInt = BigInt.zero();
 	_profit: BigInt = BigInt.zero();
+	_positionsCount: BigInt = BigInt.zero();
 
-	constructor(account: Account, timestamp: BigInt, accountSource: Bytes | null = Bytes.empty()) {
+	constructor(account: Account, solver: Account | null, timestamp: BigInt, accountSource: Bytes | null = Bytes.empty()) {
 		this.account = account;
+		this.solver = solver;
 		if (accountSource === null || accountSource == Bytes.empty() || accountSource.length == 0)
 			accountSource = account.accountSource
 		this.accountSource = accountSource;
@@ -101,6 +111,16 @@ export class UpdateHistoriesParams {
 
 	closeTradeVolume(closeTradeVolume: BigInt): UpdateHistoriesParams {
 		this._closeTradeVolume = closeTradeVolume;
+		return this;
+	}
+
+	liquidateTradeVolume(liquidateTradeVolume: BigInt): UpdateHistoriesParams {
+		this._liquidateTradeVolume = liquidateTradeVolume;
+		return this;
+	}
+
+	positionsCount(positionsCount: BigInt): UpdateHistoriesParams {
+		this._positionsCount = positionsCount;
 		return this;
 	}
 
@@ -165,11 +185,13 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	const timestamp = params.timestamp;
 	const openTradeVolume = params._openTradeVolume;
 	const closeTradeVolume = params._closeTradeVolume;
+	const liquidateTradeVolume = params._liquidateTradeVolume;
 
 	const dh = getDailyHistoryForTimestamp(timestamp, params.accountSource)
-	dh.tradeVolume = dh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume))
+	dh.tradeVolume = dh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 	dh.openTradeVolume = dh.openTradeVolume.plus(openTradeVolume)
 	dh.closeTradeVolume = dh.closeTradeVolume.plus(closeTradeVolume)
+	dh.liquidateTradeVolume = dh.liquidateTradeVolume.plus(liquidateTradeVolume)
 	dh.platformFee = dh.platformFee.plus(params._tradingFee)
 	dh.allocate = dh.allocate.plus(params._allocate)
 	dh.deallocate = dh.deallocate.plus(params._deallocate)
@@ -180,6 +202,21 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.fundingReceived = dh.fundingReceived.plus(params._fundingReceived)
 	dh.updateTimestamp = timestamp
 	dh.save()
+
+	if (params.solver != null) {
+		const sdh = getSolverDailyHistoryForTimestamp(timestamp, params.solver!.account, params.accountSource)
+		sdh.tradeVolume = sdh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume))
+		sdh.openTradeVolume = sdh.openTradeVolume.plus(openTradeVolume)
+		sdh.closeTradeVolume = sdh.closeTradeVolume.plus(closeTradeVolume)
+		sdh.fundingPaid = sdh.fundingPaid.plus(params._fundingPaid)
+		sdh.fundingReceived = sdh.fundingReceived.plus(params._fundingReceived)
+		if (params._positionsCount.plus(sdh.positionsCount).gt(BigInt.zero())) {
+			sdh.averagePositionSize = sdh.averagePositionSize.times(sdh.positionsCount).plus(openTradeVolume).div(params._positionsCount.plus(sdh.positionsCount))
+			sdh.positionsCount = sdh.positionsCount.plus(params._positionsCount)
+		}
+		sdh.updateTimestamp = timestamp
+		sdh.save()
+	}
 
 	const th = getTotalHistory(timestamp, account.accountSource)
 	th.tradeVolume = th.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume))

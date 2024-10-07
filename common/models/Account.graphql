@@ -6,6 +6,7 @@ type Account @entity {
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	name: String
+	type: String
 	lastActivityTimestamp: BigInt!
 	transaction: Bytes!
 	updateTimestamp: BigInt!

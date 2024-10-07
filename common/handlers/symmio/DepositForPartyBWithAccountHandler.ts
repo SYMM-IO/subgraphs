@@ -1,8 +1,8 @@
 import {Version} from "../../BaseHandler"
 import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
 import {Account} from "../../../generated/schema";
-import {newUserAndAccount} from "../../../analytics/utils/builders";
 import {DepositForPartyBHandler} from "./DepositForPartyBHandler";
+import {AccountType, createNewAccountIfNotExists} from "../../utils/builders";
 
 export class DepositForPartyBWithAccountHandler<T> extends DepositForPartyBHandler<T> {
 	handleAccount(_event: ethereum.Event, version: Version): void {
@@ -12,7 +12,7 @@ export class DepositForPartyBWithAccountHandler<T> extends DepositForPartyBHandl
 		const event = changetype<T>(_event)
 		const globalCounter = super.handleGlobalCounter()
 
-		newUserAndAccount(event.params.partyB, event.block, event.transaction)
+		createNewAccountIfNotExists(event.params.partyB, event.params.partyB, null, AccountType.SOLVER, event.block, event.transaction)
 		let account = Account.load(event.params.partyB.toHexString())!
 		account.deposit = account.deposit.plus(event.params.amount)
 		account.globalCounter = globalCounter
