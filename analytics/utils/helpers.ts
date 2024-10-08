@@ -200,6 +200,10 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.quotesCount = dh.quotesCount.plus(params._quotesCount)
 	dh.fundingPaid = dh.fundingPaid.plus(params._fundingPaid)
 	dh.fundingReceived = dh.fundingReceived.plus(params._fundingReceived)
+	if (params._positionsCount.plus(dh.positionsCount).gt(BigInt.zero())) {
+		dh.averagePositionSize = dh.averagePositionSize.times(dh.positionsCount).plus(openTradeVolume).div(params._positionsCount.plus(dh.positionsCount))
+		dh.positionsCount = dh.positionsCount.plus(params._positionsCount)
+	}
 	dh.updateTimestamp = timestamp
 	dh.save()
 

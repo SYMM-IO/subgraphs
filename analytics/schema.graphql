@@ -48,6 +48,8 @@ type DailyHistory @entity {
     openInterest: BigInt!
     fundingPaid: BigInt!
     fundingReceived: BigInt!
+    averagePositionSize: BigInt!
+    positionsCount: BigInt!
     accountSource: Bytes
     updateTimestamp: BigInt!
     timestamp: BigInt!

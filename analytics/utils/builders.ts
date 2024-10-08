@@ -42,6 +42,8 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.openInterest = BigInt.zero()
 		dh.fundingPaid = BigInt.zero()
 		dh.fundingReceived = BigInt.zero()
+		dh.positionsCount = BigInt.zero()
+		dh.averagePositionSize = BigInt.zero()
 		dh.accountSource = accountSource
 		dh.save()
 	}
