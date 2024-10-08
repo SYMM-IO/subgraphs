@@ -59,6 +59,7 @@ export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Byt
 		sdh.tradeVolume = BigInt.zero()
 		sdh.openTradeVolume = BigInt.zero()
 		sdh.closeTradeVolume = BigInt.zero()
+		sdh.liquidateTradeVolume = BigInt.zero()
 		sdh.openInterest = BigInt.zero()
 		sdh.positionsCount = BigInt.zero()
 		sdh.averagePositionSize = BigInt.zero()
@@ -114,6 +115,7 @@ export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null):
 		th.tradeVolume = BigInt.zero()
 		th.openTradeVolume = BigInt.zero()
 		th.closeTradeVolume = BigInt.zero()
+		th.liquidateTradeVolume = BigInt.zero()
 		th.allocate = BigInt.zero()
 		th.deallocate = BigInt.zero()
 		th.users = BigInt.zero()
@@ -235,6 +237,7 @@ export function getDailyUserHistoryForTimestamp(
 		dh.quotesCount = BigInt.zero();
 		dh.openTradeVolume = BigInt.zero();
 		dh.closeTradeVolume = BigInt.zero();
+		dh.liquidateTradeVolume = BigInt.zero();
 		dh.allocate = BigInt.zero();
 		dh.deallocate = BigInt.zero();
 		dh.accAllocate = th.allocate; // carry over from total history
@@ -268,6 +271,7 @@ export function getTotalUserHistory(
 		th.quotesCount = BigInt.zero();
 		th.openTradeVolume = BigInt.zero();
 		th.closeTradeVolume = BigInt.zero();
+		th.liquidateTradeVolume = BigInt.zero();
 		th.allocate = BigInt.zero();
 		th.deallocate = BigInt.zero();
 		th.platformFeePaid = BigInt.zero();
