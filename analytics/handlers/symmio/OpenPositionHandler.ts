@@ -56,7 +56,6 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 			updateHistories(
 				new UpdateHistoriesParams(solverAccount, null, event.block.timestamp, account.accountSource)
 					.openTradeVolume(volume)
-					.positionsCount(BigInt.fromI32(1))
 					.symbolId(quote.symbolId!)
 			)
 		}

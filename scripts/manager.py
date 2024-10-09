@@ -416,7 +416,10 @@ def main():
     parser.add_argument(
         "--simple-mapping", action="store_true", help="Generate simple handler mappings"
     )
-    parser.add_argument("--deploy", action="store_true", help="Deploy the module")
+    parser.add_argument("--deploy", action="store_true", help="Deploy the subgraph")
+    parser.add_argument("--delete", action="store_true", help="Delete the subgraph")
+    parser.add_argument("--add-latest-tag", action="store_true", help="Add 'latest' tag to the subgraph")
+    parser.add_argument("--delete-latest-tag", action="store_true", help="Delete 'latest' tag from the subgraph")
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
@@ -429,7 +432,8 @@ def main():
         config_data = json.load(f)
     config = Config.from_dict(config_data)
 
-    prepare_module(config, args.module_name)
+    if not args.add_latest_tag and not args.delete_latest_tag and not args.delete:
+        prepare_module(config, args.module_name)
 
     if args.create_src:
         for contract in config.contracts:
@@ -440,17 +444,37 @@ def main():
         for contract in config.contracts:
             generate_handler_files(args.module_name, contract, args.simple_mapping)
 
-    subprocess.run(["graph", "codegen"], check=True)
-    subprocess.run(["graph", "build"], check=True)
+    if not args.add_latest_tag and not args.delete_latest_tag and not args.delete:
+        subprocess.run(["graph", "codegen"], check=True)
+        subprocess.run(["graph", "build"], check=True)
 
     if args.deploy:
         if args.version is None:
-            raise Exception("Version should be provided in deploy with --version")
-
+            raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
-        deploy_command = ["goldsky", "subgraph", "deploy", f"{deploy_url}/{args.version}", "--path", "build"]
+        command = ["goldsky", "subgraph", "deploy", f"{deploy_url}/{args.version}", "--path", "build"]
+        subprocess.run(command, check=True)
 
-        subprocess.run(deploy_command, check=True)
+    if args.delete:
+        if args.version is None:
+            raise Exception("Version should be provided with --version")
+        deploy_url = config.deploy_urls[args.module_name]
+        command = ["goldsky", "subgraph", "delete", f"{deploy_url}/{args.version}"]
+        subprocess.run(command, check=True)
+
+    if args.add_latest_tag:
+        if args.version is None:
+            raise Exception("Version should be provided with --version")
+        deploy_url = config.deploy_urls[args.module_name]
+        command = ["goldsky", "subgraph", "tag", "create", f"{deploy_url}/{args.version}", "--tag", "latest"]
+        subprocess.run(command, check=True)
+
+    if args.delete_latest_tag:
+        if args.version is None:
+            raise Exception("Version should be provided with --version")
+        deploy_url = config.deploy_urls[args.module_name]
+        command = ["goldsky", "subgraph", "tag", "delete", f"{deploy_url}/{args.version}", "--tag", "latest"]
+        subprocess.run(command, check=True)
 
 
 if __name__ == "__main__":

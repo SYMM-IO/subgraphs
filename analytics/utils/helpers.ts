@@ -200,7 +200,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.quotesCount = dh.quotesCount.plus(params._quotesCount)
 	dh.fundingPaid = dh.fundingPaid.plus(params._fundingPaid)
 	dh.fundingReceived = dh.fundingReceived.plus(params._fundingReceived)
-	if (params._positionsCount.plus(dh.positionsCount).gt(BigInt.zero())) {
+	if (params._positionsCount.gt(BigInt.zero())) {
 		dh.averagePositionSize = dh.averagePositionSize.times(dh.positionsCount).plus(openTradeVolume).div(params._positionsCount.plus(dh.positionsCount))
 		dh.positionsCount = dh.positionsCount.plus(params._positionsCount)
 	}
@@ -215,7 +215,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.liquidateTradeVolume = sdh.liquidateTradeVolume.plus(liquidateTradeVolume)
 		sdh.fundingPaid = sdh.fundingPaid.plus(params._fundingPaid)
 		sdh.fundingReceived = sdh.fundingReceived.plus(params._fundingReceived)
-		if (params._positionsCount.plus(sdh.positionsCount).gt(BigInt.zero())) {
+		if (params._positionsCount.gt(BigInt.zero())) {
 			sdh.averagePositionSize = sdh.averagePositionSize.times(sdh.positionsCount).plus(openTradeVolume).div(params._positionsCount.plus(sdh.positionsCount))
 			sdh.positionsCount = sdh.positionsCount.plus(params._positionsCount)
 		}
