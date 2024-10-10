@@ -29,7 +29,7 @@ export function createNewAccountIfNotExists(
 ): AccountModel {
 	let u = UserModel.load(user.toHexString())
 	if (u == null) {
-		u = new UserModel(address.toHexString())
+		u = new UserModel(user.toHexString())
 		u.address = user
 		u.timestamp = block.timestamp
 		u.transaction = transaction.hash

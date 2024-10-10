@@ -55,6 +55,13 @@
 			"version": "1",
 			"startBlock": "19460596",
 			"name": "vibe_multi_account"
+		},
+		{
+			"address": "0x921Dd892D67Aed3d492F9ad77b30b60160B53Fe1",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "18701626",
+			"name": "multi_account_privex"
 		}
 	],
 	"deploy_urls": {
