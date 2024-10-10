@@ -459,7 +459,7 @@ def main():
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
-        command = ["goldsky", "subgraph", "delete", f"{deploy_url}/{args.version}"]
+        command = ["goldsky", "subgraph", "delete", "-f", f"{deploy_url}/{args.version}"]
         subprocess.run(command, check=True)
 
     if args.add_latest_tag:
