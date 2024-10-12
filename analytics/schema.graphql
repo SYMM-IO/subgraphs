@@ -105,6 +105,7 @@ type TotalHistory @entity {
     fundingPaid: BigInt!
     fundingReceived: BigInt!
     accountSource: Bytes
+    collateral: Bytes!
     updateTimestamp: BigInt!
     timestamp: BigInt!
 }

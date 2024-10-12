@@ -104,8 +104,8 @@ export function getMonthlyHistoryForTimestamp(timestamp: BigInt, accountSource: 
 	return mh
 }
 
-export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null): TotalHistory {
-	const id = accountSource === null ? "null" : accountSource.toHexString()
+export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null, collateral: Bytes): TotalHistory {
+	const id = (accountSource === null ? "null" : accountSource.toHexString()) + "_" + collateral.toHexString()
 	let th = TotalHistory.load(id)
 	if (th == null) {
 		th = new TotalHistory(id)
@@ -125,6 +125,7 @@ export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null):
 		th.platformFee = BigInt.zero()
 		th.fundingReceived = BigInt.zero()
 		th.fundingPaid = BigInt.zero()
+		th.collateral = collateral
 		th.accountSource = accountSource
 		th.save()
 	}
@@ -325,4 +326,8 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 		configuration.save()
 	}
 	return configuration
+}
+
+export function getAlreadyCreatedConfiguration(): Configuration {
+	return Configuration.load("0")!
 }

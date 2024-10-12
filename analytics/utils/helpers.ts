@@ -1,6 +1,7 @@
 import {BigInt, Bytes} from "@graphprotocol/graph-ts";
 import {Account} from "../../generated/schema";
 import {
+	getAlreadyCreatedConfiguration,
 	getDailyHistoryForTimestamp,
 	getDailySymbolTradesHistory,
 	getDailyUserHistoryForTimestamp,
@@ -223,7 +224,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.save()
 	}
 
-	const th = getTotalHistory(timestamp, account.accountSource)
+	const th = getTotalHistory(timestamp, account.accountSource, getAlreadyCreatedConfiguration().collateral)
 	th.tradeVolume = th.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 	th.openTradeVolume = th.openTradeVolume.plus(openTradeVolume)
 	th.closeTradeVolume = th.closeTradeVolume.plus(closeTradeVolume)
