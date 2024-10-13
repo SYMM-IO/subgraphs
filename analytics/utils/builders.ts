@@ -17,6 +17,10 @@ import {
 	WeeklyHistory
 } from "../../generated/schema";
 import {startOfDay, startOfMonth, startOfWeek} from "./time";
+import {Version} from "../../common/BaseHandler";
+import {getCollateral as getCollateral_0_8_3} from "../../common/contract_utils_0_8_3";
+import {getCollateral as getCollateral_0_8_2} from "../../common/contract_utils_0_8_2";
+import {getCollateral as getCollateral_0_8_0} from "../../common/contract_utils_0_8_0";
 
 export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): DailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
@@ -328,6 +332,26 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 	return configuration
 }
 
-export function getAlreadyCreatedConfiguration(): Configuration {
-	return Configuration.load("0")!
+export function getAlreadyCreatedConfiguration(event: ethereum.Event, version: Version): Configuration {
+	let conf = Configuration.load("0")!
+	if (conf.collateral == event.address) {
+		switch (version) {
+			case Version.v_0_8_3: {
+				conf.collateral = getCollateral_0_8_3(event.address)!
+				conf.save()
+				break
+			}
+			case Version.v_0_8_2: {
+				conf.collateral = getCollateral_0_8_2(event.address)!
+				conf.save()
+				break
+			}
+			case Version.v_0_8_0: {
+				conf.collateral = getCollateral_0_8_0(event.address)!
+				conf.save()
+				break
+			}
+		}
+	}
+	return conf
 }

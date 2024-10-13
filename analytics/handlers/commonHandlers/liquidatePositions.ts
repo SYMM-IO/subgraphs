@@ -51,13 +51,13 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	let solverAccount = Account.load(quote.partyB!.toHexString())!
 
 	updateHistories(
-		new UpdateHistoriesParams(account, solverAccount, event.block.timestamp)
+		new UpdateHistoriesParams(version, account, solverAccount, event)
 			.liquidateTradeVolume(additionalVolume)
 			.symbolId(quote.symbolId!)
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 		updateHistories(
-			new UpdateHistoriesParams(solverAccount, null, event.block.timestamp, account.accountSource)
+			new UpdateHistoriesParams(version, solverAccount, null, event, account.accountSource)
 				.liquidateTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!)
 		)

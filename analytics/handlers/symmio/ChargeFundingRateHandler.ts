@@ -52,7 +52,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 				fundingReceived = funding
 
 			updateHistories(
-				new UpdateHistoriesParams(account, solverAccount, event.block.timestamp)
+				new UpdateHistoriesParams(version, account, solverAccount, event)
 					.symbolId(quote.symbolId!)
 					.fundingPaid(fundingPaid)
 					.fundingReceived(fundingReceived)

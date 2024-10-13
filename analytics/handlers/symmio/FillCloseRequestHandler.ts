@@ -20,15 +20,15 @@ export class FillCloseRequestHandler<T> extends CommonFillCloseRequestHandler<T>
 
 		switch (version) {
 			case Version.v_0_8_3: {
-				handleClose<FillCloseRequest_0_8_3>(event, "FillCloseRequest")
+				handleClose<FillCloseRequest_0_8_3>(event, "FillCloseRequest", version)
 				break
 			}
 			case Version.v_0_8_2: {
-				handleClose<FillCloseRequest_0_8_2>(event, "FillCloseRequest")
+				handleClose<FillCloseRequest_0_8_2>(event, "FillCloseRequest", version)
 				break
 			}
 			case Version.v_0_8_0: {
-				handleClose<FillCloseRequest_0_8_0>(event, "FillCloseRequest")
+				handleClose<FillCloseRequest_0_8_0>(event, "FillCloseRequest", version)
 				break
 			}
 		}

@@ -18,15 +18,15 @@ export class EmergencyClosePositionHandler<T> extends CommonEmergencyClosePositi
 		super.handleAccount(_event, version)
 		switch (version) {
 			case Version.v_0_8_3: {
-				handleClose<EmergencyClosePosition_0_8_3>(event, "EmergencyClosePosition")
+				handleClose<EmergencyClosePosition_0_8_3>(event, "EmergencyClosePosition", version)
 				break
 			}
 			case Version.v_0_8_2: {
-				handleClose<EmergencyClosePosition_0_8_2>(event, "EmergencyClosePosition")
+				handleClose<EmergencyClosePosition_0_8_2>(event, "EmergencyClosePosition", version)
 				break
 			}
 			case Version.v_0_8_0: {
-				handleClose<EmergencyClosePosition_0_8_0>(event, "EmergencyClosePosition")
+				handleClose<EmergencyClosePosition_0_8_0>(event, "EmergencyClosePosition", version)
 				break
 			}
 		}

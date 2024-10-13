@@ -1,4 +1,4 @@
-import {BigInt, Bytes} from "@graphprotocol/graph-ts";
+import {BigInt, Bytes, ethereum} from "@graphprotocol/graph-ts";
 import {Account} from "../../generated/schema";
 import {
 	getAlreadyCreatedConfiguration,
@@ -16,6 +16,7 @@ import {
 	getWeeklyHistoryForTimestamp
 } from "./builders";
 import {isSameDay, isSameMonth, isSameWeek, startOfDay} from "./time";
+import {Version} from "../../common/BaseHandler";
 
 export function unDecimal(value: BigInt): BigInt {
 	return value.div(BigInt.fromString("10").pow(18))
@@ -76,6 +77,8 @@ export function updateActivityTimestamps(account: Account, timestamp: BigInt): v
 }
 
 export class UpdateHistoriesParams {
+	version: Version;
+	event: ethereum.Event;
 	account: Account;
 	solver: Account | null;
 	accountSource: Bytes | null;
@@ -96,13 +99,15 @@ export class UpdateHistoriesParams {
 	_profit: BigInt = BigInt.zero();
 	_positionsCount: BigInt = BigInt.zero();
 
-	constructor(account: Account, solver: Account | null, timestamp: BigInt, accountSource: Bytes | null = Bytes.empty()) {
+	constructor(version: Version, account: Account, solver: Account | null, event: ethereum.Event, accountSource: Bytes | null = Bytes.empty()) {
+		this.version = version;
 		this.account = account;
 		this.solver = solver;
 		if (accountSource === null || accountSource == Bytes.empty() || accountSource.length == 0)
 			accountSource = account.accountSource
 		this.accountSource = accountSource;
-		this.timestamp = timestamp;
+		this.timestamp = event.block.timestamp;
+		this.event = event
 	}
 
 	openTradeVolume(openTradeVolume: BigInt): UpdateHistoriesParams {
@@ -224,7 +229,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.save()
 	}
 
-	const th = getTotalHistory(timestamp, account.accountSource, getAlreadyCreatedConfiguration().collateral)
+	const th = getTotalHistory(timestamp, account.accountSource, getAlreadyCreatedConfiguration(params.event, params.version).collateral)
 	th.tradeVolume = th.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 	th.openTradeVolume = th.openTradeVolume.plus(openTradeVolume)
 	th.closeTradeVolume = th.closeTradeVolume.plus(closeTradeVolume)

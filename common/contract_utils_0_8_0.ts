@@ -1,4 +1,4 @@
-import {Address, BigInt, log} from "@graphprotocol/graph-ts"
+import {Address, BigInt, Bytes, log} from "@graphprotocol/graph-ts"
 import {
 	symmio_0_8_0,
 	symmio_0_8_0__balanceInfoOfPartyAResult,
@@ -9,6 +9,12 @@ import {
 export function getQuote(address: Address, id: BigInt): symmio_0_8_0__getQuoteResultValue0Struct | null {
 	const contract = symmio_0_8_0.bind(address)
 	let result = contract.try_getQuote(id)
+	return result.reverted ? null : result.value
+}
+
+export function getCollateral(address: Address,): Bytes | null {
+	const contract = symmio_0_8_0.bind(address)
+	let result = contract.try_getCollateral()
 	return result.reverted ? null : result.value
 }
 

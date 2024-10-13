@@ -34,7 +34,7 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		withdraw.collateral = getConfiguration(event).collateral
 		withdraw.save()
 		updateHistories(
-			new UpdateHistoriesParams(account, null, event.block.timestamp)
+			new UpdateHistoriesParams(version, account, null, event)
 				.withdraw(event.params.amount)
 		)
 	}

@@ -2,8 +2,9 @@ import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
 import {Account, DebugEntity, Quote, TradeHistory} from "../../../generated/schema";
 import {BigInt, log} from "@graphprotocol/graph-ts";
 import {unDecimal, updateDailyOpenInterest, updateHistories, UpdateHistoriesParams} from "../../utils/helpers";
+import {Version} from "../../../common/BaseHandler";
 
-export function handleClose<T>(_event: ethereum.Event, name: string): void {
+export function handleClose<T>(_event: ethereum.Event, name: string, version: Version): void {
 	// @ts-ignore
 	const event = changetype<T>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
 	let quote = Quote.load(event.params.quoteId.toString())
@@ -41,7 +42,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 		loss = pnl
 
 	updateHistories(
-		new UpdateHistoriesParams(account, solverAccount, event.block.timestamp)
+		new UpdateHistoriesParams(version, account, solverAccount, event)
 			.closeTradeVolume(additionalVolume)
 			.symbolId(quote.symbolId!)
 			.loss(loss)
@@ -49,7 +50,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string): void {
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 		updateHistories(
-			new UpdateHistoriesParams(solverAccount, null, event.block.timestamp, account.accountSource)
+			new UpdateHistoriesParams(version, solverAccount, null, event, account.accountSource)
 				.closeTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!)
 		)

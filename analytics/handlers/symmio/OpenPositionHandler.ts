@@ -46,7 +46,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		let solverAccount = Account.load(partyB)!
 
 		updateHistories(
-			new UpdateHistoriesParams(account, solverAccount, event.block.timestamp)
+			new UpdateHistoriesParams(version, account, solverAccount, event)
 				.openTradeVolume(volume)
 				.symbolId(quote.symbolId!)
 				.positionsCount(BigInt.fromI32(1))
@@ -54,7 +54,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		)
 		if (_event.block.timestamp > BigInt.fromI32(1723852800)) { // From this timestamp we count partyB volumes in analytics as well
 			updateHistories(
-				new UpdateHistoriesParams(solverAccount, null, event.block.timestamp, account.accountSource)
+				new UpdateHistoriesParams(version, solverAccount, null, event, account.accountSource)
 					.openTradeVolume(volume)
 					.symbolId(quote.symbolId!)
 			)

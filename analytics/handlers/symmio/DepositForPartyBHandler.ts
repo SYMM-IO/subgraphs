@@ -32,7 +32,7 @@ export class DepositForPartyBHandler<T> extends CommonDepositForPartyBHandler<T>
 		deposit.collateral = getConfiguration(event).collateral
 		deposit.save()
 		updateHistories(
-			new UpdateHistoriesParams(account, null, event.block.timestamp)
+			new UpdateHistoriesParams(version, account, null, event)
 				.deposit(event.params.amount)
 		)
 	}

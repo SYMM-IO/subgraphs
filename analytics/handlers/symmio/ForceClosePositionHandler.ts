@@ -20,15 +20,15 @@ export class ForceClosePositionHandler<T> extends CommonForceClosePositionHandle
 
 		switch (version) {
 			case Version.v_0_8_3: {
-				handleClose<ForceClosePosition_0_8_3>(event, "ForceClosePosition")
+				handleClose<ForceClosePosition_0_8_3>(event, "ForceClosePosition", version)
 				break
 			}
 			case Version.v_0_8_2: {
-				handleClose<ForceClosePosition_0_8_2>(event, "ForceClosePosition")
+				handleClose<ForceClosePosition_0_8_2>(event, "ForceClosePosition", version)
 				break
 			}
 			case Version.v_0_8_0: {
-				handleClose<ForceClosePosition_0_8_0>(event, "ForceClosePosition")
+				handleClose<ForceClosePosition_0_8_0>(event, "ForceClosePosition", version)
 				break
 			}
 		}

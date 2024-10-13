@@ -37,7 +37,7 @@ export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T>
 		}
 
 		updateHistories(
-			new UpdateHistoriesParams(account, null, event.block.timestamp)
+			new UpdateHistoriesParams(version, account, null, event)
 				.deallocate(event.params.amount)
 		)
 	}
