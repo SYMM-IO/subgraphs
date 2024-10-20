@@ -55,6 +55,7 @@ abi_versions = {
     "symmioMultiAccount": ["1"],
     "off_chain_vault": ["1"],
     "on_chain_vault": ["1"],
+    "vault_token": ["1"],
 }
 
 

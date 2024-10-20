@@ -4,5 +4,8 @@
     "WithdrawRequestCanceled",
     "WithdrawRequestAcceptedEvent",
     "WithdrawClaimedEvent"
+  ],
+  "Deposit": [
+    "Deposit"
   ]
 }

@@ -12,6 +12,18 @@
       "abi": "on_chain_vault",
       "version": "1",
       "startBlock": "63343531"
+    },
+    {
+      "address": "0x074849c3F9f9a948c07fe141d0520Df9A7b0b182",
+      "abi": "vault_token",
+      "version": "1",
+      "startBlock": "63343694"
+    },
+    {
+      "address": "0x14eF4F5AFD3928d983fA7dcaa2c1ff6D1956F1E9",
+      "abi": "vault_token",
+      "version": "1",
+      "startBlock": "63343531"
     }
   ],
   "deploy_urls": {

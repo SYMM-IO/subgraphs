@@ -12,7 +12,15 @@ export enum VaultVersion {
 	v_1,
 }
 
+export enum VaultTokenVersion {
+	v_1,
+}
+
 export enum MultiAccountVersion {
+	v_1,
+}
+
+export enum VibeVersion {
 	v_1,
 }
 
