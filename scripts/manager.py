@@ -55,8 +55,7 @@ abi_versions = {
     "symmioMultiAccount": ["1"],
     "off_chain_vault": ["1"],
     "on_chain_vault": ["1"],
-    "timelock12H": ["1"],
-    "timelock3D": ["1"],
+    "timelock": ["1"],
 }
 
 

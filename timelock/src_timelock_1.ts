@@ -1,9 +1,9 @@
-import {CallExecutedHandler} from './handlers/timelock3D/CallExecutedHandler'
-import {CallExecuted} from '../generated/timelock3D_1/timelock3D_1'
-import {CallScheduledHandler} from './handlers/timelock3D/CallScheduledHandler'
-import {CallScheduled} from '../generated/timelock3D_1/timelock3D_1'
-import {CancelledHandler} from './handlers/timelock3D/CancelledHandler'
-import {Cancelled} from '../generated/timelock3D_1/timelock3D_1'
+import {CallExecutedHandler} from './handlers/timelock/CallExecutedHandler'
+import {CallExecuted} from '../generated/timelock_1/timelock_1'
+import {CallScheduledHandler} from './handlers/timelock/CallScheduledHandler'
+import {CallScheduled} from '../generated/timelock_1/timelock_1'
+import {CancelledHandler} from './handlers/timelock/CancelledHandler'
+import {Cancelled} from '../generated/timelock_1/timelock_1'
 import {TimelockVersion} from '../common/BaseHandler'
 
 
