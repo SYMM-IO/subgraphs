@@ -16,6 +16,10 @@ export enum MultiAccountVersion {
 	v_1,
 }
 
+export enum TimelockVersion {
+	v_1,
+}
+
 export class BaseHandler {
 
 	constructor() {
