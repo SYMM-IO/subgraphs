@@ -3,13 +3,13 @@
   "contracts": [
     {
       "address": "0x5784899B4f5e0589394A9fCF52B2423dE2F37ea3",
-      "abi": "off_chain_vault",
+      "abi": "vault",
       "version": "1",
       "startBlock": "63343694"
     },
     {
       "address": "0x1F050A434763De043363adC58cAbCd8f3662C320",
-      "abi": "on_chain_vault",
+      "abi": "vault",
       "version": "1",
       "startBlock": "63343531"
     },
