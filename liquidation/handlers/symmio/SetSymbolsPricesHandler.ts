@@ -1,8 +1,7 @@
 import {
 	SetSymbolsPricesHandler as CommonHandler
 } from "../../../common/handlers/symmio/SetSymbolsPricesHandler"
-import { getGlobalCounterAndInc } from "../../../common/utils"
-import { Liquidator, PartyA } from "../../../generated/schema";
+
 import { ethereum } from "@graphprotocol/graph-ts";
 import { Version } from "../../../common/BaseHandler";
 import { addLiquidator } from "./utils";
