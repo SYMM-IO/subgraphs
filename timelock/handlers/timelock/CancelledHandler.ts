@@ -6,7 +6,7 @@ export class CancelledHandler<T> {
 	handle(_event: ethereum.Event, version: TimelockVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let cancel = new Cancelled(event.params.id.toString())
+		let cancel = new Cancelled(event.params.id.toHexString())
 		cancel.save()
 	}
 }

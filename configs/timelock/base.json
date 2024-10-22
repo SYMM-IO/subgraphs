@@ -1,5 +1,5 @@
 {
-	"network": "arbitrum-one",
+	"network": "base",
 	"contracts": [
 		{
 			"address": "0x92E89Bb3cE2CeA34dF6168010BBEFce2997b014d",
@@ -15,6 +15,6 @@
 		}
 	],
 	"deploy_urls": {
-		"timelock": "timelock_arbitrum"
+		"timelock": "timelock_base"
 	}
 }
