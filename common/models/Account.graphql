@@ -1,0 +1,20 @@
+type Account @entity {
+	id: ID!
+	account: Bytes!
+	globalCounter: BigInt!
+	user: Bytes!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	name: String
+	type: String
+	lastActivityTimestamp: BigInt!
+	transaction: Bytes!
+	updateTimestamp: BigInt!
+	accountSource: Bytes
+	quotesCount: BigInt!
+	positionsCount: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocated: BigInt!
+	deallocated: BigInt!
+}

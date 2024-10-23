@@ -1,0 +1,43 @@
+{
+	"network": "matic",
+	"contracts": [
+		{
+			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
+			"abi": "symmio",
+			"version": "0_8_3",
+			"startBlock": "59068459"
+		},
+		{
+			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
+			"abi": "symmio",
+			"version": "0_8_2",
+			"startBlock": "49420747",
+			"endBlock": "59068459"
+		},
+		{
+			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
+			"abi": "symmio",
+			"version": "0_8_0",
+			"startBlock": "89068459",
+			"endBlock": "89068459"
+		},
+		{
+			"address": "0x976c87Cd3eB2DE462Db249cCA711E4C89154537b",
+			"abi": "symmio",
+			"version": "0_8_1",
+			"startBlock": "89068459",
+			"endBlock": "89068459"
+		},
+		{
+			"address": "0xffE2C25404525D2D4351D75177B92F18D9DaF4Af",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "49420747",
+			"name": "MultiAccount1"
+		}
+	],
+	"deploy_urls": {
+		"analytics": "polygon_analytics",
+		"events": "polygon_events"
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"network": "matic",
+	"contracts": [
+		{
+		    "address": "0x5C71E3229BB8c012c558332498D947324f412212",
+			"abi": "off_chain_vault",
+			"version": "1",
+			"startBlock": "61135803"
+		}
+	],
+	"deploy_urls": {
+		"vaults": "vaults_main_polygon_1"
+	}
+}
