@@ -20,7 +20,7 @@ export enum MultiAccountVersion {
 	v_1,
 }
 
-export enum VibeVersion {
+export enum TimelockVersion {
 	v_1,
 }
 

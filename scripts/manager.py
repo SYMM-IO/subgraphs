@@ -53,6 +53,7 @@ class Config:
 abi_versions = {
     "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3"],
     "symmioMultiAccount": ["1"],
+    "timelock": ["1"],
     "vault": ["1"],
     "vault_token": ["1"],
 }
