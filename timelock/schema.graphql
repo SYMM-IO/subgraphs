@@ -4,6 +4,7 @@ type CallExecuted @entity {
 	target: Bytes!
 	value: BigInt!
 	data: Bytes!
+	timestamp: BigInt!
 }
 
 type CallScheduled @entity {
@@ -14,8 +15,10 @@ type CallScheduled @entity {
 	data: Bytes!
 	predecessor: Bytes!
 	delay: BigInt!
+	timestamp: BigInt!
 }
 
 type Cancelled @entity {
 	id: ID!
+	timestamp: BigInt!
 }
