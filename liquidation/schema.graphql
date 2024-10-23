@@ -1,0 +1,55 @@
+type PartyA @entity {
+	id: ID!
+	index: BigInt!
+	partyA: Bytes!
+	amount: BigInt!
+	timeStamp: BigInt!
+	blockNumber: BigInt!
+	trHash: Bytes
+	trHashLiquidate: Bytes
+	liquidatePartyATimeStamp: BigInt
+	liquidateAllocatedBalance: BigInt
+	liquidateCva: BigInt
+	liquidatePendingCva: BigInt
+	liquidateLf: BigInt
+	liquidatePendingLf: BigInt
+	totalUnrealizedLoss: BigInt
+	upnl: BigInt
+	allocatedBalance: BigInt
+	GlobalCounter: BigInt!
+}
+
+type PartyB @entity {
+	id: ID!
+	index: BigInt!
+	amount: BigInt!
+	partyA: Bytes!
+	partyB: Bytes!
+	timeStamp: BigInt!
+	blockNumber: BigInt!
+	trHash: Bytes
+	trHashLiquidate: Bytes
+	liquidatePartyBTimeStamp: BigInt
+	liquidateAllocatedBalance: BigInt
+	liquidateCva: BigInt
+	liquidatePendingCva: BigInt
+	liquidateLf: BigInt
+	liquidatePendingLf: BigInt
+	partyBAllocatedBalance: BigInt
+	upnl: BigInt
+	GlobalCounter: BigInt!
+}
+
+type Liquidator @entity {
+	id: ID!
+	liquidatorAddress: Bytes!
+	profit: BigInt!
+	balance: BigInt!
+}
+
+type PartyALiquidator @entity {
+	id: ID!
+	PartyA: Bytes!
+	Liquidators: [Bytes!]
+	timeStamp: BigInt!
+}

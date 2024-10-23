@@ -1,0 +1,9 @@
+type Symbol @entity {
+    id: ID!
+    globalCounter: BigInt!
+    name: String!
+    tradingFee: BigInt!
+    timestamp: BigInt!
+    blockNumber: BigInt!
+    updateTimestamp: BigInt!
+}

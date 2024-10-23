@@ -1,0 +1,12 @@
+{
+  "PartyA": [
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "LiquidatePartyA"
+  ],
+  "PartyB": [
+    "AllocateForPartyB",
+    "DeallocateForPartyB",
+    "LiquidatePartyB"
+  ]
+}

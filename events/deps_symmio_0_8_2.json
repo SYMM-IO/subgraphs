@@ -1,0 +1,218 @@
+{
+  "ActiveEmergencyMode": [
+    "ActiveEmergencyMode"
+  ],
+  "AddSymbol": [
+    "AddSymbol"
+  ],
+  "DeactiveEmergencyMode": [
+    "DeactiveEmergencyMode"
+  ],
+  "DeregisterPartyB": [
+    "DeregisterPartyB"
+  ],
+  "PauseAccounting": [
+    "PauseAccounting"
+  ],
+  "PauseGlobal": [
+    "PauseGlobal"
+  ],
+  "PauseLiquidation": [
+    "PauseLiquidation"
+  ],
+  "PausePartyAActions": [
+    "PausePartyAActions"
+  ],
+  "PausePartyBActions": [
+    "PausePartyBActions"
+  ],
+  "RegisterPartyB": [
+    "RegisterPartyB"
+  ],
+  "RoleGranted": [
+    "RoleGranted"
+  ],
+  "RoleRevoked": [
+    "RoleRevoked"
+  ],
+  "SetBalanceLimitPerUser": [
+    "SetBalanceLimitPerUser"
+  ],
+  "SetCollateral": [
+    "SetCollateral"
+  ],
+  "SetDeallocateCooldown": [
+    "SetDeallocateCooldown"
+  ],
+  "SetFeeCollector": [
+    "SetFeeCollector"
+  ],
+  "SetForceCancelCloseCooldown": [
+    "SetForceCancelCloseCooldown"
+  ],
+  "SetForceCancelCooldown": [
+    "SetForceCancelCooldown"
+  ],
+  "SetForceCloseCooldown": [
+    "SetForceCloseCooldown"
+  ],
+  "SetForceCloseGapRatio": [
+    "SetForceCloseGapRatio"
+  ],
+  "SetLiquidationTimeout": [
+    "SetLiquidationTimeout"
+  ],
+  "SetLiquidatorShare": [
+    "SetLiquidatorShare"
+  ],
+  "SetMuonConfig": [
+    "SetMuonConfig"
+  ],
+  "SetMuonIds": [
+    "SetMuonIds"
+  ],
+  "SetPartyBEmergencyStatus": [
+    "SetPartyBEmergencyStatus"
+  ],
+  "SetPendingQuotesValidLength": [
+    "SetPendingQuotesValidLength"
+  ],
+  "SetSuspendedAddress": [
+    "SetSuspendedAddress"
+  ],
+  "SetSymbolAcceptableValues": [
+    "SetSymbolAcceptableValues"
+  ],
+  "SetSymbolFundingState": [
+    "SetSymbolFundingState"
+  ],
+  "SetSymbolMaxLeverage": [
+    "SetSymbolMaxLeverage"
+  ],
+  "SetSymbolMaxSlippage": [
+    "SetSymbolMaxSlippage"
+  ],
+  "SetSymbolTradingFee": [
+    "SetSymbolTradingFee"
+  ],
+  "SetSymbolValidationState": [
+    "SetSymbolValidationState"
+  ],
+  "UnpauseAccounting": [
+    "UnpauseAccounting"
+  ],
+  "UnpauseGlobal": [
+    "UnpauseGlobal"
+  ],
+  "UnpauseLiquidation": [
+    "UnpauseLiquidation"
+  ],
+  "UnpausePartyAActions": [
+    "UnpausePartyAActions"
+  ],
+  "UnpausePartyBActions": [
+    "UnpausePartyBActions"
+  ],
+  "DisputeForLiquidation": [
+    "DisputeForLiquidation"
+  ],
+  "FullyLiquidatedPartyB": [
+    "FullyLiquidatedPartyB"
+  ],
+  "LiquidatePartyA": [
+    "LiquidatePartyA"
+  ],
+  "LiquidatePartyB": [
+    "LiquidatePartyB"
+  ],
+  "LiquidatePendingPositionsPartyA": [
+    "LiquidatePendingPositionsPartyA"
+  ],
+  "LiquidatePositionsPartyA": [
+    "LiquidatePositionsPartyA"
+  ],
+  "LiquidatePositionsPartyB": [
+    "LiquidatePositionsPartyB"
+  ],
+  "LiquidationDisputed": [
+    "LiquidationDisputed"
+  ],
+  "SetSymbolsPrices": [
+    "SetSymbolsPrices"
+  ],
+  "SettlePartyALiquidation": [
+    "SettlePartyALiquidation"
+  ],
+  "ExpireQuote": [
+    "ExpireQuote"
+  ],
+  "ForceCancelCloseRequest": [
+    "ForceCancelCloseRequest"
+  ],
+  "ForceCancelQuote": [
+    "ForceCancelQuote"
+  ],
+  "ForceClosePosition": [
+    "ForceClosePosition"
+  ],
+  "RequestToCancelCloseRequest": [
+    "RequestToCancelCloseRequest"
+  ],
+  "RequestToCancelQuote": [
+    "RequestToCancelQuote"
+  ],
+  "RequestToClosePosition": [
+    "RequestToClosePosition"
+  ],
+  "SendQuote": [
+    "SendQuote"
+  ],
+  "AllocateForPartyB": [
+    "AllocateForPartyB"
+  ],
+  "AllocatePartyA": [
+    "AllocatePartyA"
+  ],
+  "DeallocateForPartyB": [
+    "DeallocateForPartyB"
+  ],
+  "DeallocatePartyA": [
+    "DeallocatePartyA"
+  ],
+  "Deposit": [
+    "Deposit"
+  ],
+  "TransferAllocation": [
+    "TransferAllocation"
+  ],
+  "Withdraw": [
+    "Withdraw"
+  ],
+  "AcceptCancelCloseRequest": [
+    "AcceptCancelCloseRequest"
+  ],
+  "AcceptCancelRequest": [
+    "AcceptCancelRequest"
+  ],
+  "AllocatePartyB": [
+    "AllocatePartyB"
+  ],
+  "ChargeFundingRate": [
+    "ChargeFundingRate"
+  ],
+  "EmergencyClosePosition": [
+    "EmergencyClosePosition"
+  ],
+  "FillCloseRequest": [
+    "FillCloseRequest"
+  ],
+  "LockQuote": [
+    "LockQuote"
+  ],
+  "OpenPosition": [
+    "OpenPosition"
+  ],
+  "UnlockQuote": [
+    "UnlockQuote"
+  ]
+}
