@@ -13,6 +13,11 @@ def main():
         "./configs/mantle.json",
         "./configs/mode.json",
         "./configs/arbitrum.json"
+
+        # "./configs/vaults/base.json",
+        # "./configs/vaults/blast.json",
+        # "./configs/vaults/bnb.json",
+        # "./configs/vaults/mantle.json",
     ]
 
     parser = argparse.ArgumentParser(
