@@ -14,6 +14,7 @@ export class CallScheduledHandler<T> {
         call_schedule.predecessor = event.params.predecessor
         call_schedule.delay = event.params.delay
         call_schedule.timestamp = event.block.timestamp
+        call_schedule.address = event.address
 		call_schedule.save()
     }
 }

@@ -8,6 +8,7 @@ export class CancelledHandler<T> {
 		const event = changetype<T>(_event)
 		let cancel = new Cancelled(event.params.id.toHexString())
 		cancel.timestamp = event.block.timestamp
+		cancel.address = event.address
 		cancel.save()
 	}
 }

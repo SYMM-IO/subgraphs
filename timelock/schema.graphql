@@ -1,5 +1,6 @@
 type CallExecuted @entity {
 	id: ID!
+	address: Bytes!
 	index: BigInt!
 	target: Bytes!
 	value: BigInt!
@@ -9,6 +10,7 @@ type CallExecuted @entity {
 
 type CallScheduled @entity {
 	id: ID!
+	address: Bytes!
 	index: BigInt!
 	target: Bytes!
 	value: BigInt!
@@ -20,5 +22,6 @@ type CallScheduled @entity {
 
 type Cancelled @entity {
 	id: ID!
+	address: Bytes!
 	timestamp: BigInt!
 }
