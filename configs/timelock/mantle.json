@@ -1,0 +1,20 @@
+{
+	"network": "mantle",
+	"contracts": [
+		{
+			"address": "0xD02f2cc0C2bc1799ff0674b64620a351F986eBDe",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "69916202"
+		},
+		{
+			"address": "0xA75FbAaE9D952913BCA5a21e96225E90A592cE63",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "70602930"
+		}
+	],
+	"deploy_urls": {
+		"timelocks": "mantle_timelocks"
+	}
+}
