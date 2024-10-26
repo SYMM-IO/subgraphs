@@ -1,5 +1,5 @@
 {
-	"network": "mantle",
+	"network": "bsc",
 	"contracts": [
 		{
 			"address": "0xCb850319Cb6B907c7A2ebAb71980147D19d6e3A1",
