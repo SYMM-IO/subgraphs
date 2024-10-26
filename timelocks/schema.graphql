@@ -1,21 +1,27 @@
 type CallExecuted @entity {
 	id: ID!
+	address: Bytes!
 	index: BigInt!
 	target: Bytes!
 	value: BigInt!
 	data: Bytes!
+	timestamp: BigInt!
 }
 
 type CallScheduled @entity {
 	id: ID!
+	address: Bytes!
 	index: BigInt!
 	target: Bytes!
 	value: BigInt!
 	data: Bytes!
 	predecessor: Bytes!
 	delay: BigInt!
+	timestamp: BigInt!
 }
 
 type Cancelled @entity {
 	id: ID!
+	address: Bytes!
+	timestamp: BigInt!
 }

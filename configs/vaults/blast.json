@@ -1,5 +1,5 @@
 {
-  "network": "blast-mainnet",
+  "network": "blast",
   "contracts": [
     {
       "address": "0x75Bd495F94D251341827C4A6b3975Ac5CD096f71",
@@ -27,6 +27,6 @@
     }
   ],
   "deploy_urls": {
-    "vaults": "vaults_main_blast_1"
+    "vaults": "blast_vaults"
   }
 }

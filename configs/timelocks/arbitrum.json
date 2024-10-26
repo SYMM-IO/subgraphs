@@ -15,6 +15,6 @@
 		}
 	],
 	"deploy_urls": {
-		"timelock": "timelock_arbitrum"
+		"timelocks": "arbitrum_timelocks"
 	}
 }

@@ -27,6 +27,6 @@
 		}
 	],
 	"deploy_urls": {
-		"vaults": "vaults_main_bnb_1"
+		"vaults": "bnb_vaults"
 	}
 }

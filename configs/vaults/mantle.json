@@ -27,6 +27,6 @@
     }
   ],
   "deploy_urls": {
-    "vaults": "vaults_main_mantle_1"
+    "vaults": "mantle_vaults"
   }
 }
