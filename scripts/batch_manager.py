@@ -4,16 +4,16 @@ import subprocess
 
 def main():
     configs = [
-        "./configs/fantom_just_8_0.json",
-        "./configs/base_just_8_0.json",
-        "./configs/bnb_just_8_0.json",
-        "./configs/bnb.json",
-        "./configs/base.json",
-        "./configs/blast.json",
-        "./configs/mantle.json",
-        "./configs/mode.json",
-        "./configs/arbitrum.json"
-        "./configs/iota.json"
+        # "./configs/fantom_just_8_0.json",
+        # "./configs/base_just_8_0.json",
+        # "./configs/bnb_just_8_0.json",
+        # "./configs/bnb.json",
+        # "./configs/base.json",
+        # "./configs/blast.json",
+        # "./configs/mantle.json",
+        # "./configs/mode.json",
+        # "./configs/arbitrum.json"
+        # "./configs/iota.json"
 
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",
@@ -24,6 +24,7 @@ def main():
         # "./configs/timelocks/arbitrum.json",
         # "./configs/timelocks/bnb.json",
         # "./configs/timelocks/mantle.json",
+        # "./configs/timelocks/mode.json",
     ]
 
     parser = argparse.ArgumentParser(
