@@ -191,7 +191,7 @@ type TotalSymbolTradesHistory @entity {
 type OpenInterest @entity {
     id: ID!
     amount: BigInt!
-    accumulatedAmount: BigInt!
+    weightedAmount: BigInt!
     timestamp: BigInt!
 }
 

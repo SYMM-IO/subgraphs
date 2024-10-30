@@ -1,5 +1,5 @@
 import {BigInt, Bytes, ethereum} from "@graphprotocol/graph-ts";
-import {Account} from "../../generated/schema";
+import {Account, OpenInterest} from "../../generated/schema";
 import {
 	getAlreadyCreatedConfiguration,
 	getDailyHistoryForTimestamp,
@@ -8,6 +8,7 @@ import {
 	getMonthlyHistoryForTimestamp,
 	getOpenInterest,
 	getSolverDailyHistoryForTimestamp,
+	getSolverOpenInterest,
 	getSymbolTradeHistory,
 	getTotalHistory,
 	getTotalSymbolTradesHistory,
@@ -15,42 +16,177 @@ import {
 	getUserActivity,
 	getWeeklyHistoryForTimestamp
 } from "./builders";
-import {isSameDay, isSameMonth, isSameWeek, startOfDay} from "./time";
+import {isSameDay, isSameMonth, isSameWeek} from "./time";
 import {Version} from "../../common/BaseHandler";
 
 export function unDecimal(value: BigInt): BigInt {
 	return value.div(BigInt.fromString("10").pow(18))
 }
 
-export function diffInSeconds(timestamp1: BigInt, timestamp2: BigInt): BigInt {
-	return timestamp1.minus(timestamp2)
+const SECONDS_IN_DAY = BigInt.fromI32(86400)
+
+export function updateDailyOpenInterest(
+	blockTimestamp: BigInt,
+	value: BigInt,
+	increase: boolean,
+	solver: Account,
+	accountSource: Bytes | null
+): void {
+	let affiliateOI: OpenInterest = getOpenInterest(blockTimestamp, accountSource);
+	let solverOI: OpenInterest = getSolverOpenInterest(blockTimestamp, solver.account);
+
+	// Process affiliate open interest
+	processOpenInterest(
+		affiliateOI,
+		blockTimestamp,
+		value,
+		increase,
+		accountSource,
+		false // isSolver is false
+		// solverAccount defaults to null
+	);
+
+	// Process solver open interest
+	processOpenInterest(
+		solverOI,
+		blockTimestamp,
+		value,
+		increase,
+		accountSource,
+		true, // isSolver is true
+		solver.account // Pass solverAccount
+	);
 }
 
-export function updateDailyOpenInterest(blockTimestamp: BigInt, value: BigInt, increase: boolean, solver: Account, accountSource: Bytes | null): void {
-	let oi = getOpenInterest(blockTimestamp, accountSource)
-	let dh = getDailyHistoryForTimestamp(blockTimestamp, accountSource)
-	let sdh = getSolverDailyHistoryForTimestamp(blockTimestamp, solver.account, accountSource)
+function startOfDayTimestamp(timestamp: BigInt): BigInt {
+	return timestamp.div(SECONDS_IN_DAY).times(SECONDS_IN_DAY);
+}
 
-	const sod = BigInt.fromString((startOfDay(blockTimestamp).getTime() / 1000).toString())
+function endOfDayTimestamp(timestamp: BigInt): BigInt {
+	let dayStart = startOfDayTimestamp(timestamp);
+	return dayStart.plus(SECONDS_IN_DAY).minus(BigInt.fromI32(1));
+}
 
-	if (isSameDay(blockTimestamp, oi.timestamp)) {
-		oi.accumulatedAmount = oi.accumulatedAmount.plus(diffInSeconds(blockTimestamp, oi.timestamp).times(oi.amount))
-		dh.openInterest = oi.accumulatedAmount.div(diffInSeconds(blockTimestamp, sod))
-		sdh.openInterest = oi.accumulatedAmount.div(diffInSeconds(blockTimestamp, sod))
-	} else {
-		dh.openInterest = oi.accumulatedAmount.div(BigInt.fromString("86400"))
-		sdh.openInterest = oi.accumulatedAmount.div(BigInt.fromString("86400"))
-		oi.accumulatedAmount = diffInSeconds(blockTimestamp, sod).times(oi.amount)
+function getDayNumber(timestamp: BigInt): BigInt {
+	return timestamp.div(SECONDS_IN_DAY);
+}
+
+function diffInSeconds(end: BigInt, start: BigInt): BigInt {
+	return end.minus(start);
+}
+
+function processOpenInterest(
+	openInterest: OpenInterest,
+	blockTimestamp: BigInt,
+	value: BigInt,
+	increase: boolean,
+	accountSource: Bytes | null,
+	isSolver: boolean,
+	solverAccount: Bytes | null = null
+): void {
+	let lastUpdateTimestamp = openInterest.timestamp;
+	let currentTimestamp = blockTimestamp;
+
+	let currentAmount = openInterest.amount;
+
+	let processingTimestamp = lastUpdateTimestamp;
+
+	let done = false;
+
+	while (!done) {
+		let processingDayNumber = getDayNumber(processingTimestamp);
+
+		let lastDay = getDayNumber(currentTimestamp).equals(processingDayNumber)
+		let firstDay = getDayNumber(lastUpdateTimestamp).equals(processingDayNumber);
+
+		done = lastDay
+		let dailyOpenInterest = BigInt.zero()
+
+		if (firstDay && !lastDay) {
+			let firstIntervalStart = startOfDayTimestamp(processingTimestamp);
+			let firstIntervalEnd = processingTimestamp;
+
+			let secondIntervalStart = processingTimestamp;
+			let secondIntervalEnd = endOfDayTimestamp(processingTimestamp);
+
+			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart);
+			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart);
+			let totalInterval = diffInSeconds(secondIntervalEnd, firstIntervalStart);
+
+			// Calculate the day's accumulated amount
+			let accumulatedFirstPart = openInterest.weightedAmount;
+			let accumulatedSecondPart = secondInterval.times(currentAmount);
+
+			dailyOpenInterest = (accumulatedFirstPart.plus(accumulatedSecondPart)).div(totalInterval);
+			openInterest.weightedAmount = BigInt.zero()
+		} else if (!firstDay && !lastDay) {
+			dailyOpenInterest = currentAmount
+			openInterest.weightedAmount = BigInt.zero()
+		} else if (!firstDay && lastDay) {
+			processingTimestamp = currentTimestamp;
+			let firstIntervalStart = startOfDayTimestamp(processingTimestamp);
+			let firstIntervalEnd = processingTimestamp;
+
+			let secondIntervalStart = processingTimestamp;
+			let secondIntervalEnd = endOfDayTimestamp(processingTimestamp);
+
+			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart);
+			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart);
+			let totalInterval = diffInSeconds(secondIntervalEnd, firstIntervalStart);
+
+			// Calculate the day's accumulated amount
+			let accumulatedFirstPart = firstInterval.times(currentAmount);
+			let accumulatedSecondPart = secondInterval.times(increase ? currentAmount.plus(value) : currentAmount.minus(value));
+
+			dailyOpenInterest = (accumulatedFirstPart.plus(accumulatedSecondPart)).div(totalInterval);
+			openInterest.weightedAmount = accumulatedFirstPart
+		} else if (firstDay && lastDay) {
+			processingTimestamp = lastUpdateTimestamp
+			let firstIntervalStart = startOfDayTimestamp(processingTimestamp);
+			let firstIntervalEnd = processingTimestamp;
+
+			let secondIntervalStart = processingTimestamp;
+			let secondIntervalEnd = currentTimestamp;
+
+			let thirdIntervalStart = currentTimestamp;
+			let thirdIntervalEnd = endOfDayTimestamp(processingTimestamp);
+
+			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart);
+			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart);
+			let thirdInterval = diffInSeconds(thirdIntervalEnd, thirdIntervalStart);
+			let totalInterval = diffInSeconds(thirdIntervalEnd, firstIntervalStart);
+
+			// Calculate the day's accumulated amount
+			let accumulatedFirstPart = openInterest.weightedAmount;
+			let accumulatedSecondPart = secondInterval.times(currentAmount);
+			let accumulatedThirdPart = thirdInterval.times(increase ? currentAmount.plus(value) : currentAmount.minus(value));
+
+			dailyOpenInterest = (accumulatedFirstPart.plus(accumulatedSecondPart).plus(accumulatedThirdPart)).div(totalInterval);
+			openInterest.weightedAmount = accumulatedFirstPart.plus(accumulatedSecondPart)
+		}
+
+		if (isSolver) {
+			let dailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource);
+			dailyHistory.openInterest = dailyOpenInterest;
+			dailyHistory.updateTimestamp = processingTimestamp;
+			dailyHistory.save();
+		} else {
+			let dailyHistory = getDailyHistoryForTimestamp(processingTimestamp, accountSource);
+			dailyHistory.openInterest = dailyOpenInterest;
+			dailyHistory.updateTimestamp = processingTimestamp;
+			dailyHistory.save();
+		}
+
+		// Move to the next day
+		processingTimestamp = processingTimestamp.plus(SECONDS_IN_DAY);
+
 	}
-	oi.amount = increase ? oi.amount.plus(value) : oi.amount.minus(value)
-	oi.timestamp = blockTimestamp
-	dh.updateTimestamp = blockTimestamp
-	sdh.updateTimestamp = blockTimestamp
 
-	oi.save()
-	dh.save()
-	sdh.save()
+	openInterest.timestamp = currentTimestamp;
+	openInterest.amount = increase ? currentAmount.plus(value) : currentAmount.minus(value);
+	openInterest.save();
 }
+
 
 export function updateActivityTimestamps(account: Account, timestamp: BigInt): void {
 	account.lastActivityTimestamp = timestamp

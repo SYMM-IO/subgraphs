@@ -300,7 +300,20 @@ export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null):
 	if (oi == null) {
 		oi = new OpenInterest(id)
 		oi.amount = BigInt.zero()
-		oi.accumulatedAmount = BigInt.zero()
+		oi.weightedAmount = BigInt.zero()
+		oi.timestamp = timestamp
+		oi.save()
+	}
+	return oi
+}
+
+export function getSolverOpenInterest(timestamp: BigInt, solver: Bytes): OpenInterest {
+	const id = "OpenInterest_" + solver.toHexString()
+	let oi = OpenInterest.load(id)
+	if (oi == null) {
+		oi = new OpenInterest(id)
+		oi.amount = BigInt.zero()
+		oi.weightedAmount = BigInt.zero()
 		oi.timestamp = timestamp
 		oi.save()
 	}
