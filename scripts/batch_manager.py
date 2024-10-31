@@ -12,7 +12,7 @@ def main():
         # "./configs/blast.json",
         # "./configs/mantle.json",
         # "./configs/mode.json",
-        # "./configs/arbitrum.json"
+        # "./configs/arbitrum.json",
         # "./configs/iota.json"
 
         # "./configs/vaults/base.json",

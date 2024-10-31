@@ -1,6 +1,7 @@
 import {TransferAllocation as TransferAllocationEntity} from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class TransferAllocationHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -8,6 +9,7 @@ export class TransferAllocationHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new TransferAllocationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		entity.amount = event.params.amount;
 		entity.origin = event.params.origin;
 		entity.recipient = event.params.recipient;
