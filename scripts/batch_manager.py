@@ -25,6 +25,7 @@ def main():
         # "./configs/timelocks/bnb.json",
         # "./configs/timelocks/mantle.json",
         # "./configs/timelocks/mode.json",
+        # "./configs/timelocks/iota.json",
     ]
 
     parser = argparse.ArgumentParser(
