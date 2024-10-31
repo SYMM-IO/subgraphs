@@ -1,6 +1,7 @@
 import {SetMuonIds as SetMuonIdsEntity} from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class SetMuonIdsHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -8,6 +9,7 @@ export class SetMuonIdsHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetMuonIdsEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		entity.muonAppId = event.params.muonAppId;
 		entity.gateway = event.params.gateway;
 		entity.x = event.params.x;

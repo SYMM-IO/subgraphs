@@ -1,6 +1,7 @@
 import {RoleGranted as RoleGrantedEntity} from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {MultiAccountVersion} from "../../../common/BaseHandler";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class RoleGrantedHandler<T> {
 	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
@@ -8,6 +9,7 @@ export class RoleGrantedHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new RoleGrantedEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		entity.role = event.params.role;
 		entity.user = event.params.account;
 

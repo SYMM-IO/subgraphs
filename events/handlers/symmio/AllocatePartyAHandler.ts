@@ -1,6 +1,7 @@
 import {AllocatePartyA as AllocatePartyAEntity} from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class AllocatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -8,6 +9,7 @@ export class AllocatePartyAHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new AllocatePartyAEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		entity.user = event.params.user;
 		entity.amount = event.params.amount;
 

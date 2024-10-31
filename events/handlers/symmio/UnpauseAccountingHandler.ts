@@ -1,6 +1,7 @@
 import {UnpauseAccounting as UnpauseAccountingEntity} from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class UnpauseAccountingHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -9,6 +10,7 @@ export class UnpauseAccountingHandler<T> {
 
 		let entity = new UnpauseAccountingEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
 
+		entity.globalId = getGlobalCounterAndInc()
 		entity.blockTimestamp = event.block.timestamp;
 		entity.blockNumber = event.block.number;
 		entity.transactionHash = event.transaction.hash;
