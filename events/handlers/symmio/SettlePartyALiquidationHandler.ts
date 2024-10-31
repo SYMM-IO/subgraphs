@@ -1,6 +1,7 @@
 import {SettlePartyALiquidation as SettlePartyALiquidationEntity} from "../../../generated/schema";
 import {Bytes, ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class SettlePartyALiquidationHandler<T>  {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -8,6 +9,7 @@ export class SettlePartyALiquidationHandler<T>  {
 		const event = changetype<T>(_event)
 
 		let entity = new SettlePartyALiquidationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		entity.partyA = event.params.partyA;
 		if (event.params.partyBs) {
 			let partyBs: Bytes[] = []

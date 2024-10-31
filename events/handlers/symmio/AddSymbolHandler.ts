@@ -2,6 +2,7 @@ import {AddSymbol as AddSymbolEntity} from "../../../generated/schema";
 import {BigInt, ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 import {AddSymbol as AddSymbol_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class AddSymbolHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -9,6 +10,7 @@ export class AddSymbolHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new AddSymbolEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<AddSymbol_8_2>(_event)

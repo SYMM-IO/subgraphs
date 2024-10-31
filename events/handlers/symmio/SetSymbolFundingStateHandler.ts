@@ -2,6 +2,7 @@ import {SetSymbolFundingState as SetSymbolFundingStateEntity} from "../../../gen
 import {BigInt, ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 import {SetSymbolFundingState as SetSymbolFundingState_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class SetSymbolFundingStateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -9,6 +10,7 @@ export class SetSymbolFundingStateHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetSymbolFundingStateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_2>(_event)

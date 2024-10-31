@@ -1,6 +1,7 @@
 import {SetForceCloseGapRatio as SetForceCloseGapRatioEntity} from "../../../generated/schema";
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
+import {getGlobalCounterAndInc} from "../../../common/utils";
 
 export class SetForceCloseGapRatioHandler<T>  {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -8,6 +9,7 @@ export class SetForceCloseGapRatioHandler<T>  {
 		const event = changetype<T>(_event)
 
 		let entity = new SetForceCloseGapRatioEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		entity.globalId = getGlobalCounterAndInc()
 		entity.oldForceCloseGapRatio = event.params.oldForceCloseGapRatio;
 		entity.newForceCloseGapRatio = event.params.newForceCloseGapRatio;
 
