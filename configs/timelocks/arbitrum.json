@@ -12,6 +12,12 @@
 			"abi": "timelock",
 			"version": "1",
 			"startBlock": "265422357 "
+		},
+		{
+			"address": "0xE802853F67c618dBbB071D59E0B9537A4a7Fe8B7",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "261383535 "
 		}
 	],
 	"deploy_urls": {
