@@ -12,7 +12,7 @@ def main():
         # "./configs/blast.json",
         # "./configs/mantle.json",
         # "./configs/mode.json",
-        # "./configs/arbitrum.json"
+        # "./configs/arbitrum.json",
         # "./configs/iota.json"
 
         # "./configs/vaults/base.json",
@@ -25,6 +25,7 @@ def main():
         # "./configs/timelocks/bnb.json",
         # "./configs/timelocks/mantle.json",
         # "./configs/timelocks/mode.json",
+        # "./configs/timelocks/iota.json",
     ]
 
     parser = argparse.ArgumentParser(
