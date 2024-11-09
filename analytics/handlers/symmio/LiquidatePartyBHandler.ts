@@ -1,6 +1,6 @@
 import {
-	LiquidatePartyBHandler as CommonLiquidatePartyBHandler
-} from "../../../common/handlers/symmio/LiquidatePartyBHandler"
+	LiquidatePartyBHandlerWithAccount as CommonLiquidatePartyBHandler
+} from "../../../common/handlers/symmio/LiquidatePartyBHandlerWithAccount"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 

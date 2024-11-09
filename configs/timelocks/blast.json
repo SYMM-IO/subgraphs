@@ -1,0 +1,14 @@
+{
+	"network": "blast",
+	"contracts": [
+		{
+			"address": "0xf5a10B4124Dc503E79350f81cfA2108EaC1964DC",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "9755388"
+		}
+	],
+	"deploy_urls": {
+		"timelocks": "blast_timelocks"
+	}
+}

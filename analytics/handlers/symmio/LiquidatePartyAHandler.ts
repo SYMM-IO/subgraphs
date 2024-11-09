@@ -1,6 +1,6 @@
 import {
-	LiquidatePartyAHandler as CommonLiquidatePartyAHandler
-} from "../../../common/handlers/symmio/LiquidatePartyAHandler"
+	LiquidatePartyAHandlerWithAccount as CommonLiquidatePartyAHandler
+} from "../../../common/handlers/symmio/LiquidatePartyAHandlerWithAccount"
 import {ethereum} from "@graphprotocol/graph-ts";
 import {Version} from "../../../common/BaseHandler";
 
