@@ -1,3 +1,23 @@
+type AcceptCancelCloseRequest @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type AcceptCancelRequest @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
 type ActiveEmergencyMode @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
@@ -8,15 +28,59 @@ type ActiveEmergencyMode @entity(immutable: true) {
 
 type AddSymbol @entity(immutable: true) {
     id: ID!
-    globalId: BigInt!
-    symbolId: BigInt!
-    name: String!
-    minAcceptableQuoteValue: BigInt!
-    minAcceptablePortionLF: BigInt!
-    tradingFee: BigInt!
-    maxLeverage: BigInt!
     fundingRateEpochDuration: BigInt!
     fundingRateWindowTime: BigInt!
+    globalId: BigInt!
+    maxLeverage: BigInt!
+    minAcceptablePortionLF: BigInt!
+    minAcceptableQuoteValue: BigInt!
+    name: String!
+    symbolId: BigInt!
+    tradingFee: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type AllocateForPartyB @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type AllocatePartyA @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    user: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type AllocatePartyB @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type ChargeFundingRate @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteIds: [BigInt!]
+    rates: [BigInt!]
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -30,11 +94,226 @@ type DeactiveEmergencyMode @entity(immutable: true) {
     transactionHash: Bytes!
 }
 
+type DeallocateForPartyB @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type DeallocatePartyA @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    user: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
 type DeregisterPartyB @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    partyB: Bytes!
     index: BigInt!
+    partyB: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type Deposit @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    sender: Bytes!
+    user: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type DisputeForLiquidation @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    liquidator: Bytes!
+    partyA: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type EmergencyClosePosition @entity(immutable: true) {
+    id: ID!
+    closedPrice: BigInt!
+    filledAmount: BigInt!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type ExpireQuote @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type FillCloseRequest @entity(immutable: true) {
+    id: ID!
+    closedPrice: BigInt!
+    filledAmount: BigInt!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type ForceCancelCloseRequest @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type ForceCancelQuote @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type ForceClosePosition @entity(immutable: true) {
+    id: ID!
+    closedPrice: BigInt!
+    filledAmount: BigInt!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type FullyLiquidatedPartyB @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type LiquidatePartyA @entity(immutable: true) {
+    id: ID!
+    allocatedBalance: BigInt!
+    globalId: BigInt!
+    liquidator: Bytes!
+    partyA: Bytes!
+    totalUnrealizedLoss: BigInt!
+    upnl: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type LiquidatePartyB @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    liquidator: Bytes!
+    partyA: Bytes!
+    partyB: Bytes!
+    partyBAllocatedBalance: BigInt!
+    upnl: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type LiquidatePendingPositionsPartyA @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    liquidator: Bytes!
+    partyA: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type LiquidatePositionsPartyA @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    liquidator: Bytes!
+    partyA: Bytes!
+    quoteIds: [BigInt!]
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type LiquidatePositionsPartyB @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    liquidator: Bytes!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteIds: [BigInt!]
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type LiquidationDisputed @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    partyA: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type LockQuote @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    partyB: Bytes!
+    quoteId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type OpenPosition @entity(immutable: true) {
+    id: ID!
+    filledAmount: BigInt!
+    globalId: BigInt!
+    openedPrice: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteId: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -89,6 +368,46 @@ type RegisterPartyB @entity(immutable: true) {
     transactionHash: Bytes!
 }
 
+type RequestToCancelCloseRequest @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type RequestToCancelQuote @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type RequestToClosePosition @entity(immutable: true) {
+    id: ID!
+    closePrice: BigInt!
+    deadline: BigInt!
+    globalId: BigInt!
+    orderType: Int!
+    partyA: Bytes!
+    partyB: Bytes!
+    quoteId: BigInt!
+    quoteStatus: Int!
+    quantityToClose: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
 type RoleGranted @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
@@ -109,10 +428,33 @@ type RoleRevoked @entity(immutable: true) {
     transactionHash: Bytes!
 }
 
+type SendQuote @entity(immutable: true) {
+    id: ID!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    cva: BigInt!
+    deadline: BigInt!
+    globalId: BigInt!
+    lf: BigInt!
+    marketPrice: BigInt!
+    orderType: Int!
+    partyA: Bytes!
+    partyAmm: BigInt!
+    partyBsWhiteList: [Bytes!]
+    partyBmm: BigInt!
+    positionType: Int!
+    price: BigInt!
+    quantity: BigInt!
+    quoteId: BigInt!
+    symbolId: BigInt!
+    tradingFee: BigInt!
+    transactionHash: Bytes!
+}
+
 type SetBalanceLimitPerUser @entity(immutable: true) {
     id: ID!
-    globalId: BigInt!
     balanceLimitPerUser: BigInt!
+    globalId: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -120,8 +462,8 @@ type SetBalanceLimitPerUser @entity(immutable: true) {
 
 type SetCollateral @entity(immutable: true) {
     id: ID!
-    globalId: BigInt!
     collateral: Bytes!
+    globalId: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -130,8 +472,8 @@ type SetCollateral @entity(immutable: true) {
 type SetDeallocateCooldown @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldDeallocateCooldown: BigInt!
     newDeallocateCooldown: BigInt!
+    oldDeallocateCooldown: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -140,8 +482,8 @@ type SetDeallocateCooldown @entity(immutable: true) {
 type SetFeeCollector @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldFeeCollector: Bytes!
     newFeeCollector: Bytes!
+    oldFeeCollector: Bytes!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -150,8 +492,8 @@ type SetFeeCollector @entity(immutable: true) {
 type SetForceCancelCloseCooldown @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldForceCancelCloseCooldown: BigInt!
     newForceCancelCloseCooldown: BigInt!
+    oldForceCancelCloseCooldown: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -160,8 +502,8 @@ type SetForceCancelCloseCooldown @entity(immutable: true) {
 type SetForceCancelCooldown @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldForceCancelCooldown: BigInt!
     newForceCancelCooldown: BigInt!
+    oldForceCancelCooldown: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -170,8 +512,8 @@ type SetForceCancelCooldown @entity(immutable: true) {
 type SetForceCloseCooldown @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldForceCloseCooldown: BigInt!
     newForceCloseCooldown: BigInt!
+    oldForceCloseCooldown: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -180,8 +522,8 @@ type SetForceCloseCooldown @entity(immutable: true) {
 type SetForceCloseGapRatio @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldForceCloseGapRatio: BigInt!
     newForceCloseGapRatio: BigInt!
+    oldForceCloseGapRatio: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -190,8 +532,8 @@ type SetForceCloseGapRatio @entity(immutable: true) {
 type SetLiquidationTimeout @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldLiquidationTimeout: BigInt!
     newLiquidationTimeout: BigInt!
+    oldLiquidationTimeout: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -200,8 +542,8 @@ type SetLiquidationTimeout @entity(immutable: true) {
 type SetLiquidatorShare @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldLiquidatorShare: BigInt!
     newLiquidatorShare: BigInt!
+    oldLiquidatorShare: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -210,9 +552,9 @@ type SetLiquidatorShare @entity(immutable: true) {
 type SetMuonConfig @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    upnlValidTime: BigInt!
-    priceValidTime: BigInt!
     priceQuantityValidTime: BigInt!
+    priceValidTime: BigInt!
+    upnlValidTime: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -221,10 +563,10 @@ type SetMuonConfig @entity(immutable: true) {
 type SetMuonIds @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    muonAppId: BigInt!
     gateway: Bytes!
-    x: BigInt!
+    muonAppId: BigInt!
     parity: Int!
+    x: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -243,8 +585,8 @@ type SetPartyBEmergencyStatus @entity(immutable: true) {
 type SetPendingQuotesValidLength @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    oldPendingQuotesValidLength: BigInt!
     newPendingQuotesValidLength: BigInt!
+    oldPendingQuotesValidLength: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -253,8 +595,8 @@ type SetPendingQuotesValidLength @entity(immutable: true) {
 type SetSuspendedAddress @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    user: Bytes!
     isSuspended: Boolean!
+    user: Bytes!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -263,11 +605,11 @@ type SetSuspendedAddress @entity(immutable: true) {
 type SetSymbolAcceptableValues @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    symbolId: BigInt!
-    oldMinAcceptableQuoteValue: BigInt!
-    oldMinAcceptablePortionLF: BigInt!
-    minAcceptableQuoteValue: BigInt!
     minAcceptablePortionLF: BigInt!
+    minAcceptableQuoteValue: BigInt!
+    oldMinAcceptablePortionLF: BigInt!
+    oldMinAcceptableQuoteValue: BigInt!
+    symbolId: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -275,10 +617,10 @@ type SetSymbolAcceptableValues @entity(immutable: true) {
 
 type SetSymbolFundingState @entity(immutable: true) {
     id: ID!
-    globalId: BigInt!
-    symbolId: BigInt!
     fundingRateEpochDuration: BigInt!
     fundingRateWindowTime: BigInt!
+    globalId: BigInt!
+    symbolId: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -287,9 +629,9 @@ type SetSymbolFundingState @entity(immutable: true) {
 type SetSymbolMaxLeverage @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    symbolId: BigInt!
-    oldMaxLeverage: BigInt!
     maxLeverage: BigInt!
+    oldMaxLeverage: BigInt!
+    symbolId: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -298,9 +640,9 @@ type SetSymbolMaxLeverage @entity(immutable: true) {
 type SetSymbolMaxSlippage @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    symbolId: BigInt!
-    oldMaxSlippage: BigInt!
     maxSlippage: BigInt!
+    oldMaxSlippage: BigInt!
+    symbolId: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -309,8 +651,8 @@ type SetSymbolMaxSlippage @entity(immutable: true) {
 type SetSymbolTradingFee @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    symbolId: BigInt!
     oldTradingFee: BigInt!
+    symbolId: BigInt!
     tradingFee: BigInt!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -320,9 +662,43 @@ type SetSymbolTradingFee @entity(immutable: true) {
 type SetSymbolValidationState @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
-    symbolId: BigInt!
-    oldState: Boolean!
     isValid: Boolean!
+    oldState: Boolean!
+    symbolId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type SetSymbolsPrices @entity(immutable: true) {
+    id: ID!
+    globalId: BigInt!
+    liquidator: Bytes!
+    partyA: Bytes!
+    prices: [BigInt!]
+    symbolIds: [BigInt!]
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type SettlePartyALiquidation @entity(immutable: true) {
+    id: ID!
+    amounts: [BigInt!]
+    globalId: BigInt!
+    partyA: Bytes!
+    partyBs: [Bytes!]
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
+
+type TransferAllocation @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    origin: Bytes!
+    recipient: Bytes!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -368,393 +744,6 @@ type UnpausePartyBActions @entity(immutable: true) {
     transactionHash: Bytes!
 }
 
-type DisputeForLiquidation @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    liquidator: Bytes!
-    partyA: Bytes!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type FullyLiquidatedPartyB @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyB: Bytes!
-    partyA: Bytes!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type LiquidatePartyA @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    liquidator: Bytes!
-    partyA: Bytes!
-    allocatedBalance: BigInt!
-    upnl: BigInt!
-    totalUnrealizedLoss: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type LiquidatePartyB @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    liquidator: Bytes!
-    partyB: Bytes!
-    partyA: Bytes!
-    partyBAllocatedBalance: BigInt!
-    upnl: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type LiquidatePendingPositionsPartyA @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    liquidator: Bytes!
-    partyA: Bytes!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type LiquidatePositionsPartyA @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    liquidator: Bytes!
-    partyA: Bytes!
-    quoteIds: [BigInt!]
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type LiquidatePositionsPartyB @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    liquidator: Bytes!
-    partyB: Bytes!
-    partyA: Bytes!
-    quoteIds: [BigInt!]
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type LiquidationDisputed @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyA: Bytes!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type SetSymbolsPrices @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    liquidator: Bytes!
-    partyA: Bytes!
-    symbolIds: [BigInt!]
-    prices:  [BigInt!]
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type SettlePartyALiquidation @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyA: Bytes!
-    partyBs: [Bytes!]!
-    amounts: [BigInt!]
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type ExpireQuote @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteStatus: Int!
-    quoteId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type ForceCancelCloseRequest @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type ForceCancelQuote @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type ForceClosePosition @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    partyA: Bytes!
-    partyB: Bytes!
-    filledAmount: BigInt!
-    closedPrice: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type RequestToCancelCloseRequest @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyA: Bytes!
-    partyB: Bytes!
-    quoteId: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type RequestToCancelQuote @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyA: Bytes!
-    partyB: Bytes!
-    quoteStatus: Int!
-    quoteId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type RequestToClosePosition @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyA: Bytes!
-    partyB: Bytes!
-    quoteId: BigInt!
-    closePrice: BigInt!
-    quantityToClose: BigInt!
-    orderType: Int!
-    deadline: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type SendQuote @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyA: Bytes!
-    quoteId: BigInt!
-    partyBsWhiteList: [Bytes!]
-    symbolId: BigInt!
-    positionType: Int!
-    orderType: Int!
-    price: BigInt!
-    marketPrice: BigInt!
-    quantity: BigInt!
-    cva: BigInt!
-    lf: BigInt!
-    partyAmm: BigInt!
-    partyBmm: BigInt!
-    tradingFee: BigInt!
-    deadline: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type AllocateForPartyB @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyB: Bytes!
-    partyA: Bytes!
-    amount: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type AllocatePartyA @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    user: Bytes!
-    amount: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type DeallocateForPartyB @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyB: Bytes!
-    partyA: Bytes!
-    amount: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type DeallocatePartyA @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    user: Bytes!
-    amount: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type Deposit @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    sender: Bytes!
-    user: Bytes!
-    amount: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type TransferAllocation @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    amount: BigInt!
-    origin: Bytes!
-    recipient: Bytes!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type Withdraw @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    sender: Bytes!
-    user: Bytes!
-    amount: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type AcceptCancelCloseRequest @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type AcceptCancelRequest @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type AllocatePartyB @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyB: Bytes!
-    partyA: Bytes!
-    amount: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type ChargeFundingRate @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyB: Bytes!
-    partyA: Bytes!
-    quoteIds: [BigInt!]
-    rates: [BigInt!]
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type EmergencyClosePosition @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    partyA: Bytes!
-    partyB: Bytes!
-    filledAmount: BigInt!
-    closedPrice: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type FillCloseRequest @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    partyA: Bytes!
-    partyB: Bytes!
-    filledAmount: BigInt!
-    closedPrice: BigInt!
-    quoteStatus: Int!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type LockQuote @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    partyB: Bytes!
-    quoteId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
-type OpenPosition @entity(immutable: true) {
-    id: ID!
-    globalId: BigInt!
-    quoteId: BigInt!
-    partyA: Bytes!
-    partyB: Bytes!
-    filledAmount: BigInt!
-    openedPrice: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-}
-
 type UnlockQuote @entity(immutable: true) {
     id: ID!
     globalId: BigInt!
@@ -766,3 +755,13 @@ type UnlockQuote @entity(immutable: true) {
     transactionHash: Bytes!
 }
 
+type Withdraw @entity(immutable: true) {
+    id: ID!
+    amount: BigInt!
+    globalId: BigInt!
+    sender: Bytes!
+    user: Bytes!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+}
