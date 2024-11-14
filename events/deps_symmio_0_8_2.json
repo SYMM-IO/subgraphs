@@ -1,15 +1,96 @@
 {
+  "AcceptCancelCloseRequest": [
+    "AcceptCancelCloseRequest"
+  ],
+  "AcceptCancelRequest": [
+    "AcceptCancelRequest"
+  ],
   "ActiveEmergencyMode": [
     "ActiveEmergencyMode"
   ],
   "AddSymbol": [
     "AddSymbol"
   ],
+  "AllocateForPartyB": [
+    "AllocateForPartyB"
+  ],
+  "AllocatePartyA": [
+    "AllocatePartyA"
+  ],
+  "AllocatePartyB": [
+    "AllocatePartyB"
+  ],
+  "ChargeFundingRate": [
+    "ChargeFundingRate"
+  ],
   "DeactiveEmergencyMode": [
     "DeactiveEmergencyMode"
   ],
+  "DeallocateForPartyB": [
+    "DeallocateForPartyB"
+  ],
+  "DeallocatePartyA": [
+    "DeallocatePartyA"
+  ],
+  "DeferredLiquidatePartyA": [
+    "DeferredLiquidatePartyA"
+  ],
+  "Deposit": [
+    "Deposit"
+  ],
   "DeregisterPartyB": [
     "DeregisterPartyB"
+  ],
+  "DisputeForLiquidation": [
+    "DisputeForLiquidation"
+  ],
+  "EmergencyClosePosition": [
+    "EmergencyClosePosition"
+  ],
+  "ExpireQuote": [
+    "ExpireQuote"
+  ],
+  "FillCloseRequest": [
+    "FillCloseRequest"
+  ],
+  "ForceCancelCloseRequest": [
+    "ForceCancelCloseRequest"
+  ],
+  "ForceCancelQuote": [
+    "ForceCancelQuote"
+  ],
+  "ForceClosePosition": [
+    "ForceClosePosition"
+  ],
+  "FullyLiquidatedPartyA": [
+    "FullyLiquidatedPartyA"
+  ],
+  "FullyLiquidatedPartyB": [
+    "FullyLiquidatedPartyB"
+  ],
+  "LiquidatePartyA": [
+    "LiquidatePartyA"
+  ],
+  "LiquidatePartyB": [
+    "LiquidatePartyB"
+  ],
+  "LiquidatePendingPositionsPartyA": [
+    "LiquidatePendingPositionsPartyA"
+  ],
+  "LiquidatePositionsPartyA": [
+    "LiquidatePositionsPartyA"
+  ],
+  "LiquidatePositionsPartyB": [
+    "LiquidatePositionsPartyB"
+  ],
+  "LiquidationDisputed": [
+    "LiquidationDisputed"
+  ],
+  "LockQuote": [
+    "LockQuote"
+  ],
+  "OpenPosition": [
+    "OpenPosition"
   ],
   "PauseAccounting": [
     "PauseAccounting"
@@ -29,11 +110,29 @@
   "RegisterPartyB": [
     "RegisterPartyB"
   ],
+  "RemoveBridge": [
+    "RemoveBridge"
+  ],
+  "RequestToCancelCloseRequest": [
+    "RequestToCancelCloseRequest"
+  ],
+  "RequestToCancelQuote": [
+    "RequestToCancelQuote"
+  ],
+  "RequestToClosePosition": [
+    "RequestToClosePosition"
+  ],
+  "ResolveLiquidationDispute": [
+    "ResolveLiquidationDispute"
+  ],
   "RoleGranted": [
     "RoleGranted"
   ],
   "RoleRevoked": [
     "RoleRevoked"
+  ],
+  "SendQuote": [
+    "SendQuote"
   ],
   "SetBalanceLimitPerUser": [
     "SetBalanceLimitPerUser"
@@ -43,6 +142,9 @@
   ],
   "SetDeallocateCooldown": [
     "SetDeallocateCooldown"
+  ],
+  "SetDeallocateDebounceTime": [
+    "SetDeallocateDebounceTime"
   ],
   "SetFeeCollector": [
     "SetFeeCollector"
@@ -58,6 +160,12 @@
   ],
   "SetForceCloseGapRatio": [
     "SetForceCloseGapRatio"
+  ],
+  "SetForceCloseMinSigPeriod": [
+    "SetForceCloseMinSigPeriod"
+  ],
+  "SetForceClosePricePenalty": [
+    "SetForceClosePricePenalty"
   ],
   "SetLiquidationTimeout": [
     "SetLiquidationTimeout"
@@ -95,14 +203,29 @@
   "SetSymbolTradingFee": [
     "SetSymbolTradingFee"
   ],
+  "SetSymbolsPrices": [
+    "SetSymbolsPrices"
+  ],
   "SetSymbolValidationState": [
     "SetSymbolValidationState"
+  ],
+  "SettlePartyALiquidation": [
+    "SettlePartyALiquidation"
+  ],
+  "TransferAllocation": [
+    "TransferAllocation"
+  ],
+  "UnlockQuote": [
+    "UnlockQuote"
   ],
   "UnpauseAccounting": [
     "UnpauseAccounting"
   ],
   "UnpauseGlobal": [
     "UnpauseGlobal"
+  ],
+  "UnpauseInternalTransfer": [
+    "UnpauseInternalTransfer"
   ],
   "UnpauseLiquidation": [
     "UnpauseLiquidation"
@@ -113,106 +236,7 @@
   "UnpausePartyBActions": [
     "UnpausePartyBActions"
   ],
-  "DisputeForLiquidation": [
-    "DisputeForLiquidation"
-  ],
-  "FullyLiquidatedPartyB": [
-    "FullyLiquidatedPartyB"
-  ],
-  "LiquidatePartyA": [
-    "LiquidatePartyA"
-  ],
-  "LiquidatePartyB": [
-    "LiquidatePartyB"
-  ],
-  "LiquidatePendingPositionsPartyA": [
-    "LiquidatePendingPositionsPartyA"
-  ],
-  "LiquidatePositionsPartyA": [
-    "LiquidatePositionsPartyA"
-  ],
-  "LiquidatePositionsPartyB": [
-    "LiquidatePositionsPartyB"
-  ],
-  "LiquidationDisputed": [
-    "LiquidationDisputed"
-  ],
-  "SetSymbolsPrices": [
-    "SetSymbolsPrices"
-  ],
-  "SettlePartyALiquidation": [
-    "SettlePartyALiquidation"
-  ],
-  "ExpireQuote": [
-    "ExpireQuote"
-  ],
-  "ForceCancelCloseRequest": [
-    "ForceCancelCloseRequest"
-  ],
-  "ForceCancelQuote": [
-    "ForceCancelQuote"
-  ],
-  "ForceClosePosition": [
-    "ForceClosePosition"
-  ],
-  "RequestToCancelCloseRequest": [
-    "RequestToCancelCloseRequest"
-  ],
-  "RequestToCancelQuote": [
-    "RequestToCancelQuote"
-  ],
-  "RequestToClosePosition": [
-    "RequestToClosePosition"
-  ],
-  "SendQuote": [
-    "SendQuote"
-  ],
-  "AllocateForPartyB": [
-    "AllocateForPartyB"
-  ],
-  "AllocatePartyA": [
-    "AllocatePartyA"
-  ],
-  "DeallocateForPartyB": [
-    "DeallocateForPartyB"
-  ],
-  "DeallocatePartyA": [
-    "DeallocatePartyA"
-  ],
-  "Deposit": [
-    "Deposit"
-  ],
-  "TransferAllocation": [
-    "TransferAllocation"
-  ],
   "Withdraw": [
-    "Withdraw"
-  ],
-  "AcceptCancelCloseRequest": [
-    "AcceptCancelCloseRequest"
-  ],
-  "AcceptCancelRequest": [
-    "AcceptCancelRequest"
-  ],
-  "AllocatePartyB": [
-    "AllocatePartyB"
-  ],
-  "ChargeFundingRate": [
-    "ChargeFundingRate"
-  ],
-  "EmergencyClosePosition": [
-    "EmergencyClosePosition"
-  ],
-  "FillCloseRequest": [
-    "FillCloseRequest"
-  ],
-  "LockQuote": [
-    "LockQuote"
-  ],
-  "OpenPosition": [
-    "OpenPosition"
-  ],
-  "UnlockQuote": [
-    "UnlockQuote"
+   "Withdraw"
   ]
 }

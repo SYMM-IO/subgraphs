@@ -5,7 +5,8 @@ export enum Version {
 	v_0_8_0,
 	v_0_8_1,
 	v_0_8_2,
-	v_0_8_3
+	v_0_8_3,
+	v_0_8_4
 }
 
 export enum VaultVersion {

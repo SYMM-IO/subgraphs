@@ -1,16 +1,16 @@
-import {SettlePartyALiquidation as SettlePartyALiquidationEntity} from "../../../generated/schema";
-import {Bytes, ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
-import {getGlobalCounterAndInc} from "../../../common/utils";
+import { SettlePartyALiquidation as SettlePartyALiquidationEntity } from "../../../generated/schema"
+import { Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
+import { getGlobalCounterAndInc } from "../../../common/utils"
 
-export class SettlePartyALiquidationHandler<T>  {
+export class SettlePartyALiquidationHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		let entity = new SettlePartyALiquidationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString());
+		let entity = new SettlePartyALiquidationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.globalId = getGlobalCounterAndInc()
-		entity.partyA = event.params.partyA;
+		entity.partyA = event.params.partyA
 		if (event.params.partyBs) {
 			let partyBs: Bytes[] = []
 			for (let i = 0, len = event.params.partyBs.length; i < len; i++) {
@@ -18,11 +18,11 @@ export class SettlePartyALiquidationHandler<T>  {
 			}
 			entity.partyBs = partyBs
 		}
-		entity.amounts = event.params.amounts;
+		entity.amounts = event.params.amounts
 
-		entity.blockTimestamp = event.block.timestamp;
-		entity.blockNumber = event.block.number;
-		entity.transactionHash = event.transaction.hash;
-		entity.save();
+		entity.blockTimestamp = event.block.timestamp
+		entity.blockNumber = event.block.number
+		entity.transactionHash = event.transaction.hash
+		entity.save()
 	}
 }

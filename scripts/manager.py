@@ -51,7 +51,7 @@ class Config:
 
 
 abi_versions = {
-    "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3"],
+    "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3", "0_8_4"],
     "symmioMultiAccount": ["1"],
     "timelock": ["1"],
     "vault": ["1"],
@@ -247,12 +247,25 @@ def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
     with open(abi_file_path, "r") as file:
         abi = json.load(file)
 
+    def parse_type(input_item):
+        type_str = input_item['type']
+        if 'tuple' in type_str:
+            # Check for array suffix
+            array_suffix = '[]' if type_str.endswith('[]') else ''
+            # Recursively parse components
+            components = input_item.get('components', [])
+            component_types = [parse_type(comp) for comp in components]
+            tuple_str = f"({','.join(component_types)})"
+            return tuple_str + array_suffix
+        else:
+            return input_item['type']
+
     signatures = []
     for entry in abi:
         if entry["type"] == "event" and entry["name"] == event_name:
             inputs = [
-                ("indexed " if input["indexed"] else "") + input["type"]
-                for input in entry["inputs"]
+                ("indexed " if inp["indexed"] else "") + parse_type(inp)
+                for inp in entry["inputs"]
             ]
             signature = f"{entry['name']}({','.join(inputs)})"
             signatures.append(signature)
@@ -405,6 +418,85 @@ def prepare_module(config: Config, target_module: str):
         yaml_file.write(yaml_content)
 
 
+# New function to convert Solidity types to GraphQL types
+def solidity_type_to_graphql(sol_type):
+    # Handle arrays
+    if sol_type.endswith('[]'):
+        base_type = solidity_type_to_graphql(sol_type[:-2])
+        return f'[{base_type[:-1]}]!'
+    elif '[' in sol_type and ']' in sol_type:
+        # Fixed-size arrays
+        base_type = sol_type[:sol_type.find('[')]
+        base_graphql_type = solidity_type_to_graphql(base_type)
+        return f'[{base_graphql_type[:-1]}]!'
+    elif sol_type.startswith('uint') or sol_type.startswith('int'):
+        bits = ''.join(filter(str.isdigit, sol_type))
+        if bits == '':
+            bits = 256  # default
+        else:
+            bits = int(bits)
+        if bits <= 32:
+            return 'Int!'
+        else:
+            return 'BigInt!'
+    elif sol_type == 'address':
+        return 'Bytes!'
+    elif sol_type.startswith('bytes'):
+        return 'Bytes!'
+    elif sol_type == 'bool':
+        return 'Boolean!'
+    elif sol_type == 'string':
+        return 'String!'
+    else:
+        return 'String!'  # default to String
+
+
+# New function to generate and print entities
+def generate_and_print_entities(config: Config):
+    all_events = {}
+
+    # Collect all events from all ABIs
+    for contract in config.contracts:
+        abi_file_path = os.path.join("./configs/abis", f"{contract.path()}.json")
+        if not os.path.exists(abi_file_path):
+            continue
+        with open(abi_file_path, "r") as f:
+            abi = json.load(f)
+        for item in abi:
+            if item.get('type') == 'event':
+                event_name = item['name']
+                # Avoid duplicate events
+                if event_name not in all_events:
+                    all_events[event_name] = item
+
+    # Get the events as a list and sort by name
+    events_list = list(all_events.values())
+    events_list.sort(key=lambda x: x['name'])
+
+    for event in events_list:
+        event_name = event['name']
+        inputs = event['inputs']
+        # Collect parameter names and types
+        params = []
+        for param in inputs:
+            param_name = param['name'] or 'param'  # Ensure param name exists
+            param_type = param['type']
+            graphql_type = solidity_type_to_graphql(param_type)
+            params.append({'name': param_name, 'type': graphql_type})
+        # Sort parameters by name
+        params.sort(key=lambda x: x['name'])
+        # Output the entity definition
+        print(f"type {event_name} @entity(immutable: true) {{")
+        print("    id: ID!")
+        print("    globalId: BigInt!")
+        for param in params:
+            print(f"    {param['name']}: {param['type']}")
+        print("    blockNumber: BigInt!")
+        print("    blockTimestamp: BigInt!")
+        print("    transactionHash: Bytes!")
+        print("}\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Module preparation script.")
     parser.add_argument("config_file", type=str, help="Configuration file path")
@@ -421,6 +513,7 @@ def main():
     parser.add_argument("--delete", action="store_true", help="Delete the subgraph")
     parser.add_argument("--add-latest-tag", action="store_true", help="Add 'latest' tag to the subgraph")
     parser.add_argument("--delete-latest-tag", action="store_true", help="Delete 'latest' tag from the subgraph")
+    parser.add_argument("--generate-entities", action="store_true", help="Generate and print entities")  # New option
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
@@ -432,6 +525,11 @@ def main():
     with open(args.config_file, "r") as f:
         config_data = json.load(f)
     config = Config.from_dict(config_data)
+
+    # New block to handle the generate_entities option
+    if args.generate_entities:
+        generate_and_print_entities(config)
+        sys.exit(0)
 
     if not args.add_latest_tag and not args.delete_latest_tag and not args.delete:
         prepare_module(config, args.module_name)
