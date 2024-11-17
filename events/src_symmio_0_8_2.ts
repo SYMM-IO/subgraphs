@@ -1,148 +1,150 @@
 import { AcceptCancelCloseRequestHandler } from "./handlers/symmio/AcceptCancelCloseRequestHandler"
-import { AcceptCancelCloseRequest } from "../generated/symmio_0_8_2/symmio_0_8_2"
+import {
+	AcceptCancelCloseRequest,
+	AcceptCancelRequest,
+	ActiveEmergencyMode,
+	AddSymbol,
+	AllocateForPartyB,
+	AllocatePartyA,
+	AllocatePartyB,
+	ChargeFundingRate,
+	DeactiveEmergencyMode,
+	DeallocateForPartyB,
+	DeallocatePartyA,
+	Deposit,
+	DeregisterPartyB,
+	DisputeForLiquidation,
+	EmergencyClosePosition,
+	ExpireQuote,
+	FillCloseRequest,
+	ForceCancelCloseRequest,
+	ForceCancelQuote,
+	ForceClosePosition,
+	FullyLiquidatedPartyB,
+	LiquidatePartyA,
+	LiquidatePartyB,
+	LiquidatePendingPositionsPartyA,
+	LiquidatePositionsPartyA,
+	LiquidatePositionsPartyB,
+	LiquidationDisputed,
+	LockQuote,
+	OpenPosition,
+	PauseAccounting,
+	PauseGlobal,
+	PauseLiquidation,
+	PausePartyAActions,
+	PausePartyBActions,
+	RegisterPartyB,
+	RequestToCancelCloseRequest,
+	RequestToCancelQuote,
+	RequestToClosePosition,
+	RoleGranted,
+	RoleRevoked,
+	SendQuote,
+	SetBalanceLimitPerUser,
+	SetCollateral,
+	SetDeallocateCooldown,
+	SetFeeCollector,
+	SetForceCancelCloseCooldown,
+	SetForceCancelCooldown,
+	SetForceCloseCooldown,
+	SetForceCloseGapRatio,
+	SetLiquidationTimeout,
+	SetLiquidatorShare,
+	SetMuonConfig,
+	SetMuonIds,
+	SetPartyBEmergencyStatus,
+	SetPendingQuotesValidLength,
+	SetSuspendedAddress,
+	SetSymbolAcceptableValues,
+	SetSymbolFundingState,
+	SetSymbolMaxLeverage,
+	SetSymbolMaxSlippage,
+	SetSymbolsPrices,
+	SetSymbolTradingFee,
+	SetSymbolValidationState,
+	SettlePartyALiquidation,
+	TransferAllocation,
+	UnlockQuote,
+	UnpauseAccounting,
+	UnpauseGlobal,
+	UnpauseLiquidation,
+	UnpausePartyAActions,
+	UnpausePartyBActions,
+	Withdraw,
+} from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
-import { AcceptCancelRequest } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { ActiveEmergencyModeHandler } from "./handlers/symmio/ActiveEmergencyModeHandler"
-import { ActiveEmergencyMode } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
-import { AddSymbol } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { AllocateForPartyBHandler } from "./handlers/symmio/AllocateForPartyBHandler"
-import { AllocateForPartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { AllocatePartyAHandler } from "./handlers/symmio/AllocatePartyAHandler"
-import { AllocatePartyA } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { AllocatePartyBHandler } from "./handlers/symmio/AllocatePartyBHandler"
-import { AllocatePartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { ChargeFundingRateHandler } from "./handlers/symmio/ChargeFundingRateHandler"
-import { ChargeFundingRate } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { DeactiveEmergencyModeHandler } from "./handlers/symmio/DeactiveEmergencyModeHandler"
-import { DeactiveEmergencyMode } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { DeallocateForPartyBHandler } from "./handlers/symmio/DeallocateForPartyBHandler"
-import { DeallocateForPartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { DeallocatePartyAHandler } from "./handlers/symmio/DeallocatePartyAHandler"
-import { DeallocatePartyA } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { DepositHandler } from "./handlers/symmio/DepositHandler"
-import { Deposit } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { DeregisterPartyBHandler } from "./handlers/symmio/DeregisterPartyBHandler"
-import { DeregisterPartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { DisputeForLiquidationHandler } from "./handlers/symmio/DisputeForLiquidationHandler"
-import { DisputeForLiquidation } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { EmergencyClosePositionHandler } from "./handlers/symmio/EmergencyClosePositionHandler"
-import { EmergencyClosePosition } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { ExpireQuoteHandler } from "./handlers/symmio/ExpireQuoteHandler"
-import { ExpireQuote } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { FillCloseRequestHandler } from "./handlers/symmio/FillCloseRequestHandler"
-import { FillCloseRequest } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { ForceCancelCloseRequestHandler } from "./handlers/symmio/ForceCancelCloseRequestHandler"
-import { ForceCancelCloseRequest } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { ForceCancelQuoteHandler } from "./handlers/symmio/ForceCancelQuoteHandler"
-import { ForceCancelQuote } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { ForceClosePositionHandler } from "./handlers/symmio/ForceClosePositionHandler"
-import { ForceClosePosition } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { FullyLiquidatedPartyBHandler } from "./handlers/symmio/FullyLiquidatedPartyBHandler"
-import { FullyLiquidatedPartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePartyAHandler } from "./handlers/symmio/LiquidatePartyAHandler"
-import { LiquidatePartyA } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePartyBHandler } from "./handlers/symmio/LiquidatePartyBHandler"
-import { LiquidatePartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePendingPositionsPartyAHandler } from "./handlers/symmio/LiquidatePendingPositionsPartyAHandler"
-import { LiquidatePendingPositionsPartyA } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePositionsPartyAHandler } from "./handlers/symmio/LiquidatePositionsPartyAHandler"
-import { LiquidatePositionsPartyA } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePositionsPartyBHandler } from "./handlers/symmio/LiquidatePositionsPartyBHandler"
-import { LiquidatePositionsPartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidationDisputedHandler } from "./handlers/symmio/LiquidationDisputedHandler"
-import { LiquidationDisputed } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { LockQuoteHandler } from "./handlers/symmio/LockQuoteHandler"
-import { LockQuote } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { OpenPositionHandler } from "./handlers/symmio/OpenPositionHandler"
-import { OpenPosition } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { PauseAccountingHandler } from "./handlers/symmio/PauseAccountingHandler"
-import { PauseAccounting } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { PauseGlobalHandler } from "./handlers/symmio/PauseGlobalHandler"
-import { PauseGlobal } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { PauseLiquidationHandler } from "./handlers/symmio/PauseLiquidationHandler"
-import { PauseLiquidation } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { PausePartyAActionsHandler } from "./handlers/symmio/PausePartyAActionsHandler"
-import { PausePartyAActions } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { PausePartyBActionsHandler } from "./handlers/symmio/PausePartyBActionsHandler"
-import { PausePartyBActions } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { RegisterPartyBHandler } from "./handlers/symmio/RegisterPartyBHandler"
-import { RegisterPartyB } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { RequestToCancelCloseRequestHandler } from "./handlers/symmio/RequestToCancelCloseRequestHandler"
-import { RequestToCancelCloseRequest } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { RequestToCancelQuoteHandler } from "./handlers/symmio/RequestToCancelQuoteHandler"
-import { RequestToCancelQuote } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { RequestToClosePositionHandler } from "./handlers/symmio/RequestToClosePositionHandler"
-import { RequestToClosePosition } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { RoleGrantedHandler } from "./handlers/symmio/RoleGrantedHandler"
-import { RoleGranted } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { RoleRevokedHandler } from "./handlers/symmio/RoleRevokedHandler"
-import { RoleRevoked } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SendQuoteHandler } from "./handlers/symmio/SendQuoteHandler"
-import { SendQuote } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetBalanceLimitPerUserHandler } from "./handlers/symmio/SetBalanceLimitPerUserHandler"
-import { SetBalanceLimitPerUser } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetCollateralHandler } from "./handlers/symmio/SetCollateralHandler"
-import { SetCollateral } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetDeallocateCooldownHandler } from "./handlers/symmio/SetDeallocateCooldownHandler"
-import { SetDeallocateCooldown } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
-import { SetFeeCollector } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetForceCancelCloseCooldownHandler } from "./handlers/symmio/SetForceCancelCloseCooldownHandler"
-import { SetForceCancelCloseCooldown } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetForceCancelCooldownHandler } from "./handlers/symmio/SetForceCancelCooldownHandler"
-import { SetForceCancelCooldown } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetForceCloseCooldownHandler } from "./handlers/symmio/SetForceCloseCooldownHandler"
-import { SetForceCloseCooldown } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetForceCloseGapRatioHandler } from "./handlers/symmio/SetForceCloseGapRatioHandler"
-import { SetForceCloseGapRatio } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetLiquidationTimeoutHandler } from "./handlers/symmio/SetLiquidationTimeoutHandler"
-import { SetLiquidationTimeout } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetLiquidatorShareHandler } from "./handlers/symmio/SetLiquidatorShareHandler"
-import { SetLiquidatorShare } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetMuonConfigHandler } from "./handlers/symmio/SetMuonConfigHandler"
-import { SetMuonConfig } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetMuonIdsHandler } from "./handlers/symmio/SetMuonIdsHandler"
-import { SetMuonIds } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetPartyBEmergencyStatusHandler } from "./handlers/symmio/SetPartyBEmergencyStatusHandler"
-import { SetPartyBEmergencyStatus } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetPendingQuotesValidLengthHandler } from "./handlers/symmio/SetPendingQuotesValidLengthHandler"
-import { SetPendingQuotesValidLength } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSuspendedAddressHandler } from "./handlers/symmio/SetSuspendedAddressHandler"
-import { SetSuspendedAddress } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolAcceptableValuesHandler } from "./handlers/symmio/SetSymbolAcceptableValuesHandler"
-import { SetSymbolAcceptableValues } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
-import { SetSymbolFundingState } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolMaxLeverageHandler } from "./handlers/symmio/SetSymbolMaxLeverageHandler"
-import { SetSymbolMaxLeverage } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolMaxSlippageHandler } from "./handlers/symmio/SetSymbolMaxSlippageHandler"
-import { SetSymbolMaxSlippage } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolTradingFeeHandler } from "./handlers/symmio/SetSymbolTradingFeeHandler"
-import { SetSymbolTradingFee } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
-import { SetSymbolValidationState } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolsPricesHandler } from "./handlers/symmio/SetSymbolsPricesHandler"
-import { SetSymbolsPrices } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
-import { SettlePartyALiquidation } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { TransferAllocationHandler } from "./handlers/symmio/TransferAllocationHandler"
-import { TransferAllocation } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { UnlockQuoteHandler } from "./handlers/symmio/UnlockQuoteHandler"
-import { UnlockQuote } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { UnpauseAccountingHandler } from "./handlers/symmio/UnpauseAccountingHandler"
-import { UnpauseAccounting } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { UnpauseGlobalHandler } from "./handlers/symmio/UnpauseGlobalHandler"
-import { UnpauseGlobal } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { UnpauseLiquidationHandler } from "./handlers/symmio/UnpauseLiquidationHandler"
-import { UnpauseLiquidation } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { UnpausePartyAActionsHandler } from "./handlers/symmio/UnpausePartyAActionsHandler"
-import { UnpausePartyAActions } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { UnpausePartyBActionsHandler } from "./handlers/symmio/UnpausePartyBActionsHandler"
-import { UnpausePartyBActions } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
-import { Withdraw } from "../generated/symmio_0_8_2/symmio_0_8_2"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
