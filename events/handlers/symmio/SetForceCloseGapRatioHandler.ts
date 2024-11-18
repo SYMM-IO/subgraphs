@@ -11,7 +11,7 @@ export class SetForceCloseGapRatioHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetForceCloseGapRatioEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.oldForceCloseGapRatio = event.params.oldForceCloseGapRatio
 		entity.newForceCloseGapRatio = event.params.newForceCloseGapRatio
 

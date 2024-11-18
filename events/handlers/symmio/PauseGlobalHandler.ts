@@ -9,7 +9,7 @@ export class PauseGlobalHandler<T> {
 		const event = changetype<T>(_event)
 		let entity = new PauseGlobalEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash

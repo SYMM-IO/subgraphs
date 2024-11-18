@@ -9,7 +9,7 @@ export class DeferredLiquidatePartyAHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new DeferredLiquidatePartyAEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.allocatedBalance = event.params.allocatedBalance
 		entity.liquidationAllocatedBalance = event.params.liquidationAllocatedBalance

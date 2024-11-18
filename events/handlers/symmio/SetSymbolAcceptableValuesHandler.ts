@@ -9,7 +9,7 @@ export class SetSymbolAcceptableValuesHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetSymbolAcceptableValuesEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.symbolId = event.params.symbolId
 		entity.oldMinAcceptableQuoteValue = event.params.oldMinAcceptableQuoteValue
 		entity.oldMinAcceptablePortionLF = event.params.oldMinAcceptablePortionLF

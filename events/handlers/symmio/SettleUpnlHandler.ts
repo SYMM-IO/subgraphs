@@ -9,7 +9,7 @@ export class SettleUpnlHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SettleUpnlEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.newPartyAAllocatedBalance = event.params.newPartyAAllocatedBalance
 		entity.newPartyBsAllocatedBalances = event.params.newPartyBsAllocatedBalances

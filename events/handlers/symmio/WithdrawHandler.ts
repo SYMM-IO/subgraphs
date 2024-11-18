@@ -9,7 +9,7 @@ export class WithdrawHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new WithdrawEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.sender = event.params.sender
 		entity.user = event.params.user
 		entity.amount = event.params.amount

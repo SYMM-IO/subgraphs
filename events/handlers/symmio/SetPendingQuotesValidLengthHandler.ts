@@ -9,7 +9,7 @@ export class SetPendingQuotesValidLengthHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetPendingQuotesValidLengthEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.oldPendingQuotesValidLength = event.params.oldPendingQuotesValidLength
 		entity.newPendingQuotesValidLength = event.params.newPendingQuotesValidLength
 

@@ -9,7 +9,7 @@ export class UnlockQuoteHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new UnlockQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId
 		entity.quoteStatus = event.params.quoteStatus

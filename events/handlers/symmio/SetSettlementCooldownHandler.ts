@@ -9,7 +9,7 @@ export class SetSettlementCooldownHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetSettlementCooldownEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.oldSettlementCooldown = event.params.oldSettlementCooldown
 		entity.newSettlementCooldown = event.params.newSettlementCooldown

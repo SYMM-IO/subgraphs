@@ -9,7 +9,7 @@ export class SetDeallocateCooldownHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetDeallocateCooldownEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.oldDeallocateCooldown = event.params.oldDeallocateCooldown
 		entity.newDeallocateCooldown = event.params.newDeallocateCooldown
 

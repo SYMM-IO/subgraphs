@@ -9,7 +9,7 @@ export class ChargeFundingRateHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new ChargeFundingRateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
 		entity.quoteIds = event.params.quoteIds

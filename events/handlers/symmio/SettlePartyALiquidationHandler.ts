@@ -11,7 +11,7 @@ export class SettlePartyALiquidationHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SettlePartyALiquidationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.partyA = event.params.partyA
 		if (event.params.partyBs) {
 			let partyBs: Bytes[] = []

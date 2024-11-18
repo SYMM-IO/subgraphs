@@ -9,7 +9,7 @@ export class SetMuonConfigHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetMuonConfigEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.upnlValidTime = event.params.upnlValidTime
 		entity.priceValidTime = event.params.priceValidTime
 		entity.blockTimestamp = event.block.timestamp

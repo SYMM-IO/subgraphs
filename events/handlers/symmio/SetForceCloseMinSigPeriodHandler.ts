@@ -9,7 +9,7 @@ export class SetForceCloseMinSigPeriodHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetForceCloseMinSigPeriodEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.newCloseMinSigPeriod = event.params.newCloseMinSigPeriod
 		entity.oldCloseMinSigPeriod = event.params.oldCloseMinSigPeriod

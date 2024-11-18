@@ -9,7 +9,7 @@ export class SetDefaultFeeCollectorHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetDefaultFeeCollectorEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.newDefaultFeeCollector = event.params.newDefaultFeeCollector
 		entity.oldDefaultFeeCollector = event.params.oldDefaultFeeCollector

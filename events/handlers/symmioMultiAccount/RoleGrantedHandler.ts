@@ -9,7 +9,7 @@ export class RoleGrantedHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new RoleGrantedEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.role = event.params.role
 		entity.user = event.params.account
 

@@ -9,7 +9,7 @@ export class RegisterAffiliateHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new RegisterAffiliateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.affilate = event.params.affilate
 
 		entity.blockTimestamp = event.block.timestamp

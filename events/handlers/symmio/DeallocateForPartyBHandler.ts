@@ -11,7 +11,7 @@ export class DeallocateForPartyBHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new DeallocateForPartyBEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
 		entity.amount = event.params.amount

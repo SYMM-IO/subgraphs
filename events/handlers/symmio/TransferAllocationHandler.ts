@@ -11,7 +11,7 @@ export class TransferAllocationHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new TransferAllocationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.amount = event.params.amount
 		entity.origin = event.params.origin
 		entity.recipient = event.params.recipient

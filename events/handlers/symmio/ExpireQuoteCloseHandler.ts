@@ -9,7 +9,7 @@ export class ExpireQuoteCloseHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new ExpireQuoteCloseEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.quoteStatus = event.params.quoteStatus
 		entity.quoteId = event.params.quoteId
 		entity.closeId = event.params.closeId

@@ -10,7 +10,7 @@ export class SetSymbolValidationStateHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetSymbolValidationStateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_2>(_event)

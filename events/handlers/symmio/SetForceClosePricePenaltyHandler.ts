@@ -9,7 +9,7 @@ export class SetForceClosePricePenaltyHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetForceClosePricePenaltyEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.newPricePenalty = event.params.newPricePenalty
 		entity.oldPricePenalty = event.params.oldPricePenalty

@@ -9,7 +9,7 @@ export class WithdrawReceivedBridgeValuesHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new WithdrawReceivedBridgeValuesEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.transactionIds = event.params.transactionIds
 

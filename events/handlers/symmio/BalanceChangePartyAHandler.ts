@@ -9,7 +9,7 @@ export class BalanceChangePartyAHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new BalanceChangePartyAEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 		entity.partyA = event.params.partyA
 		entity.amount = event.params.amount
 		entity._type = event.params._type

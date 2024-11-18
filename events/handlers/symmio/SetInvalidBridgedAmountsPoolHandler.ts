@@ -9,7 +9,7 @@ export class SetInvalidBridgedAmountsPoolHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new SetInvalidBridgedAmountsPoolEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		entity.newInvalidBridgedAmountsPool = event.params.newInvalidBridgedAmountsPool
 		entity.oldInvalidBridgedAmountsPool = event.params.oldInvalidBridgedAmountsPool

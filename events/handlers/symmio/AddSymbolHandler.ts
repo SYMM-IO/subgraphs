@@ -12,7 +12,7 @@ export class AddSymbolHandler<T> {
 		const event = changetype<T>(_event)
 
 		let entity = new AddSymbolEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
-		entity.globalId = getGlobalCounterAndInc()
+		entity.counterId = getGlobalCounterAndInc()
 
 		switch (version) {
 			case Version.v_0_8_4: {
