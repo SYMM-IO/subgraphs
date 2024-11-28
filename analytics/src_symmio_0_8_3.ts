@@ -19,10 +19,8 @@ import {
 	ForceCancelQuote,
 	ForceClosePosition,
 	LiquidatePartyA,
-	LiquidatePartyA1,
 	LiquidatePartyB,
 	LiquidatePendingPositionsPartyA,
-	LiquidatePendingPositionsPartyA1,
 	LiquidatePositionsPartyA,
 	LiquidatePositionsPartyB,
 	LockQuote,
@@ -191,12 +189,6 @@ export function handleLiquidatePartyA(event: LiquidatePartyA): void {
 }
 
 
-export function handleLiquidatePartyA1(event: LiquidatePartyA1): void {
-	let handler = new LiquidatePartyAHandler<LiquidatePartyA1>()
-	handler.handle(event, Version.v_0_8_3)
-}
-
-
 export function handleLiquidatePartyB(event: LiquidatePartyB): void {
 	let handler = new LiquidatePartyBHandler<LiquidatePartyB>()
 	handler.handle(event, Version.v_0_8_3)
@@ -205,12 +197,6 @@ export function handleLiquidatePartyB(event: LiquidatePartyB): void {
 
 export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPositionsPartyA): void {
 	let handler = new LiquidatePendingPositionsPartyAHandler<LiquidatePendingPositionsPartyA>()
-	handler.handle(event, Version.v_0_8_3)
-}
-
-
-export function handleLiquidatePendingPositionsPartyA1(event: LiquidatePendingPositionsPartyA1): void {
-	let handler = new LiquidatePendingPositionsPartyAHandler<LiquidatePendingPositionsPartyA1>()
 	handler.handle(event, Version.v_0_8_3)
 }
 

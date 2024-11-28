@@ -1,5 +1,237 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "_functionSelector",
+        "type": "bytes4"
+      }
+    ],
+    "name": "facetAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "facetAddress_",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "facetAddresses",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "facetAddresses_",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_facet",
+        "type": "address"
+      }
+    ],
+    "name": "facetFunctionSelectors",
+    "outputs": [
+      {
+        "internalType": "bytes4[]",
+        "name": "facetFunctionSelectors_",
+        "type": "bytes4[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "facets",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "facetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "internalType": "struct IDiamondLoupe.Facet[]",
+        "name": "facets_",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "_interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "AcceptCancelCloseRequest",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      }
+    ],
+    "name": "AcceptCancelRequest",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "AllocatePartyB",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "filledAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closedPrice",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "EmergencyClosePosition",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "ExpireQuote",
+    "type": "event"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -54,50 +286,6 @@
       },
       {
         "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "closeId",
-        "type": "uint256"
-      }
-    ],
-    "name": "ForceCancelCloseRequest",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      }
-    ],
-    "name": "ForceCancelQuote",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "partyA",
         "type": "address"
@@ -133,7 +321,7 @@
         "type": "uint256"
       }
     ],
-    "name": "ForceClosePosition",
+    "name": "FillCloseRequest",
     "type": "event"
   },
   {
@@ -179,12 +367,6 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
         "name": "partyB",
         "type": "address"
       },
@@ -193,21 +375,9 @@
         "internalType": "uint256",
         "name": "quoteId",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "closeId",
-        "type": "uint256"
       }
     ],
-    "name": "RequestToCancelCloseRequest",
+    "name": "LockQuote",
     "type": "event"
   },
   {
@@ -215,35 +385,10 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "quoteId",
         "type": "uint256"
-      }
-    ],
-    "name": "RequestToCancelQuote",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
+      },
       {
         "indexed": false,
         "internalType": "address",
@@ -259,47 +404,17 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "quoteId",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "closePrice",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quantityToClose",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum OrderType",
-        "name": "orderType",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "deadline",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "closeId",
+        "name": "openedPrice",
         "type": "uint256"
       }
     ],
-    "name": "RequestToClosePosition",
+    "name": "OpenPosition",
     "type": "event"
   },
   {
@@ -400,14 +515,39 @@
     "type": "event"
   },
   {
+    "anonymous": false,
     "inputs": [
       {
-        "internalType": "uint256[]",
-        "name": "expiredQuoteIds",
-        "type": "uint256[]"
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
       }
     ],
-    "name": "expireQuote",
+    "name": "UnlockQuote",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "acceptCancelCloseRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -420,20 +560,7 @@
         "type": "uint256"
       }
     ],
-    "name": "forceCancelCloseRequest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      }
-    ],
-    "name": "forceCancelQuote",
+    "name": "acceptCancelRequest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -456,41 +583,6 @@
             "internalType": "uint256",
             "name": "timestamp",
             "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "symbolId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "highest",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "lowest",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "averagePrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "startTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "endTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyB",
-            "type": "int256"
           },
           {
             "internalType": "int256",
@@ -498,184 +590,8 @@
             "type": "int256"
           },
           {
-            "internalType": "uint256",
-            "name": "currentPrice",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct HighLowPriceSig",
-        "name": "sig",
-        "type": "tuple"
-      }
-    ],
-    "name": "forceClosePosition",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      }
-    ],
-    "name": "requestToCancelCloseRequest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      }
-    ],
-    "name": "requestToCancelQuote",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "closePrice",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "quantityToClose",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum OrderType",
-        "name": "orderType",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "deadline",
-        "type": "uint256"
-      }
-    ],
-    "name": "requestToClosePosition",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "partyBsWhiteList",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256",
-        "name": "symbolId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum PositionType",
-        "name": "positionType",
-        "type": "uint8"
-      },
-      {
-        "internalType": "enum OrderType",
-        "name": "orderType",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "quantity",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "cva",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "lf",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "partyAmm",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "partyBmm",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "maxFundingRate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "deadline",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
             "internalType": "int256",
-            "name": "upnl",
+            "name": "upnlPartyB",
             "type": "int256"
           },
           {
@@ -711,12 +627,12 @@
             "type": "tuple"
           }
         ],
-        "internalType": "struct SingleUpnlAndPriceSig",
+        "internalType": "struct PairUpnlAndPriceSig",
         "name": "upnlSig",
         "type": "tuple"
       }
     ],
-    "name": "sendQuote",
+    "name": "emergencyClosePosition",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -724,133 +640,534 @@
   {
     "inputs": [
       {
-        "internalType": "address[]",
-        "name": "partyBsWhiteList",
-        "type": "address[]"
-      },
-      {
         "internalType": "uint256",
-        "name": "symbolId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum PositionType",
-        "name": "positionType",
-        "type": "uint8"
-      },
-      {
-        "internalType": "enum OrderType",
-        "name": "orderType",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "price",
+        "name": "quoteId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "quantity",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "cva",
+        "name": "closedPrice",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyA",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyB",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct PairUpnlAndPriceSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "fillCloseRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "lf",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "partyAmm",
+        "name": "openedPrice",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct SingleUpnlSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyA",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyB",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct PairUpnlAndPriceSig",
+        "name": "pairUpnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "lockAndOpenQuote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct SingleUpnlSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "lockQuote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "partyBmm",
+        "name": "filledAmount",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "maxFundingRate",
+        "name": "openedPrice",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyA",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyB",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct PairUpnlAndPriceSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "openPosition",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "unlockQuote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "transactionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "validAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "RestoreBridgeTransaction",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "transactionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "SuspendBridgeTransaction",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "bridgeAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "transactionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferToBridge",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "transactionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "WithdrawReceivedBridgeValue",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "transactionIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "WithdrawReceivedBridgeValues",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "transactionId",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "deadline",
+        "name": "validAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "restoreBridgeTransaction",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "transactionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "suspendBridgeTransaction",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
         "type": "uint256"
       },
       {
         "internalType": "address",
-        "name": "affiliate",
+        "name": "bridgeAddress",
         "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct SingleUpnlAndPriceSig",
-        "name": "upnlSig",
-        "type": "tuple"
       }
     ],
-    "name": "sendQuoteWithAffiliate",
-    "outputs": [
+    "name": "transferToBridge",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
         "internalType": "uint256",
-        "name": "quoteId",
+        "name": "transactionId",
         "type": "uint256"
       }
     ],
+    "name": "withdrawReceivedBridgeValue",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "transactionIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "withdrawReceivedBridgeValues",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -1077,6 +1394,37 @@
         "name": "",
         "type": "uint256"
       },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "deallocateCooldown",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "forceCloseCooldowns",
+    "outputs": [
       {
         "internalType": "uint256",
         "name": "",
@@ -2807,6 +3155,25 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getQuoteCloseId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "partyA",
         "type": "address"
@@ -4262,56 +4629,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "deallocateCooldown",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "forceCloseCooldowns",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getQuoteCloseId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -4333,7 +4650,7 @@
         "type": "uint256"
       }
     ],
-    "name": "AcceptCancelCloseRequest",
+    "name": "ForceCancelCloseRequest",
     "type": "event"
   },
   {
@@ -4352,7 +4669,690 @@
         "type": "uint8"
       }
     ],
-    "name": "AcceptCancelRequest",
+    "name": "ForceCancelQuote",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "filledAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closedPrice",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      }
+    ],
+    "name": "ForceClosePosition",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "RequestToCancelCloseRequest",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "RequestToCancelQuote",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closePrice",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quantityToClose",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum OrderType",
+        "name": "orderType",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum QuoteStatus",
+        "name": "quoteStatus",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "closeId",
+        "type": "uint256"
+      }
+    ],
+    "name": "RequestToClosePosition",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "expiredQuoteIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "expireQuote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "forceCancelCloseRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "forceCancelQuote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "symbolId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "highest",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lowest",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "averagePrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "startTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "endTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyB",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyA",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct HighLowPriceSig",
+        "name": "sig",
+        "type": "tuple"
+      }
+    ],
+    "name": "forceClosePosition",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "requestToCancelCloseRequest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      }
+    ],
+    "name": "requestToCancelQuote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "quoteId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "closePrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantityToClose",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum OrderType",
+        "name": "orderType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      }
+    ],
+    "name": "requestToClosePosition",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "partyBsWhiteList",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "symbolId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum PositionType",
+        "name": "positionType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "enum OrderType",
+        "name": "orderType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cva",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lf",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "partyAmm",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "partyBmm",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxFundingRate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct SingleUpnlAndPriceSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "sendQuote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "partyBsWhiteList",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "symbolId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum PositionType",
+        "name": "positionType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "enum OrderType",
+        "name": "orderType",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cva",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lf",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "partyAmm",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "partyBmm",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxFundingRate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "affiliate",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct SingleUpnlAndPriceSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "sendQuoteWithAffiliate",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newAllocatedBalance",
+        "type": "uint256"
+      }
+    ],
+    "name": "AllocateForPartyB",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newAllocatedBalance",
+        "type": "uint256"
+      }
+    ],
+    "name": "AllocatePartyA",
     "type": "event"
   },
   {
@@ -4375,9 +5375,96 @@
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newAllocatedBalance",
+        "type": "uint256"
       }
     ],
-    "name": "AllocatePartyB",
+    "name": "DeallocateForPartyB",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newAllocatedBalance",
+        "type": "uint256"
+      }
+    ],
+    "name": "DeallocatePartyA",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Deposit",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "userNewAllocatedBalance",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "InternalTransfer",
     "type": "event"
   },
   {
@@ -4386,188 +5473,114 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "quoteId",
+        "name": "amount",
         "type": "uint256"
       },
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "origin",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "originNewAllocatedBalance",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "recipientNewAllocatedBalance",
+        "type": "uint256"
+      }
+    ],
+    "name": "TransferAllocation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "origin",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      }
+    ],
+    "name": "TransferAllocation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Withdraw",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "allocate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
         "name": "partyA",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "filledAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "closedPrice",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "closeId",
-        "type": "uint256"
       }
     ],
-    "name": "EmergencyClosePosition",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "filledAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "closedPrice",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "closeId",
-        "type": "uint256"
-      }
-    ],
-    "name": "FillCloseRequest",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      }
-    ],
-    "name": "LockQuote",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "filledAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "openedPrice",
-        "type": "uint256"
-      }
-    ],
-    "name": "OpenPosition",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum QuoteStatus",
-        "name": "quoteStatus",
-        "type": "uint8"
-      }
-    ],
-    "name": "UnlockQuote",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      }
-    ],
-    "name": "acceptCancelCloseRequest",
+    "name": "allocateForPartyB",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -4576,305 +5589,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      }
-    ],
-    "name": "acceptCancelRequest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyA",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyB",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct PairUpnlAndPriceSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "emergencyClosePosition",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "filledAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "closedPrice",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyA",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyB",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct PairUpnlAndPriceSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "fillCloseRequest",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "filledAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "openedPrice",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct SingleUpnlSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyA",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyB",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct PairUpnlAndPriceSig",
-        "name": "pairUpnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "lockAndOpenQuote",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "quoteId",
+        "name": "amount",
         "type": "uint256"
       },
       {
@@ -4927,7 +5642,7 @@
         "type": "tuple"
       }
     ],
-    "name": "lockQuote",
+    "name": "deallocate",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -4936,18 +5651,13 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "quoteId",
+        "name": "amount",
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "filledAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "openedPrice",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
       },
       {
         "components": [
@@ -4963,18 +5673,8 @@
           },
           {
             "internalType": "int256",
-            "name": "upnlPartyA",
+            "name": "upnl",
             "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyB",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "price",
-            "type": "uint256"
           },
           {
             "internalType": "bytes",
@@ -5004,12 +5704,12 @@
             "type": "tuple"
           }
         ],
-        "internalType": "struct PairUpnlAndPriceSig",
+        "internalType": "struct SingleUpnlSig",
         "name": "upnlSig",
         "type": "tuple"
       }
     ],
-    "name": "openPosition",
+    "name": "deallocateForPartyB",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -5018,11 +5718,271 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "quoteId",
+        "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "unlockQuote",
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "depositAndAllocate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "depositFor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "internalTransfer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "origin",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct SingleUpnlSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "transferAllocation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawTo",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "quoteIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256[]",
+        "name": "rates",
+        "type": "int256[]"
+      }
+    ],
+    "name": "ChargeFundingRate",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "quoteIds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "int256[]",
+        "name": "rates",
+        "type": "int256[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyA",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnlPartyB",
+            "type": "int256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct PairUpnlSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "chargeFundingRate",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -5110,98 +6070,1104 @@
     "type": "function"
   },
   {
+    "anonymous": false,
     "inputs": [
       {
-        "internalType": "bytes4",
-        "name": "_functionSelector",
-        "type": "bytes4"
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "allocatedBalance",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "upnl",
+        "type": "int256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "totalUnrealizedLoss",
+        "type": "int256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "liquidationBlockNumber",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "liquidationTimestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "liquidationAllocatedBalance",
+        "type": "uint256"
       }
     ],
-    "name": "facetAddress",
-    "outputs": [
+    "name": "DeferredLiquidatePartyA",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       {
+        "indexed": false,
         "internalType": "address",
-        "name": "facetAddress_",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "DisputeForLiquidation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "FullyLiquidatedPartyA",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
         "type": "address"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "name": "FullyLiquidatedPartyA",
+    "type": "event"
   },
   {
-    "inputs": [],
-    "name": "facetAddresses",
-    "outputs": [
+    "anonymous": false,
+    "inputs": [
       {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      }
+    ],
+    "name": "FullyLiquidatedPartyB",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "allocatedBalance",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "upnl",
+        "type": "int256"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256",
+        "name": "totalUnrealizedLoss",
+        "type": "int256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "LiquidatePartyA",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "quoteIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "liquidatedAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "LiquidatePendingPositionsPartyA",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "quoteIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "liquidatedAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "closeIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "LiquidatePositionsPartyA",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "quoteIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "liquidatedAmounts",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "closeIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "LiquidatePositionsPartyB",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "LiquidationDisputed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      }
+    ],
+    "name": "LiquidationDisputed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "address[]",
-        "name": "facetAddresses_",
+        "name": "partyBs",
         "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
+      },
       {
-        "internalType": "address",
-        "name": "_facet",
-        "type": "address"
-      }
-    ],
-    "name": "facetFunctionSelectors",
-    "outputs": [
+        "indexed": false,
+        "internalType": "int256[]",
+        "name": "amounts",
+        "type": "int256[]"
+      },
       {
-        "internalType": "bytes4[]",
-        "name": "_facetFunctionSelectors",
-        "type": "bytes4[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "facets",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "facetAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes4[]",
-            "name": "functionSelectors",
-            "type": "bytes4[]"
-          }
-        ],
-        "internalType": "struct IDiamondLoupe.Facet[]",
-        "name": "facets_",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes4",
-        "name": "_interfaceId",
-        "type": "bytes4"
-      }
-    ],
-    "name": "supportsInterface",
-    "outputs": [
-      {
+        "indexed": false,
         "internalType": "bool",
-        "name": "",
+        "name": "disputed",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "ResolveLiquidationDispute",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "partyBs",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256[]",
+        "name": "amounts",
+        "type": "int256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "disputed",
         "type": "bool"
       }
     ],
-    "stateMutability": "view",
+    "name": "ResolveLiquidationDispute",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "symbolIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "prices",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "SetSymbolsPrices",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "symbolIds",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "prices",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "SetSymbolsPrices",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "partyBs",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256[]",
+        "name": "amounts",
+        "type": "int256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "liquidationId",
+        "type": "bytes"
+      }
+    ],
+    "name": "SettlePartyALiquidation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "partyBs",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "int256[]",
+        "name": "amounts",
+        "type": "int256[]"
+      }
+    ],
+    "name": "SettlePartyALiquidation",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationAllocatedBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "liquidationId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "totalUnrealizedLoss",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "symbolIds",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prices",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct DeferredLiquidationSig",
+        "name": "liquidationSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "deferredLiquidatePartyA",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationBlockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "liquidationAllocatedBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "liquidationId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "totalUnrealizedLoss",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "symbolIds",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prices",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct DeferredLiquidationSig",
+        "name": "liquidationSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "deferredSetSymbolsPrice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "liquidationId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "totalUnrealizedLoss",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "symbolIds",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prices",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct LiquidationSig",
+        "name": "liquidationSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "liquidatePartyA",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct SingleUpnlSig",
+        "name": "upnlSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "liquidatePartyB",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      }
+    ],
+    "name": "liquidatePendingPositionsPartyA",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "quoteIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "liquidatePositionsPartyA",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyB",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "quoteIds",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prices",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct QuotePriceSig",
+        "name": "priceSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "liquidatePositionsPartyB",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "partyBs",
+        "type": "address[]"
+      },
+      {
+        "internalType": "int256[]",
+        "name": "amounts",
+        "type": "int256[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "disputed",
+        "type": "bool"
+      }
+    ],
+    "name": "resolveLiquidationDispute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "reqId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bytes",
+            "name": "liquidationId",
+            "type": "bytes"
+          },
+          {
+            "internalType": "int256",
+            "name": "upnl",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "totalUnrealizedLoss",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "symbolIds",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "uint256[]",
+            "name": "prices",
+            "type": "uint256[]"
+          },
+          {
+            "internalType": "bytes",
+            "name": "gatewaySignature",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "signature",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "nonce",
+                "type": "address"
+              }
+            ],
+            "internalType": "struct SchnorrSign",
+            "name": "sigs",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct LiquidationSig",
+        "name": "liquidationSig",
+        "type": "tuple"
+      }
+    ],
+    "name": "setSymbolsPrice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "partyA",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "partyBs",
+        "type": "address[]"
+      }
+    ],
+    "name": "settlePartyALiquidation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -6798,16 +8764,153 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "AFFILIATE_MANAGER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DEFAULT_ADMIN_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DISPUTE_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "LIQUIDATOR_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MUON_SETTER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PARTY_B_MANAGER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PAUSER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SETTER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SUSPENDER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SYMBOL_MANAGER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "UNPAUSER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "partyA",
         "type": "address"
@@ -6815,123 +8918,30 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "allocatedBalance",
+        "name": "amount",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "int256",
-        "name": "upnl",
-        "type": "int256"
-      },
-      {
-        "indexed": false,
-        "internalType": "int256",
-        "name": "totalUnrealizedLoss",
-        "type": "int256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "liquidationBlockNumber",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "liquidationTimestamp",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "liquidationAllocatedBalance",
-        "type": "uint256"
+        "internalType": "enum SharedEvents.BalanceChangeType",
+        "name": "_type",
+        "type": "uint8"
       }
     ],
-    "name": "DeferredLiquidatePartyA",
+    "name": "BalanceChangePartyA",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
-      }
-    ],
-    "name": "DisputeForLiquidation",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
-      }
-    ],
-    "name": "FullyLiquidatedPartyA",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "partyB",
         "type": "address"
       },
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      }
-    ],
-    "name": "FullyLiquidatedPartyB",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "partyA",
         "type": "address"
@@ -6939,1014 +8949,127 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "allocatedBalance",
+        "name": "amount",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "int256",
-        "name": "upnl",
-        "type": "int256"
-      },
-      {
-        "indexed": false,
-        "internalType": "int256",
-        "name": "totalUnrealizedLoss",
-        "type": "int256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
+        "internalType": "enum SharedEvents.BalanceChangeType",
+        "name": "_type",
+        "type": "uint8"
       }
     ],
-    "name": "LiquidatePartyA",
+    "name": "BalanceChangePartyB",
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
+    "inputs": [],
+    "name": "HALF_Q",
+    "outputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "quoteIds",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "liquidatedAmounts",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "LiquidatePendingPositionsPartyA",
-    "type": "event"
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "anonymous": false,
-    "inputs": [
+    "inputs": [],
+    "name": "Q",
+    "outputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "quoteIds",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "liquidatedAmounts",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "closeIds",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "LiquidatePositionsPartyA",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "quoteIds",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "liquidatedAmounts",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "closeIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "LiquidatePositionsPartyB",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
-      }
-    ],
-    "name": "LiquidationDisputed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address[]",
-        "name": "partyBs",
-        "type": "address[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "int256[]",
-        "name": "amounts",
-        "type": "int256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "disputed",
-        "type": "bool"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
-      }
-    ],
-    "name": "ResolveLiquidationDispute",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "symbolIds",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "prices",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
-      }
-    ],
-    "name": "SetSymbolsPrices",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address[]",
-        "name": "partyBs",
-        "type": "address[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "int256[]",
-        "name": "amounts",
-        "type": "int256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "bytes",
-        "name": "liquidationId",
-        "type": "bytes"
-      }
-    ],
-    "name": "SettlePartyALiquidation",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationBlockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationTimestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationAllocatedBalance",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "liquidationId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "totalUnrealizedLoss",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "symbolIds",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "prices",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct DeferredLiquidationSig",
-        "name": "liquidationSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "deferredLiquidatePartyA",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationBlockNumber",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationTimestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationAllocatedBalance",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "liquidationId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "totalUnrealizedLoss",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "symbolIds",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "prices",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct DeferredLiquidationSig",
-        "name": "liquidationSig",
-        "type": "tuple"
+        "internalType": "uint256",
+        "name": "signingPubKeyX",
+        "type": "uint256"
       }
     ],
-    "name": "deferredSetSymbolsPrice",
+    "name": "validatePubKey",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "signingPubKeyX",
+        "type": "uint256"
       },
       {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "liquidationId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "totalUnrealizedLoss",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "symbolIds",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "prices",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct LiquidationSig",
-        "name": "liquidationSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "liquidatePartyA",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "uint8",
+        "name": "pubKeyYParity",
+        "type": "uint8"
+      },
       {
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "signature",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "msgHash",
+        "type": "uint256"
       },
       {
         "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct SingleUpnlSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "liquidatePartyB",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyA",
+        "name": "nonceTimesGeneratorAddress",
         "type": "address"
       }
     ],
-    "name": "liquidatePendingPositionsPartyA",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "quoteIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "liquidatePositionsPartyA",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "quoteIds",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "prices",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct QuotePriceSig",
-        "name": "priceSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "liquidatePositionsPartyB",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "internalType": "address[]",
-        "name": "partyBs",
-        "type": "address[]"
-      },
-      {
-        "internalType": "int256[]",
-        "name": "amounts",
-        "type": "int256[]"
-      },
+    "name": "verifySignature",
+    "outputs": [
       {
         "internalType": "bool",
-        "name": "disputed",
+        "name": "",
         "type": "bool"
       }
     ],
-    "name": "resolveLiquidationDispute",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "liquidationId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "totalUnrealizedLoss",
-            "type": "int256"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "symbolIds",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "uint256[]",
-            "name": "prices",
-            "type": "uint256[]"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct LiquidationSig",
-        "name": "liquidationSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "setSymbolsPrice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "internalType": "address[]",
-        "name": "partyBs",
-        "type": "address[]"
-      }
-    ],
-    "name": "settlePartyALiquidation",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "validAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "RestoreBridgeTransaction",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
-      }
-    ],
-    "name": "SuspendBridgeTransaction",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
-        "name": "user",
+        "name": "previousOwner",
         "type": "address"
       },
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
-        "name": "bridgeAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
-      }
-    ],
-    "name": "TransferToBridge",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
-      }
-    ],
-    "name": "WithdrawReceivedBridgeValue",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "transactionIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "WithdrawReceivedBridgeValues",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "validAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "restoreBridgeTransaction",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
-      }
-    ],
-    "name": "suspendBridgeTransaction",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "bridgeAddress",
+        "name": "newOwner",
         "type": "address"
       }
     ],
-    "name": "transferToBridge",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "name": "OwnershipTransferred",
+    "type": "event"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "DIAMOND_STORAGE_POSITION",
+    "outputs": [
       {
-        "internalType": "uint256",
-        "name": "transactionId",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
-    "name": "withdrawReceivedBridgeValue",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "transactionIds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "withdrawReceivedBridgeValues",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -7955,29 +9078,11 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "partyB",
+        "name": "value",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newAllocatedBalance",
-        "type": "uint256"
       }
     ],
-    "name": "AllocateForPartyB",
+    "name": "LogAddress",
     "type": "event"
   },
   {
@@ -7985,24 +9090,12 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newAllocatedBalance",
-        "type": "uint256"
+        "internalType": "int256",
+        "name": "value",
+        "type": "int256"
       }
     ],
-    "name": "AllocatePartyA",
+    "name": "LogInt",
     "type": "event"
   },
   {
@@ -8010,111 +9103,12 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newAllocatedBalance",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "value",
+        "type": "string"
       }
     ],
-    "name": "DeallocateForPartyB",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newAllocatedBalance",
-        "type": "uint256"
-      }
-    ],
-    "name": "DeallocatePartyA",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "Deposit",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "userNewAllocatedBalance",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "InternalTransfer",
+    "name": "LogString",
     "type": "event"
   },
   {
@@ -8123,493 +9117,11 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "origin",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "originNewAllocatedBalance",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "recipientNewAllocatedBalance",
+        "name": "value",
         "type": "uint256"
       }
     ],
-    "name": "TransferAllocation",
+    "name": "LogUint",
     "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "Withdraw",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "allocate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      }
-    ],
-    "name": "allocateForPartyB",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct SingleUpnlSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "deallocate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct SingleUpnlSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "deallocateForPartyB",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "deposit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "depositAndAllocate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "depositFor",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "internalTransfer",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "origin",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnl",
-            "type": "int256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct SingleUpnlSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "transferAllocation",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "withdrawTo",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyB",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256[]",
-        "name": "quoteIds",
-        "type": "uint256[]"
-      },
-      {
-        "indexed": false,
-        "internalType": "int256[]",
-        "name": "rates",
-        "type": "int256[]"
-      }
-    ],
-    "name": "ChargeFundingRate",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "partyA",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "quoteIds",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "int256[]",
-        "name": "rates",
-        "type": "int256[]"
-      },
-      {
-        "components": [
-          {
-            "internalType": "bytes",
-            "name": "reqId",
-            "type": "bytes"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyA",
-            "type": "int256"
-          },
-          {
-            "internalType": "int256",
-            "name": "upnlPartyB",
-            "type": "int256"
-          },
-          {
-            "internalType": "bytes",
-            "name": "gatewaySignature",
-            "type": "bytes"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "signature",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "owner",
-                "type": "address"
-              },
-              {
-                "internalType": "address",
-                "name": "nonce",
-                "type": "address"
-              }
-            ],
-            "internalType": "struct SchnorrSign",
-            "name": "sigs",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct PairUpnlSig",
-        "name": "upnlSig",
-        "type": "tuple"
-      }
-    ],
-    "name": "chargeFundingRate",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   }
 ]
