@@ -1,5 +1,5 @@
-import {BigInt, Bytes} from "@graphprotocol/graph-ts";
-import {ethereum} from "@graphprotocol/graph-ts/chain/ethereum";
+import { BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import {
 	Account,
 	Configuration,
@@ -14,13 +14,13 @@ import {
 	TotalSymbolTradesHistory,
 	TotalUserHistory,
 	UserActivity,
-	WeeklyHistory
-} from "../../generated/schema";
-import {startOfDay, startOfMonth, startOfWeek} from "./time";
-import {Version} from "../../common/BaseHandler";
-import {getCollateral as getCollateral_0_8_3} from "../../common/contract_utils_0_8_3";
-import {getCollateral as getCollateral_0_8_2} from "../../common/contract_utils_0_8_2";
-import {getCollateral as getCollateral_0_8_0} from "../../common/contract_utils_0_8_0";
+	WeeklyHistory,
+} from "../../generated/schema"
+import { startOfDay, startOfMonth, startOfWeek } from "./time"
+import { Version } from "../../common/BaseHandler"
+import { getCollateral as getCollateral_0_8_3 } from "../../common/contract_utils_0_8_3"
+import { getCollateral as getCollateral_0_8_2 } from "../../common/contract_utils_0_8_2"
+import { getCollateral as getCollateral_0_8_0 } from "../../common/contract_utils_0_8_0"
 
 export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): DailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
@@ -157,33 +157,25 @@ export function getDailySymbolTradesHistory(
 	accountSource: Bytes | null,
 	symbolId: BigInt,
 ): DailySymbolTradesHistory {
-	const dateStr = startOfDay(timestamp)
-		.getTime()
-		.toString();
+	const dateStr = startOfDay(timestamp).getTime().toString()
 	const id =
-		dateStr +
-		"_" +
-		(accountSource === null ? "null" : accountSource.toHexString()) +
-		"_" +
-		account.toHexString() +
-		"_" +
-		symbolId.toHexString();
+		dateStr + "_" + (accountSource === null ? "null" : accountSource.toHexString()) + "_" + account.toHexString() + "_" + symbolId.toHexString()
 
-	let history = DailySymbolTradesHistory.load(id);
+	let history = DailySymbolTradesHistory.load(id)
 
 	if (history == null) {
-		history = new DailySymbolTradesHistory(id);
-		history.updateTimestamp = timestamp;
-		history.account = account;
-		history.accountSource = accountSource;
-		history.symbolId = symbolId;
-		history.totalTrades = BigInt.zero();
-		history.fundingPaid = BigInt.zero();
-		history.fundingReceived = BigInt.zero();
-		history.platformFeePaid = BigInt.zero();
-		history.save();
+		history = new DailySymbolTradesHistory(id)
+		history.updateTimestamp = timestamp
+		history.account = account
+		history.accountSource = accountSource
+		history.symbolId = symbolId
+		history.totalTrades = BigInt.zero()
+		history.fundingPaid = BigInt.zero()
+		history.fundingReceived = BigInt.zero()
+		history.platformFeePaid = BigInt.zero()
+		history.save()
 	}
-	return history;
+	return history
 }
 
 export function getTotalSymbolTradesHistory(
@@ -192,107 +184,84 @@ export function getTotalSymbolTradesHistory(
 	accountSource: Bytes | null,
 	symbolId: BigInt,
 ): TotalSymbolTradesHistory {
-	const id =
-		(accountSource === null ? "null" : accountSource.toHexString()) +
-		"_" +
-		account.toHexString() +
-		"_" +
-		symbolId.toHexString();
+	const id = (accountSource === null ? "null" : accountSource.toHexString()) + "_" + account.toHexString() + "_" + symbolId.toHexString()
 
-	let history = TotalSymbolTradesHistory.load(id);
+	let history = TotalSymbolTradesHistory.load(id)
 
 	if (history == null) {
-		history = new TotalSymbolTradesHistory(id);
-		history.updateTimestamp = timestamp;
-		history.account = account;
-		history.accountSource = accountSource;
-		history.symbolId = symbolId;
-		history.totalTrades = BigInt.zero();
-		history.fundingPaid = BigInt.zero();
-		history.fundingReceived = BigInt.zero();
-		history.platformFeePaid = BigInt.zero();
-		history.save();
+		history = new TotalSymbolTradesHistory(id)
+		history.updateTimestamp = timestamp
+		history.account = account
+		history.accountSource = accountSource
+		history.symbolId = symbolId
+		history.totalTrades = BigInt.zero()
+		history.fundingPaid = BigInt.zero()
+		history.fundingReceived = BigInt.zero()
+		history.platformFeePaid = BigInt.zero()
+		history.save()
 	}
-	return history;
+	return history
 }
 
-
-export function getDailyUserHistoryForTimestamp(
-	timestamp: BigInt,
-	account: Account
-): DailyUserHistory {
-	const dateStr = startOfDay(timestamp)
-		.getTime()
-		.toString();
-	const id =
-		dateStr +
-		"_" +
-		(account.accountSource === null ? "null" : account.accountSource!.toHexString()) +
-		"_" +
-		account.id;
-	let dh = DailyUserHistory.load(id);
+export function getDailyUserHistoryForTimestamp(timestamp: BigInt, account: Account): DailyUserHistory {
+	const dateStr = startOfDay(timestamp).getTime().toString()
+	const id = dateStr + "_" + (account.accountSource === null ? "null" : account.accountSource!.toHexString()) + "_" + account.id
+	let dh = DailyUserHistory.load(id)
 	if (dh == null) {
 		// get total history
-		let th = getTotalUserHistory(timestamp, account);
+		let th = getTotalUserHistory(timestamp, account)
 
-		dh = new DailyUserHistory(id);
-		dh.updateTimestamp = timestamp;
-		dh.account = account.account;
-		dh.timestamp = timestamp;
-		dh.deposit = BigInt.zero();
-		dh.withdraw = BigInt.zero();
-		dh.quotesCount = BigInt.zero();
-		dh.openTradeVolume = BigInt.zero();
-		dh.closeTradeVolume = BigInt.zero();
-		dh.liquidateTradeVolume = BigInt.zero();
-		dh.allocate = BigInt.zero();
-		dh.deallocate = BigInt.zero();
-		dh.accAllocate = th.allocate; // carry over from total history
-		dh.accDeallocate = th.deallocate; // carry over from total history
-		dh.platformFeePaid = BigInt.zero();
-		dh.fundingPaid = BigInt.zero();
-		dh.fundingReceived = BigInt.zero();
-		dh.loss = BigInt.zero();
-		dh.profit = BigInt.zero();
-		dh.accountSource = account.accountSource;
-		dh.save();
+		dh = new DailyUserHistory(id)
+		dh.updateTimestamp = timestamp
+		dh.account = account.account
+		dh.timestamp = timestamp
+		dh.deposit = BigInt.zero()
+		dh.withdraw = BigInt.zero()
+		dh.quotesCount = BigInt.zero()
+		dh.openTradeVolume = BigInt.zero()
+		dh.closeTradeVolume = BigInt.zero()
+		dh.liquidateTradeVolume = BigInt.zero()
+		dh.allocate = BigInt.zero()
+		dh.deallocate = BigInt.zero()
+		dh.accAllocate = th.allocate // carry over from total history
+		dh.accDeallocate = th.deallocate // carry over from total history
+		dh.platformFeePaid = BigInt.zero()
+		dh.fundingPaid = BigInt.zero()
+		dh.fundingReceived = BigInt.zero()
+		dh.loss = BigInt.zero()
+		dh.profit = BigInt.zero()
+		dh.accountSource = account.accountSource
+		dh.save()
 	}
-	return dh;
+	return dh
 }
 
-export function getTotalUserHistory(
-	timestamp: BigInt,
-	account: Account
-): TotalUserHistory {
-	const id =
-		(account.accountSource === null ? "null" : account.accountSource!.toHexString()) +
-		"_" +
-		account.id;
-	let th = TotalUserHistory.load(id);
+export function getTotalUserHistory(timestamp: BigInt, account: Account): TotalUserHistory {
+	const id = (account.accountSource === null ? "null" : account.accountSource!.toHexString()) + "_" + account.id
+	let th = TotalUserHistory.load(id)
 	if (th == null) {
-		th = new TotalUserHistory(id);
-		th.updateTimestamp = timestamp;
-		th.timestamp = timestamp;
-		th.deposit = BigInt.zero();
-		th.withdraw = BigInt.zero();
-		th.quotesCount = BigInt.zero();
-		th.openTradeVolume = BigInt.zero();
-		th.closeTradeVolume = BigInt.zero();
-		th.liquidateTradeVolume = BigInt.zero();
-		th.allocate = BigInt.zero();
-		th.deallocate = BigInt.zero();
-		th.platformFeePaid = BigInt.zero();
-		th.fundingPaid = BigInt.zero();
-		th.fundingReceived = BigInt.zero();
-		th.loss = BigInt.zero();
-		th.profit = BigInt.zero();
-		th.account = account.account;
-		th.accountSource = account.accountSource;
-		th.save();
+		th = new TotalUserHistory(id)
+		th.updateTimestamp = timestamp
+		th.timestamp = timestamp
+		th.deposit = BigInt.zero()
+		th.withdraw = BigInt.zero()
+		th.quotesCount = BigInt.zero()
+		th.openTradeVolume = BigInt.zero()
+		th.closeTradeVolume = BigInt.zero()
+		th.liquidateTradeVolume = BigInt.zero()
+		th.allocate = BigInt.zero()
+		th.deallocate = BigInt.zero()
+		th.platformFeePaid = BigInt.zero()
+		th.fundingPaid = BigInt.zero()
+		th.fundingReceived = BigInt.zero()
+		th.loss = BigInt.zero()
+		th.profit = BigInt.zero()
+		th.account = account.account
+		th.accountSource = account.accountSource
+		th.save()
 	}
-	return th;
+	return th
 }
-
 
 export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null): OpenInterest {
 	const id = "OpenInterest_" + (accountSource === null ? "null" : accountSource.toHexString())
@@ -307,8 +276,8 @@ export function getOpenInterest(timestamp: BigInt, accountSource: Bytes | null):
 	return oi
 }
 
-export function getSolverOpenInterest(timestamp: BigInt, solver: Bytes): OpenInterest {
-	const id = "OpenInterest_" + solver.toHexString()
+export function getSolverOpenInterest(timestamp: BigInt, accountSource: Bytes | null, solver: Bytes): OpenInterest {
+	const id = "OpenInterest_" + solver.toHexString() + "_" + (accountSource === null ? "null" : accountSource.toHexString())
 	let oi = OpenInterest.load(id)
 	if (oi == null) {
 		oi = new OpenInterest(id)

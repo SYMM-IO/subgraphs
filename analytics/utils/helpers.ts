@@ -1,5 +1,5 @@
-import {BigInt, Bytes, ethereum} from "@graphprotocol/graph-ts";
-import {Account, OpenInterest} from "../../generated/schema";
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { Account, OpenInterest } from "../../generated/schema"
 import {
 	getAlreadyCreatedConfiguration,
 	getDailyHistoryForTimestamp,
@@ -14,10 +14,10 @@ import {
 	getTotalSymbolTradesHistory,
 	getTotalUserHistory,
 	getUserActivity,
-	getWeeklyHistoryForTimestamp
-} from "./builders";
-import {isSameDay, isSameMonth, isSameWeek} from "./time";
-import {Version} from "../../common/BaseHandler";
+	getWeeklyHistoryForTimestamp,
+} from "./builders"
+import { isSameDay, isSameMonth, isSameWeek } from "./time"
+import { Version } from "../../common/BaseHandler"
 
 export function unDecimal(value: BigInt): BigInt {
 	return value.div(BigInt.fromString("10").pow(18))
@@ -30,10 +30,10 @@ export function updateDailyOpenInterest(
 	value: BigInt,
 	increase: boolean,
 	solver: Account,
-	accountSource: Bytes | null
+	accountSource: Bytes | null,
 ): void {
-	let affiliateOI: OpenInterest = getOpenInterest(blockTimestamp, accountSource);
-	let solverOI: OpenInterest = getSolverOpenInterest(blockTimestamp, solver.account);
+	let affiliateOI: OpenInterest = getOpenInterest(blockTimestamp, accountSource)
+	let solverOI: OpenInterest = getSolverOpenInterest(blockTimestamp, accountSource, solver.account)
 
 	// Process affiliate open interest
 	processOpenInterest(
@@ -42,9 +42,9 @@ export function updateDailyOpenInterest(
 		value,
 		increase,
 		accountSource,
-		false // isSolver is false
+		false, // isSolver is false
 		// solverAccount defaults to null
-	);
+	)
 
 	// Process solver open interest
 	processOpenInterest(
@@ -54,25 +54,25 @@ export function updateDailyOpenInterest(
 		increase,
 		accountSource,
 		true, // isSolver is true
-		solver.account // Pass solverAccount
-	);
+		solver.account, // Pass solverAccount
+	)
 }
 
 function startOfDayTimestamp(timestamp: BigInt): BigInt {
-	return timestamp.div(SECONDS_IN_DAY).times(SECONDS_IN_DAY);
+	return timestamp.div(SECONDS_IN_DAY).times(SECONDS_IN_DAY)
 }
 
 function endOfDayTimestamp(timestamp: BigInt): BigInt {
-	let dayStart = startOfDayTimestamp(timestamp);
-	return dayStart.plus(SECONDS_IN_DAY).minus(BigInt.fromI32(1));
+	let dayStart = startOfDayTimestamp(timestamp)
+	return dayStart.plus(SECONDS_IN_DAY).minus(BigInt.fromI32(1))
 }
 
 function getDayNumber(timestamp: BigInt): BigInt {
-	return timestamp.div(SECONDS_IN_DAY);
+	return timestamp.div(SECONDS_IN_DAY)
 }
 
 function diffInSeconds(end: BigInt, start: BigInt): BigInt {
-	return end.minus(start);
+	return end.minus(start)
 }
 
 function processOpenInterest(
@@ -82,111 +82,109 @@ function processOpenInterest(
 	increase: boolean,
 	accountSource: Bytes | null,
 	isSolver: boolean,
-	solverAccount: Bytes | null = null
+	solverAccount: Bytes | null = null,
 ): void {
-	let lastUpdateTimestamp = openInterest.timestamp;
-	let currentTimestamp = blockTimestamp;
+	let lastUpdateTimestamp = openInterest.timestamp
+	let currentTimestamp = blockTimestamp
 
-	let currentAmount = openInterest.amount;
+	let currentAmount = openInterest.amount
 
-	let processingTimestamp = lastUpdateTimestamp;
+	let processingTimestamp = lastUpdateTimestamp
 
-	let done = false;
+	let done = false
 
 	while (!done) {
-		let processingDayNumber = getDayNumber(processingTimestamp);
+		let processingDayNumber = getDayNumber(processingTimestamp)
 
 		let lastDay = getDayNumber(currentTimestamp).equals(processingDayNumber)
-		let firstDay = getDayNumber(lastUpdateTimestamp).equals(processingDayNumber);
+		let firstDay = getDayNumber(lastUpdateTimestamp).equals(processingDayNumber)
 
 		done = lastDay
 		let dailyOpenInterest = BigInt.zero()
 
 		if (firstDay && !lastDay) {
-			let firstIntervalStart = startOfDayTimestamp(processingTimestamp);
-			let firstIntervalEnd = processingTimestamp;
+			let firstIntervalStart = startOfDayTimestamp(processingTimestamp)
+			let firstIntervalEnd = processingTimestamp
 
-			let secondIntervalStart = processingTimestamp;
-			let secondIntervalEnd = endOfDayTimestamp(processingTimestamp);
+			let secondIntervalStart = processingTimestamp
+			let secondIntervalEnd = endOfDayTimestamp(processingTimestamp)
 
-			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart);
-			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart);
-			let totalInterval = diffInSeconds(secondIntervalEnd, firstIntervalStart);
+			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart)
+			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart)
+			let totalInterval = diffInSeconds(secondIntervalEnd, firstIntervalStart)
 
 			// Calculate the day's accumulated amount
-			let accumulatedFirstPart = openInterest.weightedAmount;
-			let accumulatedSecondPart = secondInterval.times(currentAmount);
+			let accumulatedFirstPart = openInterest.weightedAmount
+			let accumulatedSecondPart = secondInterval.times(currentAmount)
 
-			dailyOpenInterest = (accumulatedFirstPart.plus(accumulatedSecondPart)).div(totalInterval);
+			dailyOpenInterest = accumulatedFirstPart.plus(accumulatedSecondPart).div(totalInterval)
 			openInterest.weightedAmount = BigInt.zero()
 		} else if (!firstDay && !lastDay) {
 			dailyOpenInterest = currentAmount
 			openInterest.weightedAmount = BigInt.zero()
 		} else if (!firstDay && lastDay) {
-			processingTimestamp = currentTimestamp;
-			let firstIntervalStart = startOfDayTimestamp(processingTimestamp);
-			let firstIntervalEnd = processingTimestamp;
+			processingTimestamp = currentTimestamp
+			let firstIntervalStart = startOfDayTimestamp(processingTimestamp)
+			let firstIntervalEnd = processingTimestamp
 
-			let secondIntervalStart = processingTimestamp;
-			let secondIntervalEnd = endOfDayTimestamp(processingTimestamp);
+			let secondIntervalStart = processingTimestamp
+			let secondIntervalEnd = endOfDayTimestamp(processingTimestamp)
 
-			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart);
-			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart);
-			let totalInterval = diffInSeconds(secondIntervalEnd, firstIntervalStart);
+			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart)
+			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart)
+			let totalInterval = diffInSeconds(secondIntervalEnd, firstIntervalStart)
 
 			// Calculate the day's accumulated amount
-			let accumulatedFirstPart = firstInterval.times(currentAmount);
-			let accumulatedSecondPart = secondInterval.times(increase ? currentAmount.plus(value) : currentAmount.minus(value));
+			let accumulatedFirstPart = firstInterval.times(currentAmount)
+			let accumulatedSecondPart = secondInterval.times(increase ? currentAmount.plus(value) : currentAmount.minus(value))
 
-			dailyOpenInterest = (accumulatedFirstPart.plus(accumulatedSecondPart)).div(totalInterval);
+			dailyOpenInterest = accumulatedFirstPart.plus(accumulatedSecondPart).div(totalInterval)
 			openInterest.weightedAmount = accumulatedFirstPart
 		} else if (firstDay && lastDay) {
 			processingTimestamp = lastUpdateTimestamp
-			let firstIntervalStart = startOfDayTimestamp(processingTimestamp);
-			let firstIntervalEnd = processingTimestamp;
+			let firstIntervalStart = startOfDayTimestamp(processingTimestamp)
+			let firstIntervalEnd = processingTimestamp
 
-			let secondIntervalStart = processingTimestamp;
-			let secondIntervalEnd = currentTimestamp;
+			let secondIntervalStart = processingTimestamp
+			let secondIntervalEnd = currentTimestamp
 
-			let thirdIntervalStart = currentTimestamp;
-			let thirdIntervalEnd = endOfDayTimestamp(processingTimestamp);
+			let thirdIntervalStart = currentTimestamp
+			let thirdIntervalEnd = endOfDayTimestamp(processingTimestamp)
 
-			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart);
-			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart);
-			let thirdInterval = diffInSeconds(thirdIntervalEnd, thirdIntervalStart);
-			let totalInterval = diffInSeconds(thirdIntervalEnd, firstIntervalStart);
+			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart)
+			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart)
+			let thirdInterval = diffInSeconds(thirdIntervalEnd, thirdIntervalStart)
+			let totalInterval = diffInSeconds(thirdIntervalEnd, firstIntervalStart)
 
 			// Calculate the day's accumulated amount
-			let accumulatedFirstPart = openInterest.weightedAmount;
-			let accumulatedSecondPart = secondInterval.times(currentAmount);
-			let accumulatedThirdPart = thirdInterval.times(increase ? currentAmount.plus(value) : currentAmount.minus(value));
+			let accumulatedFirstPart = openInterest.weightedAmount
+			let accumulatedSecondPart = secondInterval.times(currentAmount)
+			let accumulatedThirdPart = thirdInterval.times(increase ? currentAmount.plus(value) : currentAmount.minus(value))
 
-			dailyOpenInterest = (accumulatedFirstPart.plus(accumulatedSecondPart).plus(accumulatedThirdPart)).div(totalInterval);
+			dailyOpenInterest = accumulatedFirstPart.plus(accumulatedSecondPart).plus(accumulatedThirdPart).div(totalInterval)
 			openInterest.weightedAmount = accumulatedFirstPart.plus(accumulatedSecondPart)
 		}
 
 		if (isSolver) {
-			let dailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource);
-			dailyHistory.openInterest = dailyOpenInterest;
-			dailyHistory.updateTimestamp = processingTimestamp;
-			dailyHistory.save();
+			let dailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource)
+			dailyHistory.openInterest = dailyOpenInterest
+			dailyHistory.updateTimestamp = processingTimestamp
+			dailyHistory.save()
 		} else {
-			let dailyHistory = getDailyHistoryForTimestamp(processingTimestamp, accountSource);
-			dailyHistory.openInterest = dailyOpenInterest;
-			dailyHistory.updateTimestamp = processingTimestamp;
-			dailyHistory.save();
+			let dailyHistory = getDailyHistoryForTimestamp(processingTimestamp, accountSource)
+			dailyHistory.openInterest = dailyOpenInterest
+			dailyHistory.updateTimestamp = processingTimestamp
+			dailyHistory.save()
 		}
 
 		// Move to the next day
-		processingTimestamp = processingTimestamp.plus(SECONDS_IN_DAY);
-
+		processingTimestamp = processingTimestamp.plus(SECONDS_IN_DAY)
 	}
 
-	openInterest.timestamp = currentTimestamp;
-	openInterest.amount = increase ? currentAmount.plus(value) : currentAmount.minus(value);
-	openInterest.save();
+	openInterest.timestamp = currentTimestamp
+	openInterest.amount = increase ? currentAmount.plus(value) : currentAmount.minus(value)
+	openInterest.save()
 }
-
 
 export function updateActivityTimestamps(account: Account, timestamp: BigInt): void {
 	account.lastActivityTimestamp = timestamp
@@ -213,121 +211,120 @@ export function updateActivityTimestamps(account: Account, timestamp: BigInt): v
 }
 
 export class UpdateHistoriesParams {
-	version: Version;
-	event: ethereum.Event;
-	account: Account;
-	solver: Account | null;
-	accountSource: Bytes | null;
-	timestamp: BigInt;
-	_openTradeVolume: BigInt = BigInt.zero();
-	_closeTradeVolume: BigInt = BigInt.zero();
-	_liquidateTradeVolume: BigInt = BigInt.zero();
-	_symbolId: BigInt = BigInt.zero();
-	_tradingFee: BigInt = BigInt.zero();
-	_allocate: BigInt = BigInt.zero();
-	_deallocate: BigInt = BigInt.zero();
-	_deposit: BigInt = BigInt.zero();
-	_withdraw: BigInt = BigInt.zero();
-	_quotesCount: BigInt = BigInt.zero();
-	_fundingPaid: BigInt = BigInt.zero();
-	_fundingReceived: BigInt = BigInt.zero();
-	_loss: BigInt = BigInt.zero();
-	_profit: BigInt = BigInt.zero();
-	_positionsCount: BigInt = BigInt.zero();
+	version: Version
+	event: ethereum.Event
+	account: Account
+	solver: Account | null
+	accountSource: Bytes | null
+	timestamp: BigInt
+	_openTradeVolume: BigInt = BigInt.zero()
+	_closeTradeVolume: BigInt = BigInt.zero()
+	_liquidateTradeVolume: BigInt = BigInt.zero()
+	_symbolId: BigInt = BigInt.zero()
+	_tradingFee: BigInt = BigInt.zero()
+	_allocate: BigInt = BigInt.zero()
+	_deallocate: BigInt = BigInt.zero()
+	_deposit: BigInt = BigInt.zero()
+	_withdraw: BigInt = BigInt.zero()
+	_quotesCount: BigInt = BigInt.zero()
+	_fundingPaid: BigInt = BigInt.zero()
+	_fundingReceived: BigInt = BigInt.zero()
+	_loss: BigInt = BigInt.zero()
+	_profit: BigInt = BigInt.zero()
+	_positionsCount: BigInt = BigInt.zero()
 
 	constructor(version: Version, account: Account, solver: Account | null, event: ethereum.Event, accountSource: Bytes | null = Bytes.empty()) {
-		this.version = version;
-		this.account = account;
-		this.solver = solver;
-		if (accountSource === null || accountSource == Bytes.empty() || accountSource.length == 0)
-			accountSource = account.accountSource
-		this.accountSource = accountSource;
-		this.timestamp = event.block.timestamp;
+		this.version = version
+		this.account = account
+		this.solver = solver
+		if (accountSource === null || accountSource == Bytes.empty() || accountSource.length == 0) accountSource = account.accountSource
+		this.accountSource = accountSource
+		this.timestamp = event.block.timestamp
 		this.event = event
 	}
 
 	openTradeVolume(openTradeVolume: BigInt): UpdateHistoriesParams {
-		this._openTradeVolume = openTradeVolume;
-		return this;
+		this._openTradeVolume = openTradeVolume
+		return this
 	}
 
 	closeTradeVolume(closeTradeVolume: BigInt): UpdateHistoriesParams {
-		this._closeTradeVolume = closeTradeVolume;
-		return this;
+		this._closeTradeVolume = closeTradeVolume
+		return this
 	}
 
 	liquidateTradeVolume(liquidateTradeVolume: BigInt): UpdateHistoriesParams {
-		this._liquidateTradeVolume = liquidateTradeVolume;
-		return this;
+		this._liquidateTradeVolume = liquidateTradeVolume
+		return this
 	}
 
 	positionsCount(positionsCount: BigInt): UpdateHistoriesParams {
-		this._positionsCount = positionsCount;
-		return this;
+		this._positionsCount = positionsCount
+		return this
 	}
 
 	symbolId(symbolId: BigInt): UpdateHistoriesParams {
-		this._symbolId = symbolId;
-		return this;
+		this._symbolId = symbolId
+		return this
 	}
 
 	tradingFee(tradingFee: BigInt): UpdateHistoriesParams {
-		this._tradingFee = tradingFee;
-		return this;
+		this._tradingFee = tradingFee
+		return this
 	}
 
 	allocate(allocate: BigInt): UpdateHistoriesParams {
-		this._allocate = allocate;
-		return this;
+		this._allocate = allocate
+		return this
 	}
 
 	deallocate(deallocate: BigInt): UpdateHistoriesParams {
-		this._deallocate = deallocate;
-		return this;
+		this._deallocate = deallocate
+		return this
 	}
 
 	deposit(deposit: BigInt): UpdateHistoriesParams {
-		this._deposit = deposit;
-		return this;
+		this._deposit = deposit
+		return this
 	}
 
 	withdraw(withdraw: BigInt): UpdateHistoriesParams {
-		this._withdraw = withdraw;
-		return this;
+		this._withdraw = withdraw
+		return this
 	}
 
 	quotesCount(quotesCount: BigInt): UpdateHistoriesParams {
-		this._quotesCount = quotesCount;
-		return this;
+		this._quotesCount = quotesCount
+		return this
 	}
 
 	fundingPaid(fundingPaid: BigInt): UpdateHistoriesParams {
-		this._fundingPaid = fundingPaid;
-		return this;
+		this._fundingPaid = fundingPaid
+		return this
 	}
 
 	fundingReceived(fundingReceived: BigInt): UpdateHistoriesParams {
-		this._fundingReceived = fundingReceived;
-		return this;
+		this._fundingReceived = fundingReceived
+		return this
 	}
 
 	loss(loss: BigInt): UpdateHistoriesParams {
-		this._loss = loss;
-		return this;
+		this._loss = loss
+		return this
 	}
 
 	profit(profit: BigInt): UpdateHistoriesParams {
-		this._profit = profit;
-		return this;
+		this._profit = profit
+		return this
 	}
 }
 
 export function updateHistories(params: UpdateHistoriesParams): void {
-	const account = params.account;
-	const timestamp = params.timestamp;
-	const openTradeVolume = params._openTradeVolume;
-	const closeTradeVolume = params._closeTradeVolume;
-	const liquidateTradeVolume = params._liquidateTradeVolume;
+	const account = params.account
+	const timestamp = params.timestamp
+	const openTradeVolume = params._openTradeVolume
+	const closeTradeVolume = params._closeTradeVolume
+	const liquidateTradeVolume = params._liquidateTradeVolume
 
 	const dh = getDailyHistoryForTimestamp(timestamp, params.accountSource)
 	dh.tradeVolume = dh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
@@ -358,7 +355,10 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.fundingPaid = sdh.fundingPaid.plus(params._fundingPaid)
 		sdh.fundingReceived = sdh.fundingReceived.plus(params._fundingReceived)
 		if (params._positionsCount.gt(BigInt.zero())) {
-			sdh.averagePositionSize = sdh.averagePositionSize.times(sdh.positionsCount).plus(openTradeVolume).div(params._positionsCount.plus(sdh.positionsCount))
+			sdh.averagePositionSize = sdh.averagePositionSize
+				.times(sdh.positionsCount)
+				.plus(openTradeVolume)
+				.div(params._positionsCount.plus(sdh.positionsCount))
 			sdh.positionsCount = sdh.positionsCount.plus(params._positionsCount)
 		}
 		sdh.updateTimestamp = timestamp
@@ -424,12 +424,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		stv.updateTimestamp = timestamp
 		stv.save()
 
-		const dst = getDailySymbolTradesHistory(
-			timestamp,
-			account.account,
-			account.accountSource,
-			params._symbolId,
-		)
+		const dst = getDailySymbolTradesHistory(timestamp, account.account, account.accountSource, params._symbolId)
 		dst.totalTrades = dst.totalTrades.plus(BigInt.fromString("1"))
 		dst.platformFeePaid = dst.platformFeePaid.plus(params._tradingFee)
 		dst.fundingPaid = dst.fundingPaid.plus(params._fundingPaid)
@@ -437,12 +432,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		dst.updateTimestamp = timestamp
 		dst.save()
 
-		const tst = getTotalSymbolTradesHistory(
-			timestamp,
-			account.account,
-			account.accountSource,
-			params._symbolId,
-		)
+		const tst = getTotalSymbolTradesHistory(timestamp, account.account, account.accountSource, params._symbolId)
 		tst.totalTrades = tst.totalTrades.plus(BigInt.fromString("1"))
 		tst.platformFeePaid = tst.platformFeePaid.plus(params._tradingFee)
 		tst.fundingPaid = tst.fundingPaid.plus(params._fundingPaid)
