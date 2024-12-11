@@ -62,6 +62,20 @@
 			"version": "1",
 			"startBlock": "18701626",
 			"name": "multi_account_privex"
+		},
+		{
+			"address": "0xdfC2a55a44aD3d3aAbFe8D1C498Ea923c6D39526",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "21330641",
+			"name": "multi_account_peppy"
+		},
+		{
+			"address": "0xf2215724516A564eFC5b3f1F77A7d5f8770A58EF",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "22086878",
+			"name": "multi_account_zklink"
 		}
 	],
 	"deploy_urls": {

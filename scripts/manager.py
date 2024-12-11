@@ -81,9 +81,7 @@ def copy_abi_files(abi_path: str):
 def create_schema_file(target_module: str, target_config: Dict[str, Any]):
     common_models_dir = os.path.join("./common", "models")
 
-    with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open(
-            "./schema.graphql", "w"
-    ) as dest_file:
+    with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open("./schema.graphql", "w") as dest_file:
         dest_file.write("# Imported Models\n")
         for model in os.listdir(common_models_dir):
             model_name = model.split(".")[0]
@@ -102,12 +100,8 @@ def generate_src_ts(target_module: str, contract: Contract):
     sorted_events = sorted(contract.events, key=lambda e: e.name)
 
     for event in sorted_events:
-        imports.add(
-            f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'"
-        )
-        imports.add(
-            f"import {{{event.numbered_name}}} from '../generated/{event.source}/{event.source}'"
-        )
+        imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
+        imports.add(f"import {{{event.numbered_name}}} from '../generated/{event.source}/{event.source}'")
         handlers_code.append(
             textwrap.dedent(
                 f"""
@@ -121,9 +115,7 @@ def generate_src_ts(target_module: str, contract: Contract):
 
     imports.add("import {Version} from '../common/BaseHandler'")
 
-    with open(
-            os.path.join(target_module, f"src_{contract.path()}.ts"), "w"
-    ) as src_file:
+    with open(os.path.join(target_module, f"src_{contract.path()}.ts"), "w") as src_file:
         src_file.write("\n".join(sorted(imports)))
         src_file.write("\n\n")
         src_file.write("\n".join(handlers_code))
@@ -139,9 +131,7 @@ def get_event_inputs(event_name: str, abi_file_path: str) -> List[Dict[str, Any]
     return []
 
 
-def generate_handler_files(
-        target_module: str, contract: Contract, simple_mapping: bool = False
-):
+def generate_handler_files(target_module: str, contract: Contract, simple_mapping: bool = False):
     for event in contract.events:
         handler_dir = os.path.join(target_module, "handlers", contract.abi)
         os.makedirs(handler_dir, exist_ok=True)
@@ -211,9 +201,7 @@ def generate_default_content(event, contract: Contract) -> str:
 def get_scheme_models():
     with open("./schema.graphql", "r") as schema_file:
         schema_content = schema_file.read()
-    pattern = re.compile(
-        r"\btype\s+(\w+)((?:\s+@\w+(?:\([^)]*\))?)*)\s*{", re.MULTILINE
-    )
+    pattern = re.compile(r"\btype\s+(\w+)((?:\s+@\w+(?:\([^)]*\))?)*)\s*{", re.MULTILINE)
     return [match[0] for match in pattern.findall(schema_content)]
 
 
@@ -226,15 +214,9 @@ def load_dependencies(file_path: str) -> Dict[str, List[str]]:
         return {}
 
 
-def get_needed_events_for(
-        models: List[str], target_module: str, contract: Contract
-) -> List[str]:
-    common_dependencies = load_dependencies(
-        os.path.join("./common", f"deps_{contract.path()}.json")
-    )
-    target_dependencies = load_dependencies(
-        os.path.join(target_module, f"deps_{contract.path()}.json")
-    )
+def get_needed_events_for(models: List[str], target_module: str, contract: Contract) -> List[str]:
+    common_dependencies = load_dependencies(os.path.join("./common", f"deps_{contract.path()}.json"))
+    target_dependencies = load_dependencies(os.path.join(target_module, f"deps_{contract.path()}.json"))
 
     events = []
     for model in models:
@@ -248,33 +230,28 @@ def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
         abi = json.load(file)
 
     def parse_type(input_item):
-        type_str = input_item['type']
-        if 'tuple' in type_str:
+        type_str = input_item["type"]
+        if "tuple" in type_str:
             # Check for array suffix
-            array_suffix = '[]' if type_str.endswith('[]') else ''
+            array_suffix = "[]" if type_str.endswith("[]") else ""
             # Recursively parse components
-            components = input_item.get('components', [])
+            components = input_item.get("components", [])
             component_types = [parse_type(comp) for comp in components]
             tuple_str = f"({','.join(component_types)})"
             return tuple_str + array_suffix
         else:
-            return input_item['type']
+            return input_item["type"]
 
     signatures = []
     for entry in abi:
         if entry["type"] == "event" and entry["name"] == event_name:
-            inputs = [
-                ("indexed " if inp["indexed"] else "") + parse_type(inp)
-                for inp in entry["inputs"]
-            ]
+            inputs = [("indexed " if inp["indexed"] else "") + parse_type(inp) for inp in entry["inputs"]]
             signature = f"{entry['name']}({','.join(inputs)})"
             signatures.append(signature)
     return signatures
 
 
-def get_events_with_signatures(
-        needed_events: List[str], contract: Contract
-) -> List[Event]:
+def get_events_with_signatures(needed_events: List[str], contract: Contract) -> List[Event]:
     events = []
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
@@ -286,9 +263,7 @@ def get_events_with_signatures(
                     source=source,
                     name=event,
                     signature=sig,
-                    handler_name=(
-                        f"handle{event}" if not contract.fake else "handleIgnoredEvent"
-                    ),
+                    handler_name=(f"handle{event}" if not contract.fake else "handleIgnoredEvent"),
                     numbered_name=event,
                 )
             )
@@ -296,9 +271,7 @@ def get_events_with_signatures(
 
 
 def prepare_module(config: Config, target_module: str):
-    with open(
-            os.path.join(target_module, "subgraph_config.json"), "r"
-    ) as target_config_file:
+    with open(os.path.join(target_module, "subgraph_config.json"), "r") as target_config_file:
         target_config = json.load(target_config_file)
 
     create_schema_file(target_module, target_config)
@@ -319,14 +292,10 @@ def prepare_module(config: Config, target_module: str):
     # Second pass: Process events for each contract and add missing versions
     for abi in unique_abis:
         versions = abi_versions[abi]
-        max_start_block = max(
-            int(c.startBlock) for c in config.contracts if c.abi == abi
-        )
+        max_start_block = max(int(c.startBlock) for c in config.contracts if c.abi == abi)
 
         for version in versions:
-            existing_contracts = [
-                c for c in config.contracts if c.abi == abi and c.version == version
-            ]
+            existing_contracts = [c for c in config.contracts if c.abi == abi and c.version == version]
             if existing_contracts:
                 all_contracts.extend(existing_contracts)
             else:
@@ -387,13 +356,8 @@ def prepare_module(config: Config, target_module: str):
                 "apiVersion": "0.0.6",
                 "language": "wasm/assemblyscript",
                 "entities": ["Account"],
-                "abis": [
-                    {"name": contract.path(), "file": f"./abis/{contract.path()}.json"}
-                ],
-                "eventHandlers": [
-                    {"event": event.signature, "handler": event.handler_name}
-                    for event in contract_events
-                ],
+                "abis": [{"name": contract.path(), "file": f"./abis/{contract.path()}.json"}],
+                "eventHandlers": [{"event": event.signature, "handler": event.handler_name} for event in contract_events],
                 "file": f"./{target_module}/src_{contract.path() if not contract.fake else 'fake'}.ts",
             },
         }
@@ -401,15 +365,12 @@ def prepare_module(config: Config, target_module: str):
             source_config["source"]["endBlock"] = int(contract.endBlock)
 
         if len(contract.dependencies) > 0:
-            source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in
-                                                 contract.dependencies]
+            source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in contract.dependencies]
 
         contract_indexes[(contract.abi, contract.version)] += 1
 
         if contract_indexes[(contract.abi, contract.version)] > 1:
-            source_config[
-                "name"
-            ] += f"_{contract_indexes[(contract.abi, contract.version)]}"
+            source_config["name"] += f"_{contract_indexes[(contract.abi, contract.version)]}"
 
         subgraph_config["dataSources"].append(source_config)
 
@@ -421,34 +382,34 @@ def prepare_module(config: Config, target_module: str):
 # New function to convert Solidity types to GraphQL types
 def solidity_type_to_graphql(sol_type):
     # Handle arrays
-    if sol_type.endswith('[]'):
+    if sol_type.endswith("[]"):
         base_type = solidity_type_to_graphql(sol_type[:-2])
-        return f'[{base_type[:-1]}]!'
-    elif '[' in sol_type and ']' in sol_type:
+        return f"[{base_type[:-1]}]!"
+    elif "[" in sol_type and "]" in sol_type:
         # Fixed-size arrays
-        base_type = sol_type[:sol_type.find('[')]
+        base_type = sol_type[: sol_type.find("[")]
         base_graphql_type = solidity_type_to_graphql(base_type)
-        return f'[{base_graphql_type[:-1]}]!'
-    elif sol_type.startswith('uint') or sol_type.startswith('int'):
-        bits = ''.join(filter(str.isdigit, sol_type))
-        if bits == '':
+        return f"[{base_graphql_type[:-1]}]!"
+    elif sol_type.startswith("uint") or sol_type.startswith("int"):
+        bits = "".join(filter(str.isdigit, sol_type))
+        if bits == "":
             bits = 256  # default
         else:
             bits = int(bits)
         if bits <= 32:
-            return 'Int!'
+            return "Int!"
         else:
-            return 'BigInt!'
-    elif sol_type == 'address':
-        return 'Bytes!'
-    elif sol_type.startswith('bytes'):
-        return 'Bytes!'
-    elif sol_type == 'bool':
-        return 'Boolean!'
-    elif sol_type == 'string':
-        return 'String!'
+            return "BigInt!"
+    elif sol_type == "address":
+        return "Bytes!"
+    elif sol_type.startswith("bytes"):
+        return "Bytes!"
+    elif sol_type == "bool":
+        return "Boolean!"
+    elif sol_type == "string":
+        return "String!"
     else:
-        return 'String!'  # default to String
+        return "String!"  # default to String
 
 
 # New function to generate and print entities
@@ -463,28 +424,28 @@ def generate_and_print_entities(config: Config):
         with open(abi_file_path, "r") as f:
             abi = json.load(f)
         for item in abi:
-            if item.get('type') == 'event':
-                event_name = item['name']
+            if item.get("type") == "event":
+                event_name = item["name"]
                 # Avoid duplicate events
                 if event_name not in all_events:
                     all_events[event_name] = item
 
     # Get the events as a list and sort by name
     events_list = list(all_events.values())
-    events_list.sort(key=lambda x: x['name'])
+    events_list.sort(key=lambda x: x["name"])
 
     for event in events_list:
-        event_name = event['name']
-        inputs = event['inputs']
+        event_name = event["name"]
+        inputs = event["inputs"]
         # Collect parameter names and types
         params = []
         for param in inputs:
-            param_name = param['name'] or 'param'  # Ensure param name exists
-            param_type = param['type']
+            param_name = param["name"] or "param"  # Ensure param name exists
+            param_type = param["type"]
             graphql_type = solidity_type_to_graphql(param_type)
-            params.append({'name': param_name, 'type': graphql_type})
+            params.append({"name": param_name, "type": graphql_type})
         # Sort parameters by name
-        params.sort(key=lambda x: x['name'])
+        params.sort(key=lambda x: x["name"])
         # Output the entity definition
         print(f"type {event_name} @entity(immutable: true) {{")
         print("    id: ID!")
@@ -501,18 +462,18 @@ def main():
     parser = argparse.ArgumentParser(description="Module preparation script.")
     parser.add_argument("config_file", type=str, help="Configuration file path")
     parser.add_argument("module_name", type=str, help="Target module name")
-    parser.add_argument("version", type=str, nargs='?', help="Deployment version")
+    parser.add_argument("version", type=str, nargs="?", help="Deployment version")
     parser.add_argument("--create-src", action="store_true", help="Create the src file")
-    parser.add_argument(
-        "--create-handlers", action="store_true", help="Create the handler files"
-    )
-    parser.add_argument(
-        "--simple-mapping", action="store_true", help="Generate simple handler mappings"
-    )
+    parser.add_argument("--create-handlers", action="store_true", help="Create the handler files")
+    parser.add_argument("--simple-mapping", action="store_true", help="Generate simple handler mappings")
     parser.add_argument("--deploy", action="store_true", help="Deploy the subgraph")
     parser.add_argument("--delete", action="store_true", help="Delete the subgraph")
     parser.add_argument("--add-latest-tag", action="store_true", help="Add 'latest' tag to the subgraph")
-    parser.add_argument("--delete-latest-tag", action="store_true", help="Delete 'latest' tag from the subgraph")
+    parser.add_argument(
+        "--delete-latest-tag",
+        action="store_true",
+        help="Delete 'latest' tag from the subgraph",
+    )
     parser.add_argument("--generate-entities", action="store_true", help="Generate and print entities")  # New option
 
     args = parser.parse_args()
@@ -551,28 +512,58 @@ def main():
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
-        command = ["goldsky", "subgraph", "deploy", f"{deploy_url}/{args.version}", "--path", "build"]
+        command = [
+            "goldsky",
+            "subgraph",
+            "deploy",
+            f"{deploy_url}/{args.version}",
+            "--path",
+            "build",
+        ]
         subprocess.run(command, check=True)
 
     if args.delete:
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
-        command = ["goldsky", "subgraph", "delete", "-f", f"{deploy_url}/{args.version}"]
+        command = [
+            "goldsky",
+            "subgraph",
+            "delete",
+            "-f",
+            f"{deploy_url}/{args.version}",
+        ]
         subprocess.run(command, check=True)
 
     if args.add_latest_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
-        command = ["goldsky", "subgraph", "tag", "create", f"{deploy_url}/{args.version}", "--tag", "latest"]
+        command = [
+            "goldsky",
+            "subgraph",
+            "tag",
+            "create",
+            f"{deploy_url}/{args.version}",
+            "--tag",
+            "latest",
+        ]
         subprocess.run(command, check=True)
 
     if args.delete_latest_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
-        command = ["goldsky", "subgraph", "tag", "delete", f"{deploy_url}/{args.version}", "-f", "--tag", "latest"]
+        command = [
+            "goldsky",
+            "subgraph",
+            "tag",
+            "delete",
+            f"{deploy_url}/{args.version}",
+            "-f",
+            "--tag",
+            "latest",
+        ]
         subprocess.run(command, check=True)
 
 

@@ -20,6 +20,13 @@
 			"version": "1",
 			"startBlock": "12951603",
 			"name": "bmx_multi_account"
+		},
+		{
+			"address": "0xDE6446197Cd1AE02E1C5B7191a626Fb0c1757377",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "16673330",
+			"name": "horizon_multi_account"
 		}
 	],
 	"deploy_urls": {

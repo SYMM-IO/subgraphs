@@ -7,7 +7,7 @@ export class EditAccountNameHandler<T> extends BaseMultiAccountHandler {
 		super.handleAccount(_event, version);
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let account = Account.load(event.params.account.toHexString())
+		let account = Account.load(event.params.account.toHexString())!
 		account.name = event.params.newName;
 		account.save();
 	}

@@ -13,6 +13,13 @@
 			"version": "1",
 			"startBlock": "1977426",
 			"name": "cloverfield_multi_account"
+		},
+		{
+			"address": "0xdfC2a55a44aD3d3aAbFe8D1C498Ea923c6D39526",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "2022303",
+			"name": "cloverfield_multi_peppy"
 		}
 	],
 	"deploy_urls": {

@@ -365,7 +365,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.save()
 	}
 
-	const th = getTotalHistory(timestamp, account.accountSource, getAlreadyCreatedConfiguration(params.event, params.version).collateral)
+	const th = getTotalHistory(timestamp, params.accountSource, getAlreadyCreatedConfiguration(params.event, params.version).collateral)
 	th.tradeVolume = th.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 	th.openTradeVolume = th.openTradeVolume.plus(openTradeVolume)
 	th.closeTradeVolume = th.closeTradeVolume.plus(closeTradeVolume)
@@ -419,12 +419,12 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	tuh.save()
 
 	if (params._symbolId.gt(BigInt.zero())) {
-		let stv = getSymbolTradeHistory(params._symbolId, timestamp, account.accountSource)
+		let stv = getSymbolTradeHistory(params._symbolId, timestamp, params.accountSource)
 		stv.volume = stv.volume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 		stv.updateTimestamp = timestamp
 		stv.save()
 
-		const dst = getDailySymbolTradesHistory(timestamp, account.account, account.accountSource, params._symbolId)
+		const dst = getDailySymbolTradesHistory(timestamp, account.account, params.accountSource, params._symbolId)
 		dst.totalTrades = dst.totalTrades.plus(BigInt.fromString("1"))
 		dst.platformFeePaid = dst.platformFeePaid.plus(params._tradingFee)
 		dst.fundingPaid = dst.fundingPaid.plus(params._fundingPaid)
@@ -432,7 +432,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		dst.updateTimestamp = timestamp
 		dst.save()
 
-		const tst = getTotalSymbolTradesHistory(timestamp, account.account, account.accountSource, params._symbolId)
+		const tst = getTotalSymbolTradesHistory(timestamp, account.account, params.accountSource, params._symbolId)
 		tst.totalTrades = tst.totalTrades.plus(BigInt.fromString("1"))
 		tst.platformFeePaid = tst.platformFeePaid.plus(params._tradingFee)
 		tst.fundingPaid = tst.fundingPaid.plus(params._fundingPaid)
