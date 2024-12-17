@@ -71,6 +71,27 @@
 			"name": "alpha_multi_account_8"
 		},
 		{
+			"address": "0x041e372ed328a6088e470476e6df92617a86e2b2",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "39593661",
+			"name": "alpha_multi_account_9"
+		},
+		{
+			"address": "0x4986415e243b9db258124909facb0a6aa87f6ccd",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "39762860",
+			"name": "alpha_multi_account_10"
+		},
+		{
+			"address": "0x723abb2ef943d816a010f6f2ed510e513cc0d7f3",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "39834064",
+			"name": "alpha_multi_account_11"
+		},
+		{
 			"address": "0xcCc8CC82868B94Bc2759c69375fC7Ae769703EB8",
 			"abi": "symmioMultiAccount",
 			"version": "1",

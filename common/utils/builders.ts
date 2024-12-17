@@ -1,6 +1,6 @@
-import {BigInt, Bytes, ethereum} from "@graphprotocol/graph-ts"
-import {Account as AccountModel, User as UserModel} from "../../generated/schema"
-import {getGlobalCounterAndInc} from "../utils"
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { Account as AccountModel, User as UserModel } from "../../generated/schema"
+import { getGlobalCounterAndInc } from "../utils"
 
 export enum AccountType {
 	NORMAL,
@@ -26,6 +26,7 @@ export function createNewAccountIfNotExists(
 	block: ethereum.Block,
 	transaction: ethereum.Transaction,
 	name: string | null = null,
+	replaceOnExisting: boolean = false,
 ): AccountModel {
 	let u = UserModel.load(user.toHexString())
 	if (u == null) {
@@ -37,11 +38,15 @@ export function createNewAccountIfNotExists(
 		u.save()
 	}
 	let account = AccountModel.load(address.toHexString())
-	if (account != null)
+	if (account != null && !replaceOnExisting) {
 		return account
-	account = new AccountModel(address.toHexString())
+	}
+	if (account == null) {
+		account = new AccountModel(address.toHexString())
+	}
+
 	account.account = address
-	account.type = accountTypes.get(type)
+	account.type = accountTypes.get(type)!
 	account.lastActivityTimestamp = block.timestamp
 	account.timestamp = block.timestamp
 	account.transaction = transaction.hash
