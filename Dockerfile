@@ -27,5 +27,5 @@ RUN mkdir /subgraph
 COPY package.json /subgraph
 WORKDIR /subgraph
 RUN npm i
-
+RUN python3 -m pip install yaml --no-chache --default-timeout=60
 COPY . /subgraph
