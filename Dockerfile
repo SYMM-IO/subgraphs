@@ -1,8 +1,13 @@
 # Project: v3-subgraph
 # Description: -
+ARG PY_VER=3.11
 
 FROM node:lts AS subgraph
-ARG PY_VER=3.11
+
+
+
+ARG PY_VER
+
 FROM python:${PY_VER} AS subgraph-py
 ######################################################################
 # LABELS
