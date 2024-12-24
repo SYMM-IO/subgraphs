@@ -33,5 +33,5 @@ COPY package.json /subgraph
 WORKDIR /subgraph
 RUN npm i
 RUN pip install --upgrade --no-cache pip
-RUN pip install PyYAML --no-chache --default-timeout=60
+RUN pip install PyYAML --no-cache --default-timeout=60
 COPY . /subgraph
