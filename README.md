@@ -39,47 +39,48 @@ This structure addresses the following challenges:
    to be imported from the common directory.
 3. **Prepare Dependency Files**: Place dependency files in the appropriate directories to map entity models to events.
 4. **Run the Script**:
-   ```bash
-   python script_name.py config_file.json module_name [--create-src] [--deploy] [--mantle]
-   ```
-    - `config_file.json`: Path to your configuration file.
-    - `module_name`: Name of the target module.
-    - `--create-src`: (Optional) Generates the source TypeScript files for event handling.
-    - `--deploy`: (Optional) Deploys the subgraph after preparation.
-    - `--mantle`: (Optional) Use this flag if deploying to the Mantle network.
 
+   ```bash
+   python scripts/manager.py config_file.json module_name [--create-src] [--deploy]
+   ```
+
+   - `config_file.json`: Path to your configuration file.
+   - `module_name`: Name of the target module.
+   - `--create-src`: (Optional) Generates the source TypeScript files for event handling.
+   - `--deploy`: (Optional) Deploys the subgraph after preparation.
 5. **Review Output**: The script will generate necessary files and output the deployment status. It's important to
    review the generated files, especially `subgraph.yaml` and `schema.graphql`, to ensure they are correctly configured.
 
 ## How It Works (Overview)
 
 1. **Configuration Loading**:
-    - The script loads the configuration from a specified JSON file and initializes the deployment process.
 
+   - The script loads the configuration from a specified JSON file and initializes the deployment process.
 2. **Module Preparation**:
-    - Combines common models and target module schema into a unified `schema.graphql`.
-    - Identifies the events required by the models in the schema based on the dependency files.
-    - Copies necessary ABI files to the appropriate locations.
 
+   - Combines common models and target module schema into a unified `schema.graphql`.
+   - Identifies the events required by the models in the schema based on the dependency files.
+   - Copies necessary ABI files to the appropriate locations.
 3. **Contract Processing**:
-    - Processes each contract, including generating "fake" contracts for missing versions to ensure all versions are
-      accounted for.
 
+   - Processes each contract, including generating "fake" contracts for missing versions to ensure all versions are
+     accounted for.
 4. **Subgraph Configuration**:
-    - Generates a `subgraph.yaml` file, configuring data sources, event handlers, and mappings for each contract.
 
+   - Generates a `subgraph.yaml` file, configuring data sources, event handlers, and mappings for each contract.
 5. **Code Generation**:
-    - If the `--create-src` flag is used, generates TypeScript source files to handle the events specified in the
-      configuration.
 
+   - If the `--create-src` flag is used, generates TypeScript source files to handle the events specified in the
+     configuration.
 6. **Build and Deploy**:
-    - Executes `graph codegen` to generate AssemblyScript types and `graph build` to compile the subgraph.
-    - If the `--deploy` flag is used, deploys the subgraph to the specified network, with additional options for Mantle
-      deployment.
 
+   - Executes `graph codegen` to generate AssemblyScript types and `graph build` to compile the subgraph.
+   - If the `--deploy` flag is used, deploys the subgraph to the specified network, with additional options for Mantle
+     deployment.
 7. **Network-Specific Handling**:
-    - The `--mantle` flag enables specialized deployment configurations for the Mantle network, including custom node
-      and IPFS endpoints.
+
+   - The `--mantle` flag enables specialized deployment configurations for the Mantle network, including custom node
+     and IPFS endpoints.
 
 ## Dependency Files
 
@@ -129,48 +130,50 @@ This file is central to module-specific configurations and should be placed in t
 ### How `subgraph_config.json` Is Used:
 
 1. **Model Imports**:
-    - The `importModels` array specifies which models should be imported from the common directory into the module's
-      schema.
-    - These models are included in the final `schema.graphql` file.
 
+   - The `importModels` array specifies which models should be imported from the common directory into the module's
+     schema.
+   - These models are included in the final `schema.graphql` file.
 2. **Schema Generation**:
-    - The script first incorporates the imported models into the `schema.graphql`.
-    - Then, it appends the module-specific schema.
 
+   - The script first incorporates the imported models into the `schema.graphql`.
+   - Then, it appends the module-specific schema.
 3. **Custom Configurations**:
-    - The file can be extended to include other settings that customize the subgraph preparation process.
+
+   - The file can be extended to include other settings that customize the subgraph preparation process.
 
 ## Detailed Script Workflow
 
 1. **Clean Up**:
-    - The script begins by running a cleanup process to remove any old generated files.
 
+   - The script begins by running a cleanup process to remove any old generated files.
 2. **Load Configuration**:
-    - The JSON configuration file is parsed, and a `Config` object is created to manage the deployment.
 
+   - The JSON configuration file is parsed, and a `Config` object is created to manage the deployment.
 3. **Prepare Module**:
-    - The `schema.graphql` is generated by combining common models and the target module’s schema.
-    - The script identifies all models in the schema and determines the necessary events using the dependency files.
 
+   - The `schema.graphql` is generated by combining common models and the target module’s schema.
+   - The script identifies all models in the schema and determines the necessary events using the dependency files.
 4. **Process Contracts**:
-    - Each contract is processed to handle multiple versions, creating "fake" contracts as needed.
-    - Event signatures and handler names are generated for each event.
 
+   - Each contract is processed to handle multiple versions, creating "fake" contracts as needed.
+   - Event signatures and handler names are generated for each event.
 5. **Generate Subgraph Configuration**:
-    - A `subgraph.yaml` file is created, detailing the data sources, event handlers, ABIs, and file paths for each
-      contract.
 
+   - A `subgraph.yaml` file is created, detailing the data sources, event handlers, ABIs, and file paths for each
+     contract.
 6. **Generate Source Files** (if `--create-src` flag is used):
-    - TypeScript files (`src_{abi}_{version}.ts`) are generated for each contract version.
-    - Import statements and handler functions for each event are created.
 
+   - TypeScript files (`src_{abi}_{version}.ts`) are generated for each contract version.
+   - Import statements and handler functions for each event are created.
 7. **Build Subgraph**:
-    - `graph codegen` is executed to generate AssemblyScript types.
-    - `graph build` compiles the subgraph.
 
+   - `graph codegen` is executed to generate AssemblyScript types.
+   - `graph build` compiles the subgraph.
 8. **Deploy Subgraph** (if `--deploy` flag is used):
-    - The script constructs the deployment command based on the network (including Mantle if specified) and executes the
-      `graph deploy` command.
+
+   - The script constructs the deployment command based on the network (including Mantle if specified) and executes the
+     `graph deploy` command.
 
 ## Troubleshooting
 
