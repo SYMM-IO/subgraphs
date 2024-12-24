@@ -1,11 +1,6 @@
 # Project: v3-subgraph
 # Description: -
 ARG PY_VER=3.11
-
-FROM node:lts AS subgraph
-
-
-
 FROM python:${PY_VER} AS subgraph-py
 ######################################################################
 # LABELS
@@ -25,7 +20,13 @@ LABEL org.build.Date=${BUILD_DATE}
 ######################################################################
 # BUILD STAGE
 ######################################################################
-RUN npm install -g @graphprotocol/graph-cli@0.69.2
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y tini jq && \
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install -y nodejs && \
+    node -v >> debug.txt &&\
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN mkdir /subgraph
 COPY package.json /subgraph
