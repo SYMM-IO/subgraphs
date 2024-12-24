@@ -1,0 +1,134 @@
+type Quote @entity {
+    id: String!
+    globalCounter: BigInt!
+    quoteId: BigInt!
+    quoteStatus: Int
+    partyA: Bytes!
+    partyB: Bytes
+    action: String
+    blockNumber: BigInt!
+
+    # open request
+    requestedOpenPrice: BigInt
+    marketPrice: BigInt
+    orderTypeOpen: Int
+    quantity: BigInt
+    cva: BigInt
+    lf: BigInt
+    partyBmm: BigInt
+    partyAmm: BigInt
+    symbolId: BigInt
+    symbol: String
+    positionType: Int
+    openDeadline: BigInt
+    partyBsWhiteList: [Bytes!]
+    maxFundingRate: BigInt
+
+    # open
+    fillAmount: BigInt
+    openedPrice: BigInt
+    tradingFee: BigInt!
+
+    # initial
+    initialOpenedPrice: BigInt
+    initialCva: BigInt!
+    initialPartyAmm: BigInt
+    initialPartyBmm: BigInt!
+    initialLf: BigInt!
+
+    # close request
+    closePrice: BigInt # request
+    orderTypeClose: Int
+    closedPrice: BigInt # done
+    closeDeadline: BigInt
+    quantityToClose: BigInt
+    closeId: BigInt
+
+    # closed
+    closedAmount: BigInt
+    leverage: BigInt
+    averageClosedPrice: BigInt
+
+    # liquidation
+    liquidatePrice: BigInt
+    liquidateAmount: BigInt
+    liquidatedSide: Int
+
+    # funding rate
+    userPaidFunding: BigInt
+    userReceivedFunding: BigInt
+
+    # timestamps
+    timestamp: BigInt!
+    timestampLastFundingPayment: BigInt
+    timestampExpireQuote: BigInt
+    timestampAcceptCancelCloseRequest: BigInt
+    timestampAcceptCancelRequest: BigInt
+    timestampChargeFundingRate: BigInt
+    timestampEmergencyClosePosition: BigInt
+    timestampForceCancelCloseRequest: BigInt
+    timestampFillCloseRequest: BigInt
+    timestampForceCancelQuote: BigInt
+    timestampForceClosePosition: BigInt
+    timestampLockQuote: BigInt
+    timestampRequestToCancelCloseRequest: BigInt
+    timestampOpenPosition: BigInt
+    timestampRequestToCancelQuote: BigInt
+    timestampSendQuote: BigInt
+    timestampRequestToLimitClosePosition: BigInt
+    timestampUnlockQuote: BigInt
+    timestampRequestToClosePosition: BigInt
+    timestampLiquidatePositionsPartyA: BigInt
+    timestampLiquidatePositionsPartyB: BigInt
+
+    # transaction hashes
+    txHashExpireQuote: Bytes
+    txHashAcceptCancelCloseRequest: Bytes
+    txHashAcceptCancelRequest: Bytes
+    txHashChargeFundingRate: Bytes
+    txHashEmergencyClosePosition: Bytes
+    txHashForceCancelCloseRequest: Bytes
+    txHashFillCloseRequest: Bytes
+    txHashForceCancelQuote: Bytes
+    txHashForceClosePosition: Bytes
+    txHashLockQuote: Bytes
+    txHashRequestToCancelCloseRequest: Bytes
+    txHashOpenPosition: Bytes
+    txHashRequestToCancelQuote: Bytes
+    txHashSendQuote: Bytes
+    txHashRequestToLimitClosePosition: Bytes
+    txHashUnlockQuote: Bytes
+    txHashRequestToClosePosition: Bytes
+    txHashLiquidatePositionsPartyA: Bytes
+    txHashLiquidatePositionsPartyB: Bytes
+}
+
+type PartyA @entity {
+    id: String!
+    partyB: Bytes
+    quoteUntilLiquid: [BigInt!]
+    globalCounter: BigInt!
+}
+
+type PartyBPartyA @entity {
+    id: String!
+    partyB: Bytes
+    quoteUntilLiquid: [BigInt!]
+    globalCounter: BigInt!
+}
+
+type PartyASymbolPrice @entity {
+    id: String!
+    partyA: Bytes!
+    symbolId: BigInt!
+    requestedOpenPrice: BigInt!
+    timeStamp: BigInt!
+    trHash: Bytes!
+    GlobalCounter: BigInt!
+}
+
+type GlobalFee @entity {
+    id: ID!
+    globalFee: BigInt!
+    latestTimestamp: BigInt!
+}

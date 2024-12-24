@@ -1,0 +1,50 @@
+{
+  "network": "arbitrum-one",
+  "contracts": [
+    {
+      "address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+      "abi": "symmio",
+      "version": "0_8_3",
+      "startBlock": "249345343"
+    },
+    {
+      "address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+      "abi": "symmio",
+      "version": "0_8_2",
+      "startBlock": "210771536",
+      "endBlock": "249345343"
+    },
+    {
+      "address": "0x6273242a7E88b3De90822b31648C212215caaFE4",
+      "abi": "symmioMultiAccount",
+      "version": "1",
+      "startBlock": "210771536",
+      "name": "multi_account_pear"
+    },
+    {
+      "address": "0x6a3C63Ed5e558a4c4810ecC980ba6075476602D6",
+      "abi": "symmioMultiAccount",
+      "version": "1",
+      "startBlock": "222717579",
+      "name": "multi_account_cloverfield"
+    },
+    {
+      "address": "0x141269E29a770644C34e05B127AB621511f20109",
+      "abi": "symmioMultiAccount",
+      "version": "1",
+      "startBlock": "259657700",
+      "name": "multi_account_intentx"
+    },
+    {
+      "address": "0x3334226b27FCdda639620eE10c4dfca30f084969",
+      "abi": "symmioMultiAccount",
+      "version": "1",
+      "startBlock": "277773113",
+      "name": "multi_account_vibe"
+    }
+  ],
+  "deploy_urls": {
+    "analytics": "arbitrum_analytics",
+    "events": "arbitrum_events"
+  }
+}

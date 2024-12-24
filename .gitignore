@@ -1,5 +1,4 @@
 networks.json
-subgraph.yaml
 build/
 generated/
 node_modules/
@@ -10,6 +9,10 @@ package-lock.json
 .idea/
 pnpm-lock.yaml
 yarn-error.log
-*/abis/*
-
+/abis/
+events/abis/
 .env
+
+UniConfig.json
+subgraph.yaml
+/schema.graphql

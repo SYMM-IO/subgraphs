@@ -1,0 +1,32 @@
+{
+	"network": "bsc",
+	"contracts": [
+		{
+			"address": "0x7f632d4327C083064e632845ADaE8Fad2ccBA6eE",
+			"abi": "vault",
+			"version": "1",
+			"startBlock": "38477004"
+		},
+		{
+			"address": "0x0379e4F69Dd7D6898d7e4e879Ee7A4F4DF7583bd",
+			"abi": "vault",
+			"version": "1",
+			"startBlock": "38477057"
+		},
+		{
+			"address": "0x8fF61bB59462Ec62c3c6af74262058d4064B1B3b",
+			"abi": "vault_token",
+			"version": "1",
+			"startBlock": "38477004"
+		},
+		{
+			"address": "0xFf44865a12b43ba2A21E3f8A8443F34075f84bc0",
+			"abi": "vault_token",
+			"version": "1",
+			"startBlock": "38477057"
+		}
+	],
+	"deploy_urls": {
+		"vaults": "bnb_vaults"
+	}
+}

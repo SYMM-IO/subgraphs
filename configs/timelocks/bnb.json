@@ -1,0 +1,26 @@
+{
+	"network": "bsc",
+	"contracts": [
+		{
+			"address": "0xCb850319Cb6B907c7A2ebAb71980147D19d6e3A1",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "42794350"
+		},
+		{
+			"address": "0x3Db312a1D419428DEAe205554274CeF95368B0f5",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "43252233"
+		},
+		{
+			"address": "0x1CB4B1dcEe1EbDE41c272C7c14bF55D565e2830C",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "42913585"
+		}
+	],
+	"deploy_urls": {
+		"timelocks": "bnb_timelocks"
+	}
+}
