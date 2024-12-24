@@ -6,8 +6,6 @@ FROM node:lts AS subgraph
 
 
 
-ARG PY_VER
-
 FROM python:${PY_VER} AS subgraph-py
 ######################################################################
 # LABELS
