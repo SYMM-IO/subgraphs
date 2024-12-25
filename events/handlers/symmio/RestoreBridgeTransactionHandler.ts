@@ -10,6 +10,8 @@ export class RestoreBridgeTransactionHandler<T> {
 
 		let entity = new RestoreBridgeTransactionEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		entity.transactionId = event.params.transactionId
 		entity.validAmount = event.params.validAmount

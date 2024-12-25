@@ -10,6 +10,8 @@ export class DepositToReserveVaultHandler<T> {
 
 		let entity = new DepositToReserveVaultEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		entity.sender = event.params.sender
 		entity.amount = event.params.amount

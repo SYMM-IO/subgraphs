@@ -10,6 +10,8 @@ export class SetInvalidBridgedAmountsPoolHandler<T> {
 
 		let entity = new SetInvalidBridgedAmountsPoolEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		entity.newInvalidBridgedAmountsPool = event.params.newInvalidBridgedAmountsPool
 		entity.oldInvalidBridgedAmountsPool = event.params.oldInvalidBridgedAmountsPool

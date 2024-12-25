@@ -20,6 +20,8 @@ export class RequestToClosePositionHandler<T> {
 		entity.orderType = event.params.orderType
 		entity.deadline = event.params.deadline
 		entity.quoteStatus = event.params.quoteStatus
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {

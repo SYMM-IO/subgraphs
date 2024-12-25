@@ -17,6 +17,8 @@ export class ForceClosePositionHandler<T> {
 		entity.filledAmount = event.params.filledAmount
 		entity.closedPrice = event.params.closedPrice
 		entity.quoteStatus = event.params.quoteStatus
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {
