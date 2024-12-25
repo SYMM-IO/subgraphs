@@ -6,6 +6,13 @@
         "abi": "symmio",
         "version": "0_8_3",
         "startBlock": "0"
+      },
+      {
+        "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "abi": "symmio",
+        "version": "0_8_2",
+        "startBlock": "0",
+        "endBlock": "0"
       }
     ],
     "deploy_urls": {
