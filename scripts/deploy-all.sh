@@ -6,5 +6,5 @@ do
 	# cd $proj
 	echo "********** processing $proj **********"
 	./scripts/manage -cbd $prefix-$proj
-	cd ..
+	# cd ..
 done
