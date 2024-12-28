@@ -12,6 +12,8 @@ export class ResolveLiquidationDisputeHandler<T> {
 
 		let entity = new ResolveLiquidationDisputeEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		entity.amounts = event.params.amounts
 		entity.disputed = event.params.disputed

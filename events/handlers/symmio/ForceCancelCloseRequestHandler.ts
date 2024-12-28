@@ -14,6 +14,8 @@ export class ForceCancelCloseRequestHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.quoteId = event.params.quoteId
 		entity.quoteStatus = event.params.quoteStatus
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {

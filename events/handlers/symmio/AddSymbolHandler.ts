@@ -13,6 +13,8 @@ export class AddSymbolHandler<T> {
 
 		let entity = new AddSymbolEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {

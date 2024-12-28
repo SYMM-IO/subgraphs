@@ -16,6 +16,8 @@ export class SetSymbolsPricesHandler<T> {
 		entity.partyA = event.params.partyA
 		entity.symbolIds = event.params.symbolIds
 		entity.prices = event.params.prices
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {

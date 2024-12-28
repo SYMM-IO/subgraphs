@@ -16,6 +16,8 @@ export class SendQuoteHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.partyA = event.params.partyA
 		entity.quoteId = event.params.quoteId
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
 			for (let i = 0, len = event.params.partyBsWhiteList.length; i < len; i++) {

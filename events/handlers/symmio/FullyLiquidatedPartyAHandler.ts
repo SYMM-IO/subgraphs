@@ -13,6 +13,8 @@ export class FullyLiquidatedPartyAHandler<T> {
 		let entity = new FullyLiquidatedPartyAEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.partyA = event.params.partyA
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {

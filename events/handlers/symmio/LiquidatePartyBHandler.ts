@@ -16,6 +16,8 @@ export class LiquidatePartyBHandler<T> {
 		entity.liquidator = event.params.liquidator
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {

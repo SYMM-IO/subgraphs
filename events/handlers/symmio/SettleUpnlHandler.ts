@@ -10,6 +10,8 @@ export class SettleUpnlHandler<T> {
 
 		let entity = new SettleUpnlEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		entity.newPartyAAllocatedBalance = event.params.newPartyAAllocatedBalance
 		entity.newPartyBsAllocatedBalances = event.params.newPartyBsAllocatedBalances

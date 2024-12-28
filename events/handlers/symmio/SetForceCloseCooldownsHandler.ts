@@ -10,6 +10,8 @@ export class SetForceCloseCooldownsHandler<T> {
 
 		let entity = new SetForceCloseCooldownsEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		entity.oldForceCloseFirstCooldown = event.params.oldForceCloseFirstCooldown
 		entity.newForceCloseFirstCooldown = event.params.newForceCloseFirstCooldown

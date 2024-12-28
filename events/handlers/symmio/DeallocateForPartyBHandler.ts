@@ -15,6 +15,8 @@ export class DeallocateForPartyBHandler<T> {
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
 		entity.amount = event.params.amount
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {

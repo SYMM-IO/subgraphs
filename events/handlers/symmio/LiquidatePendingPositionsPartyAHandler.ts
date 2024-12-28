@@ -14,6 +14,8 @@ export class LiquidatePendingPositionsPartyAHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.liquidator = event.params.liquidator
 		entity.partyA = event.params.partyA
+		entity.transactionLogIndex = event.logIndex
+		entity.blockHash = event.block.hash
 
 		switch (version) {
 			case Version.v_0_8_4: {
