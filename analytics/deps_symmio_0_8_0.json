@@ -1,0 +1,95 @@
+{
+  "UserActivity": [
+    "SendQuote",
+    "RequestToClosePosition",
+    "ExpireQuote",
+    "ForceCancelQuote",
+    "ForceCancelCloseRequest",
+    "ForceClosePosition",
+    "RequestToCancelCloseRequest",
+    "RequestToCancelQuote",
+    "RequestToCancelQuote"
+  ],
+  "BalanceChange": [
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw"
+  ],
+  "TradeHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition"
+  ],
+  "DailyHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition",
+    "ChargeFundingRate",
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw"
+  ],
+  "TotalHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition",
+    "ChargeFundingRate",
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw"
+  ],
+  "SymbolTradeHistory": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition"
+  ],
+  "OpenInterest": [
+    "OpenPosition",
+    "LiquidatePositionsPartyA",
+    "LiquidatePositionsPartyB",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition"
+  ],
+  "PriceCheck": [
+    "OpenPosition",
+    "FillCloseRequest",
+    "EmergencyClosePosition",
+    "ForceClosePosition"
+  ],
+  "PartyALiquidation": [
+    "SetSymbolsPrices"
+  ],
+  "PartyBLiquidation": [
+    "LiquidatePartyB"
+  ],
+  "PartyALiquidationDisputed": [
+    "LiquidationDisputed"
+  ],
+  "Configuration": [
+    "SetCollateral"
+  ],
+  "GrantedRole": [
+    "RoleGranted",
+    "RoleRevoked"
+  ],
+  "Account": [
+    "RequestToCancelCloseRequest",
+    "RequestToCancelQuote"
+  ]
+}

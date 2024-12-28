@@ -1,8 +1,7 @@
 # Project: v3-subgraph
 # Description: -
-
-FROM node:lts AS subgraph
-
+ARG PY_VER=3.11
+FROM python:${PY_VER} AS subgraph-py
 ######################################################################
 # LABELS
 ######################################################################
@@ -21,11 +20,19 @@ LABEL org.build.Date=${BUILD_DATE}
 ######################################################################
 # BUILD STAGE
 ######################################################################
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y tini jq && \
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install -y nodejs && \
+    node -v >> debug.txt &&\
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN npm install -g @graphprotocol/graph-cli@0.69.2
 
 RUN mkdir /subgraph
 COPY package.json /subgraph
 WORKDIR /subgraph
 RUN npm i
-
+RUN pip install --upgrade --no-cache pip
+RUN pip install PyYAML --no-cache --default-timeout=60
 COPY . /subgraph

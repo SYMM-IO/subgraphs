@@ -1,0 +1,106 @@
+{
+	"network": "bsc",
+	"contracts": [
+		{
+			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
+			"abi": "symmio",
+			"version": "0_8_3",
+			"startBlock": "41900351"
+		},
+		{
+			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
+			"abi": "symmio",
+			"version": "0_8_2",
+			"startBlock": "34345963",
+			"endBlock": "41900351"
+		},
+		{
+			"address": "0x650a2D6C263A93cFF5EdD41f836ce832F05A1cF3",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "34462282",
+			"name": "alpha_multi_account_1"
+		},
+		{
+			"address": "0xdAA571297038eeCB31dCafc3d1ff2C1A138E41C9",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "40004033",
+			"name": "alpha_multi_account_2"
+		},
+		{
+			"address": "0xf3d56c3c1E610581181f4dE9242DbDa92D583dD6",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "40008166",
+			"name": "alpha_multi_account_3"
+		},
+		{
+			"address": "0x49f49005e8e4D333459a05CCD34D00EB30D67446",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "40491155",
+			"name": "alpha_multi_account_4"
+		},
+		{
+			"address": "0x2035CAC2C606c66e0B650f6E102bfAF931218432",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "40606254",
+			"name": "alpha_multi_account_5"
+		},
+		{
+			"address": "0xBCc250B8D7e7e378c85fe9bc83fF0Eff5d5b0f20",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "41120231",
+			"name": "alpha_multi_account_6"
+		},
+		{
+			"address": "0x7634Fd3084286e15DE973eca9a56dD353dAB3eE3",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "43392229",
+			"name": "alpha_multi_account_7"
+		},
+		{
+			"address": "0xeFD638A013bF62638EfB4a405aca804F5f7d6cb8",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "43400343",
+			"name": "alpha_multi_account_8"
+		},
+		{
+			"address": "0x041e372ed328a6088e470476e6df92617a86e2b2",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "39593661",
+			"name": "alpha_multi_account_9"
+		},
+		{
+			"address": "0x4986415e243b9db258124909facb0a6aa87f6ccd",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "39762860",
+			"name": "alpha_multi_account_10"
+		},
+		{
+			"address": "0x723abb2ef943d816a010f6f2ed510e513cc0d7f3",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "39834064",
+			"name": "alpha_multi_account_11"
+		},
+		{
+			"address": "0xcCc8CC82868B94Bc2759c69375fC7Ae769703EB8",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "39684294",
+			"name": "cloverfield_multi_account"
+		}
+	],
+	"deploy_urls": {
+		"analytics": "bnb_analytics",
+		"events": "bnb_events"
+	}
+}

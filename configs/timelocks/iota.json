@@ -1,0 +1,20 @@
+{
+	"network": "iota",
+	"contracts": [
+		{
+			"address": "0xe639B85B77F5D31d37C52AD1F026C6508f48DC61",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "2020076"
+		},
+		{
+			"address": "0xa7989EC31875Da0579454EE20195140FeB75B562",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "2020055"
+		}
+	],
+	"deploy_urls": {
+		"timelocks": "iota_timelocks"
+	}
+}

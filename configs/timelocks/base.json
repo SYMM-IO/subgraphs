@@ -1,0 +1,26 @@
+{
+	"network": "base",
+	"contracts": [
+		{
+			"address": "0x92E89Bb3cE2CeA34dF6168010BBEFce2997b014d",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "20536572"
+		},
+		{
+			"address": "0x62d68CAD88fef03a68e461b476CbB3D9681cCf2C",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "21273653"
+		},
+		{
+			"address": "0x319F10D14B5B7195a1693f4f5C015370C4324Fa6",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "20765638"
+		}
+	],
+	"deploy_urls": {
+		"timelocks": "base_timelocks"
+	}
+}

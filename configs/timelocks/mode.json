@@ -1,0 +1,20 @@
+{
+	"network": "mode-mainnet",
+	"contracts": [
+		{
+			"address": "0xeCcfBB250f7eC409ebC9F20277EC097578270fAB",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "15016086"
+		},
+		{
+			"address": "0x1Da7A300181E69582A0eb80bBDcE3bCB15Dcf68D",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "15016132"
+		}
+	],
+	"deploy_urls": {
+		"timelocks": "mode_timelocks"
+	}
+}
