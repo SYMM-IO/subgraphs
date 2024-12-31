@@ -10,7 +10,8 @@ export class RegisterAffiliateHandler<T> {
 
 		let entity = new RegisterAffiliateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.transactionLogIndex = event.logIndex
+		entity.transactionLogIndex = event.transaction.index
+		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 		entity.affilate = event.params.affilate
 

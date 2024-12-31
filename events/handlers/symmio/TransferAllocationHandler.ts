@@ -15,7 +15,8 @@ export class TransferAllocationHandler<T> {
 		entity.amount = event.params.amount
 		entity.origin = event.params.origin
 		entity.recipient = event.params.recipient
-		entity.transactionLogIndex = event.logIndex
+		entity.transactionLogIndex = event.transaction.index
+		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
 		switch (version) {
