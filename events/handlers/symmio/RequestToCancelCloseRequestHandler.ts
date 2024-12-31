@@ -16,7 +16,8 @@ export class RequestToCancelCloseRequestHandler<T> {
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId
 		entity.quoteStatus = event.params.quoteStatus
-		entity.transactionLogIndex = event.logIndex
+		entity.transactionLogIndex = event.transaction.index
+		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
 		switch (version) {

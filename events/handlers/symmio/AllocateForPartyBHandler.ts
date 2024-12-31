@@ -15,7 +15,8 @@ export class AllocateForPartyBHandler<T> {
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
 		entity.amount = event.params.amount
-		entity.transactionLogIndex = event.logIndex
+		entity.transactionLogIndex = event.transaction.index
+		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
 		switch (version) {
