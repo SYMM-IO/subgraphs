@@ -1,0 +1,7 @@
+type DebugEntity @entity {
+	id: String!
+	timestamp: BigInt
+	trigger: BigInt
+	type: String
+	message: String
+}

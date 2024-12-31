@@ -1,8 +1,9 @@
 {
   "name": "subgraph",
   "devDependencies": {
+    "@graphprotocol/graph-ts": "*",
     "matchstick-as": "^0.5.0",
     "mustache": "^4.2.0",
-    "@graphprotocol/graph-ts": "*"
+    "prettier": "3.3.3"
   }
 }

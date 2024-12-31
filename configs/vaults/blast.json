@@ -1,0 +1,32 @@
+{
+  "network": "blast",
+  "contracts": [
+    {
+      "address": "0x75Bd495F94D251341827C4A6b3975Ac5CD096f71",
+      "abi": "vault",
+      "version": "1",
+      "startBlock": "3060772"
+    },
+    {
+      "address": "0xc818F52e267609A4C377ed1A0691425cdE8F853e",
+      "abi": "vault",
+      "version": "1",
+      "startBlock": "3060722"
+    },
+    {
+      "address": "0xdA7011A8688d8568C5Cede9a5ce31Cf59434A992",
+      "abi": "vault_token",
+      "version": "1",
+      "startBlock": "3060772"
+    },
+    {
+      "address": "0x49e682B79154938c415d420DDd38718A443b8f28",
+      "abi": "vault_token",
+      "version": "1",
+      "startBlock": "3060722"
+    }
+  ],
+  "deploy_urls": {
+    "vaults": "blast_vaults"
+  }
+}

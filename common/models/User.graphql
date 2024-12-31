@@ -1,0 +1,7 @@
+type User @entity {
+    id: ID!
+    globalCounter: BigInt!
+    address: Bytes!
+    timestamp: BigInt!
+    transaction: Bytes!
+}

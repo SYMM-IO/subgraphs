@@ -1,0 +1,33 @@
+type WithdrawRequest @entity {
+	id: ID!
+	timestamp: BigInt!
+	sender: Bytes!
+	receiver: Bytes!
+	amount: BigInt!
+	status: Int!
+	paybackRatio: BigInt
+	source: Bytes!
+}
+
+type Deposit @entity {
+    id: ID!
+    user: Bytes!
+    sender: Bytes!
+    amount: BigInt!
+    source: Bytes!
+    timestamp: BigInt!
+    blockNumber: BigInt!
+    transaction: Bytes!
+}
+
+type Transfer @entity {
+    id: ID!
+    from: Bytes!
+    to: Bytes!
+    sender: Bytes!
+    amount: BigInt!
+    source: Bytes!
+    transaction: Bytes!
+    blockNumber: BigInt!
+    timestamp: BigInt!
+}

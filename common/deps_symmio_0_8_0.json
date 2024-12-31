@@ -1,0 +1,40 @@
+{
+  "Quote": [
+    "AcceptCancelRequest",
+    "AcceptCancelCloseRequest",
+    "SendQuote",
+    "LockQuote",
+    "UnlockQuote",
+    "ChargeFundingRate",
+    "LiquidatePositionsPartyB",
+    "LiquidatePositionsPartyA",
+    "RequestToClosePosition",
+    "ExpireQuote",
+    "handleForceCancelCloseRe",
+    "ForceClosePosition",
+    "EmergencyClosePosition",
+    "FillCloseRequest",
+    "OpenPosition"
+  ],
+  "User": [
+    "SendQuote",
+    "AddAccount",
+    "DepositForPartyB"
+  ],
+  "Symbol": [
+    "AddSymbol",
+    "SetSymbolTradingFee"
+  ],
+  "Account": [
+    "AllocatePartyA",
+    "DeallocatePartyA",
+    "Deposit",
+    "Withdraw",
+    "AllocateForPartyB",
+    "DeallocateForPartyB",
+    "SendQuote",
+    "OpenPosition",
+    "RequestToClosePosition",
+    "DepositForPartyB"
+  ]
+}
