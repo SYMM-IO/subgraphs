@@ -12,7 +12,7 @@ export class SendQuoteHandler<T> {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		let entity = new SendQuoteEntity(event.params.quoteId)
+		let entity = new SendQuoteEntity(event.params.quoteId.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.partyA = event.params.partyA
 		entity.quoteId = event.params.quoteId
