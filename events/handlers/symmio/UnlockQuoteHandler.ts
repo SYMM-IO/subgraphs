@@ -2,7 +2,7 @@ import { UnlockQuote as UnlockQuoteEntity } from "../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { findAccountSource } from "../../utils/account_utlis";
+import { findAccountSource } from "../../utils/account_utils";
 
 export class UnlockQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

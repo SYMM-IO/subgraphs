@@ -3,7 +3,7 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { ForceClosePosition as ForceClosePosition_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { findAccountSource } from "../../utils/account_utlis";
+import { findAccountSource } from "../../utils/account_utils";
 
 export class ForceClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

@@ -4,7 +4,7 @@ import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { RequestToClosePosition as RequestToClosePosition_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { RequestToClosePosition as RequestToClosePosition_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { findAccountSource } from "../../utils/account_utlis";
+import { findAccountSource } from "../../utils/account_utils";
 
 export class RequestToClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
