@@ -14,7 +14,8 @@ export class AllocatePartyAHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.user = event.params.user
 		entity.amount = event.params.amount
-		entity.transactionLogIndex = event.logIndex
+		entity.transactionLogIndex = event.transaction.index
+		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
 		switch (version) {
