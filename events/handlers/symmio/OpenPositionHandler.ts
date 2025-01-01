@@ -2,7 +2,7 @@ import { OpenPosition as OpenPositionEntity } from "../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { findAccountSource } from "../../utils/account_utils";
+import { findAccountSourceForQuote } from "../../utils/account_utils";
 
 export class OpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -12,7 +12,7 @@ export class OpenPositionHandler<T> {
 		let entity = new OpenPositionEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSource(event.params.quoteId)
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.filledAmount = event.params.filledAmount
