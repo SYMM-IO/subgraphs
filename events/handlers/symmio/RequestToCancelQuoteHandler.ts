@@ -2,6 +2,7 @@ import { RequestToCancelQuote as RequestToCancelQuoteEntity } from "../../../gen
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
+import { findAccountSource } from "../../utils/acc_src";
 
 export class RequestToCancelQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -14,6 +15,7 @@ export class RequestToCancelQuoteHandler<T> {
 		entity.partyB = event.params.partyB
 		entity.quoteStatus = event.params.quoteStatus
 		entity.quoteId = event.params.quoteId
+		entity.accountSource = findAccountSource(event.params.quoteId)
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
