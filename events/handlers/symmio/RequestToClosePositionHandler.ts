@@ -4,6 +4,7 @@ import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { RequestToClosePosition as RequestToClosePosition_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { RequestToClosePosition as RequestToClosePosition_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
+import { findAccountSource } from "../../utils/acc_src";
 
 export class RequestToClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -15,6 +16,7 @@ export class RequestToClosePositionHandler<T> {
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId
+		entity.accountSource = findAccountSource(event.params.quoteId)
 		entity.closePrice = event.params.closePrice
 		entity.quantityToClose = event.params.quantityToClose
 		entity.orderType = event.params.orderType

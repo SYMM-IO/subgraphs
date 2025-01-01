@@ -3,6 +3,7 @@ type AcceptCancelCloseRequest @entity(immutable: true) {
     counterId: BigInt!
     closeId: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -16,6 +17,7 @@ type AcceptCancelRequest @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -290,6 +292,7 @@ type EmergencyClosePosition @entity(immutable: true) {
     partyA: Bytes!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -303,6 +306,7 @@ type ExpireQuote @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -317,6 +321,7 @@ type ExpireQuoteClose @entity(immutable: true) {
     counterId: BigInt!
     closeId: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -330,6 +335,7 @@ type ExpireQuoteOpen @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -348,6 +354,7 @@ type FillCloseRequest @entity(immutable: true) {
     partyA: Bytes!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -362,6 +369,7 @@ type ForceCancelCloseRequest @entity(immutable: true) {
     counterId: BigInt!
     closeId: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -375,6 +383,7 @@ type ForceCancelQuote @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -393,6 +402,7 @@ type ForceClosePosition @entity(immutable: true) {
     partyA: Bytes!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -544,6 +554,7 @@ type LockQuote @entity(immutable: true) {
     counterId: BigInt!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -560,6 +571,7 @@ type OpenPosition @entity(immutable: true) {
     partyA: Bytes!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
@@ -677,6 +689,7 @@ type RequestToCancelCloseRequest @entity(immutable: true) {
     partyA: Bytes!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -692,6 +705,7 @@ type RequestToCancelQuote @entity(immutable: true) {
     partyA: Bytes!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -712,6 +726,7 @@ type RequestToClosePosition @entity(immutable: true) {
     partyB: Bytes!
     quantityToClose: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -792,6 +807,7 @@ type SendQuote @entity(immutable: true) {
     price: BigInt!
     quantity: BigInt!
     quoteId: BigInt!
+	accountSource: Bytes!
     symbolId: BigInt!
     tradingFee: BigInt!
     blockNumber: BigInt!
@@ -1212,6 +1228,7 @@ type SettlePartyALiquidation @entity(immutable: true) {
 type QuoteSettlementData @entity {
     id: ID!
     quoteId: BigInt!
+	accountSource: Bytes!
     currentPrice: BigInt!
     partyBUpnlIndex: Int!
     transactionLogIndex: BigInt!
@@ -1283,6 +1300,7 @@ type UnlockQuote @entity(immutable: true) {
     counterId: BigInt!
     partyB: Bytes!
     quoteId: BigInt!
+	accountSource: Bytes!
     quoteStatus: Int!
     blockNumber: BigInt!
     blockTimestamp: BigInt!
@@ -1402,6 +1420,19 @@ type WithdrawReceivedBridgeValues @entity(immutable: true) {
     counterId: BigInt!
     transactionIds: [BigInt!]
     blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionLogIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+}
+
+type AddAccount @entity {
+	id: ID!
+	account: Bytes!
+	user: Bytes!
+	accountSource: Bytes!
+	blockNumber: BigInt!
     blockTimestamp: BigInt!
     transactionHash: Bytes!
     transactionLogIndex: BigInt!

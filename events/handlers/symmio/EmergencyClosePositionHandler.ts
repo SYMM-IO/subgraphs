@@ -4,6 +4,7 @@ import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { EmergencyClosePosition as EmergencyClosePosition_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { EmergencyClosePosition as EmergencyClosePosition_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { findAccountSource } from "../../utils/acc_src";
 
 export class EmergencyClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -14,6 +15,7 @@ export class EmergencyClosePositionHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 
 		entity.quoteId = event.params.quoteId
+		entity.accountSource = findAccountSource(event.params.quoteId)
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.filledAmount = event.params.filledAmount

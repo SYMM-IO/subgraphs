@@ -3,6 +3,7 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { ForceClosePosition as ForceClosePosition_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { findAccountSource } from "../../utils/acc_src";
 
 export class ForceClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -12,6 +13,7 @@ export class ForceClosePositionHandler<T> {
 		let entity = new ForceClosePositionEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.quoteId = event.params.quoteId
+		entity.accountSource = findAccountSource(event.params.quoteId)
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.filledAmount = event.params.filledAmount
