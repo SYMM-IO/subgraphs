@@ -6,7 +6,7 @@ import { SendQuote as SendQuote_8_0 } from "../../../generated/symmio_0_8_0/symm
 import { SendQuote as SendQuote_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { SendQuote as SendQuote_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SendQuote as SendQuote_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { findAccountSource } from "../../utils/acc_src";
+import { findAccountSourceForQuoteForAccount, findAccountSourceForQuote } from "../../utils/account_utils"
 
 export class SendQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -17,8 +17,8 @@ export class SendQuoteHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.partyA = event.params.partyA
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSource(event.params.quoteId)
-		entity.transactionLogIndex = event.transaction.index
+		entity.accountSource = findAccountSourceForQuoteForAccount(event.params.partyA)
+		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 		if (event.params.partyBsWhiteList) {

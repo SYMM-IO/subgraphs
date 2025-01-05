@@ -8,11 +8,12 @@ export class AddAccountHandler<T> {
 		const event = changetype<T>(_event)
 		let entity = new AddAccount(event.params.account.toString())
 		entity.user = event.params.user
+		entity.account = event.params.account
 		entity.accountSource = event.address
 		entity.blockNumber = event.block.number
 		entity.blockTimestamp = event.block.timestamp
 		entity.transactionHash = event.transaction.hash
-		entity.transactionLogIndex = event.transaction.index
+		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 		entity.save()
