@@ -33,7 +33,9 @@ import {
 	RoleRevoked,
 	SendQuote,
 	SetCollateral,
+	SetSymbolFundingState,
 	SetSymbolTradingFee,
+	SetSymbolValidationState,
 	UnlockQuote,
 	Withdraw,
 } from "../generated/symmio_0_8_3/symmio_0_8_3"
@@ -73,6 +75,8 @@ import { SetSymbolTradingFeeHandler } from "./handlers/symmio/SetSymbolTradingFe
 import { UnlockQuoteHandler } from "./handlers/symmio/UnlockQuoteHandler"
 import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
+import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
+import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -241,6 +245,16 @@ export function handleSetCollateral(event: SetCollateral): void {
 
 export function handleSetSymbolTradingFee(event: SetSymbolTradingFee): void {
 	let handler = new SetSymbolTradingFeeHandler<SetSymbolTradingFee>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleSetSymbolValidationState(event: SetSymbolValidationState): void {
+	let handler = new SetSymbolValidationStateHandler<SetSymbolValidationState>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleSetSymbolFundingState(event: SetSymbolFundingState): void {
+	let handler = new SetSymbolFundingStateHandler<SetSymbolFundingState>()
 	handler.handle(event, Version.v_0_8_3)
 }
 

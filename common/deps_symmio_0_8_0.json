@@ -23,7 +23,9 @@
   ],
   "Symbol": [
     "AddSymbol",
-    "SetSymbolTradingFee"
+    "SetSymbolTradingFee",
+    "SetSymbolValidationState",
+    "SetSymbolFundingState"
   ],
   "Account": [
     "AllocatePartyA",

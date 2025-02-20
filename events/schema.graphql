@@ -147,6 +147,7 @@ type ChargeFundingRate @entity(immutable: true) {
     partyA: Bytes!
     partyB: Bytes!
     quoteIds: [BigInt!]
+    amounts: [BigInt!]
     rates: [BigInt!]
     blockNumber: BigInt!
     blockTimestamp: BigInt!

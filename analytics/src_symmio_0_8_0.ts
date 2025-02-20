@@ -27,6 +27,7 @@ import {
 	SendQuote,
 	SetCollateral,
 	SetSymbolTradingFee,
+	SetSymbolValidationState,
 	UnlockQuote,
 	Withdraw,
 } from "../generated/symmio_0_8_0/symmio_0_8_0"
@@ -59,6 +60,7 @@ import { UnlockQuoteHandler } from "./handlers/symmio/UnlockQuoteHandler"
 import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolTradingFeeHandler } from "./handlers/symmio/SetSymbolTradingFeeHandler"
+import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 
 export function handleForceCancelCloseRequest(event: ForceCancelCloseRequest): void {
 	let handler = new ForceCancelCloseRequestHandler<ForceCancelCloseRequest>()
@@ -203,5 +205,10 @@ export function handleAllocatePartyA(event: AllocatePartyA): void {
 
 export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyB): void {
 	let handler = new LiquidatePositionsPartyBHandler<LiquidatePositionsPartyB>()
+	handler.handle(event, Version.v_0_8_0)
+}
+
+export function handleSetSymbolValidationState(event: SetSymbolValidationState): void {
+	let handler = new SetSymbolValidationStateHandler<SetSymbolValidationState>()
 	handler.handle(event, Version.v_0_8_0)
 }
