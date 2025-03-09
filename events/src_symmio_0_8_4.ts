@@ -99,6 +99,7 @@ import {
 	WithdrawFromReserveVault,
 	WithdrawReceivedBridgeValue,
 	WithdrawReceivedBridgeValues,
+	DiamondCut,
 } from "../generated/symmio_0_8_4/symmio_0_8_4"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { ActiveEmergencyModeHandler } from "./handlers/symmio/ActiveEmergencyModeHandler"
@@ -199,6 +200,7 @@ import { WithdrawFromReserveVaultHandler } from "./handlers/symmio/WithdrawFromR
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { WithdrawReceivedBridgeValueHandler } from "./handlers/symmio/WithdrawReceivedBridgeValueHandler"
 import { WithdrawReceivedBridgeValuesHandler } from "./handlers/symmio/WithdrawReceivedBridgeValuesHandler"
+import { DiamondCutHandler } from "./handlers/symmio/DiamondCutHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -692,5 +694,10 @@ export function handleWithdrawReceivedBridgeValue(event: WithdrawReceivedBridgeV
 
 export function handleWithdrawReceivedBridgeValues(event: WithdrawReceivedBridgeValues): void {
 	let handler = new WithdrawReceivedBridgeValuesHandler<WithdrawReceivedBridgeValues>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleDiamondCut(event: DiamondCut): void {
+	let handler = new DiamondCutHandler<DiamondCut>()
 	handler.handle(event, Version.v_0_8_4)
 }

@@ -72,6 +72,7 @@ import {
 	UnpausePartyAActions,
 	UnpausePartyBActions,
 	Withdraw,
+	DiamondCut,
 } from "../generated/symmio_0_8_2/symmio_0_8_2"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { ActiveEmergencyModeHandler } from "./handlers/symmio/ActiveEmergencyModeHandler"
@@ -145,6 +146,7 @@ import { UnpausePartyAActionsHandler } from "./handlers/symmio/UnpausePartyAActi
 import { UnpausePartyBActionsHandler } from "./handlers/symmio/UnpausePartyBActionsHandler"
 import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
+import { DiamondCutHandler } from "./handlers/symmio/DiamondCutHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -503,5 +505,10 @@ export function handleUnpausePartyBActions(event: UnpausePartyBActions): void {
 
 export function handleWithdraw(event: Withdraw): void {
 	let handler = new WithdrawHandler<Withdraw>()
+	handler.handle(event, Version.v_0_8_2)
+}
+
+export function handleDiamondCut(event: DiamondCut): void {
+	let handler = new DiamondCutHandler<DiamondCut>()
 	handler.handle(event, Version.v_0_8_2)
 }
