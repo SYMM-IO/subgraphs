@@ -1,3 +1,4 @@
+import { Account } from "./../../../analytics/generated/schema"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Quote } from "../../../generated/schema"
 import { SendQuote as SendQuote_0_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0"
@@ -105,6 +106,10 @@ export class SendQuoteHandler<T> extends BaseHandler {
 			}
 			quote.partyBsWhiteList = partyBsWhiteList
 		}
+
+		const accountSource = Account.load(event.params.partyA.toHexString())!.accountSource
+		quote.affiliate = accountSource === null ? Bytes.fromHexString("0x0000000000000000000000000000000000000000") : accountSource
+
 		quote.timestamp = event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "SendQuote", event)

@@ -5,6 +5,7 @@ type Quote @entity {
     quoteStatus: Int
     partyA: Bytes!
     partyB: Bytes
+    affiliate: Bytes
     action: String
     blockNumber: BigInt!
 
