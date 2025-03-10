@@ -301,5 +301,8 @@
   ],
   "WithdrawReceivedBridgeValues": [
     "WithdrawReceivedBridgeValues"
+  ],
+  "DiamondCut": [
+    "DiamondCut"
   ]
 }

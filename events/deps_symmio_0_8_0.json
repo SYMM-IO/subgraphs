@@ -20,9 +20,6 @@
   "AllocatePartyB": [
     "AllocatePartyB"
   ],
-  "ChargeFundingRate": [
-    "ChargeFundingRate"
-  ],
   "DeactiveEmergencyMode": [
     "DeactiveEmergencyMode"
   ],
@@ -32,17 +29,8 @@
   "DeallocatePartyA": [
     "DeallocatePartyA"
   ],
-  "DeferredLiquidatePartyA": [
-    "DeferredLiquidatePartyA"
-  ],
   "Deposit": [
     "Deposit"
-  ],
-  "DeregisterPartyB": [
-    "DeregisterPartyB"
-  ],
-  "DisputeForLiquidation": [
-    "DisputeForLiquidation"
   ],
   "EmergencyClosePosition": [
     "EmergencyClosePosition"
@@ -62,29 +50,17 @@
   "ForceClosePosition": [
     "ForceClosePosition"
   ],
-  "FullyLiquidatedPartyA": [
-    "FullyLiquidatedPartyA"
-  ],
-  "FullyLiquidatedPartyB": [
-    "FullyLiquidatedPartyB"
-  ],
   "LiquidatePartyA": [
     "LiquidatePartyA"
   ],
   "LiquidatePartyB": [
     "LiquidatePartyB"
   ],
-  "LiquidatePendingPositionsPartyA": [
-    "LiquidatePendingPositionsPartyA"
-  ],
   "LiquidatePositionsPartyA": [
     "LiquidatePositionsPartyA"
   ],
   "LiquidatePositionsPartyB": [
     "LiquidatePositionsPartyB"
-  ],
-  "LiquidationDisputed": [
-    "LiquidationDisputed"
   ],
   "LockQuote": [
     "LockQuote"
@@ -191,26 +167,14 @@
   "SetSymbolAcceptableValues": [
     "SetSymbolAcceptableValues"
   ],
-  "SetSymbolFundingState": [
-    "SetSymbolFundingState"
-  ],
-  "SetSymbolMaxLeverage": [
-    "SetSymbolMaxLeverage"
-  ],
   "SetSymbolMaxSlippage": [
     "SetSymbolMaxSlippage"
   ],
   "SetSymbolTradingFee": [
     "SetSymbolTradingFee"
   ],
-  "SetSymbolsPrices": [
-    "SetSymbolsPrices"
-  ],
   "SetSymbolValidationState": [
     "SetSymbolValidationState"
-  ],
-  "SettlePartyALiquidation": [
-    "SettlePartyALiquidation"
   ],
   "TransferAllocation": [
     "TransferAllocation"
@@ -237,7 +201,7 @@
     "UnpausePartyBActions"
   ],
   "Withdraw": [
-   "Withdraw"
+    "Withdraw"
   ],
   "DiamondCut": [
     "DiamondCut"

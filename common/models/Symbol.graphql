@@ -3,6 +3,11 @@ type Symbol @entity {
     globalCounter: BigInt!
     name: String!
     tradingFee: BigInt!
+    isValid: Boolean!
+    minAcceptableQuoteValue: BigInt
+    minAcceptablePortionLF: BigInt
+    fundingRateEpochDuration: BigInt
+    fundingRateWindowTime: BigInt
     timestamp: BigInt!
     blockNumber: BigInt!
     updateTimestamp: BigInt!

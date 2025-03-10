@@ -24,12 +24,14 @@ export class LiquidatePositionsPartyAHandler<T> {
 				// @ts-ignore
 				const e = changetype<LiquidatePositionsPartyA_8_4>(_event)
 				entity.liquidationId = e.params.liquidationId
+				entity.liquidatedAmounts = e.params.liquidatedAmounts
 				break
 			}
 			case Version.v_0_8_3: {
 				// @ts-ignore
 				const e = changetype<LiquidatePositionsPartyA_8_3>(_event)
 				entity.liquidationId = e.params.liquidationId
+				entity.liquidatedAmounts = e.params.liquidatedAmounts
 				break
 			}
 			default: {
