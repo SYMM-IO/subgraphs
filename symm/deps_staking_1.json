@@ -2,10 +2,10 @@
   "Deposit": [
     "Deposit"
   ],
-  "Initialized": [
+  "StakingInitialized": [
     "Initialized"
   ],
-  "Paused": [
+  "StakingPaused": [
     "Paused"
   ],
   "RescueToken": [
@@ -17,16 +17,16 @@
   "RewardNotified": [
     "RewardNotified"
   ],
-  "RoleAdminChanged": [
+  "StakingRoleAdminChanged": [
     "RoleAdminChanged"
   ],
-  "RoleGranted": [
+  "StakingRoleGranted": [
     "RoleGranted"
   ],
-  "RoleRevoked": [
+  "StakingRoleRevoked": [
     "RoleRevoked"
   ],
-  "Unpaused": [
+  "StakingUnpaused": [
     "Unpaused"
   ],
   "UpdateWhitelist": [

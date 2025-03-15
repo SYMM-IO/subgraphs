@@ -1,14 +1,14 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { SymmStakingVersion } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { RoleGranted } from "../../../generated/schema"
+import { StakingRoleGranted } from "../../../generated/schema"
 
 export class RoleGrantedHandler<T> {
 	handle(_event: ethereum.Event, version: SymmStakingVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		let entity = new RoleGranted(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		let entity = new StakingRoleGranted(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.role = event.params.role
 		entity.account = event.params.account

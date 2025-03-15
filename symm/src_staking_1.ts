@@ -1,4 +1,4 @@
-import { DepositHandler } from "../handlers/staking/DepositHandler"
+import { DepositHandler } from "./handlers/staking/DepositHandler"
 import {
 	Deposit,
 	Initialized,
@@ -12,19 +12,19 @@ import {
 	Unpaused,
 	UpdateWhitelist,
 	Withdraw,
-} from "../../generated/staking_1/staking_1"
-import { InitializedHandler } from "../handlers/staking/InitializedHandler"
-import { PausedHandler } from "../handlers/staking/PausedHandler"
-import { RescueTokenHandler } from "../handlers/staking/RescueTokenHandler"
-import { RewardClaimedHandler } from "../handlers/staking/RewardClaimedHandler"
-import { RewardNotifiedHandler } from "../handlers/staking/RewardNotifiedHandler"
-import { RoleAdminChangedHandler } from "../handlers/staking/RoleAdminChangedHandler"
-import { RoleGrantedHandler } from "../handlers/staking/RoleGrantedHandler"
-import { RoleRevokedHandler } from "../handlers/staking/RoleRevokedHandler"
-import { UnpausedHandler } from "../handlers/staking/UnpausedHandler"
-import { UpdateWhitelistHandler } from "../handlers/staking/UpdateWhitelistHandler"
-import { SymmStakingVersion } from "../../common/BaseHandler"
-import { WithdrawHandler } from "../handlers/staking/WithdrawHandler"
+} from "../generated/staking_1/staking_1"
+import { InitializedHandler } from "./handlers/staking/InitializedHandler"
+import { PausedHandler } from "./handlers/staking/PausedHandler"
+import { RescueTokenHandler } from "./handlers/staking/RescueTokenHandler"
+import { RewardClaimedHandler } from "./handlers/staking/RewardClaimedHandler"
+import { RewardNotifiedHandler } from "./handlers/staking/RewardNotifiedHandler"
+import { RoleAdminChangedHandler } from "./handlers/staking/RoleAdminChangedHandler"
+import { RoleGrantedHandler } from "./handlers/staking/RoleGrantedHandler"
+import { RoleRevokedHandler } from "./handlers/staking/RoleRevokedHandler"
+import { UnpausedHandler } from "./handlers/staking/UnpausedHandler"
+import { UpdateWhitelistHandler } from "./handlers/staking/UpdateWhitelistHandler"
+import { SymmStakingVersion } from "../common/BaseHandler"
+import { WithdrawHandler } from "./handlers/staking/WithdrawHandler"
 
 export function handleDeposit(event: Deposit): void {
 	let handler = new DepositHandler<Deposit>()

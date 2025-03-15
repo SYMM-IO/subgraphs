@@ -1,4 +1,4 @@
-import { InitializedHandler } from "../handlers/vesting/InitializedHandler"
+import { InitializedHandler } from "./handlers/vesting/InitializedHandler"
 import {
 	Initialized,
 	LiquidityAdded,
@@ -11,18 +11,18 @@ import {
 	Unpaused,
 	VestingPlanReset,
 	VestingPlanSetup,
-} from "../../generated/vesting_1/vesting_1"
-import { LiquidityAddedHandler } from "../handlers/vesting/LiquidityAddedHandler"
-import { LockedTokenClaimedHandler } from "../handlers/vesting/LockedTokenClaimedHandler"
-import { PausedHandler } from "../handlers/vesting/PausedHandler"
-import { RoleAdminChangedHandler } from "../handlers/vesting/RoleAdminChangedHandler"
-import { RoleGrantedHandler } from "../handlers/vesting/RoleGrantedHandler"
-import { RoleRevokedHandler } from "../handlers/vesting/RoleRevokedHandler"
-import { UnlockedTokenClaimedHandler } from "../handlers/vesting/UnlockedTokenClaimedHandler"
-import { UnpausedHandler } from "../handlers/vesting/UnpausedHandler"
-import { SymmVestingVersion } from "../../common/BaseHandler"
-import { VestingPlanResetHandler } from "../handlers/vesting/VestingPlanResetHandler"
-import { VestingPlanSetupHandler } from "../handlers/vesting/VestingPlanSetupHandler"
+} from "../generated/vesting_1/vesting_1"
+import { LiquidityAddedHandler } from "./handlers/vesting/LiquidityAddedHandler"
+import { LockedTokenClaimedHandler } from "./handlers/vesting/LockedTokenClaimedHandler"
+import { PausedHandler } from "./handlers/vesting/PausedHandler"
+import { RoleAdminChangedHandler } from "./handlers/vesting/RoleAdminChangedHandler"
+import { RoleGrantedHandler } from "./handlers/vesting/RoleGrantedHandler"
+import { RoleRevokedHandler } from "./handlers/vesting/RoleRevokedHandler"
+import { UnlockedTokenClaimedHandler } from "./handlers/vesting/UnlockedTokenClaimedHandler"
+import { UnpausedHandler } from "./handlers/vesting/UnpausedHandler"
+import { SymmVestingVersion } from "../common/BaseHandler"
+import { VestingPlanResetHandler } from "./handlers/vesting/VestingPlanResetHandler"
+import { VestingPlanSetupHandler } from "./handlers/vesting/VestingPlanSetupHandler"
 
 export function handleInitialized(event: Initialized): void {
 	let handler = new InitializedHandler<Initialized>()

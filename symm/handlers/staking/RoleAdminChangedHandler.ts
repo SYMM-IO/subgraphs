@@ -1,14 +1,14 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { SymmStakingVersion } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { RoleAdminChanged } from "../../../generated/schema"
+import { StakingRoleAdminChanged } from "../../../generated/schema"
 
 export class RoleAdminChangedHandler<T> {
 	handle(_event: ethereum.Event, version: SymmStakingVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		let entity = new RoleAdminChanged(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		let entity = new StakingRoleAdminChanged(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.role = event.params.role
 		entity.previousAdminRole = event.params.previousAdminRole

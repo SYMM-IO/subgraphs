@@ -1,14 +1,14 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { SymmVestingVersion } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { Initialized } from "../../../generated/schema"
+import { VestingInitialized } from "../../../generated/schema"
 
 export class InitializedHandler<T> {
 	handle(_event: ethereum.Event, version: SymmVestingVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		let entity = new Initialized(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		let entity = new VestingInitialized(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.version = event.params.version
 		entity.blockTimestamp = event.block.timestamp

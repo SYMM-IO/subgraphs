@@ -1,0 +1,340 @@
+type Deposit @entity {
+	id: ID!
+	counterId: BigInt!
+	sender: Bytes!
+	amount: BigInt!
+	receiver: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakingInitialized @entity {
+	id: ID!
+	counterId: BigInt!
+	version: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakingPaused @entity {
+	id: ID!
+	counterId: BigInt!
+	account: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RescueToken @entity {
+	id: ID!
+	counterId: BigInt!
+	token: Bytes!
+	amount: BigInt!
+	receiver: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RewardClaimed @entity {
+	id: ID!
+	counterId: BigInt!
+	user: Bytes!
+	rewardsToken: Bytes!
+	reward: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RewardNotified @entity {
+	id: ID!
+	counterId: BigInt!
+	rewardsTokens: [Bytes!]
+	rewards: [BigInt!]
+	newRates: [BigInt!]
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakingRoleAdminChanged @entity {
+	id: ID!
+	counterId: BigInt!
+	role: Bytes!
+	previousAdminRole: Bytes!
+	newAdminRole: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakingRoleGranted @entity {
+	id: ID!
+	counterId: BigInt!
+	role: Bytes!
+	account: Bytes!
+	sender: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakingRoleRevoked @entity {
+	id: ID!
+	counterId: BigInt!
+	role: Bytes!
+	account: Bytes!
+	sender: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakingUnpaused @entity {
+	id: ID!
+	counterId: BigInt!
+	account: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type UpdateWhitelist @entity {
+	id: ID!
+	counterId: BigInt!
+	token: Bytes!
+	whitelist: Boolean!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type Withdraw @entity {
+	id: ID!
+	counterId: BigInt!
+	sender: Bytes!
+	amount: BigInt!
+	to: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type Transfer @entity {
+	id: ID!
+	counterId: BigInt!
+	from: Bytes!
+	to: Bytes!
+	value: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type Approval @entity {
+	id: ID!
+	counterId: BigInt!
+	owner: Bytes!
+	spender: Bytes!
+	value: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingInitialized @entity {
+	id: ID!
+	counterId: BigInt!
+	version: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingPaused @entity {
+	id: ID!
+	counterId: BigInt!
+	account: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingRoleAdminChanged @entity {
+	id: ID!
+	counterId: BigInt!
+	role: Bytes!
+	previousAdminRole: Bytes!
+	newAdminRole: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingRoleGranted @entity {
+	id: ID!
+	counterId: BigInt!
+	role: Bytes!
+	account: Bytes!
+	sender: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingRoleRevoked @entity {
+	id: ID!
+	counterId: BigInt!
+	role: Bytes!
+	account: Bytes!
+	sender: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingUnpaused @entity {
+	id: ID!
+	counterId: BigInt!
+	account: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type LiquidityAdded @entity {
+	id: ID!
+	counterId: BigInt!
+	user: Bytes!
+	symmAmount: BigInt!
+	usdcAmount: BigInt!
+	lpAmount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type LockedTokenClaimed @entity {
+	id: ID!
+	counterId: BigInt!
+	token: Bytes!
+	user: Bytes!
+	amount: BigInt!
+	penalty: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type UnlockedTokenClaimed @entity {
+	id: ID!
+	counterId: BigInt!
+	token: Bytes!
+	user: Bytes!
+	amount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingPlanReset @entity {
+	id: ID!
+	counterId: BigInt!
+	token: Bytes!
+	user: Bytes!
+	newAmount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VestingPlanSetup @entity {
+	id: ID!
+	counterId: BigInt!
+	token: Bytes!
+	user: Bytes!
+	amount: BigInt!
+	startTime: BigInt!
+	endTime: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}

@@ -1,5 +1,5 @@
 {
-  "Initialized": [
+  "VestingInitialized": [
     "Initialized"
   ],
   "LiquidityAdded": [
@@ -8,22 +8,22 @@
   "LockedTokenClaimed": [
     "LockedTokenClaimed"
   ],
-  "Paused": [
+  "VestingPaused": [
     "Paused"
   ],
-  "RoleAdminChanged": [
+  "VestingRoleAdminChanged": [
     "RoleAdminChanged"
   ],
-  "RoleGranted": [
+  "VestingRoleGranted": [
     "RoleGranted"
   ],
-  "RoleRevoked": [
+  "VestingRoleRevoked": [
     "RoleRevoked"
   ],
   "UnlockedTokenClaimed": [
     "UnlockedTokenClaimed"
   ],
-  "Unpaused": [
+  "VestingUnpaused": [
     "Unpaused"
   ],
   "VestingPlanReset": [

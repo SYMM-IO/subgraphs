@@ -1,14 +1,14 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { SymmVestingVersion } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { Unpaused } from "../../../generated/schema"
+import { VestingUnpaused } from "../../../generated/schema"
 
 export class UnpausedHandler<T> {
 	handle(_event: ethereum.Event, version: SymmVestingVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		let entity = new Unpaused(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		let entity = new VestingUnpaused(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.account = event.params.account
 		entity.blockTimestamp = event.block.timestamp
