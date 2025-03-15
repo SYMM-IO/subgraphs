@@ -1,0 +1,20 @@
+{
+	"network": "berachain-mainnet",
+	"contracts": [
+		{
+			"address": "0x3D05E073F466fc61730AdFFAea5FFA0323a9cd39",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "908340"
+		},
+		{
+			"address": "0xCBc66026FE6a0310ADa98238465F139E5B739792",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "908340"
+		}
+	],
+	"deploy_urls": {
+		"timelocks": "bera_timelocks"
+	}
+}

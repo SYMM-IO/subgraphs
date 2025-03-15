@@ -1,4 +1,4 @@
-import { Account } from "./../../../analytics/generated/schema"
+import { Account } from "../../../generated/schema"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Quote } from "../../../generated/schema"
 import { SendQuote as SendQuote_0_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0"
