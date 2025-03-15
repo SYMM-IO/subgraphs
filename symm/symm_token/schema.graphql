@@ -1,0 +1,27 @@
+type Transfer @entity {
+	id: ID!
+	counterId: BigInt!
+	from: Bytes!
+	to: Bytes!
+	value: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type Approval @entity {
+	id: ID!
+	counterId: BigInt!
+	owner: Bytes!
+	spender: Bytes!
+	value: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}

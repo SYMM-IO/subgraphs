@@ -1,0 +1,14 @@
+{
+	"network": "base",
+	"contracts": [
+		{
+			"address": "0xed56e682bF46dD2bA5137c3092486ff0bb2128b1",
+			"abi": "symm_token",
+			"version": "1",
+			"startBlock": "27535123"
+		}
+	],
+	"deploy_urls": {
+		"symm_stake": "base_symm_token"
+	}
+}

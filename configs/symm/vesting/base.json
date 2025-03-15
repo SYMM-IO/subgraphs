@@ -1,0 +1,14 @@
+{
+	"network": "base",
+	"contracts": [
+		{
+			"address": "0xEC8165172B8d67375C2F674C5218124cfDc9D200",
+			"abi": "vesting",
+			"version": "1",
+			"startBlock": "27535871"
+		}
+	],
+	"deploy_urls": {
+		"symm_vesting": "base_symm_vesting"
+	}
+}

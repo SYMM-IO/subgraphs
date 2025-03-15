@@ -1,0 +1,38 @@
+{
+  "Deposit": [
+    "Deposit"
+  ],
+  "Initialized": [
+    "Initialized"
+  ],
+  "Paused": [
+    "Paused"
+  ],
+  "RescueToken": [
+    "RescueToken"
+  ],
+  "RewardClaimed": [
+    "RewardClaimed"
+  ],
+  "RewardNotified": [
+    "RewardNotified"
+  ],
+  "RoleAdminChanged": [
+    "RoleAdminChanged"
+  ],
+  "RoleGranted": [
+    "RoleGranted"
+  ],
+  "RoleRevoked": [
+    "RoleRevoked"
+  ],
+  "Unpaused": [
+    "Unpaused"
+  ],
+  "UpdateWhitelist": [
+    "UpdateWhitelist"
+  ],
+  "Withdraw": [
+    "Withdraw"
+  ]
+}
