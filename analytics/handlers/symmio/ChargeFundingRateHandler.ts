@@ -2,6 +2,7 @@ import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../.
 import { Account, Quote } from "../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
+import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
@@ -39,6 +40,11 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 				}
 				case Version.v_0_8_2: {
 					let chainQuote = getQuote_0_8_2(event.address, BigInt.fromString(quote.id))!
+					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
+					break
+				}
+				case Version.v_0_8_1: {
+					let chainQuote = getQuote_0_8_1(event.address, BigInt.fromString(quote.id))!
 					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
 					break
 				}

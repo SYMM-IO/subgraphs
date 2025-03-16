@@ -2,6 +2,7 @@ import {BaseHandler, Version} from "../../BaseHandler"
 import {Quote} from "../../../generated/schema"
 import {BigInt, ethereum} from "@graphprotocol/graph-ts"
 import {getQuote as getQuote_0_8_0} from "../../../common/contract_utils_0_8_0";
+import {getQuote as getQuote_0_8_1} from "../../../common/contract_utils_0_8_1";
 import {getQuote as getQuote_0_8_2} from "../../../common/contract_utils_0_8_2";
 import {getQuote as getQuote_0_8_3} from "../../../common/contract_utils_0_8_3";
 import {getQuote as getQuote_0_8_4} from "../../../common/contract_utils_0_8_4";
@@ -44,6 +45,14 @@ export class OpenPositionHandler<T> extends BaseHandler {
 			}
 			case Version.v_0_8_2: {
 				let q = getQuote_0_8_2(event.address, event.params.quoteId)!
+				newCva = q.lockedValues.cva
+				newPartyAmm = q.lockedValues.partyAmm
+				newPartyBmm = q.lockedValues.partyBmm
+				newLF = q.lockedValues.lf
+				break
+			}
+			case Version.v_0_8_1: {
+				let q = getQuote_0_8_1(event.address, event.params.quoteId)!
 				newCva = q.lockedValues.cva
 				newPartyAmm = q.lockedValues.partyAmm
 				newPartyBmm = q.lockedValues.partyBmm

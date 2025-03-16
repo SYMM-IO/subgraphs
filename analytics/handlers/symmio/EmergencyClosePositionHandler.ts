@@ -6,6 +6,7 @@ import {Version} from "../../../common/BaseHandler";
 import {EmergencyClosePosition as EmergencyClosePosition_0_8_4} from "../../../generated/symmio_0_8_4/symmio_0_8_4";
 import {EmergencyClosePosition as EmergencyClosePosition_0_8_3} from "../../../generated/symmio_0_8_3/symmio_0_8_3";
 import {EmergencyClosePosition as EmergencyClosePosition_0_8_2} from "../../../generated/symmio_0_8_2/symmio_0_8_2";
+import {EmergencyClosePosition as EmergencyClosePosition_0_8_1} from "../../../generated/symmio_0_8_1/symmio_0_8_1";
 import {EmergencyClosePosition as EmergencyClosePosition_0_8_0} from "../../../generated/symmio_0_8_0/symmio_0_8_0";
 import {handleClose} from "../commonHandlers/close";
 
@@ -28,6 +29,10 @@ export class EmergencyClosePositionHandler<T> extends CommonEmergencyClosePositi
 			}
 			case Version.v_0_8_2: {
 				handleClose<EmergencyClosePosition_0_8_2>(event, "EmergencyClosePosition", version)
+				break
+			}
+			case Version.v_0_8_1: {
+				handleClose<EmergencyClosePosition_0_8_1>(event, "EmergencyClosePosition", version)
 				break
 			}
 			case Version.v_0_8_0: {

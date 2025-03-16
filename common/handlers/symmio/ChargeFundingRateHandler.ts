@@ -4,6 +4,7 @@ import {GlobalFee, Quote} from "../../../generated/schema";
 import {getQuote as getQuote_0_8_4} from "../../contract_utils_0_8_4";
 import {getQuote as getQuote_0_8_3} from "../../contract_utils_0_8_3";
 import {getQuote as getQuote_0_8_2} from "../../contract_utils_0_8_2";
+import {getQuote as getQuote_0_8_1} from "../../contract_utils_0_8_1";
 import {getQuote as getQuote_0_8_0} from "../../contract_utils_0_8_0";
 import {unDecimal} from "../../utils";
 
@@ -32,6 +33,12 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 				}
 				case Version.v_0_8_2: {
 					let chainQuote = getQuote_0_8_2(event.address, BigInt.fromString(quote.id))!
+					funding = unDecimal((chainQuote.openedPrice.minus(quote.openedPrice!).abs()).times(openAmount))
+					quote.openedPrice = chainQuote.openedPrice;
+					break
+				}
+				case Version.v_0_8_1: {
+					let chainQuote = getQuote_0_8_1(event.address, BigInt.fromString(quote.id))!
 					funding = unDecimal((chainQuote.openedPrice.minus(quote.openedPrice!).abs()).times(openAmount))
 					quote.openedPrice = chainQuote.openedPrice;
 					break
