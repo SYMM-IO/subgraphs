@@ -5,6 +5,7 @@ import { FACTOR, getGlobalCounterAndInc, unDecimal } from "../../../common/utils
 import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
 import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
+import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
 
 export class ChargeFundingRateHandler<T> {
@@ -49,6 +50,17 @@ export class ChargeFundingRateHandler<T> {
 				}
 				case Version.v_0_8_2: {
 					let chainQuote = getQuote_0_8_2(event.address, quoteId)!
+					if (chainQuote == null) return
+					const updatedPrice = chainQuote.openedPrice
+					// Reverse the rate application to get original price
+					// If rate is 0.001 (0.1%), then original = current / 1.001
+					const originalPrice = updatedPrice.times(FACTOR).div(rate.plus(FACTOR))
+					const priceDiff = updatedPrice.minus(originalPrice)
+					amounts.push(unDecimal(priceDiff.times(chainQuote.quantity)))
+					break
+				}
+				case Version.v_0_8_1: {
+					let chainQuote = getQuote_0_8_1(event.address, quoteId)!
 					if (chainQuote == null) return
 					const updatedPrice = chainQuote.openedPrice
 					// Reverse the rate application to get original price

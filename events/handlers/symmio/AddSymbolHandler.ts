@@ -1,6 +1,7 @@
 import { AddSymbol as AddSymbolEntity } from "../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
+import { AddSymbol as AddSymbol_8_1 } from "../../../generated/symmio_0_8_1/symmio_0_8_1"
 import { AddSymbol as AddSymbol_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { AddSymbol as AddSymbol_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { AddSymbol as AddSymbol_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
@@ -41,6 +42,16 @@ export class AddSymbolHandler<T> {
 			case Version.v_0_8_2: {
 				// @ts-ignore
 				const e = changetype<AddSymbol_8_2>(_event)
+				entity.symbolId = BigInt.zero()
+				entity.maxLeverage = e.params.maxLeverage
+				entity.fundingRateEpochDuration = e.params.fundingRateEpochDuration
+				entity.fundingRateWindowTime = e.params.fundingRateWindowTime
+				entity.symbolId = e.params.id
+				break
+			}
+			case Version.v_0_8_1: {
+				// @ts-ignore
+				const e = changetype<AddSymbol_8_1>(_event)
 				entity.symbolId = BigInt.zero()
 				entity.maxLeverage = e.params.maxLeverage
 				entity.fundingRateEpochDuration = e.params.fundingRateEpochDuration

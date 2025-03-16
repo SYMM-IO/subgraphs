@@ -3,6 +3,7 @@ import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { SendQuote as SendQuote_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0"
+import { SendQuote as SendQuote_8_1 } from "../../../generated/symmio_0_8_1/symmio_0_8_1"
 import { SendQuote as SendQuote_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { SendQuote as SendQuote_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SendQuote as SendQuote_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
@@ -44,6 +45,14 @@ export class SendQuoteHandler<T> {
 				entity.partyAmm = e.params.mm
 				entity.partyBmm = e.params.mm
 				entity.tradingFee = BigInt.zero() // we can read from the contract if it ever matters
+				break
+			}
+			case Version.v_0_8_1: {
+				// @ts-ignore
+				const e = changetype<SendQuote_8_1>(_event)
+				entity.partyAmm = e.params.partyAmm
+				entity.partyBmm = e.params.partyBmm
+				entity.tradingFee = e.params.tradingFee
 				break
 			}
 			case Version.v_0_8_2: {
