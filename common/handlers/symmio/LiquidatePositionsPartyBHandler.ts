@@ -1,7 +1,8 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { DebugEntity, Quote } from "../../../generated/schema"
-import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
+import { Quote } from "../../../generated/schema"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
+import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
@@ -39,6 +40,11 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 				}
 				case Version.v_0_8_2: {
 					let q = getQuote_0_8_2(event.address, quoteId)!
+					avgClosedPrice = q.avgClosedPrice
+					break
+				}
+				case Version.v_0_8_1: {
+					let q = getQuote_0_8_1(event.address, quoteId)!
 					avgClosedPrice = q.avgClosedPrice
 					break
 				}
