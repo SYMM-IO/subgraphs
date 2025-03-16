@@ -56,6 +56,9 @@ abi_versions = {
     "timelock": ["1"],
     "vault": ["1"],
     "vault_token": ["1"],
+    "staking": ["1"],
+    "vesting": ["1"],
+    "symm_token": ["1"],
 }
 
 

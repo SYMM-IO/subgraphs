@@ -15,6 +15,7 @@ def main():
         # "./configs/arbitrum.json",
         # "./configs/iota.json",
         # "./configs/polygon.json",
+        # "./configs/bera.json",
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",
         # "./configs/vaults/bnb.json",
@@ -25,6 +26,7 @@ def main():
         # "./configs/timelocks/mantle.json",
         # "./configs/timelocks/mode.json",
         # "./configs/timelocks/iota.json",
+        # "./configs/timelocks/bera.json",
     ]
 
     parser = argparse.ArgumentParser(description="Run manager.py with specified action, version, and component on multiple configs.")

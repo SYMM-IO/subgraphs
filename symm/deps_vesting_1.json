@@ -1,0 +1,35 @@
+{
+  "VestingInitialized": [
+    "Initialized"
+  ],
+  "LiquidityAdded": [
+    "LiquidityAdded"
+  ],
+  "LockedTokenClaimed": [
+    "LockedTokenClaimed"
+  ],
+  "VestingPaused": [
+    "Paused"
+  ],
+  "VestingRoleAdminChanged": [
+    "RoleAdminChanged"
+  ],
+  "VestingRoleGranted": [
+    "RoleGranted"
+  ],
+  "VestingRoleRevoked": [
+    "RoleRevoked"
+  ],
+  "UnlockedTokenClaimed": [
+    "UnlockedTokenClaimed"
+  ],
+  "VestingUnpaused": [
+    "Unpaused"
+  ],
+  "VestingPlanReset": [
+    "VestingPlanReset"
+  ],
+  "VestingPlanSetup": [
+    "VestingPlanSetup"
+  ]
+}
