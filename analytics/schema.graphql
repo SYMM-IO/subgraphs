@@ -112,6 +112,23 @@ type TotalHistory @entity {
 	timestamp: BigInt!
 }
 
+type TotalSolverHistory @entity {
+	id: ID!
+	tradeVolume: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	openInterest: BigInt!
+	averagePositionSize: BigInt!
+	positionsCount: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	solver: Bytes!
+	accountSource: Bytes
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
 type DailyUserHistory @entity {
 	id: ID!
 	day: BigInt!

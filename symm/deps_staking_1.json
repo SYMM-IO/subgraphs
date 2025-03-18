@@ -1,0 +1,38 @@
+{
+  "Deposit": [
+    "Deposit"
+  ],
+  "StakingInitialized": [
+    "Initialized"
+  ],
+  "StakingPaused": [
+    "Paused"
+  ],
+  "RescueToken": [
+    "RescueToken"
+  ],
+  "RewardClaimed": [
+    "RewardClaimed"
+  ],
+  "RewardNotified": [
+    "RewardNotified"
+  ],
+  "StakingRoleAdminChanged": [
+    "RoleAdminChanged"
+  ],
+  "StakingRoleGranted": [
+    "RoleGranted"
+  ],
+  "StakingRoleRevoked": [
+    "RoleRevoked"
+  ],
+  "StakingUnpaused": [
+    "Unpaused"
+  ],
+  "UpdateWhitelist": [
+    "UpdateWhitelist"
+  ],
+  "Withdraw": [
+    "Withdraw"
+  ]
+}

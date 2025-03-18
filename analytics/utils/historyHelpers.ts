@@ -8,6 +8,7 @@ import {
 	getSolverDailyHistoryForTimestamp,
 	getSymbolTradeHistory,
 	getTotalHistory,
+	getTotalSolverHistory,
 	getTotalSymbolTradesHistory,
 	getTotalUserHistory,
 } from "./builders"
@@ -166,6 +167,23 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		}
 		sdh.updateTimestamp = timestamp
 		sdh.save()
+
+		const tsh = getTotalSolverHistory(timestamp, params.solver!.account, params.accountSource)
+		tsh.tradeVolume = tsh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
+		tsh.openTradeVolume = tsh.openTradeVolume.plus(openTradeVolume)
+		tsh.closeTradeVolume = tsh.closeTradeVolume.plus(closeTradeVolume)
+		tsh.liquidateTradeVolume = tsh.liquidateTradeVolume.plus(liquidateTradeVolume)
+		tsh.fundingPaid = tsh.fundingPaid.plus(params._fundingPaid)
+		tsh.fundingReceived = tsh.fundingReceived.plus(params._fundingReceived)
+		if (params._positionsCount.gt(BigInt.zero())) {
+			tsh.averagePositionSize = tsh.averagePositionSize
+				.times(tsh.positionsCount)
+				.plus(openTradeVolume)
+				.div(params._positionsCount.plus(tsh.positionsCount))
+			tsh.positionsCount = tsh.positionsCount.plus(params._positionsCount)
+		}
+		tsh.updateTimestamp = timestamp
+		tsh.save()
 	}
 
 	const th = getTotalHistory(timestamp, params.accountSource, getAlreadyCreatedConfiguration(params.event, params.version).collateral)

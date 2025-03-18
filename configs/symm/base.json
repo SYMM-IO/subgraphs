@@ -1,0 +1,26 @@
+{
+	"network": "base",
+	"contracts": [
+		{
+			"address": "0xed56e682bF46dD2bA5137c3092486ff0bb2128b1",
+			"abi": "symm_token",
+			"version": "1",
+			"startBlock": "27535123"
+		},
+		{
+			"address": "0xb5502B0C28E114451750975bACdf772EAF0c3Cf6",
+			"abi": "staking",
+			"version": "1",
+			"startBlock": "27535467"
+		},
+		{
+			"address": "0xEC8165172B8d67375C2F674C5218124cfDc9D200",
+			"abi": "vesting",
+			"version": "1",
+			"startBlock": "27535871"
+		}
+	],
+	"deploy_urls": {
+		"symm": "base_symm"
+	}
+}

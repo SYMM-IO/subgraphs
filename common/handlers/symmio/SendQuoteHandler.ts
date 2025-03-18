@@ -2,12 +2,14 @@ import { Account } from "../../../generated/schema"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Quote } from "../../../generated/schema"
 import { SendQuote as SendQuote_0_8_0 } from "../../../generated/symmio_0_8_0/symmio_0_8_0"
+import { SendQuote as SendQuote_0_8_1 } from "../../../generated/symmio_0_8_1/symmio_0_8_1"
 import { SendQuote as SendQuote_0_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { SendQuote as SendQuote_0_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SendQuote as SendQuote_0_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { BaseHandler, Version } from "../../BaseHandler"
 
 import { getQuote as getQuote_0_8_0, symbolIdToSymbolName as symbolIdToSymbolName_0_8_0 } from "../../../common/contract_utils_0_8_0"
+import { getQuote as getQuote_0_8_1, symbolIdToSymbolName as symbolIdToSymbolName_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_2, symbolIdToSymbolName as symbolIdToSymbolName_0_8_2 } from "../../../common/contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_3, symbolIdToSymbolName as symbolIdToSymbolName_0_8_3 } from "../../../common/contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_4, symbolIdToSymbolName as symbolIdToSymbolName_0_8_4 } from "../../../common/contract_utils_0_8_4"
@@ -80,6 +82,19 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				const q = getQuote_0_8_2(event.address, event.params.quoteId)!
 				quote.maxFundingRate = q.maxFundingRate
 				symbolName = symbolIdToSymbolName_0_8_2(event.params.symbolId, event.address)
+				break
+			}
+			case Version.v_0_8_1: {
+				// @ts-ignore
+				const e = changetype<SendQuote_0_8_1>(_event)
+				quote.partyAmm = e.params.partyAmm
+				quote.partyBmm = e.params.partyBmm
+				quote.initialPartyAmm = e.params.partyAmm
+				quote.initialPartyBmm = e.params.partyBmm
+				quote.tradingFee = e.params.tradingFee
+				const q = getQuote_0_8_1(event.address, event.params.quoteId)!
+				quote.maxFundingRate = q.maxFundingRate
+				symbolName = symbolIdToSymbolName_0_8_1(event.params.symbolId, event.address)
 				break
 			}
 			case Version.v_0_8_0: {

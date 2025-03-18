@@ -11,6 +11,7 @@ import {
 	SolverDailyHistory,
 	SymbolTradeHistory,
 	TotalHistory,
+	TotalSolverHistory,
 	TotalSymbolTradesHistory,
 	TotalUserHistory,
 	UserActivity,
@@ -21,6 +22,7 @@ import { Version } from "../../common/BaseHandler"
 import { getCollateral as getCollateral_0_8_4 } from "../../common/contract_utils_0_8_4"
 import { getCollateral as getCollateral_0_8_3 } from "../../common/contract_utils_0_8_3"
 import { getCollateral as getCollateral_0_8_2 } from "../../common/contract_utils_0_8_2"
+import { getCollateral as getCollateral_0_8_1 } from "../../common/contract_utils_0_8_1"
 import { getCollateral as getCollateral_0_8_0 } from "../../common/contract_utils_0_8_0"
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
@@ -82,6 +84,29 @@ export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Byt
 		sdh.save()
 	}
 	return sdh
+}
+
+export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null): TotalSolverHistory {
+	const id = solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+	let th = TotalSolverHistory.load(id)
+	if (th == null) {
+		th = new TotalSolverHistory(id)
+		th.updateTimestamp = timestamp
+		th.timestamp = timestamp
+		th.tradeVolume = BigInt.zero()
+		th.openTradeVolume = BigInt.zero()
+		th.closeTradeVolume = BigInt.zero()
+		th.liquidateTradeVolume = BigInt.zero()
+		th.openInterest = BigInt.zero()
+		th.positionsCount = BigInt.zero()
+		th.averagePositionSize = BigInt.zero()
+		th.fundingPaid = BigInt.zero()
+		th.fundingReceived = BigInt.zero()
+		th.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
+		th.solver = solver
+		th.save()
+	}
+	return th
 }
 
 export function getWeeklyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): WeeklyHistory {
@@ -338,6 +363,11 @@ export function getAlreadyCreatedConfiguration(event: ethereum.Event, version: V
 			}
 			case Version.v_0_8_2: {
 				conf.collateral = getCollateral_0_8_2(event.address)!
+				conf.save()
+				break
+			}
+			case Version.v_0_8_1: {
+				conf.collateral = getCollateral_0_8_1(event.address)!
 				conf.save()
 				break
 			}

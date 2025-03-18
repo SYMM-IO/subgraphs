@@ -4,6 +4,7 @@ import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { SettlePartyALiquidation as SettlePartyALiquidation_8_4 } from "../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { SettlePartyALiquidation as SettlePartyALiquidation_8_3 } from "../../../generated/symmio_0_8_3/symmio_0_8_3"
+import { SettlePartyALiquidation as SettlePartyALiquidation_8_2 } from "../../../generated/symmio_0_8_2/symmio_0_8_2"
 
 export class SettlePartyALiquidationHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -23,22 +24,31 @@ export class SettlePartyALiquidationHandler<T> {
 			}
 			entity.partyBs = partyBs
 		}
-		entity.amounts = event.params.amounts
 
 		switch (version) {
 			case Version.v_0_8_4: {
 				// @ts-ignore
 				const e = changetype<SettlePartyALiquidation_8_4>(_event)
 				entity.liquidationId = e.params.liquidationId
+				entity.amounts = e.params.amounts
 				break
 			}
 			case Version.v_0_8_3: {
 				// @ts-ignore
 				const e = changetype<SettlePartyALiquidation_8_3>(_event)
 				entity.liquidationId = e.params.liquidationId
+				entity.amounts = e.params.amounts
 				break
 			}
-			default: {
+			case Version.v_0_8_2: {
+				// @ts-ignore
+				const e = changetype<SettlePartyALiquidation_8_2>(_event)
+				entity.amounts = e.params.amounts
+				entity.liquidationId = Bytes.empty()
+				break
+			}
+			case Version.v_0_8_1: {
+				entity.amounts = []
 				entity.liquidationId = Bytes.empty()
 				break
 			}

@@ -25,6 +25,18 @@ export enum TimelockVersion {
 	v_1,
 }
 
+export enum SymmStakingVersion {
+	v_1,
+}
+
+export enum SymmVestingVersion {
+	v_1,
+}
+
+export enum SymmTokenVersion {
+	v_1,
+}
+
 export class BaseHandler {
 
 	constructor() {
