@@ -1,6 +1,6 @@
 import {DepositHandler} from './handlers/vault/DepositHandler'
 import {Deposit} from '../generated/vault_1/vault_1'
-import {VaultVersion} from '../common/BaseHandler'
+import {VaultVersion} from './BaseHandler'
 import {WithdrawClaimedEventHandler} from './handlers/vault/WithdrawClaimedEventHandler'
 import {WithdrawClaimedEvent} from '../generated/vault_1/vault_1'
 import {WithdrawRequestAcceptedEventHandler} from './handlers/vault/WithdrawRequestAcceptedEventHandler'

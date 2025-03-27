@@ -20,7 +20,7 @@ import { RoleGrantedHandler } from "./handlers/vesting/RoleGrantedHandler"
 import { RoleRevokedHandler } from "./handlers/vesting/RoleRevokedHandler"
 import { UnlockedTokenClaimedHandler } from "./handlers/vesting/UnlockedTokenClaimedHandler"
 import { UnpausedHandler } from "./handlers/vesting/UnpausedHandler"
-import { SymmVestingVersion } from "../common/BaseHandler"
+import { SymmVestingVersion } from "./BaseHandler"
 import { VestingPlanResetHandler } from "./handlers/vesting/VestingPlanResetHandler"
 import { VestingPlanSetupHandler } from "./handlers/vesting/VestingPlanSetupHandler"
 

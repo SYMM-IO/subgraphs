@@ -83,11 +83,15 @@ def copy_abi_files(abi_path: str):
 
 
 def create_schema_file(target_module: str, target_config: Dict[str, Any]):
-    common_models_dir = os.path.join("./common", "models")
+    common, *_ = target_module.split("/")
+    common_models_dir = os.path.join(f"./{common}", "common", "models")
 
     with open(os.path.join(target_module, "schema.graphql"), "r") as src_file, open("./schema.graphql", "w") as dest_file:
         dest_file.write("# Imported Models\n")
-        for model in os.listdir(common_models_dir):
+        common_models = []
+        if os.path.exists(common_models_dir):
+            common_models = os.listdir(common_models_dir)
+        for model in common_models:
             model_name = model.split(".")[0]
             if model_name in target_config["importModels"]:
                 with open(os.path.join(common_models_dir, model), "r") as model_file:
@@ -219,7 +223,8 @@ def load_dependencies(file_path: str) -> Dict[str, List[str]]:
 
 
 def get_needed_events_for(models: List[str], target_module: str, contract: Contract) -> List[str]:
-    common_dependencies = load_dependencies(os.path.join("./common", f"deps_{contract.path()}.json"))
+    common, *_ = target_module.split("/")
+    common_dependencies = load_dependencies(os.path.join(f"./{common}", "common", f"deps_{contract.path()}.json"))
     target_dependencies = load_dependencies(os.path.join(target_module, f"deps_{contract.path()}.json"))
 
     events = []
@@ -275,8 +280,10 @@ def get_events_with_signatures(needed_events: List[str], contract: Contract) -> 
 
 
 def prepare_module(config: Config, target_module: str):
-    with open(os.path.join(target_module, "subgraph_config.json"), "r") as target_config_file:
-        target_config = json.load(target_config_file)
+    target_config = {}
+    if os.path.exists(os.path.join(target_module, "subgraph_config.json")):
+        with open(os.path.join(target_module, "subgraph_config.json"), "r") as target_config_file:
+            target_config = json.load(target_config_file)
 
     create_schema_file(target_module, target_config)
     models = get_scheme_models()

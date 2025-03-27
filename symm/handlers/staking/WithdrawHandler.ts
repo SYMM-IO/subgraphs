@@ -1,6 +1,6 @@
 import { ethereum } from "@graphprotocol/graph-ts"
-import { SymmStakingVersion } from "../../../common/BaseHandler"
-import { getGlobalCounterAndInc } from "../../../common/utils"
+import { SymmStakingVersion } from "../../BaseHandler"
+import { getGlobalCounterAndInc } from "../../utils"
 import { Withdraw } from "../../../generated/schema"
 
 export class WithdrawHandler<T> {
