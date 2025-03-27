@@ -1,0 +1,14 @@
+{
+	"network": "base",
+	"contracts": [
+		{
+			"address": "0x1234567890123456789012345678901234567890",
+			"abi": "options",
+			"version": "1",
+			"startBlock": "28000000"
+		}
+	],
+	"deploy_urls": {
+		"events": "base_options_events"
+	}
+}

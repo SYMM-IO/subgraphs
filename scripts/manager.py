@@ -59,6 +59,7 @@ abi_versions = {
     "staking": ["1"],
     "vesting": ["1"],
     "symm_token": ["1"],
+    "options": ["1"],
 }
 
 
