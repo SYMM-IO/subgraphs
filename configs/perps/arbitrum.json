@@ -58,7 +58,7 @@
     }
   ],
   "deploy_urls": {
-    "analytics": "arbitrum_analytics",
-    "events": "arbitrum_events"
+    "perps/analytics": "arbitrum_analytics",
+    "perps/events": "arbitrum_events"
   }
 }

@@ -114,7 +114,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "bnb_analytics",
-		"events": "bnb_events"
+		"perps/analytics": "bnb_analytics",
+		"perps/events": "bnb_events"
 	}
 }

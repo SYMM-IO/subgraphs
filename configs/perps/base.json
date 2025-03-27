@@ -93,7 +93,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "base_analytics",
-		"events": "base_events"
+		"perps/analytics": "base_analytics",
+		"perps/events": "base_events"
 	}
 }

@@ -23,7 +23,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "bera_analytics",
-		"events": "bera_events"
+		"perps/analytics": "bera_analytics",
+		"perps/events": "bera_events"
 	}
 }

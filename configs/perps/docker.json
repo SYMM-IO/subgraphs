@@ -9,7 +9,7 @@
       }
     ],
     "deploy_urls": {
-      "analytics": "",
-      "events": ""
+      "perps/analytics": "",
+      "perps/events": ""
     }
 }

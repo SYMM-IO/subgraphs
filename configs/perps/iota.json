@@ -23,7 +23,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "iota_analytics",
-		"events": "iota_events"
+		"perps/analytics": "iota_analytics",
+		"perps/events": "iota_events"
 	}
 }

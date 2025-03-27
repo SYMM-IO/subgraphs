@@ -37,7 +37,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "mantle_analytics",
-		"events": "mantle_events"
+		"perps/analytics": "mantle_analytics",
+		"perps/events": "mantle_events"
 	}
 }

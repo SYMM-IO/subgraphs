@@ -16,7 +16,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "fantom_0_8_0_analytics",
-		"events": "fantom_0_8_0_events"
+		"perps/analytics": "fantom_0_8_0_analytics",
+		"perps/events": "fantom_0_8_0_events"
 	}
 }

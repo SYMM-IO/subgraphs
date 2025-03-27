@@ -30,7 +30,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "polygon_analytics",
-		"events": "polygon_events"
+		"perps/analytics": "polygon_analytics",
+		"perps/events": "polygon_events"
 	}
 }

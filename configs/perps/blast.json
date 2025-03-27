@@ -37,7 +37,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "blast_analytics",
-		"events": "blast_events"
+		"perps/analytics": "blast_analytics",
+		"perps/events": "blast_events"
 	}
 }

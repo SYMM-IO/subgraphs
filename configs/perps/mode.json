@@ -37,7 +37,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "mode_analytics",
-		"events": "mode_events"
+		"perps/analytics": "mode_analytics",
+		"perps/events": "mode_events"
 	}
 }

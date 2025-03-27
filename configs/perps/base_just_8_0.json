@@ -23,7 +23,7 @@
 		}
 	],
 	"deploy_urls": {
-		"analytics": "base_0_8_0_analytics",
-		"events": "base_0_8_0_events"
+		"perps/analytics": "base_0_8_0_analytics",
+		"perps/events": "base_0_8_0_events"
 	}
 }
