@@ -1312,3 +1312,18 @@ type ExerciseTrade @entity {
     tradeId: BigInt!
     settlementPrice: BigInt!
 }
+
+type AddAccount @entity {
+	id: ID!
+	counterId: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+
+	account: Bytes!
+	user: Bytes!
+	accountSource: Bytes!
+}

@@ -6,9 +6,16 @@
 			"abi": "options",
 			"version": "1",
 			"startBlock": "28000000"
+		},
+		{
+			"address": "0x1234567890123456789012345678901234567890",
+			"abi": "optionsMultiAccount",
+			"version": "1",
+			"startBlock": "28000000"
 		}
 	],
 	"deploy_urls": {
-		"events": "base_options_events"
+		"options/events": "base_options_events",
+		"options/analytics": "base_options_analytics"
 	}
 }
