@@ -1,5 +1,10 @@
 import {AcceptCancelCloseIntentHandler} from './handlers/options/AcceptCancelCloseIntentHandler'
-import {AcceptCancelCloseIntent} from '../../generated/options_1/options_1'
+import {
+    AcceptCancelCloseIntent,
+    ExpireCloseIntent,
+    ExpireOpenIntent,
+    SendOpenIntent,
+} from "../../generated/options_1/options_1";
 import {AcceptCancelOpenIntentHandler} from './handlers/options/AcceptCancelOpenIntentHandler'
 import {AcceptCancelOpenIntent} from '../../generated/options_1/options_1'
 import {AcceptCancelTransferIntentHandler} from './handlers/options/AcceptCancelTransferIntentHandler'
@@ -185,6 +190,9 @@ import {WithdrawUnpausedHandler} from './handlers/options/WithdrawUnpausedHandle
 import {WithdrawUnpaused} from '../../generated/options_1/options_1'
 import {WithdrawalSuspendedHandler} from './handlers/options/WithdrawalSuspendedHandler'
 import {WithdrawalSuspended} from '../../generated/options_1/options_1'
+import { ExpireCloseIntentHandler } from "./handlers/options/ExpireCloseIntentHandler";
+import { ExpireOpenIntentHandler } from "./handlers/options/ExpireOpenIntentHandler";
+import { SendOpenIntentHandler } from "./handlers/options/SendOpenIntentHandler";
 
 
 export function handleAcceptCancelCloseIntent(event: AcceptCancelCloseIntent): void {
@@ -741,5 +749,23 @@ export function handleWithdrawUnpaused(event: WithdrawUnpaused): void {
 
 export function handleWithdrawalSuspended(event: WithdrawalSuspended): void {
     let handler = new WithdrawalSuspendedHandler<WithdrawalSuspended>()
+    handler.handle(event, Version.v_1)
+}
+
+
+export function handleSendOpenIntent(event: SendOpenIntent): void {
+    let handler = new SendOpenIntentHandler<SendOpenIntent>()
+    handler.handle(event, Version.v_1)
+}
+
+
+export function handleExpireOpenIntent(event: ExpireOpenIntent): void {
+    let handler = new ExpireOpenIntentHandler<ExpireOpenIntent>()
+    handler.handle(event, Version.v_1)
+}
+
+
+export function handleExpireCloseIntent(event: ExpireCloseIntent): void {
+    let handler = new ExpireCloseIntentHandler<ExpireCloseIntent>()
     handler.handle(event, Version.v_1)
 }

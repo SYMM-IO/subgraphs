@@ -1327,3 +1327,45 @@ type AddAccount @entity {
 	user: Bytes!
 	accountSource: Bytes!
 }
+
+type SendOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyA: Bytes!
+    intentId: BigInt!
+    partyBsWhiteList: [Bytes!]
+    requestedParams: Bytes!
+}
+
+type ExpireOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type ExpireCloseIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
