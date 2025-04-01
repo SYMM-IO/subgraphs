@@ -1,5 +1,5 @@
 import {ethereum} from "@graphprotocol/graph-ts"
-import {VaultTokenVersion} from "../../../common/BaseHandler"
+import {VaultTokenVersion} from "../../BaseHandler"
 import {Transfer} from "../../../generated/schema";
 
 export class TransferHandler<T> {

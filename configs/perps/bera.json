@@ -1,0 +1,29 @@
+{
+	"network": "berachain-mainnet",
+	"contracts": [
+		{
+			"address": "0x3d17f073cCb9c3764F105550B0BCF9550477D266",
+			"abi": "symmio",
+			"version": "0_8_4",
+			"startBlock": "779223"
+		},
+		{
+			"address": "0x5C9fc09b120B7333F1DCf644C7665cEdea3dc7e2",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "813061",
+			"name": "ivx_multi_account"
+		},
+		{
+			"address": "0x703c4927945Aac2B5a76f4c1D85Bc85e6fAaddB6",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "837565",
+			"name": "lode_multi_account"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "bera_analytics",
+		"perps/events": "bera_events"
+	}
+}

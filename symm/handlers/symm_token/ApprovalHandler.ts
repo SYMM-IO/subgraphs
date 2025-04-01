@@ -1,6 +1,6 @@
 import { ethereum } from "@graphprotocol/graph-ts"
-import { SymmTokenVersion } from "../../../common/BaseHandler"
-import { getGlobalCounterAndInc } from "../../../common/utils"
+import { SymmTokenVersion } from "../../BaseHandler"
+import { getGlobalCounterAndInc } from "../../utils"
 import { Approval } from "../../../generated/schema"
 
 export class ApprovalHandler<T> {

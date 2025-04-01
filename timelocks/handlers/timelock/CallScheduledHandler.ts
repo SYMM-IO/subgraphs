@@ -1,5 +1,5 @@
 import {ethereum} from "@graphprotocol/graph-ts"
-import {TimelockVersion} from "../../../common/BaseHandler"
+import {TimelockVersion} from "../../BaseHandler"
 import {CallScheduled} from "../../../generated/schema"
 
 export class CallScheduledHandler<T> {

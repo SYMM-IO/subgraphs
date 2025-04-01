@@ -10,11 +10,10 @@ package-lock.json
 pnpm-lock.yaml
 yarn-error.log
 /abis/
-events/abis/
+perps/events/abis/
 .env
 
 UniConfig.json
 subgraph.yaml
 /schema.graphql
-schema.graphql
-analytics/currentConfig.json
+perps/analytics/currentConfig.json

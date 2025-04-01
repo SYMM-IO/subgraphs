@@ -4,7 +4,7 @@ import {CallScheduledHandler} from './handlers/timelock/CallScheduledHandler'
 import {CallScheduled} from '../generated/timelock_1/timelock_1'
 import {CancelledHandler} from './handlers/timelock/CancelledHandler'
 import {Cancelled} from '../generated/timelock_1/timelock_1'
-import {TimelockVersion} from '../common/BaseHandler'
+import {TimelockVersion} from './BaseHandler'
 
 
 export function handleCallExecuted(event: CallExecuted): void {

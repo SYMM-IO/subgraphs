@@ -23,7 +23,7 @@ import { RoleGrantedHandler } from "./handlers/staking/RoleGrantedHandler"
 import { RoleRevokedHandler } from "./handlers/staking/RoleRevokedHandler"
 import { UnpausedHandler } from "./handlers/staking/UnpausedHandler"
 import { UpdateWhitelistHandler } from "./handlers/staking/UpdateWhitelistHandler"
-import { SymmStakingVersion } from "../common/BaseHandler"
+import { SymmStakingVersion } from "./BaseHandler"
 import { WithdrawHandler } from "./handlers/staking/WithdrawHandler"
 
 export function handleDeposit(event: Deposit): void {

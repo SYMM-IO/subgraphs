@@ -1,0 +1,289 @@
+{
+  "Deposit": [
+    "Deposit"
+  ],
+  "InternalTransfer": [
+    "InternalTransfer"
+  ],
+  "InitiateWithdraw": [
+    "InitiateWithdraw"
+  ],
+  "CompleteWithdraw": [
+    "CompleteWithdraw"
+  ],
+  "CancelWithdraw": [
+    "CancelWithdraw"
+  ],
+  "ActivateInstantActionMode": [
+    "ActivateInstantActionMode"
+  ],
+  "ProposeToDeactivateInstantActionMode": [
+    "ProposeToDeactivateInstantActionMode"
+  ],
+  "DeactivateInstantActionMode": [
+    "DeactivateInstantActionMode"
+  ],
+  "SyncBalances": [
+    "SyncBalances"
+  ],
+  "BindToPartyB": [
+    "BindToPartyB"
+  ],
+  "InitiateUnbindingFromPartyB": [
+    "InitiateUnbindingFromPartyB"
+  ],
+  "CompleteUnbindingFromPartyB": [
+    "CompleteUnbindingFromPartyB"
+  ],
+  "CancelUnbindingFromPartyB": [
+    "CancelUnbindingFromPartyB"
+  ],
+  "TransferToBridge": [
+    "TransferToBridge"
+  ],
+  "WithdrawReceivedBridgeValue": [
+    "WithdrawReceivedBridgeValue"
+  ],
+  "SuspendBridgeTransaction": [
+    "SuspendBridgeTransaction"
+  ],
+  "RestoreBridgeTransaction": [
+    "RestoreBridgeTransaction"
+  ],
+  "WithdrawReceivedBridgeValues": [
+    "WithdrawReceivedBridgeValues"
+  ],
+  "FlagLiquidation": [
+    "FlagLiquidation"
+  ],
+  "UnflagLiquidation": [
+    "UnflagLiquidation"
+  ],
+  "Liquidate": [
+    "Liquidate"
+  ],
+  "ConfiscatePartyA": [
+    "ConfiscatePartyA"
+  ],
+  "ConfiscatePartyBWithdrawal": [
+    "ConfiscatePartyBWithdrawal"
+  ],
+  "CloseTradesForLiquidation": [
+    "CloseTradesForLiquidation"
+  ],
+  "DistributeCollateral": [
+    "DistributeCollateral"
+  ],
+  "FullyLiquidated": [
+    "FullyLiquidated"
+  ],
+  "CollateralWhitelisted": [
+    "CollateralWhitelisted"
+  ],
+  "CollateralRemovedFromWhitelist": [
+    "CollateralRemovedFromWhitelist"
+  ],
+  "MaxCloseOrdersLengthUpdated": [
+    "MaxCloseOrdersLengthUpdated"
+  ],
+  "MaxTradePerPartyAUpdated": [
+    "MaxTradePerPartyAUpdated"
+  ],
+  "BalanceLimitPerUserUpdated": [
+    "BalanceLimitPerUserUpdated"
+  ],
+  "PartyADeallocateCooldownUpdated": [
+    "PartyADeallocateCooldownUpdated"
+  ],
+  "PartyBDeallocateCooldownUpdated": [
+    "PartyBDeallocateCooldownUpdated"
+  ],
+  "ForceCancelOpenIntentTimeoutUpdated": [
+    "ForceCancelOpenIntentTimeoutUpdated"
+  ],
+  "ForceCancelCloseIntentTimeoutUpdated": [
+    "ForceCancelCloseIntentTimeoutUpdated"
+  ],
+  "DefaultFeeCollectorUpdated": [
+    "DefaultFeeCollectorUpdated"
+  ],
+  "GlobalPaused": [
+    "GlobalPaused"
+  ],
+  "DepositPaused": [
+    "DepositPaused"
+  ],
+  "WithdrawPaused": [
+    "WithdrawPaused"
+  ],
+  "PartyBActionsPaused": [
+    "PartyBActionsPaused"
+  ],
+  "PartyAActionsPaused": [
+    "PartyAActionsPaused"
+  ],
+  "LiquidatingPaused": [
+    "LiquidatingPaused"
+  ],
+  "GlobalUnpaused": [
+    "GlobalUnpaused"
+  ],
+  "DepositUnpaused": [
+    "DepositUnpaused"
+  ],
+  "WithdrawUnpaused": [
+    "WithdrawUnpaused"
+  ],
+  "PartyBActionsUnpaused": [
+    "PartyBActionsUnpaused"
+  ],
+  "PartyAActionsUnpaused": [
+    "PartyAActionsUnpaused"
+  ],
+  "LiquidatingUnpaused": [
+    "LiquidatingUnpaused"
+  ],
+  "EmergencyModeActivated": [
+    "EmergencyModeActivated"
+  ],
+  "EmergencyModeDeactivated": [
+    "EmergencyModeDeactivated"
+  ],
+  "PartyBEmergencyStatusActivated": [
+    "PartyBEmergencyStatusActivated"
+  ],
+  "PartyBEmergencyStatusDeactivated": [
+    "PartyBEmergencyStatusDeactivated"
+  ],
+  "AffiliateStatusUpdated": [
+    "AffiliateStatusUpdated"
+  ],
+  "AffiliateFeeCollectorUpdated": [
+    "AffiliateFeeCollectorUpdated"
+  ],
+  "RoleUpdated": [
+    "RoleUpdated"
+  ],
+  "PartyBConfigUpdated": [
+    "PartyBConfigUpdated"
+  ],
+  "SettlementPriceSigValidTimeUpdated": [
+    "SettlementPriceSigValidTimeUpdated"
+  ],
+  "LiquidationSigValidTimeUpdated": [
+    "LiquidationSigValidTimeUpdated"
+  ],
+  "LiquidationDetailUpdated": [
+    "LiquidationDetailUpdated"
+  ],
+  "SymbolPriceUpdated": [
+    "SymbolPriceUpdated"
+  ],
+  "RoleGranted": [
+    "RoleGranted"
+  ],
+  "RoleRevoked": [
+    "RoleRevoked"
+  ],
+  "PartyBReleaseIntervalUpdated": [
+    "PartyBReleaseIntervalUpdated"
+  ],
+  "MaxConnectedPartyBsUpdated": [
+    "MaxConnectedPartyBsUpdated"
+  ],
+  "UnbindingCooldownUpdated": [
+    "UnbindingCooldownUpdated"
+  ],
+  "AddressSuspended": [
+    "AddressSuspended"
+  ],
+  "WithdrawalSuspended": [
+    "WithdrawalSuspended"
+  ],
+  "DeactiveInstantActionModeCooldownUpdated": [
+    "DeactiveInstantActionModeCooldownUpdated"
+  ],
+  "InstantActionsModeUpdated": [
+    "InstantActionsModeUpdated"
+  ],
+  "InstantActionsModeDeactivateTimeUpdated": [
+    "InstantActionsModeDeactivateTimeUpdated"
+  ],
+  "OracleAdded": [
+    "OracleAdded"
+  ],
+  "SymbolAdded": [
+    "SymbolAdded"
+  ],
+  "PriceOracleAddressUpdated": [
+    "PriceOracleAddressUpdated"
+  ],
+  "ForceCancelOpenIntent": [
+    "ForceCancelOpenIntent"
+  ],
+  "ForceCancelCloseIntent": [
+    "ForceCancelCloseIntent"
+  ],
+  "SendTransferIntent": [
+    "SendTransferIntent"
+  ],
+  "CancelTransferIntent": [
+    "CancelTransferIntent"
+  ],
+  "LockTransferIntent": [
+    "LockTransferIntent"
+  ],
+  "UnlockTransferIntent": [
+    "UnlockTransferIntent"
+  ],
+  "AcceptCancelTransferIntent": [
+    "AcceptCancelTransferIntent"
+  ],
+  "FinalizeTransferIntent": [
+    "FinalizeTransferIntent"
+  ],
+  "SendCloseIntent": [
+    "SendCloseIntent"
+  ],
+  "CancelCloseIntent": [
+    "CancelCloseIntent"
+  ],
+  "TransferTradeByPartyA": [
+    "TransferTradeByPartyA"
+  ],
+  "CancelOpenIntent": [
+    "CancelOpenIntent"
+  ],
+  "AcceptCancelCloseIntent": [
+    "AcceptCancelCloseIntent"
+  ],
+  "FillCloseIntent": [
+    "FillCloseIntent"
+  ],
+  "AcceptCancelOpenIntent": [
+    "AcceptCancelOpenIntent"
+  ],
+  "LockOpenIntent": [
+    "LockOpenIntent"
+  ],
+  "UnlockOpenIntent": [
+    "UnlockOpenIntent"
+  ],
+  "FillOpenIntent": [
+    "FillOpenIntent"
+  ],
+  "ExpireTrade": [
+    "ExpireTrade"
+  ],
+  "ExerciseTrade": [
+    "ExerciseTrade"
+  ],"SendOpenIntent": [
+    "SendOpenIntent"
+  ],
+  "ExpireOpenIntent": [
+    "ExpireOpenIntent"
+  ],
+  "ExpireCloseIntent": [
+    "ExpireCloseIntent"
+  ]
+}

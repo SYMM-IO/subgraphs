@@ -1,0 +1,1371 @@
+type Deposit @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    sender: Bytes!
+    user: Bytes!
+    collateral: Bytes!
+    amount: BigInt!
+    newBalance: BigInt!
+}
+
+type InternalTransfer @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    sender: Bytes!
+    user: Bytes!
+    collateral: Bytes!
+    amount: BigInt!
+    newBalance: BigInt!
+}
+
+type InitiateWithdraw @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    withdrawId: BigInt!
+    user: Bytes!
+    to: Bytes!
+    collateral: Bytes!
+    amount: BigInt!
+    newBalance: BigInt!
+}
+
+type CompleteWithdraw @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    withdrawId: BigInt!
+}
+
+type CancelWithdraw @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    withdrawId: BigInt!
+    user: Bytes!
+    newBalance: BigInt!
+}
+
+type ActivateInstantActionMode @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    user: Bytes!
+    timestamp: BigInt!
+}
+
+type ProposeToDeactivateInstantActionMode @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    user: Bytes!
+    timestamp: BigInt!
+}
+
+type DeactivateInstantActionMode @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    user: Bytes!
+    timestamp: BigInt!
+}
+
+type SyncBalances @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    collateral: Bytes!
+    partyA: Bytes!
+    partyBs: [Bytes!]
+}
+
+type BindToPartyB @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyA: Bytes!
+    partyB: Bytes!
+}
+
+type InitiateUnbindingFromPartyB @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyA: Bytes!
+    partyB: Bytes!
+    initiationTime: BigInt!
+}
+
+type CompleteUnbindingFromPartyB @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyA: Bytes!
+    partyB: Bytes!
+}
+
+type CancelUnbindingFromPartyB @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyA: Bytes!
+    partyB: Bytes!
+}
+
+type TransferToBridge @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    sender: Bytes!
+    receiver: Bytes!
+    collateral: Bytes!
+    amount: BigInt!
+    bridgeAddress: Bytes!
+    transactionId: BigInt!
+}
+
+type WithdrawReceivedBridgeValue @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    transactionId: BigInt!
+}
+
+type SuspendBridgeTransaction @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    transactionId: BigInt!
+}
+
+type RestoreBridgeTransaction @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    transactionId: BigInt!
+    validAmount: BigInt!
+}
+
+type WithdrawReceivedBridgeValues @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    transactionIds: [BigInt!]
+}
+
+type FlagLiquidation @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    operator: Bytes!
+    partyB: Bytes!
+    collateral: Bytes!
+}
+
+type UnflagLiquidation @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    operator: Bytes!
+    partyB: Bytes!
+    collateral: Bytes!
+}
+
+type Liquidate @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    liquidationId: Bytes!
+    liquidator: Bytes!
+    partyB: Bytes!
+    collateral: Bytes!
+    balance: BigInt!
+    upnl: BigInt!
+    collateralPrice: BigInt!
+}
+
+type ConfiscatePartyA @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+    partyA: Bytes!
+    collateral: Bytes!
+    amount: BigInt!
+}
+
+type ConfiscatePartyBWithdrawal @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+    withdrawId: BigInt!
+}
+
+type CloseTradesForLiquidation @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeIds: [BigInt!]
+    prices: [BigInt!]
+}
+
+type DistributeCollateral @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    liquidationId: BigInt!
+    partyB: Bytes!
+    collateral: Bytes!
+    partyAs: [Bytes!]
+    amounts: [BigInt!]
+}
+
+type FullyLiquidated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+    liquidationId: BigInt!
+}
+
+type CollateralWhitelisted @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    collateral: Bytes!
+}
+
+type CollateralRemovedFromWhitelist @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    collateral: Bytes!
+}
+
+type MaxCloseOrdersLengthUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    max: BigInt!
+}
+
+type MaxTradePerPartyAUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    max: BigInt!
+}
+
+type BalanceLimitPerUserUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    limit: BigInt!
+}
+
+type PartyADeallocateCooldownUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    cooldown: BigInt!
+}
+
+type PartyBDeallocateCooldownUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    cooldown: BigInt!
+}
+
+type ForceCancelOpenIntentTimeoutUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    timeout: BigInt!
+}
+
+type ForceCancelCloseIntentTimeoutUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    timeout: BigInt!
+}
+
+type DefaultFeeCollectorUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    collector: Bytes!
+}
+
+type GlobalPaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type DepositPaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type WithdrawPaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type PartyBActionsPaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type PartyAActionsPaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type LiquidatingPaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type GlobalUnpaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type DepositUnpaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type WithdrawUnpaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type PartyBActionsUnpaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type PartyAActionsUnpaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type LiquidatingUnpaused @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type EmergencyModeActivated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type EmergencyModeDeactivated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+
+}
+
+type PartyBEmergencyStatusActivated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+}
+
+type PartyBEmergencyStatusDeactivated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+}
+
+type AffiliateStatusUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    affiliate: Bytes!
+    status: Boolean!
+}
+
+type AffiliateFeeCollectorUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    affiliate: Bytes!
+    feeCollector: Bytes!
+}
+
+type RoleUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    account: Bytes!
+    role: Bytes!
+    granted: Boolean!
+}
+
+type PartyBConfig @entity {
+    id: ID!
+
+    isActive: Boolean!
+    lossCoverage: BigInt!
+    oracleId: BigInt!
+    symbolType: BigInt!
+}
+
+type PartyBConfigUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+    config: [PartyBConfig!]
+}
+
+type SettlementPriceSigValidTimeUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    time: BigInt!
+}
+
+type LiquidationSigValidTimeUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    time: BigInt!
+}
+
+type LiquidationDetailUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+    collateral: Bytes!
+}
+
+type SymbolPriceUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+    symbolId: BigInt!
+}
+
+type RoleGranted @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    role: Bytes!
+    user: Bytes!
+}
+
+type RoleRevoked @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    role: Bytes!
+    user: Bytes!
+}
+
+type PartyBReleaseIntervalUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+    interval: BigInt!
+}
+
+type MaxConnectedPartyBsUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    max: BigInt!
+}
+
+type UnbindingCooldownUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    cooldown: BigInt!
+}
+
+type AddressSuspended @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    user: Bytes!
+    status: Boolean!
+}
+
+type WithdrawalSuspended @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    withdrawId: BigInt!
+    status: Boolean!
+}
+
+type DeactiveInstantActionModeCooldownUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    cooldown: BigInt!
+}
+
+type InstantActionsModeUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    user: Bytes!
+    status: Boolean!
+}
+
+type InstantActionsModeDeactivateTimeUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    user: Bytes!
+    time: BigInt!
+}
+
+type OracleAdded @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    oracleId: BigInt!
+    name: String!
+    contractAddress: Bytes!
+}
+
+type SymbolAdded @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    symbolId: BigInt!
+    name: String!
+    optionType: Int!
+    collateral: Bytes!
+}
+
+type PriceOracleAddressUpdated @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    oracle: Bytes!
+}
+
+type ForceCancelOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type ForceCancelCloseIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type SendTransferIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+    sender: Bytes!
+    partyBWhitelist: [Bytes!]
+    price: BigInt!
+    deadline: BigInt!
+}
+
+type CancelTransferIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+}
+
+type LockTransferIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+    counterParty: Bytes!
+}
+
+type UnlockTransferIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+    counterParty: Bytes!
+}
+
+type AcceptCancelTransferIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+    counterParty: Bytes!
+}
+
+type FinalizeTransferIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+    fillPrice: BigInt!
+    counterParty: Bytes!
+    clearingHouseSignature: Bytes!
+}
+
+type SendCloseIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+    intentId: BigInt!
+    price: BigInt!
+    quantity: BigInt!
+    deadline: BigInt!
+}
+
+type CancelCloseIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type TransferTradeByPartyA @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    sender: Bytes!
+    receiver: Bytes!
+    tradeId: BigInt!
+}
+
+type CancelOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+    finalStatus: Int!
+}
+
+type AcceptCancelCloseIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type FillCloseIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+    quantity: BigInt!
+    price: BigInt!
+}
+
+type AcceptCancelOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type LockOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+    partyB: Bytes!
+}
+
+type UnlockOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type FillOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+    tradeId: BigInt!
+    quantity: BigInt!
+    price: BigInt!
+}
+
+type ExpireTrade @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    operator: Bytes!
+    tradeId: BigInt!
+    settlementPrice: BigInt!
+}
+
+type ExerciseTrade @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    operator: Bytes!
+    tradeId: BigInt!
+    settlementPrice: BigInt!
+}
+
+type AddAccount @entity {
+	id: ID!
+	counterId: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+
+	account: Bytes!
+	user: Bytes!
+	accountSource: Bytes!
+}
+
+type SendOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyA: Bytes!
+    intentId: BigInt!
+    partyBsWhiteList: [Bytes!]
+    requestedParams: Bytes!
+}
+
+type ExpireOpenIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
+
+type ExpireCloseIntent @entity {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    intentId: BigInt!
+}
