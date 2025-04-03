@@ -1,5 +1,5 @@
 import {ethereum} from "@graphprotocol/graph-ts"
-import {VaultVersion} from "../../../common/BaseHandler"
+import {VaultVersion} from "../../BaseHandler"
 import {Deposit} from "../../../generated/schema";
 
 

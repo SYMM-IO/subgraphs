@@ -1,6 +1,6 @@
 import { ethereum } from "@graphprotocol/graph-ts"
-import { SymmVestingVersion } from "../../../common/BaseHandler"
-import { getGlobalCounterAndInc } from "../../../common/utils"
+import { SymmVestingVersion } from "../../BaseHandler"
+import { getGlobalCounterAndInc } from "../../utils"
 import { VestingPaused } from "../../../generated/schema"
 
 export class PausedHandler<T> {

@@ -1,0 +1,42 @@
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { getGlobalCounterAndInc } from "./utils"
+
+export enum Version {
+	v_1,
+}
+
+export enum MultiAccountVersion {
+	v_1,
+}
+
+export class BaseHandler {
+	constructor() {}
+
+	handle(_event: ethereum.Event, version: Version): void {}
+
+	handleQuote(_event: ethereum.Event, version: Version): void {}
+
+	handleAccount(_event: ethereum.Event, version: Version): void {}
+
+	handleSymbol(_event: ethereum.Event, version: Version): void {}
+
+	handleGlobalCounter(): BigInt {
+		return getGlobalCounterAndInc()
+	}
+}
+
+export class BaseMultiAccountHandler {
+
+	constructor() {
+	}
+
+	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
+	}
+
+	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
+	}
+
+	handleGlobalCounter(): BigInt {
+		return getGlobalCounterAndInc()
+	}
+}
