@@ -13,14 +13,6 @@ while getopts 'hcbd:' OPTION; do
         echo "$help_message"
         exit
         ;;
-    c)
-        echo codegen
-        graph codegen
-        ;;
-    b)
-        echo graph build
-        graph build
-        ;;
     d)
         name="$OPTARG"
         graph_node_host="${GRAPH_HOST:-localhost}"
