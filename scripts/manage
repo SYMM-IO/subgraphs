@@ -1,10 +1,8 @@
 #!/bin/bash -e
 
-help_message="Usage: $(basename $0) [-h] [-g] [-c] [-b] [-d name]
+help_message="Usage: $(basename $0) [-h] [-d name]
 Options:
   -h		Prints help message
-  -c		Generates AssemblyScript types for a subgraph
-  -b		Builds a subgraph.
   -d <NAME>	Registers a subgraph name and deploys it to a Graph node.
 		"
 while getopts 'hcbd:' OPTION; do
