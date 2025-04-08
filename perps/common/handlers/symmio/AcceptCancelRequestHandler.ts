@@ -19,6 +19,9 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.quoteId = event.params.quoteId
 			quote.timestamp = event.block.timestamp
+			quote.timestampSendQuote = event.block.timestamp
+			quote.timestampLockQuote = event.block.timestamp
+			quote.timestampRequestToCancelQuote = event.block.timestamp
 
 			let symbolName: string
 			switch (version) {
