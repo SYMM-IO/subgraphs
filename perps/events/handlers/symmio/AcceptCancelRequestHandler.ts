@@ -19,8 +19,8 @@ export class AcceptCancelRequestHandler<T> {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		if (SendQuoteEntity.load(event.transaction.hash.toHex() + "-" + event.logIndex.toString()) == null) {
-			let send_quote_entity = new SendQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		if (SendQuoteEntity.load(event.params.quoteId.toString()) == null) {
+			let send_quote_entity = new SendQuoteEntity(event.params.quoteId.toString())
 			let lock_quote_entity = new LockQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 			let request_to_cancel_quote_entity = new RequestToCancelQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 			switch (version) {
