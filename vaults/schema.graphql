@@ -1,9 +1,9 @@
-type GlobalCounter @entity {
+type GlobalCounter @entity(immutable: false) {
     id: String!
     counter: BigInt!
 }
 
-type DebugEntity @entity {
+type DebugEntity @entity(immutable: true) {
 	id: String!
 	timestamp: BigInt
 	trigger: BigInt
@@ -11,7 +11,7 @@ type DebugEntity @entity {
 	message: String
 }
 
-type WithdrawRequest @entity {
+type WithdrawRequest @entity(immutable: false) {
 	id: ID!
 	timestamp: BigInt!
 	sender: Bytes!
@@ -22,7 +22,7 @@ type WithdrawRequest @entity {
 	source: Bytes!
 }
 
-type Deposit @entity {
+type Deposit @entity(immutable: true) {
     id: ID!
     user: Bytes!
     sender: Bytes!
@@ -33,7 +33,7 @@ type Deposit @entity {
     transaction: Bytes!
 }
 
-type Transfer @entity {
+type Transfer @entity(immutable: true) {
     id: ID!
     from: Bytes!
     to: Bytes!

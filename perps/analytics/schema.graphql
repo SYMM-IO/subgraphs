@@ -1,4 +1,4 @@
-type UserActivity @entity {
+type UserActivity @entity(immutable: false) {
 	id: ID!
 	user: Bytes!
 	accountSource: Bytes
@@ -6,7 +6,7 @@ type UserActivity @entity {
 	updateTimestamp: BigInt
 }
 
-type BalanceChange @entity {
+type BalanceChange @entity(immutable: false) {
 	id: ID!
 	type: String!
 	account: Bytes!
@@ -18,7 +18,7 @@ type BalanceChange @entity {
 	transaction: Bytes!
 }
 
-type TradeHistory @entity {
+type TradeHistory @entity(immutable: false) {
 	id: ID!
 	account: Bytes!
 	volume: BigInt!
@@ -30,7 +30,7 @@ type TradeHistory @entity {
 	quote: BigInt!
 }
 
-type DailyHistory @entity {
+type DailyHistory @entity(immutable: false) {
 	id: ID!
 	day: BigInt!
 	quotesCount: BigInt!
@@ -56,7 +56,7 @@ type DailyHistory @entity {
 	timestamp: BigInt!
 }
 
-type SolverDailyHistory @entity {
+type SolverDailyHistory @entity(immutable: false) {
 	id: ID!
 	day: BigInt!
 	tradeVolume: BigInt!
@@ -74,7 +74,7 @@ type SolverDailyHistory @entity {
 	timestamp: BigInt!
 }
 
-type WeeklyHistory @entity {
+type WeeklyHistory @entity(immutable: false) {
 	id: ID!
 	tradeVolume: BigInt!
 	activeUsers: BigInt!
@@ -82,7 +82,7 @@ type WeeklyHistory @entity {
 	timestamp: BigInt!
 }
 
-type MonthlyHistory @entity {
+type MonthlyHistory @entity(immutable: false) {
 	id: ID!
 	tradeVolume: BigInt!
 	activeUsers: BigInt!
@@ -90,7 +90,7 @@ type MonthlyHistory @entity {
 	timestamp: BigInt!
 }
 
-type TotalHistory @entity {
+type TotalHistory @entity(immutable: false) {
 	id: ID!
 	quotesCount: BigInt!
 	tradeVolume: BigInt!
@@ -112,7 +112,7 @@ type TotalHistory @entity {
 	timestamp: BigInt!
 }
 
-type TotalSolverHistory @entity {
+type TotalSolverHistory @entity(immutable: false) {
 	id: ID!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
@@ -129,7 +129,7 @@ type TotalSolverHistory @entity {
 	timestamp: BigInt!
 }
 
-type DailyUserHistory @entity {
+type DailyUserHistory @entity(immutable: false) {
 	id: ID!
 	day: BigInt!
 	account: Bytes!
@@ -153,7 +153,7 @@ type DailyUserHistory @entity {
 	timestamp: BigInt!
 }
 
-type TotalUserHistory @entity {
+type TotalUserHistory @entity(immutable: false) {
 	id: ID!
 	account: Bytes!
 	quotesCount: BigInt!
@@ -174,7 +174,7 @@ type TotalUserHistory @entity {
 	timestamp: BigInt!
 }
 
-type SymbolTradeHistory @entity {
+type SymbolTradeHistory @entity(immutable: false) {
 	id: ID!
 	symbolId: BigInt!
 	timestamp: BigInt!
@@ -183,7 +183,7 @@ type SymbolTradeHistory @entity {
 	accountSource: Bytes
 }
 
-type DailySymbolTradesHistory @entity {
+type DailySymbolTradesHistory @entity(immutable: false) {
 	id: ID! # account_source + account + symbolId
 	day: BigInt!
 	updateTimestamp: BigInt!
@@ -196,7 +196,7 @@ type DailySymbolTradesHistory @entity {
 	platformFeePaid: BigInt!
 }
 
-type TotalSymbolTradesHistory @entity {
+type TotalSymbolTradesHistory @entity(immutable: false) {
 	id: ID! # account_source + account + symbolId
 	updateTimestamp: BigInt!
 	account: Bytes!
@@ -208,21 +208,21 @@ type TotalSymbolTradesHistory @entity {
 	platformFeePaid: BigInt!
 }
 
-type OpenInterest @entity {
+type OpenInterest @entity(immutable: false) {
 	id: ID!
 	amount: BigInt!
 	weightedAmount: BigInt!
 	timestamp: BigInt!
 }
 
-type Configuration @entity {
+type Configuration @entity(immutable: false) {
 	id: ID!
 	collateral: Bytes!
 	updateTimestamp: BigInt!
 	updateTransaction: Bytes!
 }
 
-type GrantedRole @entity {
+type GrantedRole @entity(immutable: false) {
 	id: ID!
 	role: String!
 	user: Bytes!
@@ -232,7 +232,7 @@ type GrantedRole @entity {
 	updateTimestamp: BigInt!
 }
 
-type OpenInterestSettleDay @entity {
+type OpenInterestSettleDay @entity(immutable: false) {
 	id: ID!
 	dayNumber: BigInt!
 	timestamp: BigInt!

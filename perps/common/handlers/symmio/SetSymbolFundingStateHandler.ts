@@ -12,7 +12,7 @@ export class SetSymbolFundingStateHandler<T> extends BaseHandler {
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_2>(_event)
-			symbol = new Symbol(e.params.id.toString())!
+			symbol = new Symbol(e.params.id.toString())
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		} else {

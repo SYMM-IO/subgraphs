@@ -1,4 +1,4 @@
-type Players @entity {
+type Players @entity(immutable: false) {
 	id: ID!
 	solvers: [Bytes!]!
 	liquidators: [Bytes!]!

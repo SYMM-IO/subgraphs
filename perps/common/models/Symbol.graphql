@@ -1,4 +1,4 @@
-type Symbol @entity {
+type Symbol @entity(immutable: false) {
     id: ID!
     globalCounter: BigInt!
     name: String!
