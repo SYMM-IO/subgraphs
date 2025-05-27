@@ -1,7 +1,10 @@
 import { SetSymbolFundingState as SetSymbolFundingStateEntity } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
+import { SetSymbolFundingState as SetSymbolFundingState_8_1 } from "../../../../generated/symmio_0_8_1/symmio_0_8_1"
 import { SetSymbolFundingState as SetSymbolFundingState_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
+import { SetSymbolFundingState as SetSymbolFundingState_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
+import { SetSymbolFundingState as SetSymbolFundingState_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
 export class SetSymbolFundingStateHandler<T> {
@@ -11,12 +14,29 @@ export class SetSymbolFundingStateHandler<T> {
 
 		let entity = new SetSymbolFundingStateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		if (version == Version.v_0_8_2) {
-			// @ts-ignore
-			const e = changetype<SetSymbolFundingState_8_2>(_event)
-			entity.symbolId = e.params.id
-		} else {
-			entity.symbolId = BigInt.zero()
+		switch (version) {
+			case Version.v_0_8_1:
+				// @ts-ignore
+				const e = changetype<SetSymbolFundingState_8_1>(_event)
+				entity.symbolId = e.params.id
+				break
+			case Version.v_0_8_2:
+				// @ts-ignore
+				const e = changetype<SetSymbolFundingState_8_2>(_event)
+				entity.symbolId = e.params.id
+				break
+			case Version.v_0_8_3:
+				// @ts-ignore
+				const e = changetype<SetSymbolFundingState_8_3>(_event)
+				entity.symbolId = e.params.symbolId
+				break
+			case Version.v_0_8_4:
+				// @ts-ignore
+				const e = changetype<SetSymbolFundingState_8_4>(_event)
+				entity.symbolId = e.params.symbolId
+				break
+			default:
+				entity.symbolId = BigInt.zero()
 		}
 		entity.fundingRateEpochDuration = event.params.fundingRateEpochDuration
 		entity.fundingRateWindowTime = event.params.fundingRateWindowTime
