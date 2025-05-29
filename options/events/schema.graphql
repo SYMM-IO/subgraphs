@@ -1,4 +1,4 @@
-type Deposit @entity {
+type Deposit @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -15,7 +15,7 @@ type Deposit @entity {
     newBalance: BigInt!
 }
 
-type InternalTransfer @entity {
+type InternalTransfer @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -32,7 +32,7 @@ type InternalTransfer @entity {
     newBalance: BigInt!
 }
 
-type InitiateWithdraw @entity {
+type InitiateWithdraw @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -50,7 +50,7 @@ type InitiateWithdraw @entity {
     newBalance: BigInt!
 }
 
-type CompleteWithdraw @entity {
+type CompleteWithdraw @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -63,7 +63,7 @@ type CompleteWithdraw @entity {
     withdrawId: BigInt!
 }
 
-type CancelWithdraw @entity {
+type CancelWithdraw @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -78,7 +78,7 @@ type CancelWithdraw @entity {
     newBalance: BigInt!
 }
 
-type ActivateInstantActionMode @entity {
+type ActivateInstantActionMode @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -92,7 +92,7 @@ type ActivateInstantActionMode @entity {
     timestamp: BigInt!
 }
 
-type ProposeToDeactivateInstantActionMode @entity {
+type ProposeToDeactivateInstantActionMode @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -106,7 +106,7 @@ type ProposeToDeactivateInstantActionMode @entity {
     timestamp: BigInt!
 }
 
-type DeactivateInstantActionMode @entity {
+type DeactivateInstantActionMode @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -120,7 +120,7 @@ type DeactivateInstantActionMode @entity {
     timestamp: BigInt!
 }
 
-type SyncBalances @entity {
+type SyncBalances @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -135,7 +135,7 @@ type SyncBalances @entity {
     partyBs: [Bytes!]
 }
 
-type BindToPartyB @entity {
+type BindToPartyB @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -149,7 +149,7 @@ type BindToPartyB @entity {
     partyB: Bytes!
 }
 
-type InitiateUnbindingFromPartyB @entity {
+type InitiateUnbindingFromPartyB @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -164,7 +164,7 @@ type InitiateUnbindingFromPartyB @entity {
     initiationTime: BigInt!
 }
 
-type CompleteUnbindingFromPartyB @entity {
+type CompleteUnbindingFromPartyB @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -178,7 +178,7 @@ type CompleteUnbindingFromPartyB @entity {
     partyB: Bytes!
 }
 
-type CancelUnbindingFromPartyB @entity {
+type CancelUnbindingFromPartyB @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -192,7 +192,7 @@ type CancelUnbindingFromPartyB @entity {
     partyB: Bytes!
 }
 
-type TransferToBridge @entity {
+type TransferToBridge @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -210,7 +210,7 @@ type TransferToBridge @entity {
     transactionId: BigInt!
 }
 
-type WithdrawReceivedBridgeValue @entity {
+type WithdrawReceivedBridgeValue @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -223,7 +223,7 @@ type WithdrawReceivedBridgeValue @entity {
     transactionId: BigInt!
 }
 
-type SuspendBridgeTransaction @entity {
+type SuspendBridgeTransaction @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -236,7 +236,7 @@ type SuspendBridgeTransaction @entity {
     transactionId: BigInt!
 }
 
-type RestoreBridgeTransaction @entity {
+type RestoreBridgeTransaction @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -250,7 +250,7 @@ type RestoreBridgeTransaction @entity {
     validAmount: BigInt!
 }
 
-type WithdrawReceivedBridgeValues @entity {
+type WithdrawReceivedBridgeValues @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -263,7 +263,7 @@ type WithdrawReceivedBridgeValues @entity {
     transactionIds: [BigInt!]
 }
 
-type FlagLiquidation @entity {
+type FlagLiquidation @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -278,7 +278,7 @@ type FlagLiquidation @entity {
     collateral: Bytes!
 }
 
-type UnflagLiquidation @entity {
+type UnflagLiquidation @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -293,7 +293,7 @@ type UnflagLiquidation @entity {
     collateral: Bytes!
 }
 
-type Liquidate @entity {
+type Liquidate @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -312,7 +312,7 @@ type Liquidate @entity {
     collateralPrice: BigInt!
 }
 
-type ConfiscatePartyA @entity {
+type ConfiscatePartyA @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -328,7 +328,7 @@ type ConfiscatePartyA @entity {
     amount: BigInt!
 }
 
-type ConfiscatePartyBWithdrawal @entity {
+type ConfiscatePartyBWithdrawal @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -342,7 +342,7 @@ type ConfiscatePartyBWithdrawal @entity {
     withdrawId: BigInt!
 }
 
-type CloseTradesForLiquidation @entity {
+type CloseTradesForLiquidation @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -356,7 +356,7 @@ type CloseTradesForLiquidation @entity {
     prices: [BigInt!]
 }
 
-type DistributeCollateral @entity {
+type DistributeCollateral @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -373,7 +373,7 @@ type DistributeCollateral @entity {
     amounts: [BigInt!]
 }
 
-type FullyLiquidated @entity {
+type FullyLiquidated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -387,7 +387,7 @@ type FullyLiquidated @entity {
     liquidationId: BigInt!
 }
 
-type CollateralWhitelisted @entity {
+type CollateralWhitelisted @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -400,7 +400,7 @@ type CollateralWhitelisted @entity {
     collateral: Bytes!
 }
 
-type CollateralRemovedFromWhitelist @entity {
+type CollateralRemovedFromWhitelist @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -413,7 +413,7 @@ type CollateralRemovedFromWhitelist @entity {
     collateral: Bytes!
 }
 
-type MaxCloseOrdersLengthUpdated @entity {
+type MaxCloseOrdersLengthUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -426,7 +426,7 @@ type MaxCloseOrdersLengthUpdated @entity {
     max: BigInt!
 }
 
-type MaxTradePerPartyAUpdated @entity {
+type MaxTradePerPartyAUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -439,7 +439,7 @@ type MaxTradePerPartyAUpdated @entity {
     max: BigInt!
 }
 
-type BalanceLimitPerUserUpdated @entity {
+type BalanceLimitPerUserUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -452,7 +452,7 @@ type BalanceLimitPerUserUpdated @entity {
     limit: BigInt!
 }
 
-type PartyADeallocateCooldownUpdated @entity {
+type PartyADeallocateCooldownUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -465,7 +465,7 @@ type PartyADeallocateCooldownUpdated @entity {
     cooldown: BigInt!
 }
 
-type PartyBDeallocateCooldownUpdated @entity {
+type PartyBDeallocateCooldownUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -478,7 +478,7 @@ type PartyBDeallocateCooldownUpdated @entity {
     cooldown: BigInt!
 }
 
-type ForceCancelOpenIntentTimeoutUpdated @entity {
+type ForceCancelOpenIntentTimeoutUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -491,7 +491,7 @@ type ForceCancelOpenIntentTimeoutUpdated @entity {
     timeout: BigInt!
 }
 
-type ForceCancelCloseIntentTimeoutUpdated @entity {
+type ForceCancelCloseIntentTimeoutUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -504,7 +504,7 @@ type ForceCancelCloseIntentTimeoutUpdated @entity {
     timeout: BigInt!
 }
 
-type DefaultFeeCollectorUpdated @entity {
+type DefaultFeeCollectorUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -517,7 +517,7 @@ type DefaultFeeCollectorUpdated @entity {
     collector: Bytes!
 }
 
-type GlobalPaused @entity {
+type GlobalPaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -530,7 +530,7 @@ type GlobalPaused @entity {
 
 }
 
-type DepositPaused @entity {
+type DepositPaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -543,7 +543,7 @@ type DepositPaused @entity {
 
 }
 
-type WithdrawPaused @entity {
+type WithdrawPaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -556,7 +556,7 @@ type WithdrawPaused @entity {
 
 }
 
-type PartyBActionsPaused @entity {
+type PartyBActionsPaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -569,7 +569,7 @@ type PartyBActionsPaused @entity {
 
 }
 
-type PartyAActionsPaused @entity {
+type PartyAActionsPaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -582,7 +582,7 @@ type PartyAActionsPaused @entity {
 
 }
 
-type LiquidatingPaused @entity {
+type LiquidatingPaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -595,7 +595,7 @@ type LiquidatingPaused @entity {
 
 }
 
-type GlobalUnpaused @entity {
+type GlobalUnpaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -608,7 +608,7 @@ type GlobalUnpaused @entity {
 
 }
 
-type DepositUnpaused @entity {
+type DepositUnpaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -621,7 +621,7 @@ type DepositUnpaused @entity {
 
 }
 
-type WithdrawUnpaused @entity {
+type WithdrawUnpaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -634,7 +634,7 @@ type WithdrawUnpaused @entity {
 
 }
 
-type PartyBActionsUnpaused @entity {
+type PartyBActionsUnpaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -647,7 +647,7 @@ type PartyBActionsUnpaused @entity {
 
 }
 
-type PartyAActionsUnpaused @entity {
+type PartyAActionsUnpaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -660,7 +660,7 @@ type PartyAActionsUnpaused @entity {
 
 }
 
-type LiquidatingUnpaused @entity {
+type LiquidatingUnpaused @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -673,7 +673,7 @@ type LiquidatingUnpaused @entity {
 
 }
 
-type EmergencyModeActivated @entity {
+type EmergencyModeActivated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -686,7 +686,7 @@ type EmergencyModeActivated @entity {
 
 }
 
-type EmergencyModeDeactivated @entity {
+type EmergencyModeDeactivated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -699,20 +699,7 @@ type EmergencyModeDeactivated @entity {
 
 }
 
-type PartyBEmergencyStatusActivated @entity {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-}
-
-type PartyBEmergencyStatusDeactivated @entity {
+type PartyBEmergencyStatusActivated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -725,7 +712,20 @@ type PartyBEmergencyStatusDeactivated @entity {
     partyB: Bytes!
 }
 
-type AffiliateStatusUpdated @entity {
+type PartyBEmergencyStatusDeactivated @entity(immutable: true) {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    partyB: Bytes!
+}
+
+type AffiliateStatusUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -739,7 +739,7 @@ type AffiliateStatusUpdated @entity {
     status: Boolean!
 }
 
-type AffiliateFeeCollectorUpdated @entity {
+type AffiliateFeeCollectorUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -753,7 +753,7 @@ type AffiliateFeeCollectorUpdated @entity {
     feeCollector: Bytes!
 }
 
-type RoleUpdated @entity {
+type RoleUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -768,7 +768,7 @@ type RoleUpdated @entity {
     granted: Boolean!
 }
 
-type PartyBConfig @entity {
+type PartyBConfig @entity(immutable: true) {
     id: ID!
 
     isActive: Boolean!
@@ -777,7 +777,7 @@ type PartyBConfig @entity {
     symbolType: BigInt!
 }
 
-type PartyBConfigUpdated @entity {
+type PartyBConfigUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -791,7 +791,7 @@ type PartyBConfigUpdated @entity {
     config: [PartyBConfig!]
 }
 
-type SettlementPriceSigValidTimeUpdated @entity {
+type SettlementPriceSigValidTimeUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -804,7 +804,7 @@ type SettlementPriceSigValidTimeUpdated @entity {
     time: BigInt!
 }
 
-type LiquidationSigValidTimeUpdated @entity {
+type LiquidationSigValidTimeUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -817,7 +817,7 @@ type LiquidationSigValidTimeUpdated @entity {
     time: BigInt!
 }
 
-type LiquidationDetailUpdated @entity {
+type LiquidationDetailUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -831,7 +831,7 @@ type LiquidationDetailUpdated @entity {
     collateral: Bytes!
 }
 
-type SymbolPriceUpdated @entity {
+type SymbolPriceUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -845,7 +845,7 @@ type SymbolPriceUpdated @entity {
     symbolId: BigInt!
 }
 
-type RoleGranted @entity {
+type RoleGranted @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -859,7 +859,7 @@ type RoleGranted @entity {
     user: Bytes!
 }
 
-type RoleRevoked @entity {
+type RoleRevoked @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -873,7 +873,7 @@ type RoleRevoked @entity {
     user: Bytes!
 }
 
-type PartyBReleaseIntervalUpdated @entity {
+type PartyBReleaseIntervalUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -887,7 +887,7 @@ type PartyBReleaseIntervalUpdated @entity {
     interval: BigInt!
 }
 
-type MaxConnectedPartyBsUpdated @entity {
+type MaxConnectedPartyBsUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -900,7 +900,7 @@ type MaxConnectedPartyBsUpdated @entity {
     max: BigInt!
 }
 
-type UnbindingCooldownUpdated @entity {
+type UnbindingCooldownUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -913,7 +913,7 @@ type UnbindingCooldownUpdated @entity {
     cooldown: BigInt!
 }
 
-type AddressSuspended @entity {
+type AddressSuspended @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -927,7 +927,7 @@ type AddressSuspended @entity {
     status: Boolean!
 }
 
-type WithdrawalSuspended @entity {
+type WithdrawalSuspended @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -941,7 +941,7 @@ type WithdrawalSuspended @entity {
     status: Boolean!
 }
 
-type DeactiveInstantActionModeCooldownUpdated @entity {
+type DeactiveInstantActionModeCooldownUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -954,7 +954,7 @@ type DeactiveInstantActionModeCooldownUpdated @entity {
     cooldown: BigInt!
 }
 
-type InstantActionsModeUpdated @entity {
+type InstantActionsModeUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -968,7 +968,7 @@ type InstantActionsModeUpdated @entity {
     status: Boolean!
 }
 
-type InstantActionsModeDeactivateTimeUpdated @entity {
+type InstantActionsModeDeactivateTimeUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -982,7 +982,7 @@ type InstantActionsModeDeactivateTimeUpdated @entity {
     time: BigInt!
 }
 
-type OracleAdded @entity {
+type OracleAdded @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -997,7 +997,7 @@ type OracleAdded @entity {
     contractAddress: Bytes!
 }
 
-type SymbolAdded @entity {
+type SymbolAdded @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1013,7 +1013,7 @@ type SymbolAdded @entity {
     collateral: Bytes!
 }
 
-type PriceOracleAddressUpdated @entity {
+type PriceOracleAddressUpdated @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1026,7 +1026,7 @@ type PriceOracleAddressUpdated @entity {
     oracle: Bytes!
 }
 
-type ForceCancelOpenIntent @entity {
+type ForceCancelOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1039,7 +1039,7 @@ type ForceCancelOpenIntent @entity {
     intentId: BigInt!
 }
 
-type ForceCancelCloseIntent @entity {
+type ForceCancelCloseIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1052,7 +1052,7 @@ type ForceCancelCloseIntent @entity {
     intentId: BigInt!
 }
 
-type SendTransferIntent @entity {
+type SendTransferIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1069,7 +1069,7 @@ type SendTransferIntent @entity {
     deadline: BigInt!
 }
 
-type CancelTransferIntent @entity {
+type CancelTransferIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1082,21 +1082,7 @@ type CancelTransferIntent @entity {
     tradeId: BigInt!
 }
 
-type LockTransferIntent @entity {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-    counterParty: Bytes!
-}
-
-type UnlockTransferIntent @entity {
+type LockTransferIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1110,7 +1096,7 @@ type UnlockTransferIntent @entity {
     counterParty: Bytes!
 }
 
-type AcceptCancelTransferIntent @entity {
+type UnlockTransferIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1124,7 +1110,21 @@ type AcceptCancelTransferIntent @entity {
     counterParty: Bytes!
 }
 
-type FinalizeTransferIntent @entity {
+type AcceptCancelTransferIntent @entity(immutable: true) {
+    id: ID!
+    counterId: BigInt!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    transactionHash: Bytes!
+    transactionIndex: BigInt!
+    logIndex: BigInt!
+    blockHash: Bytes!
+
+    tradeId: BigInt!
+    counterParty: Bytes!
+}
+
+type FinalizeTransferIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1140,7 +1140,7 @@ type FinalizeTransferIntent @entity {
     clearingHouseSignature: Bytes!
 }
 
-type SendCloseIntent @entity {
+type SendCloseIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1157,7 +1157,7 @@ type SendCloseIntent @entity {
     deadline: BigInt!
 }
 
-type CancelCloseIntent @entity {
+type CancelCloseIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1170,7 +1170,7 @@ type CancelCloseIntent @entity {
     intentId: BigInt!
 }
 
-type TransferTradeByPartyA @entity {
+type TransferTradeByPartyA @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1185,7 +1185,7 @@ type TransferTradeByPartyA @entity {
     tradeId: BigInt!
 }
 
-type CancelOpenIntent @entity {
+type CancelOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1199,7 +1199,7 @@ type CancelOpenIntent @entity {
     finalStatus: Int!
 }
 
-type AcceptCancelCloseIntent @entity {
+type AcceptCancelCloseIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1212,7 +1212,7 @@ type AcceptCancelCloseIntent @entity {
     intentId: BigInt!
 }
 
-type FillCloseIntent @entity {
+type FillCloseIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1227,7 +1227,7 @@ type FillCloseIntent @entity {
     price: BigInt!
 }
 
-type AcceptCancelOpenIntent @entity {
+type AcceptCancelOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1240,7 +1240,7 @@ type AcceptCancelOpenIntent @entity {
     intentId: BigInt!
 }
 
-type LockOpenIntent @entity {
+type LockOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1254,7 +1254,7 @@ type LockOpenIntent @entity {
     partyB: Bytes!
 }
 
-type UnlockOpenIntent @entity {
+type UnlockOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1267,7 +1267,7 @@ type UnlockOpenIntent @entity {
     intentId: BigInt!
 }
 
-type FillOpenIntent @entity {
+type FillOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1283,7 +1283,7 @@ type FillOpenIntent @entity {
     price: BigInt!
 }
 
-type ExpireTrade @entity {
+type ExpireTrade @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1298,7 +1298,7 @@ type ExpireTrade @entity {
     settlementPrice: BigInt!
 }
 
-type ExerciseTrade @entity {
+type ExerciseTrade @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1313,7 +1313,7 @@ type ExerciseTrade @entity {
     settlementPrice: BigInt!
 }
 
-type AddAccount @entity {
+type AddAccount @entity(immutable: true) {
 	id: ID!
 	counterId: BigInt!
 	blockNumber: BigInt!
@@ -1328,7 +1328,7 @@ type AddAccount @entity {
 	accountSource: Bytes!
 }
 
-type SendOpenIntent @entity {
+type SendOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1344,7 +1344,7 @@ type SendOpenIntent @entity {
     requestedParams: Bytes!
 }
 
-type ExpireOpenIntent @entity {
+type ExpireOpenIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!
@@ -1357,7 +1357,7 @@ type ExpireOpenIntent @entity {
     intentId: BigInt!
 }
 
-type ExpireCloseIntent @entity {
+type ExpireCloseIntent @entity(immutable: true) {
     id: ID!
     counterId: BigInt!
     blockNumber: BigInt!

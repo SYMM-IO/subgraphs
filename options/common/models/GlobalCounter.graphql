@@ -1,4 +1,4 @@
-type GlobalCounter @entity {
+type GlobalCounter @entity(immutable: false) {
     id: String!
     counter: BigInt!
 }

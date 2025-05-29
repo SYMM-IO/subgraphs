@@ -1,9 +1,9 @@
-type GlobalCounter @entity {
+type GlobalCounter @entity(immutable: false) {
     id: String!
     counter: BigInt!
 }
 
-type DebugEntity @entity {
+type DebugEntity @entity(immutable: true) {
 	id: String!
 	timestamp: BigInt
 	trigger: BigInt
@@ -11,7 +11,7 @@ type DebugEntity @entity {
 	message: String
 }
 
-type CallExecuted @entity {
+type CallExecuted @entity(immutable: true) {
 	id: ID!
 	address: Bytes!
 	index: BigInt!
@@ -21,7 +21,7 @@ type CallExecuted @entity {
 	timestamp: BigInt!
 }
 
-type CallScheduled @entity {
+type CallScheduled @entity(immutable: true) {
 	id: ID!
 	address: Bytes!
 	index: BigInt!
@@ -33,7 +33,7 @@ type CallScheduled @entity {
 	timestamp: BigInt!
 }
 
-type Cancelled @entity {
+type Cancelled @entity(immutable: true) {
 	id: ID!
 	address: Bytes!
 	timestamp: BigInt!

@@ -2,6 +2,12 @@
 	"network": "base",
 	"contracts": [
 		{
+			"address": "0x8CF65060CdA270a3886452A1A1cb656BECEE5bA4",
+			"abi": "timelock",
+			"version": "1",
+			"startBlock": "23857613"
+		},
+		{
 			"address": "0x92E89Bb3cE2CeA34dF6168010BBEFce2997b014d",
 			"abi": "timelock",
 			"version": "1",

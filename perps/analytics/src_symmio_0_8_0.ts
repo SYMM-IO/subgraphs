@@ -108,7 +108,6 @@ export function handleExpireQuote(event: ExpireQuote): void {
 }
 
 export function handleDepositForPartyB(event: DepositForPartyB): void {
-	event.params.partyB
 	let handler = new DepositForPartyBHandler<DepositForPartyB>()
 	handler.handle(event, Version.v_0_8_0)
 }

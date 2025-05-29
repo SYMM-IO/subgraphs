@@ -18,7 +18,7 @@ export class SetSymbolValidationStateHandler<T> extends BaseHandler {
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_2>(_event)
-			symbol = new Symbol(e.params.id.toString())!
+			symbol = new Symbol(e.params.id.toString())
 		} else {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_3>(_event)

@@ -1,4 +1,4 @@
-type DebugEntity @entity {
+type DebugEntity @entity(immutable: true) {
 	id: String!
 	timestamp: BigInt
 	trigger: BigInt

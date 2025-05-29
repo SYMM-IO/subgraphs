@@ -1226,7 +1226,7 @@ type SettlePartyALiquidation @entity(immutable: true) {
 	blockHash: Bytes!
 }
 
-type QuoteSettlementData @entity {
+type QuoteSettlementData @entity(immutable: true) {
 	id: ID!
 	quoteId: BigInt!
 	accountSource: Bytes!
@@ -1425,7 +1425,7 @@ type WithdrawReceivedBridgeValues @entity(immutable: true) {
 	blockHash: Bytes!
 }
 
-type AddAccount @entity {
+type AddAccount @entity(immutable: true) {
 	id: ID!
 	counterId: BigInt!
 	account: Bytes!
@@ -1439,7 +1439,7 @@ type AddAccount @entity {
 	blockHash: Bytes!
 }
 
-type DiamondCut @entity {
+type DiamondCut @entity(immutable: true) {
 	id: ID!
 	counterId: BigInt!
 	blockNumber: BigInt!

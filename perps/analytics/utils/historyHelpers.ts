@@ -227,7 +227,6 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	tuh.liquidateTradeVolume = tuh.liquidateTradeVolume.plus(liquidateTradeVolume)
 	tuh.platformFeePaid = tuh.platformFeePaid.plus(params._tradingFee)
 	tuh.allocate = tuh.allocate.plus(params._allocate)
-	tuh.allocate = tuh.allocate.plus(params._allocate)
 	tuh.deallocate = tuh.deallocate.plus(params._deallocate)
 	tuh.deposit = tuh.deposit.plus(params._deposit)
 	tuh.withdraw = tuh.withdraw.plus(params._withdraw)

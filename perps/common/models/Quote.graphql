@@ -1,4 +1,4 @@
-type Quote @entity {
+type Quote @entity(immutable: false) {
     id: String!
     globalCounter: BigInt!
     quoteId: BigInt!
@@ -104,21 +104,21 @@ type Quote @entity {
     txHashLiquidatePositionsPartyB: Bytes
 }
 
-type PartyA @entity {
+type PartyA @entity(immutable: false) {
     id: String!
     partyB: Bytes
     quoteUntilLiquid: [BigInt!]
     globalCounter: BigInt!
 }
 
-type PartyBPartyA @entity {
+type PartyBPartyA @entity(immutable: false) {
     id: String!
     partyB: Bytes
     quoteUntilLiquid: [BigInt!]
     globalCounter: BigInt!
 }
 
-type PartyASymbolPrice @entity {
+type PartyASymbolPrice @entity(immutable: false) {
     id: String!
     partyA: Bytes!
     symbolId: BigInt!
@@ -128,7 +128,7 @@ type PartyASymbolPrice @entity {
     GlobalCounter: BigInt!
 }
 
-type GlobalFee @entity {
+type GlobalFee @entity(immutable: false) {
     id: ID!
     globalFee: BigInt!
     latestTimestamp: BigInt!
