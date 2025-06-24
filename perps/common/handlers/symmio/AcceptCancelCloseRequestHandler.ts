@@ -10,7 +10,6 @@ export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
 		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteStatus = event.params.quoteStatus
-		quote.blockNumber = event.block.number
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, 'AcceptCancelCloseRequest', _event)
 	}

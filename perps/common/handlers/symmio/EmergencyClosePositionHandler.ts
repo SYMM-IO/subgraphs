@@ -9,7 +9,6 @@ export class EmergencyClosePositionHandler<T> extends BaseHandler {
 		const event = changetype<T>(_event)
 		let quote = Quote.load(event.params.quoteId.toString())!
 		quote.globalCounter = super.handleGlobalCounter()
-		quote.blockNumber = event.block.number
 		quote.quoteId = event.params.quoteId
 		quote.fillAmount = event.params.filledAmount
 		quote.closedPrice = event.params.closedPrice
