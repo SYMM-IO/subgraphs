@@ -55,11 +55,11 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 				}
 			}
 			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)
-			quote.liquidatePrice = avgClosedPrice!
+			quote.liquidatePrice = avgClosedPrice
 				.times(quote.quantity!)
 				.minus(quote.averageClosedPrice!.times(quote.closedAmount!))
 				.div(quote.liquidateAmount!)
-			quote.averageClosedPrice = avgClosedPrice!
+			quote.averageClosedPrice = avgClosedPrice
 			quote.closedAmount = quote.quantity
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePositionsPartyA", _event)

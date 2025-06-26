@@ -20,7 +20,7 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 		let account = Account.load(event.params.user.toHexString())!
 		updateActivityTimestamps(account, event.block.timestamp)
 		let deposit = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
-		deposit.type = balanceChangeTypes.get(BalanceChangeType.DEPOSIT)!
+		deposit.type = balanceChangeTypes.get(BalanceChangeType.DEPOSIT)
 		deposit.timestamp = event.block.timestamp
 		deposit.blockNumber = event.block.number
 		deposit.transaction = event.transaction.hash

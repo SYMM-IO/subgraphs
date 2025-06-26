@@ -46,7 +46,7 @@ export function createNewAccountIfNotExists(
 	}
 
 	account.account = address
-	account.type = accountTypes.get(type)!
+	account.type = accountTypes.get(type)
 	account.lastActivityTimestamp = block.timestamp
 	account.timestamp = block.timestamp
 	account.transaction = transaction.hash
