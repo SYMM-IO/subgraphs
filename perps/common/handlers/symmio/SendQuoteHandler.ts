@@ -112,7 +112,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 			}
 		}
 
-		quote.symbol = symbolName!
+		quote.symbol = symbolName
 
 		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []

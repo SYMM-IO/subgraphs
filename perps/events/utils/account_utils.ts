@@ -6,7 +6,7 @@ const ZERO_ADDRESS = Bytes.fromHexString("0x000000000000000000000000000000000000
 export function findAccountSourceForQuote(quoteId: BigInt): Bytes {
 	let quote = SendQuote.load(quoteId.toString())
 	if (!quote) return ZERO_ADDRESS
-	return findAccountSourceForQuoteForAccount(quote!.partyA)
+	return findAccountSourceForQuoteForAccount(quote.partyA)
 }
 
 export function findAccountSourceForQuoteForAccount(acc: Bytes): Bytes {

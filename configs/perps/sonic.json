@@ -1,0 +1,22 @@
+{
+	"network": "sonic",
+	"contracts": [
+		{
+			"address": "0x803de354cbd853D9aE3BC58131A5D538DE7a72E3",
+			"abi": "symmio",
+			"version": "0_8_4",
+			"startBlock": "16024960"
+		},
+		{
+			"address": "0xd90ACA50eE8Cb7C3dD1fEe84A722d574186cdd17",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "35977779",
+			"name": "Spooky"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "sonic_analytics",
+		"perps/events": "sonic_events"
+	}
+}

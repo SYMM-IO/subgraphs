@@ -16,6 +16,7 @@ def main():
         # "./configs/perps/iota.json",
         # "./configs/perps/polygon.json",
         # "./configs/perps/bera.json",
+        # "./configs/perps/sonic.json",
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",
         # "./configs/vaults/bnb.json",
@@ -43,7 +44,7 @@ def main():
 
     for config in configs:
         cmd = [
-            "python",
+            "python3",
             "scripts/manager.py",
             config,
             args.subgraph,

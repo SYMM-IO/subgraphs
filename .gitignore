@@ -17,3 +17,6 @@ UniConfig.json
 subgraph.yaml
 /schema.graphql
 perps/analytics/currentConfig.json
+
+.envrc
+

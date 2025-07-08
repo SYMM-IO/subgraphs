@@ -1,0 +1,22 @@
+{
+	"network": "coti",
+	"contracts": [
+		{
+			"address": "0x2Ecc7da3Cc98d341F987C85c3D9FC198570838B5",
+			"abi": "symmio",
+			"version": "0_8_4",
+			"startBlock": "185858"
+		},
+		{
+			"address": "0xbF318724218cED9A3ff7CfC642c71a0CA1952b0F",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "639223",
+			"name": "privex_multi_account"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "coti_analytics",
+		"perps/events": "coti_events"
+	}
+}

@@ -171,7 +171,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 				}
 			}
 
-			quote.symbol = symbolName!
+			quote.symbol = symbolName
 		}
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.blockNumber = event.block.number
