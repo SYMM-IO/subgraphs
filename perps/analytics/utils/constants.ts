@@ -18,8 +18,7 @@ rolesNames.set("0x427da25fe773164f88948d3e215c94b6554e2ed5e5f203a821c9f2f6131cf7
 rolesNames.set("0x241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b08", "MANAGER_ROLE")
 
 export function getRoleName(key: string): string {
-	if (rolesNames.has(key))
-		return rolesNames.get(key)
+	if (rolesNames.has(key)) return rolesNames.get(key)
 	return key
 }
 
@@ -34,6 +33,7 @@ export enum QuoteStatus {
 	CLOSED,
 	LIQUIDATED,
 	EXPIRED,
+	LIQUIDATED_PENDING,
 }
 
 export enum BalanceChangeType {
@@ -50,6 +50,7 @@ export enum BalanceChangeType {
 	DEPOSIT,
 	WITHDRAW,
 }
+
 // @ts-ignore
 export let balanceChangeTypes = new Map<number, string>()
 balanceChangeTypes.set(BalanceChangeType.ALLOCATE, "ALLOCATE")
