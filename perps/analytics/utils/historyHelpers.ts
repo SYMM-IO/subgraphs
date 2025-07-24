@@ -5,13 +5,13 @@ import {
 	getDailyHistoryForTimestamp,
 	getDailySymbolTradesHistory,
 	getDailyUserHistoryForTimestamp,
-	getSolverDailyHistoryForTimestamp,
+	getSolverDailyHistoryForTimestamp, getSolverOnlyDailyHistoryForTimestamp,
 	getSymbolTradeHistory,
 	getTotalHistory,
 	getTotalSolverHistory,
 	getTotalSymbolTradesHistory,
 	getTotalUserHistory,
-} from "./builders"
+} from "./builders";
 import { Version } from "../../common/BaseHandler"
 
 export class UpdateHistoriesParams {
@@ -158,6 +158,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.liquidateTradeVolume = sdh.liquidateTradeVolume.plus(liquidateTradeVolume)
 		sdh.fundingPaid = sdh.fundingPaid.plus(params._fundingPaid)
 		sdh.fundingReceived = sdh.fundingReceived.plus(params._fundingReceived)
+		sdh.platformFee = sdh.platformFee.plus(params._tradingFee)
 		if (params._positionsCount.gt(BigInt.zero())) {
 			sdh.averagePositionSize = sdh.averagePositionSize
 				.times(sdh.positionsCount)
@@ -167,6 +168,24 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		}
 		sdh.updateTimestamp = timestamp
 		sdh.save()
+
+		const sodh = getSolverOnlyDailyHistoryForTimestamp(timestamp, params.solver!.account)
+		sodh.tradeVolume = sodh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
+		sodh.openTradeVolume = sodh.openTradeVolume.plus(openTradeVolume)
+		sodh.closeTradeVolume = sodh.closeTradeVolume.plus(closeTradeVolume)
+		sodh.liquidateTradeVolume = sodh.liquidateTradeVolume.plus(liquidateTradeVolume)
+		sodh.fundingPaid = sodh.fundingPaid.plus(params._fundingPaid)
+		sodh.fundingReceived = sodh.fundingReceived.plus(params._fundingReceived)
+		sodh.platformFee = sodh.platformFee.plus(params._tradingFee)
+		if (params._positionsCount.gt(BigInt.zero())) {
+			sodh.averagePositionSize = sodh.averagePositionSize
+				.times(sodh.positionsCount)
+				.plus(openTradeVolume)
+				.div(params._positionsCount.plus(sodh.positionsCount))
+			sodh.positionsCount = sodh.positionsCount.plus(params._positionsCount)
+		}
+		sodh.updateTimestamp = timestamp
+		sodh.save()
 
 		const tsh = getTotalSolverHistory(timestamp, params.solver!.account, params.accountSource)
 		tsh.tradeVolume = tsh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))

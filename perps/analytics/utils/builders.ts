@@ -8,7 +8,7 @@ import {
 	DailyUserHistory,
 	MonthlyHistory,
 	OpenInterest,
-	SolverDailyHistory,
+	SolverDailyHistory, SolverOnlyDailyHistory,
 	SymbolTradeHistory,
 	TotalHistory,
 	TotalSolverHistory,
@@ -16,7 +16,7 @@ import {
 	TotalUserHistory,
 	UserActivity,
 	WeeklyHistory,
-} from "../../../generated/schema"
+} from "../../../generated/schema";
 import { getDayNumber, startOfDay, startOfMonth, startOfWeek } from "./time"
 import { Version } from "../../common/BaseHandler"
 import { getCollateral as getCollateral_0_8_4 } from "../../common/contract_utils_0_8_4"
@@ -81,9 +81,35 @@ export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Byt
 		sdh.fundingReceived = BigInt.zero()
 		sdh.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
 		sdh.solver = solver
+		sdh.platformFee = BigInt.zero()
 		sdh.save()
 	}
 	return sdh
+}
+
+export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes): SolverOnlyDailyHistory {
+	const dateStr = startOfDay(timestamp).getTime().toString()
+	const id = dateStr + "_" + solver.toHexString()
+	let sodh = SolverOnlyDailyHistory.load(id)
+	if (sodh == null) {
+		sodh = new SolverOnlyDailyHistory(id)
+		sodh.day = getDayNumber(timestamp)
+		sodh.updateTimestamp = timestamp
+		sodh.timestamp = timestamp
+		sodh.tradeVolume = BigInt.zero()
+		sodh.openTradeVolume = BigInt.zero()
+		sodh.closeTradeVolume = BigInt.zero()
+		sodh.liquidateTradeVolume = BigInt.zero()
+		sodh.openInterest = BigInt.zero()
+		sodh.positionsCount = BigInt.zero()
+		sodh.averagePositionSize = BigInt.zero()
+		sodh.fundingPaid = BigInt.zero()
+		sodh.fundingReceived = BigInt.zero()
+		sodh.solver = solver
+		sodh.platformFee = BigInt.zero()
+		sodh.save()
+	}
+	return sodh
 }
 
 export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null): TotalSolverHistory {

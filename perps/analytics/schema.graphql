@@ -70,6 +70,25 @@ type SolverDailyHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	solver: Bytes!
 	accountSource: Bytes
+	platformFee: BigInt!
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
+type SolverOnlyDailyHistory @entity(immutable: false) {
+	id: ID!
+	day: BigInt!
+	tradeVolume: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	openInterest: BigInt!
+	averagePositionSize: BigInt!
+	positionsCount: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	solver: Bytes!
+	platformFee: BigInt!
 	updateTimestamp: BigInt!
 	timestamp: BigInt!
 }
