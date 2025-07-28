@@ -98,10 +98,10 @@
 			"name": "multi_account_xpanse"
 		},
 		{
-			"address": "0x846f27e3b828412e24C7163d5b28FDa3C505D469",
+			"address": "0x95605c64356572eb5C076Cb9c027c88b527A2059",
 			"abi": "symmioMultiAccount",
 			"version": "1",
-			"startBlock": "33455434"
+			"startBlock": "33579587"
 		}
 	],
 	"deploy_urls": {
