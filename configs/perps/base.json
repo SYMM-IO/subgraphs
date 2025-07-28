@@ -2,6 +2,12 @@
 	"network": "base",
 	"contracts": [
 		{
+			"address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",
+			"abi": "symmio",
+			"version": "0_8_4",
+			"startBlock": "33454349"
+		},
+		{
 			"address": "0x91Cf2D8Ed503EC52768999aA6D8DBeA6e52dbe43",
 			"abi": "symmio",
 			"version": "0_8_4",
@@ -90,6 +96,12 @@
 			"version": "1",
 			"startBlock": "24743092",
 			"name": "multi_account_xpanse"
+		},
+		{
+			"address": "0x846f27e3b828412e24C7163d5b28FDa3C505D469",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "33455434"
 		}
 	],
 	"deploy_urls": {

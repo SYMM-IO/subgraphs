@@ -11,6 +11,7 @@ export class DeactiveEmergencyModeHandler<T> {
 		let entity = new DeactiveEmergencyModeEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash

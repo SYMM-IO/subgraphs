@@ -10,6 +10,7 @@ export class SetMuonIdsHandler<T> {
 
 		let entity = new SetMuonIdsEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.muonAppId = event.params.muonAppId
 		entity.gateway = event.params.gateway
 		entity.x = event.params.x

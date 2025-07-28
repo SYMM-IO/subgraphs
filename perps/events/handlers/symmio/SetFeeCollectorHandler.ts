@@ -12,6 +12,7 @@ export class SetFeeCollectorHandler<T> {
 
 		let entity = new SetFeeCollectorEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.oldFeeCollector = event.params.oldFeeCollector
 		entity.newFeeCollector = event.params.newFeeCollector
 		entity.transactionIndex = event.transaction.index

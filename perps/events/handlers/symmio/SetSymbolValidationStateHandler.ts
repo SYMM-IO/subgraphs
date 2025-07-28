@@ -15,6 +15,7 @@ export class SetSymbolValidationStateHandler<T> {
 
 		let entity = new SetSymbolValidationStateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		switch (version) {
 			case Version.v_0_8_0:
 				// @ts-ignore

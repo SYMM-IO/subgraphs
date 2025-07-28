@@ -10,6 +10,7 @@ export class SetPartyBEmergencyStatusHandler<T> {
 
 		let entity = new SetPartyBEmergencyStatusEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.partyB = event.params.partyB
 		entity.status = event.params.status
 

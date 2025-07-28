@@ -10,6 +10,7 @@ export class SetForceClosePricePenaltyHandler<T> {
 
 		let entity = new SetForceClosePricePenaltyEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash

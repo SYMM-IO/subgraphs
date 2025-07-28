@@ -12,6 +12,7 @@ export class LiquidatePositionsPartyAHandler<T> {
 
 		let entity = new LiquidatePositionsPartyAEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.liquidator = event.params.liquidator
 		entity.partyA = event.params.partyA
 		entity.quoteIds = event.params.quoteIds

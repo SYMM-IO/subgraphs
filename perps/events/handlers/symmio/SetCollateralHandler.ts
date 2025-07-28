@@ -10,6 +10,7 @@ export class SetCollateralHandler<T> {
 
 		let entity = new SetCollateralEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.collateral = event.params.collateral
 
 		entity.blockTimestamp = event.block.timestamp

@@ -10,6 +10,7 @@ export class AllocatePartyBHandler<T> {
 
 		let entity = new AllocatePartyBEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
 		entity.amount = event.params.amount

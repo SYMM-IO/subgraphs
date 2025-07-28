@@ -11,6 +11,7 @@ export class RequestToCancelQuoteHandler<T> {
 
 		let entity = new RequestToCancelQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.quoteStatus = event.params.quoteStatus

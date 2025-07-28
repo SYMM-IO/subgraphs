@@ -10,6 +10,7 @@ export class SetLiquidationTimeoutHandler<T> {
 
 		let entity = new SetLiquidationTimeoutEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 
 		entity.oldLiquidationTimeout = event.params.oldLiquidationTimeout
 		entity.newLiquidationTimeout = event.params.newLiquidationTimeout

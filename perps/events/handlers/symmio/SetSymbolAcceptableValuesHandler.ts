@@ -10,6 +10,7 @@ export class SetSymbolAcceptableValuesHandler<T> {
 
 		let entity = new SetSymbolAcceptableValuesEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.symbolId = event.params.symbolId
 		entity.oldMinAcceptableQuoteValue = event.params.oldMinAcceptableQuoteValue
 		entity.oldMinAcceptablePortionLF = event.params.oldMinAcceptablePortionLF

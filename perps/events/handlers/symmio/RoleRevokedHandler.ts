@@ -10,6 +10,7 @@ export class RoleRevokedHandler<T> {
 
 		let entity = new RoleRevokedEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.role = event.params.role
 		entity.user = event.params.user
 

@@ -12,6 +12,7 @@ export class ForceClosePositionHandler<T> {
 
 		let entity = new ForceClosePositionEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.diamond = event.address
 		entity.quoteId = event.params.quoteId
 		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
 		entity.partyA = event.params.partyA
