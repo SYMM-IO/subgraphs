@@ -9,7 +9,7 @@ import { unDecimal } from "../../utils/common"
 export function handleClose<T>(_event: ethereum.Event, name: string, version: Version): void {
 	// @ts-ignore
 	const event = changetype<T>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
-	let quote = Quote.load(event.params.quoteId.toString())
+	let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 	if (!quote) {
 		log.debug("quote not exist. quoteId {}", [event.params.quoteId.toString()])
 		let db = new DebugEntity("handleClose")

@@ -15,7 +15,7 @@ import { unDecimal } from "../../utils/common"
 export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
-	const quote = Quote.load(qId.toString())!
+	const quote = Quote.load(qId.toString() + "-" + event.address.toHexString())!
 
 	let liquidAmount: BigInt
 	let liquidPrice: BigInt

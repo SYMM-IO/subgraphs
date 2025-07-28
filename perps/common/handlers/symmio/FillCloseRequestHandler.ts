@@ -13,7 +13,7 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 		let db = new DebugEntity("FillCloseRequestHandler common")
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let quote = Quote.load(event.params.quoteId.toString())
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) { //  TODO: remove after debug
 			db.message = `quoteId: ${event.params.quoteId.toString()} not exist`
 			db.save()

@@ -13,10 +13,11 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let quote = Quote.load(event.params.quoteId.toString())
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) {
-			quote = new Quote(event.params.quoteId.toString())
+			quote = new Quote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 			quote.globalCounter = super.handleGlobalCounter()
+			quote.diamond = event.address
 			quote.quoteId = event.params.quoteId
 			quote.timestamp = event.block.timestamp
 			quote.timestampSendQuote = event.block.timestamp

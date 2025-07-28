@@ -32,7 +32,7 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
 			}
 		}
 		for (let index = 0; index < quoteIds.length; index++) {
-			let quote = Quote.load(quoteIds[index].toString())!
+			let quote = Quote.load(quoteIds[index].toString() + "-" + event.address.toHexString())!
 			quote.quoteStatus = QuoteStatus.LIQUIDATED_PENDING
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePendingPositionsPartyA", _event)

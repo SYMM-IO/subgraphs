@@ -20,8 +20,9 @@ export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let quote = new Quote(event.params.quoteId.toString())
+		let quote = new Quote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		quote.globalCounter = super.handleGlobalCounter()
+		quote.diamond = event.address
 		quote.quoteId = event.params.quoteId
 		quote.orderTypeOpen = event.params.orderType
 		quote.partyA = event.params.partyA

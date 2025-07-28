@@ -30,8 +30,8 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		history.updateTimestamp = event.block.timestamp
 		history.save()
 
-		let quote = Quote.load(event.params.quoteId.toString())!
-		const symbol = Symbol.load(quote.symbolId!.toString())!
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())!
+		const symbol = Symbol.load(quote.symbolId!.toString() + "-" + event.address.toHexString())!
 
 		let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
 

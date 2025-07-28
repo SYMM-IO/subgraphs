@@ -22,7 +22,7 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 		const event = changetype<T>(_event)
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
-			let quote = Quote.load(quoteId.toString())!
+			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())!
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.liquidatedSide = 1
 			quote.quoteStatus = 8

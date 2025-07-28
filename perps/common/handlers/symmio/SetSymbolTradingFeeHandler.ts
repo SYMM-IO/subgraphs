@@ -6,7 +6,7 @@ export class SetSymbolTradingFeeHandler<T> extends BaseHandler {
 	handleSymbol(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let symbol = Symbol.load(event.params.symbolId.toString())!
+		let symbol = Symbol.load(event.params.symbolId.toString() + "-" + event.address.toHexString())!
 		symbol.tradingFee = event.params.tradingFee
 		symbol.updateTimestamp = event.block.timestamp
 		symbol.save()
