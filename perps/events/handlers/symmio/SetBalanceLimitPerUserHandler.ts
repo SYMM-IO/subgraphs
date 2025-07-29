@@ -10,7 +10,7 @@ export class SetBalanceLimitPerUserHandler<T> {
 
 		let entity = new SetBalanceLimitPerUserEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.balanceLimitPerUser = event.params.balanceLimitPerUser
 
 		entity.blockTimestamp = event.block.timestamp

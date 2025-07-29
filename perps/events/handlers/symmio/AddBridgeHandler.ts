@@ -10,7 +10,7 @@ export class AddBridgeHandler<T> {
 
 		let entity = new AddBridgeEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.bridge = event.params.bridge
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

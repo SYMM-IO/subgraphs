@@ -10,7 +10,7 @@ export class DeregisterAffiliateHandler<T> {
 
 		let entity = new DeregisterAffiliateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.affilate = event.params.affilate
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

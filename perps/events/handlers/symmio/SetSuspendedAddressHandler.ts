@@ -10,7 +10,7 @@ export class SetSuspendedAddressHandler<T> {
 
 		let entity = new SetSuspendedAddressEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.user = event.params.user
 		entity.isSuspended = event.params.isSuspended
 

@@ -12,7 +12,7 @@ export class SetForceCloseGapRatioHandler<T> {
 
 		let entity = new SetForceCloseGapRatioEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.oldForceCloseGapRatio = event.params.oldForceCloseGapRatio
 		entity.newForceCloseGapRatio = event.params.newForceCloseGapRatio
 		entity.transactionIndex = event.transaction.index

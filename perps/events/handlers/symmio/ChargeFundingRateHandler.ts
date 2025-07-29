@@ -15,7 +15,7 @@ export class ChargeFundingRateHandler<T> {
 
 		let entity = new ChargeFundingRateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
 		entity.quoteIds = event.params.quoteIds

@@ -11,7 +11,7 @@ export class PausePartyBActionsHandler<T> {
 		let entity = new PausePartyBActionsEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash

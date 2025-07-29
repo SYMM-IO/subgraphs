@@ -1,6 +1,6 @@
 type AcceptCancelCloseRequest @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	quoteId: BigInt!
@@ -16,7 +16,7 @@ type AcceptCancelCloseRequest @entity(immutable: true) {
 
 type AcceptCancelRequest @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	quoteId: BigInt!
 	accountSource: Bytes!
@@ -31,7 +31,7 @@ type AcceptCancelRequest @entity(immutable: true) {
 
 type ActiveEmergencyMode @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -43,7 +43,7 @@ type ActiveEmergencyMode @entity(immutable: true) {
 
 type AddBridge @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	bridge: Bytes!
 	blockNumber: BigInt!
@@ -56,7 +56,7 @@ type AddBridge @entity(immutable: true) {
 
 type AddSymbol @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	fundingRateEpochDuration: BigInt!
 	fundingRateWindowTime: BigInt!
@@ -76,7 +76,7 @@ type AddSymbol @entity(immutable: true) {
 
 type AllocateForPartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	newAllocatedBalance: BigInt!
@@ -92,7 +92,7 @@ type AllocateForPartyB @entity(immutable: true) {
 
 type AllocatePartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	newAllocatedBalance: BigInt!
@@ -107,7 +107,7 @@ type AllocatePartyA @entity(immutable: true) {
 
 type AllocatePartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	partyA: Bytes!
@@ -122,7 +122,7 @@ type AllocatePartyB @entity(immutable: true) {
 
 type BalanceChangePartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	_type: Int!
 	amount: BigInt!
@@ -137,7 +137,7 @@ type BalanceChangePartyA @entity(immutable: true) {
 
 type BalanceChangePartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	_type: Int!
 	amount: BigInt!
@@ -153,7 +153,7 @@ type BalanceChangePartyB @entity(immutable: true) {
 
 type ChargeFundingRate @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	partyA: Bytes!
 	partyB: Bytes!
@@ -170,7 +170,7 @@ type ChargeFundingRate @entity(immutable: true) {
 
 type DeactiveEmergencyMode @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -182,7 +182,7 @@ type DeactiveEmergencyMode @entity(immutable: true) {
 
 type DeallocateForPartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	newAllocatedBalance: BigInt!
@@ -198,7 +198,7 @@ type DeallocateForPartyB @entity(immutable: true) {
 
 type DeallocatePartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	newAllocatedBalance: BigInt!
@@ -213,7 +213,7 @@ type DeallocatePartyA @entity(immutable: true) {
 
 type DeferredLiquidatePartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	allocatedBalance: BigInt!
 	liquidationAllocatedBalance: BigInt!
@@ -234,7 +234,7 @@ type DeferredLiquidatePartyA @entity(immutable: true) {
 
 type Deposit @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	sender: Bytes!
@@ -249,7 +249,7 @@ type Deposit @entity(immutable: true) {
 
 type DepositToReserveVault @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	partyB: Bytes!
@@ -264,7 +264,7 @@ type DepositToReserveVault @entity(immutable: true) {
 
 type DeregisterAffiliate @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	affilate: Bytes!
 	blockNumber: BigInt!
@@ -277,7 +277,7 @@ type DeregisterAffiliate @entity(immutable: true) {
 
 type DeregisterPartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	index: BigInt!
 	partyB: Bytes!
@@ -291,7 +291,7 @@ type DeregisterPartyB @entity(immutable: true) {
 
 type DisputeForLiquidation @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	liquidationId: Bytes!
 	liquidator: Bytes!
@@ -306,7 +306,7 @@ type DisputeForLiquidation @entity(immutable: true) {
 
 type EmergencyClosePosition @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	closedPrice: BigInt!
@@ -326,7 +326,7 @@ type EmergencyClosePosition @entity(immutable: true) {
 
 type ExpireQuote @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	quoteId: BigInt!
 	accountSource: Bytes!
@@ -341,7 +341,7 @@ type ExpireQuote @entity(immutable: true) {
 
 type ExpireQuoteClose @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	quoteId: BigInt!
@@ -357,7 +357,7 @@ type ExpireQuoteClose @entity(immutable: true) {
 
 type ExpireQuoteOpen @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	quoteId: BigInt!
 	accountSource: Bytes!
@@ -372,7 +372,7 @@ type ExpireQuoteOpen @entity(immutable: true) {
 
 type FillCloseRequest @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	closedPrice: BigInt!
@@ -392,7 +392,7 @@ type FillCloseRequest @entity(immutable: true) {
 
 type ForceCancelCloseRequest @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	quoteId: BigInt!
@@ -408,7 +408,7 @@ type ForceCancelCloseRequest @entity(immutable: true) {
 
 type ForceCancelQuote @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	quoteId: BigInt!
 	accountSource: Bytes!
@@ -423,7 +423,7 @@ type ForceCancelQuote @entity(immutable: true) {
 
 type ForceClosePosition @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	closedPrice: BigInt!
@@ -443,7 +443,7 @@ type ForceClosePosition @entity(immutable: true) {
 
 type FullyLiquidatedPartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	liquidationId: Bytes!
 	partyA: Bytes!
@@ -457,7 +457,7 @@ type FullyLiquidatedPartyA @entity(immutable: true) {
 
 type FullyLiquidatedPartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	partyA: Bytes!
 	partyB: Bytes!
@@ -471,7 +471,7 @@ type FullyLiquidatedPartyB @entity(immutable: true) {
 
 type InternalTransfer @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	sender: Bytes!
@@ -487,7 +487,7 @@ type InternalTransfer @entity(immutable: true) {
 
 type LiquidatePartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	allocatedBalance: BigInt!
 	liquidationId: Bytes!
@@ -505,7 +505,7 @@ type LiquidatePartyA @entity(immutable: true) {
 
 type LiquidatePartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	liquidator: Bytes!
 	partyA: Bytes!
@@ -522,7 +522,7 @@ type LiquidatePartyB @entity(immutable: true) {
 
 type LiquidatePendingPositionsPartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	liquidatedAmounts: [BigInt!]
 	liquidationId: Bytes!
@@ -539,7 +539,7 @@ type LiquidatePendingPositionsPartyA @entity(immutable: true) {
 
 type LiquidatePositionsPartyA @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeIds: [BigInt!]
 	liquidatedAmounts: [BigInt!]
@@ -557,7 +557,7 @@ type LiquidatePositionsPartyA @entity(immutable: true) {
 
 type LiquidatePositionsPartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeIds: [BigInt!]
 	liquidatedAmounts: [BigInt!]
@@ -575,7 +575,7 @@ type LiquidatePositionsPartyB @entity(immutable: true) {
 
 type LiquidationDisputed @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	liquidationId: Bytes!
 	partyA: Bytes!
@@ -589,7 +589,7 @@ type LiquidationDisputed @entity(immutable: true) {
 
 type LockQuote @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	partyB: Bytes!
 	quoteId: BigInt!
@@ -604,7 +604,7 @@ type LockQuote @entity(immutable: true) {
 
 type OpenPosition @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	filledAmount: BigInt!
 	openedPrice: BigInt!
@@ -622,7 +622,7 @@ type OpenPosition @entity(immutable: true) {
 
 type PauseAccounting @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -634,7 +634,7 @@ type PauseAccounting @entity(immutable: true) {
 
 type PauseGlobal @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -646,7 +646,7 @@ type PauseGlobal @entity(immutable: true) {
 
 type PauseInternalTransfer @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -658,7 +658,7 @@ type PauseInternalTransfer @entity(immutable: true) {
 
 type PauseLiquidation @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -670,7 +670,7 @@ type PauseLiquidation @entity(immutable: true) {
 
 type PausePartyAActions @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -682,7 +682,7 @@ type PausePartyAActions @entity(immutable: true) {
 
 type PausePartyBActions @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -694,7 +694,7 @@ type PausePartyBActions @entity(immutable: true) {
 
 type RegisterAffiliate @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	affilate: Bytes!
 	blockNumber: BigInt!
@@ -707,7 +707,7 @@ type RegisterAffiliate @entity(immutable: true) {
 
 type RegisterPartyB @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	partyB: Bytes!
 	blockNumber: BigInt!
@@ -720,7 +720,7 @@ type RegisterPartyB @entity(immutable: true) {
 
 type RemoveBridge @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	bridge: Bytes!
 	blockNumber: BigInt!
@@ -733,7 +733,7 @@ type RemoveBridge @entity(immutable: true) {
 
 type RequestToCancelCloseRequest @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	partyA: Bytes!
@@ -751,7 +751,7 @@ type RequestToCancelCloseRequest @entity(immutable: true) {
 
 type RequestToCancelQuote @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	partyA: Bytes!
 	partyB: Bytes!
@@ -768,7 +768,7 @@ type RequestToCancelQuote @entity(immutable: true) {
 
 type RequestToClosePosition @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	closeId: BigInt!
 	closePrice: BigInt!
@@ -790,7 +790,7 @@ type RequestToClosePosition @entity(immutable: true) {
 
 type ResolveLiquidationDispute @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amounts: [BigInt!]
 	disputed: Boolean!
@@ -807,7 +807,7 @@ type ResolveLiquidationDispute @entity(immutable: true) {
 
 type RestoreBridgeTransaction @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	transactionId: BigInt!
 	validAmount: BigInt!
@@ -821,7 +821,7 @@ type RestoreBridgeTransaction @entity(immutable: true) {
 
 type RoleGranted @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes
+	source: Bytes
 	counterId: BigInt!
 	role: Bytes!
 	user: Bytes!
@@ -835,7 +835,7 @@ type RoleGranted @entity(immutable: true) {
 
 type RoleRevoked @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes
+	source: Bytes
 	counterId: BigInt!
 	role: Bytes!
 	user: Bytes!
@@ -849,7 +849,7 @@ type RoleRevoked @entity(immutable: true) {
 
 type SendQuote @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	cva: BigInt!
 	deadline: BigInt!
@@ -877,7 +877,7 @@ type SendQuote @entity(immutable: true) {
 
 type SetBalanceLimitPerUser @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	balanceLimitPerUser: BigInt!
 	blockNumber: BigInt!
@@ -890,7 +890,7 @@ type SetBalanceLimitPerUser @entity(immutable: true) {
 
 type SetCollateral @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	collateral: Bytes!
 	blockNumber: BigInt!
@@ -903,7 +903,7 @@ type SetCollateral @entity(immutable: true) {
 
 type SetDeallocateCooldown @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newDeallocateCooldown: BigInt!
 	oldDeallocateCooldown: BigInt!
@@ -917,7 +917,7 @@ type SetDeallocateCooldown @entity(immutable: true) {
 
 type SetDeallocateDebounceTime @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newDeallocateDebounceTime: BigInt!
 	oldDeallocateDebounceTime: BigInt!
@@ -931,7 +931,7 @@ type SetDeallocateDebounceTime @entity(immutable: true) {
 
 type SetDefaultFeeCollector @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newDefaultFeeCollector: Bytes!
 	oldDefaultFeeCollector: Bytes!
@@ -945,7 +945,7 @@ type SetDefaultFeeCollector @entity(immutable: true) {
 
 type SetFeeCollector @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	affiliate: Bytes!
 	newFeeCollector: Bytes!
@@ -960,7 +960,7 @@ type SetFeeCollector @entity(immutable: true) {
 
 type SetForceCancelCloseCooldown @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newForceCancelCloseCooldown: BigInt!
 	oldForceCancelCloseCooldown: BigInt!
@@ -974,7 +974,7 @@ type SetForceCancelCloseCooldown @entity(immutable: true) {
 
 type SetForceCancelCooldown @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newForceCancelCooldown: BigInt!
 	oldForceCancelCooldown: BigInt!
@@ -988,7 +988,7 @@ type SetForceCancelCooldown @entity(immutable: true) {
 
 type SetForceCloseCooldown @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newForceCloseCooldown: BigInt!
 	oldForceCloseCooldown: BigInt!
@@ -1002,7 +1002,7 @@ type SetForceCloseCooldown @entity(immutable: true) {
 
 type SetForceCloseCooldowns @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newForceCloseFirstCooldown: BigInt!
 	newForceCloseSecondCooldown: BigInt!
@@ -1018,7 +1018,7 @@ type SetForceCloseCooldowns @entity(immutable: true) {
 
 type SetForceCloseGapRatio @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newForceCloseGapRatio: BigInt!
 	oldForceCloseGapRatio: BigInt!
@@ -1033,7 +1033,7 @@ type SetForceCloseGapRatio @entity(immutable: true) {
 
 type SetForceCloseMinSigPeriod @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newCloseMinSigPeriod: BigInt!
 	oldCloseMinSigPeriod: BigInt!
@@ -1047,7 +1047,7 @@ type SetForceCloseMinSigPeriod @entity(immutable: true) {
 
 type SetForceClosePricePenalty @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newPricePenalty: BigInt!
 	oldPricePenalty: BigInt!
@@ -1061,7 +1061,7 @@ type SetForceClosePricePenalty @entity(immutable: true) {
 
 type SetInvalidBridgedAmountsPool @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newInvalidBridgedAmountsPool: Bytes!
 	oldInvalidBridgedAmountsPool: Bytes!
@@ -1075,7 +1075,7 @@ type SetInvalidBridgedAmountsPool @entity(immutable: true) {
 
 type SetLiquidationTimeout @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newLiquidationTimeout: BigInt!
 	oldLiquidationTimeout: BigInt!
@@ -1089,7 +1089,7 @@ type SetLiquidationTimeout @entity(immutable: true) {
 
 type SetLiquidatorShare @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newLiquidatorShare: BigInt!
 	oldLiquidatorShare: BigInt!
@@ -1103,7 +1103,7 @@ type SetLiquidatorShare @entity(immutable: true) {
 
 type SetMuonConfig @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	priceValidTime: BigInt!
 	upnlValidTime: BigInt!
@@ -1117,7 +1117,7 @@ type SetMuonConfig @entity(immutable: true) {
 
 type SetMuonIds @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	gateway: Bytes!
 	muonAppId: BigInt!
@@ -1133,7 +1133,7 @@ type SetMuonIds @entity(immutable: true) {
 
 type SetPartyBEmergencyStatus @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	partyB: Bytes!
 	status: Boolean!
@@ -1147,7 +1147,7 @@ type SetPartyBEmergencyStatus @entity(immutable: true) {
 
 type SetPendingQuotesValidLength @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newPendingQuotesValidLength: BigInt!
 	oldPendingQuotesValidLength: BigInt!
@@ -1161,7 +1161,7 @@ type SetPendingQuotesValidLength @entity(immutable: true) {
 
 type SetSettlementCooldown @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newSettlementCooldown: BigInt!
 	oldSettlementCooldown: BigInt!
@@ -1175,7 +1175,7 @@ type SetSettlementCooldown @entity(immutable: true) {
 
 type SetSuspendedAddress @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	isSuspended: Boolean!
 	user: Bytes!
@@ -1189,7 +1189,7 @@ type SetSuspendedAddress @entity(immutable: true) {
 
 type SetSymbolAcceptableValues @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	minAcceptablePortionLF: BigInt!
 	minAcceptableQuoteValue: BigInt!
@@ -1206,7 +1206,7 @@ type SetSymbolAcceptableValues @entity(immutable: true) {
 
 type SetSymbolFundingState @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	fundingRateEpochDuration: BigInt!
 	fundingRateWindowTime: BigInt!
@@ -1221,7 +1221,7 @@ type SetSymbolFundingState @entity(immutable: true) {
 
 type SetSymbolMaxLeverage @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	maxLeverage: BigInt!
 	oldMaxLeverage: BigInt!
@@ -1236,7 +1236,7 @@ type SetSymbolMaxLeverage @entity(immutable: true) {
 
 type SetSymbolMaxSlippage @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	maxSlippage: BigInt!
 	oldMaxSlippage: BigInt!
@@ -1251,7 +1251,7 @@ type SetSymbolMaxSlippage @entity(immutable: true) {
 
 type SetSymbolTradingFee @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	oldTradingFee: BigInt!
 	symbolId: BigInt!
@@ -1266,7 +1266,7 @@ type SetSymbolTradingFee @entity(immutable: true) {
 
 type SetSymbolsPrices @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	liquidationId: Bytes!
 	liquidator: Bytes!
@@ -1283,7 +1283,7 @@ type SetSymbolsPrices @entity(immutable: true) {
 
 type SetSymbolValidationState @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	isValid: Boolean!
 	oldState: Boolean!
@@ -1298,7 +1298,7 @@ type SetSymbolValidationState @entity(immutable: true) {
 
 type SettlePartyALiquidation @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amounts: [BigInt!]
 	liquidationId: Bytes!
@@ -1314,7 +1314,6 @@ type SettlePartyALiquidation @entity(immutable: true) {
 
 type QuoteSettlementData @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
 	quoteId: BigInt!
 	accountSource: Bytes!
 	currentPrice: BigInt!
@@ -1323,7 +1322,7 @@ type QuoteSettlementData @entity(immutable: true) {
 
 type SettleUpnl @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	newPartyAAllocatedBalance: BigInt!
 	newPartyBsAllocatedBalances: [BigInt!]
@@ -1340,7 +1339,7 @@ type SettleUpnl @entity(immutable: true) {
 
 type SuspendBridgeTransaction @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	transactionId: BigInt!
 	blockNumber: BigInt!
@@ -1353,7 +1352,7 @@ type SuspendBridgeTransaction @entity(immutable: true) {
 
 type TransferAllocation @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	origin: Bytes!
@@ -1370,7 +1369,7 @@ type TransferAllocation @entity(immutable: true) {
 
 type TransferToBridge @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	bridgeAddress: Bytes!
@@ -1386,7 +1385,7 @@ type TransferToBridge @entity(immutable: true) {
 
 type UnlockQuote @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	partyB: Bytes!
 	quoteId: BigInt!
@@ -1402,7 +1401,7 @@ type UnlockQuote @entity(immutable: true) {
 
 type UnpauseAccounting @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -1414,7 +1413,7 @@ type UnpauseAccounting @entity(immutable: true) {
 
 type UnpauseGlobal @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -1426,7 +1425,7 @@ type UnpauseGlobal @entity(immutable: true) {
 
 type UnpauseInternalTransfer @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -1438,7 +1437,7 @@ type UnpauseInternalTransfer @entity(immutable: true) {
 
 type UnpauseLiquidation @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -1450,7 +1449,7 @@ type UnpauseLiquidation @entity(immutable: true) {
 
 type UnpausePartyAActions @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -1462,7 +1461,7 @@ type UnpausePartyAActions @entity(immutable: true) {
 
 type UnpausePartyBActions @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
@@ -1474,7 +1473,7 @@ type UnpausePartyBActions @entity(immutable: true) {
 
 type Withdraw @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	sender: Bytes!
@@ -1489,7 +1488,7 @@ type Withdraw @entity(immutable: true) {
 
 type WithdrawFromReserveVault @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	amount: BigInt!
 	partyB: Bytes!
@@ -1503,7 +1502,7 @@ type WithdrawFromReserveVault @entity(immutable: true) {
 
 type WithdrawReceivedBridgeValue @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	transactionId: BigInt!
 	blockNumber: BigInt!
@@ -1516,7 +1515,7 @@ type WithdrawReceivedBridgeValue @entity(immutable: true) {
 
 type WithdrawReceivedBridgeValues @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	transactionIds: [BigInt!]
 	blockNumber: BigInt!
@@ -1543,7 +1542,7 @@ type AddAccount @entity(immutable: true) {
 
 type DiamondCut @entity(immutable: true) {
 	id: ID!
-	diamond: Bytes!
+	source: Bytes!
 	counterId: BigInt!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!

@@ -10,7 +10,7 @@ export class DepositHandler<T> {
 
 		let entity = new DepositEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.sender = event.params.sender
 		entity.user = event.params.user
 		entity.amount = event.params.amount

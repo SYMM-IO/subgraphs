@@ -17,7 +17,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 		if (!quote) {
 			quote = new Quote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 			quote.globalCounter = super.handleGlobalCounter()
-			quote.diamond = event.address
+			quote.source = event.address
 			quote.quoteId = event.params.quoteId
 			quote.timestamp = event.block.timestamp
 			quote.timestampSendQuote = event.block.timestamp

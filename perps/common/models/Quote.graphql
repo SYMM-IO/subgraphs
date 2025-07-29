@@ -1,6 +1,6 @@
 type Quote @entity(immutable: false) {
     id: String!
-	diamond: Bytes!
+	source: Bytes!
     globalCounter: BigInt!
     quoteId: BigInt!
     quoteStatus: Int

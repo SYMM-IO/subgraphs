@@ -13,7 +13,7 @@ export class RequestToClosePositionHandler<T> {
 
 		let entity = new RequestToClosePositionEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId

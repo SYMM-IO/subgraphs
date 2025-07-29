@@ -10,7 +10,7 @@ export class RoleGrantedHandler<T> {
 
 		let entity = new RoleGrantedEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.role = event.params.role
 		entity.user = event.params.user
 

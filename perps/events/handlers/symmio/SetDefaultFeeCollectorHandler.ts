@@ -10,7 +10,7 @@ export class SetDefaultFeeCollectorHandler<T> {
 
 		let entity = new SetDefaultFeeCollectorEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 
 		entity.newDefaultFeeCollector = event.params.newDefaultFeeCollector
 		entity.oldDefaultFeeCollector = event.params.oldDefaultFeeCollector

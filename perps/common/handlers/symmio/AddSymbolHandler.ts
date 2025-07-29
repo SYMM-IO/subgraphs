@@ -32,7 +32,7 @@ export class AddSymbolHandler<T> extends BaseHandler {
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		}
 		symbol.globalCounter = globalCounter
-		symbol.diamond = event.address
+		symbol.source = event.address
 		symbol.name = event.params.name
 		symbol.tradingFee = event.params.tradingFee
 		symbol.minAcceptableQuoteValue = event.params.minAcceptableQuoteValue

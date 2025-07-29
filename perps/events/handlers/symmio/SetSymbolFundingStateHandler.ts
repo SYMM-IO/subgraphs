@@ -14,7 +14,7 @@ export class SetSymbolFundingStateHandler<T> {
 
 		let entity = new SetSymbolFundingStateEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		switch (version) {
 			case Version.v_0_8_1:
 				// @ts-ignore

@@ -10,7 +10,7 @@ export class SuspendBridgeTransactionHandler<T> {
 
 		let entity = new SuspendBridgeTransactionEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 
 		entity.transactionId = event.params.transactionId
 

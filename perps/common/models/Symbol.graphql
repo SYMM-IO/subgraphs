@@ -3,7 +3,7 @@ type Symbol @entity(immutable: false) {
     globalCounter: BigInt!
     name: String!
     symbolId: BigInt!
-	diamond: Bytes!
+	source: Bytes!
     tradingFee: BigInt!
     isValid: Boolean!
     minAcceptableQuoteValue: BigInt

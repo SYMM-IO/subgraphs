@@ -10,7 +10,7 @@ export class SetSymbolTradingFeeHandler<T> {
 
 		let entity = new SetSymbolTradingFeeEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.symbolId = event.params.symbolId
 		entity.oldTradingFee = event.params.oldTradingFee
 		entity.tradingFee = event.params.tradingFee

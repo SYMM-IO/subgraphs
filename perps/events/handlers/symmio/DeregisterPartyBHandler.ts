@@ -10,7 +10,7 @@ export class DeregisterPartyBHandler<T> {
 
 		let entity = new DeregisterPartyBEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.partyB = event.params.partyB
 		entity.index = event.params.index
 

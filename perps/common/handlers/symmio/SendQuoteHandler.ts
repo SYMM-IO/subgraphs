@@ -22,7 +22,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		const event = changetype<T>(_event)
 		let quote = new Quote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		quote.globalCounter = super.handleGlobalCounter()
-		quote.diamond = event.address
+		quote.source = event.address
 		quote.quoteId = event.params.quoteId
 		quote.orderTypeOpen = event.params.orderType
 		quote.partyA = event.params.partyA

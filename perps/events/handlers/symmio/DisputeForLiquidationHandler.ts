@@ -12,7 +12,7 @@ export class DisputeForLiquidationHandler<T> {
 
 		let entity = new DisputeForLiquidationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
-		entity.diamond = event.address
+		entity.source = event.address
 		entity.liquidator = event.params.liquidator
 		entity.partyA = event.params.partyA
 		entity.transactionIndex = event.transaction.index

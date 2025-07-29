@@ -100,7 +100,7 @@
 		{
 			"address": "0x846f27e3b828412e24C7163d5b28FDa3C505D469",
 			"abi": "symmioMultiAccount",
-			"version": "2",
+			"version": "1",
 			"startBlock": "33455434"
 		}
 	],
