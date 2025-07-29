@@ -24,6 +24,10 @@ export class SetSymbolValidationStateHandler<T> extends BaseHandler {
 			const e = changetype<SetSymbolValidationState_8_3>(_event)
 			symbol = Symbol.load(e.params.symbolId.toString() + "-" + event.address.toHexString())!
 		}
+<<<<<<< HEAD
+=======
+		symbol.source = event.address
+>>>>>>> 120d3d0 (change field name: diamond -> source)
 		symbol.isValid = event.params.isValid
 		symbol.updateTimestamp = _event.block.timestamp
 		symbol.save()

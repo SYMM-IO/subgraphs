@@ -12,13 +12,25 @@ export class SetSymbolFundingStateHandler<T> extends BaseHandler {
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_2>(_event)
+<<<<<<< HEAD
 			symbol = Symbol.load(e.params.id.toString() + "-" + e.address.toHexString())!
+=======
+			symbol = new Symbol(e.params.id.toString() + "-" + e.address.toHexString())
+			symbol.source = e.address
+			symbol.symbolId = e.params.id
+>>>>>>> 120d3d0 (change field name: diamond -> source)
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		} else {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_3>(_event)
+<<<<<<< HEAD
 			symbol = Symbol.load(e.params.symbolId.toString() + "-" + e.address.toHexString())!
+=======
+			symbol = new Symbol(e.params.symbolId.toString() + "-" + e.address.toHexString())
+			symbol.source = e.address
+			symbol.symbolId = e.params.symbolId
+>>>>>>> 120d3d0 (change field name: diamond -> source)
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		}
