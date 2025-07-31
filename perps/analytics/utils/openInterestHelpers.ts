@@ -1,6 +1,12 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Account, OpenInterest, OpenInterestSettleDay } from "../../../generated/schema"
-import { getDailyHistoryForTimestamp, getOpenInterest, getSolverDailyHistoryForTimestamp, getSolverOpenInterest } from "./builders"
+import {
+	getDailyHistoryForTimestamp,
+	getOpenInterest,
+	getSolverDailyHistoryForTimestamp,
+	getSolverOnlyDailyHistoryForTimestamp,
+	getSolverOpenInterest,
+} from "./builders"
 import { diffInSeconds, endOfDayTimestamp, getDayNumber, SECONDS_IN_DAY, startOfDayTimestamp } from "./time"
 import { getPlayers } from "../../common/utils/builders"
 
@@ -130,10 +136,15 @@ function processOpenInterest(
 		}
 
 		if (isSolver) {
-			let dailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource)
-			dailyHistory.openInterest = dailyOpenInterest
-			dailyHistory.updateTimestamp = processingTimestamp
-			dailyHistory.save()
+			let solverDailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource)
+			solverDailyHistory.openInterest = dailyOpenInterest
+			solverDailyHistory.updateTimestamp = processingTimestamp
+			solverDailyHistory.save()
+
+			let solverOnlyDailyHistory = getSolverOnlyDailyHistoryForTimestamp(processingTimestamp, solverAccount!)
+			solverOnlyDailyHistory.openInterest = dailyOpenInterest
+			solverOnlyDailyHistory.updateTimestamp = processingTimestamp
+			solverOnlyDailyHistory.save()
 		} else {
 			let dailyHistory = getDailyHistoryForTimestamp(processingTimestamp, accountSource)
 			dailyHistory.openInterest = dailyOpenInterest
