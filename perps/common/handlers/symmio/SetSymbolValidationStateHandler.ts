@@ -18,11 +18,11 @@ export class SetSymbolValidationStateHandler<T> extends BaseHandler {
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_2>(_event)
-			symbol = new Symbol(e.params.id.toString())
+			symbol = Symbol.load(e.params.id.toString())!
 		} else {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_3>(_event)
-			symbol = new Symbol(e.params.symbolId.toString())
+			symbol = Symbol.load(e.params.symbolId.toString())!
 		}
 		symbol.isValid = event.params.isValid
 		symbol.updateTimestamp = _event.block.timestamp
