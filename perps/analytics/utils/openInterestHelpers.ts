@@ -5,6 +5,7 @@ import {
 	getOpenInterest,
 	getSolverDailyHistoryForTimestamp,
 	getSolverOnlyDailyHistoryForTimestamp,
+	getSolverOnlyOpenInterest,
 	getSolverOpenInterest,
 } from "./builders"
 import { diffInSeconds, endOfDayTimestamp, getDayNumber, SECONDS_IN_DAY, startOfDayTimestamp } from "./time"
@@ -19,6 +20,7 @@ export function updateDailyOpenInterest(
 ): void {
 	let affiliateOI: OpenInterest = getOpenInterest(blockTimestamp, accountSource)
 	let solverOI: OpenInterest = getSolverOpenInterest(blockTimestamp, accountSource, solver.account)
+	let solverOnlyOI: OpenInterest = getSolverOnlyOpenInterest(blockTimestamp, solver.account)
 
 	// Process affiliate open interest
 	processOpenInterest(
@@ -27,7 +29,7 @@ export function updateDailyOpenInterest(
 		value,
 		increase,
 		accountSource,
-		false, // isSolver is false
+		0, // affiliate
 		// solverAccount defaults to null
 	)
 
@@ -38,7 +40,18 @@ export function updateDailyOpenInterest(
 		value,
 		increase,
 		accountSource,
-		true, // isSolver is true
+		1, // solver
+		solver.account, // Pass solverAccount
+	)
+
+	// Process solver only open interest
+	processOpenInterest(
+		solverOnlyOI,
+		blockTimestamp,
+		value,
+		increase,
+		null,
+		2, // solver only
 		solver.account, // Pass solverAccount
 	)
 }
@@ -49,7 +62,7 @@ function processOpenInterest(
 	value: BigInt,
 	increase: boolean,
 	accountSource: Bytes | null,
-	isSolver: boolean,
+	isSolver: number,
 	solverAccount: Bytes | null = null,
 ): void {
 	let lastUpdateTimestamp = openInterest.timestamp
@@ -135,12 +148,12 @@ function processOpenInterest(
 			openInterest.weightedAmount = accumulatedFirstPart.plus(accumulatedSecondPart)
 		}
 
-		if (isSolver) {
+		if (isSolver == 1) {
 			let solverDailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource)
 			solverDailyHistory.openInterest = dailyOpenInterest
 			solverDailyHistory.updateTimestamp = processingTimestamp
 			solverDailyHistory.save()
-
+		} else if (isSolver == 2) {
 			let solverOnlyDailyHistory = getSolverOnlyDailyHistoryForTimestamp(processingTimestamp, solverAccount!)
 			solverOnlyDailyHistory.openInterest = dailyOpenInterest
 			solverOnlyDailyHistory.updateTimestamp = processingTimestamp

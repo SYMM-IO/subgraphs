@@ -348,6 +348,19 @@ export function getSolverOpenInterest(timestamp: BigInt, accountSource: Bytes | 
 	return oi
 }
 
+export function getSolverOnlyOpenInterest(timestamp: BigInt, solver: Bytes): OpenInterest {
+	const id = "OpenInterest_" + solver.toHexString()
+	let oi = OpenInterest.load(id)
+	if (oi == null) {
+		oi = new OpenInterest(id)
+		oi.amount = BigInt.zero()
+		oi.weightedAmount = BigInt.zero()
+		oi.timestamp = timestamp
+		oi.save()
+	}
+	return oi
+}
+
 export function getUserActivity(user: Bytes, accountSource: Bytes | null, timestamp: BigInt): UserActivity {
 	const id = user.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let ua = UserActivity.load(id)
