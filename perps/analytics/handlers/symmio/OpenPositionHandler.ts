@@ -7,6 +7,7 @@ import { QuoteStatus } from "../../utils/constants"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
+import { log } from "@graphprotocol/graph-ts"
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -17,7 +18,11 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
-		let account = Account.load(event.params.partyA.toHexString())!
+		let account = Account.load(event.params.partyA.toHexString())
+		if (account == null){
+			log.error("Account not found for partyA: {}", [event.params.partyA.toHexString()])
+			return // Should never happen
+		}
 		let volume = unDecimal(event.params.filledAmount.times(event.params.openedPrice))
 		let history = new TradeHistory(account.id + "-" + event.params.quoteId.toString())
 		history.account = event.params.partyA
@@ -30,8 +35,16 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		history.updateTimestamp = event.block.timestamp
 		history.save()
 
-		let quote = Quote.load(event.params.quoteId.toString())!
-		const symbol = Symbol.load(quote.symbolId!.toString())!
+		let quote = Quote.load(event.params.quoteId.toString())
+		if (quote == null){	
+			log.error("Quote not found for quoteId: {}", [event.params.quoteId.toString()])
+			return // Should never happen
+		}
+		const symbol = Symbol.load(quote.symbolId!.toString())
+		if (symbol == null){
+			log.error("Symbol not found for quoteId: {}", [event.params.quoteId.toString()])
+			return // Should never happen
+		}
 
 		let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
 
