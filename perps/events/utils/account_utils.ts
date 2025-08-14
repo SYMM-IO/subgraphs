@@ -10,6 +10,6 @@ export function findAccountSourceForQuote(quoteId: BigInt): Bytes {
 }
 
 export function findAccountSourceForQuoteForAccount(acc: Bytes): Bytes {
-	let account = AddAccount.load(acc.toString())
+	let account = AddAccount.load(acc.toHexString())
 	return account == null ? ZERO_ADDRESS : account.accountSource
 }
