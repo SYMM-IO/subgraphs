@@ -25,6 +25,7 @@ export class LiquidatePendingPositionsPartyAHandler<T> {
 				const e = changetype<LiquidatePendingPositionsPartyA_8_4>(_event)
 				entity.liquidationId = e.params.liquidationId
 				entity.liquidatedAmounts = e.params.liquidatedAmounts
+				entity.quoteIds = e.params.quoteIds
 				break
 			}
 			case Version.v_0_8_3: {
@@ -32,6 +33,7 @@ export class LiquidatePendingPositionsPartyAHandler<T> {
 				const e = changetype<LiquidatePendingPositionsPartyA_8_3>(_event)
 				entity.liquidationId = e.params.liquidationId
 				entity.liquidatedAmounts = e.params.liquidatedAmounts
+				entity.quoteIds = e.params.quoteIds
 				break
 			}
 			default: {
