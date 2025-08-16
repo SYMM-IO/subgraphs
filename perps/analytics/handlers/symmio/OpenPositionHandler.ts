@@ -1,13 +1,12 @@
 import { OpenPositionHandlerWithAccount as CommonOpenPositionHandler } from "../../../common/handlers/symmio/OpenPositionHandlerWithAccount"
-import { Account, Quote, Symbol, TradeHistory } from "../../../../generated/schema"
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { Account, DebugEntity, Quote, Symbol, TradeHistory } from "../../../../generated/schema"
+import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { QuoteStatus } from "../../utils/constants"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
-import { log } from "@graphprotocol/graph-ts"
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -19,8 +18,10 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		super.handleAccount(_event, version)
 
 		let account = Account.load(event.params.partyA.toHexString())
-		if (account == null){
-			log.error("Account not found for partyA: {}", [event.params.partyA.toHexString()])
+		if (account == null) {
+			let db = new DebugEntity("Account_" + event.params.partyA.toHexString() + "_" + event.block.timestamp.toString())
+			db.message = `Account not found for partyA: ${event.params.partyA.toHexString()}`
+			db.save()
 			return // Should never happen
 		}
 		let volume = unDecimal(event.params.filledAmount.times(event.params.openedPrice))
@@ -36,13 +37,17 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		history.save()
 
 		let quote = Quote.load(event.params.quoteId.toString())
-		if (quote == null){	
-			log.error("Quote not found for quoteId: {}", [event.params.quoteId.toString()])
+		if (quote == null) {
+			let db = new DebugEntity("Quote_" + event.params.quoteId.toString() + "_" + event.block.timestamp.toString())
+			db.message = `Quote not found for quoteId: ${event.params.quoteId.toString()}`
+			db.save()
 			return // Should never happen
 		}
 		const symbol = Symbol.load(quote.symbolId!.toString())
-		if (symbol == null){
-			log.error("Symbol not found for quoteId: {}", [event.params.quoteId.toString()])
+		if (symbol == null) {
+			let db = new DebugEntity("Symbol_" + quote.symbolId!.toString() + "_" + event.block.timestamp.toString())
+			db.message = `Symbol not found for symbolId: ${quote.symbolId!.toString()}`
+			db.save()
 			return // Should never happen
 		}
 
