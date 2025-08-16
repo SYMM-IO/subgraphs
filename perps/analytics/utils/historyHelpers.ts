@@ -20,6 +20,7 @@ export class UpdateHistoriesParams {
 	account: Account
 	solver: Account | null
 	accountSource: Bytes | null
+	source: Bytes
 	timestamp: BigInt
 	_openTradeVolume: BigInt = BigInt.zero()
 	_closeTradeVolume: BigInt = BigInt.zero()
@@ -45,6 +46,7 @@ export class UpdateHistoriesParams {
 		this.accountSource = accountSource
 		this.timestamp = event.block.timestamp
 		this.event = event
+		this.source = event.address
 	}
 
 	openTradeVolume(openTradeVolume: BigInt): UpdateHistoriesParams {
@@ -130,7 +132,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	const closeTradeVolume = params._closeTradeVolume
 	const liquidateTradeVolume = params._liquidateTradeVolume
 
-	const dh = getDailyHistoryForTimestamp(timestamp, params.accountSource)
+	const dh = getDailyHistoryForTimestamp(timestamp, params.accountSource, params.source)
 	dh.tradeVolume = dh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 	dh.openTradeVolume = dh.openTradeVolume.plus(openTradeVolume)
 	dh.closeTradeVolume = dh.closeTradeVolume.plus(closeTradeVolume)
@@ -205,7 +207,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		tsh.save()
 	}
 
-	const th = getTotalHistory(timestamp, params.accountSource, getAlreadyCreatedConfiguration(params.event, params.version).collateral)
+	const th = getTotalHistory(timestamp, params.accountSource, getAlreadyCreatedConfiguration(params.event, params.version).collateral, params.source)
 	th.tradeVolume = th.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 	th.openTradeVolume = th.openTradeVolume.plus(openTradeVolume)
 	th.closeTradeVolume = th.closeTradeVolume.plus(closeTradeVolume)

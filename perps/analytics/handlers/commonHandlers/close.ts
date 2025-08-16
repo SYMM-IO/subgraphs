@@ -59,5 +59,6 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		false,
 		solverAccount,
 		account.accountSource,
+		event.address,
 	)
 }

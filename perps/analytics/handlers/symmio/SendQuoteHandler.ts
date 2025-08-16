@@ -17,9 +17,9 @@ export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 		super.handleAccount(_event, version)
 
 		let account = Account.load(event.params.partyA.toHexString())!
-		updateActivityTimestamps(account, event.block.timestamp)
+		updateActivityTimestamps(account, event.block.timestamp, event.address)
 
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).quotesCount(BigInt.fromString("1")))
-		catchUpHistories(_event.block.timestamp)
+		catchUpHistories(_event.block.timestamp, event.address)
 	}
 }

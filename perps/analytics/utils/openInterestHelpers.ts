@@ -17,6 +17,7 @@ export function updateDailyOpenInterest(
 	increase: boolean,
 	solver: Account,
 	accountSource: Bytes | null,
+	source: Bytes,
 ): void {
 	let affiliateOI: OpenInterest = getOpenInterest(blockTimestamp, accountSource)
 	let solverOI: OpenInterest = getSolverOpenInterest(blockTimestamp, accountSource, solver.account)
@@ -29,6 +30,7 @@ export function updateDailyOpenInterest(
 		value,
 		increase,
 		accountSource,
+		source,
 		0, // affiliate
 		// solverAccount defaults to null
 	)
@@ -40,6 +42,7 @@ export function updateDailyOpenInterest(
 		value,
 		increase,
 		accountSource,
+		source,
 		1, // solver
 		solver.account, // Pass solverAccount
 	)
@@ -51,6 +54,7 @@ export function updateDailyOpenInterest(
 		value,
 		increase,
 		null,
+		source,
 		2, // solver only
 		solver.account, // Pass solverAccount
 	)
@@ -62,6 +66,7 @@ function processOpenInterest(
 	value: BigInt,
 	increase: boolean,
 	accountSource: Bytes | null,
+	source: Bytes,
 	isSolver: number,
 	solverAccount: Bytes | null = null,
 ): void {
@@ -159,7 +164,7 @@ function processOpenInterest(
 			solverOnlyDailyHistory.updateTimestamp = processingTimestamp
 			solverOnlyDailyHistory.save()
 		} else {
-			let dailyHistory = getDailyHistoryForTimestamp(processingTimestamp, accountSource)
+			let dailyHistory = getDailyHistoryForTimestamp(processingTimestamp, accountSource, source)
 			dailyHistory.openInterest = dailyOpenInterest
 			dailyHistory.updateTimestamp = processingTimestamp
 			dailyHistory.save()
@@ -174,7 +179,7 @@ function processOpenInterest(
 	openInterest.save()
 }
 
-export function catchUpHistories(blockTimestamp: BigInt): void {
+export function catchUpHistories(blockTimestamp: BigInt, source: Bytes): void {
 	let yesterday = getDayNumber(blockTimestamp).minus(BigInt.fromI32(1))
 
 	let id = "LastSettleDay"
@@ -204,7 +209,7 @@ export function catchUpHistories(blockTimestamp: BigInt): void {
 			let solver = Account.load(players.solvers[j].toHexString())
 			if (!solver) continue
 
-			updateDailyOpenInterest(timestamp, BigInt.zero(), true, solver, BigInt.fromByteArray(affiliate) == BigInt.zero() ? null : affiliate)
+			updateDailyOpenInterest(timestamp, BigInt.zero(), true, solver, BigInt.fromByteArray(affiliate) == BigInt.zero() ? null : affiliate, source)
 		}
 	}
 

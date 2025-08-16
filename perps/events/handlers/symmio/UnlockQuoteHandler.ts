@@ -14,7 +14,7 @@ export class UnlockQuoteHandler<T> {
 		entity.source = event.address
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		entity.quoteStatus = event.params.quoteStatus
 
 		entity.blockTimestamp = event.block.timestamp

@@ -11,6 +11,7 @@ export enum Version {
 
 export enum MultiAccountVersion {
 	v_1,
+	v_2,
 }
 
 export class BaseHandler {

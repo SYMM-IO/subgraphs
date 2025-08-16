@@ -32,6 +32,7 @@ type TradeHistory @entity(immutable: false) {
 
 type DailyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	day: BigInt!
 	quotesCount: BigInt!
 	tradeVolume: BigInt!
@@ -95,6 +96,7 @@ type SolverOnlyDailyHistory @entity(immutable: false) {
 
 type WeeklyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	tradeVolume: BigInt!
 	activeUsers: BigInt!
 	accountSource: Bytes
@@ -103,6 +105,7 @@ type WeeklyHistory @entity(immutable: false) {
 
 type MonthlyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	tradeVolume: BigInt!
 	activeUsers: BigInt!
 	accountSource: Bytes
@@ -111,6 +114,7 @@ type MonthlyHistory @entity(immutable: false) {
 
 type TotalHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	quotesCount: BigInt!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
@@ -239,6 +243,11 @@ type Configuration @entity(immutable: false) {
 	collateral: Bytes!
 	updateTimestamp: BigInt!
 	updateTransaction: Bytes!
+}
+
+type SourceConfig @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
 }
 
 type GrantedRole @entity(immutable: false) {

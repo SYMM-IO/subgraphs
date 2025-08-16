@@ -19,7 +19,7 @@ export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T>
 
 		let account = Account.load(event.params.user.toHexString())
 		if (account == null) return
-		updateActivityTimestamps(account, event.block.timestamp)
+		updateActivityTimestamps(account, event.block.timestamp, event.address)
 		if (version < Version.v_0_8_3) {
 			let deallocate = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
 			deallocate.type = balanceChangeTypes.get(BalanceChangeType.DEALLOCATE)

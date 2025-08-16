@@ -100,8 +100,9 @@
 		{
 			"address": "0x95605c64356572eb5C076Cb9c027c88b527A2059",
 			"abi": "symmioMultiAccount",
-			"version": "1",
-			"startBlock": "33579587"
+			"version": "2",
+			"startBlock": "33579587",
+			"name": "vibe_multi_account"
 		}
 	],
 	"deploy_urls": {

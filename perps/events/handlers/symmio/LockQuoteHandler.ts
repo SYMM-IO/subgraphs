@@ -14,7 +14,7 @@ export class LockQuoteHandler<T> {
 		entity.source = event.address
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

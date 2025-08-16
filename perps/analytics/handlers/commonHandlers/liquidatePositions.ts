@@ -83,5 +83,6 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 		false,
 		solverAccount,
 		account.accountSource,
+		event.address,
 	)
 }

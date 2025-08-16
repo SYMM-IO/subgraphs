@@ -14,7 +14,7 @@ export class ForceClosePositionHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.source = event.address
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.filledAmount = event.params.filledAmount

@@ -1,10 +1,8 @@
-import {BigInt, ethereum} from "@graphprotocol/graph-ts"
-import {
-	AddAccountHandler as CommonAddAccountHandler
-} from "../../../common/handlers/symmioMultiAccount/AddAccountHandler"
-import {User} from "../../../../generated/schema"
-import {MultiAccountVersion} from "../../../common/BaseHandler";
-import {getConfiguration, getDailyHistoryForTimestamp, getTotalHistory} from "../../utils/builders";
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { AddAccountHandler as CommonAddAccountHandler } from "../../../common/handlers/symmioMultiAccount/AddAccountHandler"
+import { User } from "../../../../generated/schema"
+import { MultiAccountVersion } from "../../../common/BaseHandler"
+import { getConfiguration, getDailyHistoryForTimestamp, getSource, getTotalHistory } from "../../utils/builders"
 
 export class AddAccountHandler<T> extends CommonAddAccountHandler<T> {
 	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
@@ -15,8 +13,8 @@ export class AddAccountHandler<T> extends CommonAddAccountHandler<T> {
 		let user = User.load(event.params.user.toHexString())
 		super.handleAccount(_event, version)
 
-		const dh = getDailyHistoryForTimestamp(event.block.timestamp, event.address)
-		const th = getTotalHistory(event.block.timestamp, event.address, getConfiguration(event).collateral)
+		const dh = getDailyHistoryForTimestamp(event.block.timestamp, event.address, getSource(event).source)
+		const th = getTotalHistory(event.block.timestamp, event.address, getConfiguration(event).collateral, getSource(event).source)
 		if (user == null) {
 			dh.newUsers = dh.newUsers.plus(BigInt.fromString("1"))
 			th.users = th.users.plus(BigInt.fromString("1"))

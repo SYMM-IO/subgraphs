@@ -31,7 +31,7 @@ export class SettleUpnlHandler<T> {
 			quoteData.quoteId = data.quoteId
 			quoteData.currentPrice = data.currentPrice
 			quoteData.partyBUpnlIndex = data.partyBUpnlIndex
-			quoteData.accountSource = findAccountSourceForQuote(data.quoteId)
+			quoteData.accountSource = findAccountSourceForQuote(data.quoteId.toString() + "-" + event.address.toHexString())
 			
 			// Save the individual quote data
 			quoteData.save()
