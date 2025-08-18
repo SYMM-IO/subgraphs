@@ -64,7 +64,7 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 	return dh
 }
 
-export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null): SolverDailyHistory {
+export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null, source: Bytes): SolverDailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
 	const id = dateStr + "_" + solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let sdh = SolverDailyHistory.load(id)
@@ -85,12 +85,13 @@ export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Byt
 		sdh.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
 		sdh.solver = solver
 		sdh.platformFee = BigInt.zero()
+		sdh.source = source
 		sdh.save()
 	}
 	return sdh
 }
 
-export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes): SolverOnlyDailyHistory {
+export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, source: Bytes): SolverOnlyDailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
 	const id = dateStr + "_" + solver.toHexString()
 	let sodh = SolverOnlyDailyHistory.load(id)
@@ -110,6 +111,7 @@ export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver:
 		sodh.fundingReceived = BigInt.zero()
 		sodh.solver = solver
 		sodh.platformFee = BigInt.zero()
+		sodh.source = source
 		sodh.save()
 	}
 	return sodh

@@ -2,12 +2,13 @@ import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { BaseMultiAccountHandler, MultiAccountVersion } from "../../BaseHandler"
 import { AccountType, createNewAccountIfNotExists, getPlayers } from "../../utils/builders"
 import { Affiliate } from "../../../../generated/schema"
+import { getSource } from "../../../analytics/utils/builders";
 
 export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		createNewAccountIfNotExists(
+		let account = createNewAccountIfNotExists(
 			event.params.account,
 			event.params.user,
 			event.address,
@@ -17,6 +18,8 @@ export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 			event.params.name,
 			true,
 		)
+		account.source = getSource(event).source
+		account.save()
 
 		const affId = event.address.toHexString()
 		let affiliate = Affiliate.load(affId)

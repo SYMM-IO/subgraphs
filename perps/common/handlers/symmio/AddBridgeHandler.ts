@@ -7,6 +7,8 @@ export class AddBridgeHandler<T> extends BaseHandler {
 		super.handleAccount(_event, version);
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		createNewAccountIfNotExists(event.params.bridge, event.params.bridge, null, AccountType.BRIDGE, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(event.params.bridge, event.params.bridge, null, AccountType.BRIDGE, event.block, event.transaction)
+		account.source = event.address
+		account.save()
 	}
 }

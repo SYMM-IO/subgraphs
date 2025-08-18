@@ -59,6 +59,7 @@ type DailyHistory @entity(immutable: false) {
 
 type SolverDailyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	day: BigInt!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
@@ -78,6 +79,7 @@ type SolverDailyHistory @entity(immutable: false) {
 
 type SolverOnlyDailyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	day: BigInt!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!

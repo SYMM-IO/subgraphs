@@ -28,18 +28,38 @@
 			"endBlock": "19458660"
 		},
 		{
-			"address": "0x8Ab178C07184ffD44F0ADfF4eA2ce6cFc33F3b86",
+			"address": "0x52e2230cdb80edebdadafcf24033608c9a636d7d",
+			"abi": "symmio",
+			"version": "0_8_0",
+			"startBlock": "2228875"
+		},
+		{
+			"address": "0x724796d2e9143920b1b58651b04e1ed201b8cc98",
 			"abi": "symmioMultiAccount",
 			"version": "1",
+			"startBlock": "5897272",
+			"name": "intentx_multi_account"
+		},
+		{
+			"address": "0x5de6949717f3aa8e0fbed5ce8b611ebcf1e44ae9",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "2230256",
+			"name": "based_multi_account"
+		},
+		{
+			"address": "0x8Ab178C07184ffD44F0ADfF4eA2ce6cFc33F3b86",
+			"abi": "symmioMultiAccount",
+			"version": "2",
 			"startBlock": "8616108",
-			"name": "intentx_multi_account_v2"
+			"name": "intentx_multi_account"
 		},
 		{
 			"address": "0x1c03B6480a4efC2d4123ba90d7857f0e1878B780",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "8616108",
-			"name": "based_multi_account_v2"
+			"name": "based_multi_account"
 		},
 		{
 			"address": "0x6D63921D8203044f6AbaD8F346d3AEa9A2719dDD",

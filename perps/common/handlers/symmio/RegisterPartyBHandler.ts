@@ -7,7 +7,9 @@ export class RegisterPartyBHandler<T> extends BaseHandler {
 		super.handleAccount(_event, version)
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		createNewAccountIfNotExists(event.params.partyB, event.params.partyB, null, AccountType.SOLVER, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(event.params.partyB, event.params.partyB, null, AccountType.SOLVER, event.block, event.transaction)
+		account.source = event.address
+		account.save()
 
 		let players = getPlayers()
 		let solvers: Bytes[] = []

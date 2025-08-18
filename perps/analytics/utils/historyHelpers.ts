@@ -153,7 +153,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.save()
 
 	if (params.solver != null) {
-		const sdh = getSolverDailyHistoryForTimestamp(timestamp, params.solver!.account, params.accountSource)
+		const sdh = getSolverDailyHistoryForTimestamp(timestamp, params.solver!.account, params.accountSource, params.source)
 		sdh.tradeVolume = sdh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 		sdh.openTradeVolume = sdh.openTradeVolume.plus(openTradeVolume)
 		sdh.closeTradeVolume = sdh.closeTradeVolume.plus(closeTradeVolume)
@@ -171,7 +171,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.updateTimestamp = timestamp
 		sdh.save()
 
-		const sodh = getSolverOnlyDailyHistoryForTimestamp(timestamp, params.solver!.account)
+		const sodh = getSolverOnlyDailyHistoryForTimestamp(timestamp, params.solver!.account, params.source)
 		sodh.tradeVolume = sodh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 		sodh.openTradeVolume = sodh.openTradeVolume.plus(openTradeVolume)
 		sodh.closeTradeVolume = sodh.closeTradeVolume.plus(closeTradeVolume)

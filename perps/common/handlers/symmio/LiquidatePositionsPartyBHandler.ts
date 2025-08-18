@@ -14,7 +14,9 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 		super.handleAccount(_event, version)
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		createNewAccountIfNotExists(event.params.liquidator, event.params.liquidator, null, AccountType.LIQUIDATOR, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(event.params.liquidator, event.params.liquidator, null, AccountType.LIQUIDATOR, event.block, event.transaction)
+		account.source = event.address
+		account.save()
 	}
 
 	handleQuote(_event: ethereum.Event, version: Version): void {

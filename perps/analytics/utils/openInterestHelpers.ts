@@ -154,12 +154,12 @@ function processOpenInterest(
 		}
 
 		if (isSolver == 1) {
-			let solverDailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource)
+			let solverDailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource, source)
 			solverDailyHistory.openInterest = dailyOpenInterest
 			solverDailyHistory.updateTimestamp = processingTimestamp
 			solverDailyHistory.save()
 		} else if (isSolver == 2) {
-			let solverOnlyDailyHistory = getSolverOnlyDailyHistoryForTimestamp(processingTimestamp, solverAccount!)
+			let solverOnlyDailyHistory = getSolverOnlyDailyHistoryForTimestamp(processingTimestamp, solverAccount!, source)
 			solverOnlyDailyHistory.openInterest = dailyOpenInterest
 			solverOnlyDailyHistory.updateTimestamp = processingTimestamp
 			solverOnlyDailyHistory.save()
