@@ -8,7 +8,7 @@ def main():
         # "./configs/perps/base_just_8_0.json",
         # "./configs/perps/bnb_just_8_0.json",
         # "./configs/perps/bnb.json",
-        "./configs/perps/base.json",
+        # "./configs/perps/base.json",
         # "./configs/perps/blast.json",
         # "./configs/perps/mantle.json",
         # "./configs/perps/mode.json",

@@ -66,7 +66,7 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 
 export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null, source: Bytes): SolverDailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
-	const id = dateStr + "_" + solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+	const id = dateStr + "_" + source.toHexString() + "_" + solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let sdh = SolverDailyHistory.load(id)
 	if (sdh == null) {
 		sdh = new SolverDailyHistory(id)
@@ -93,7 +93,7 @@ export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Byt
 
 export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, source: Bytes): SolverOnlyDailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
-	const id = dateStr + "_" + solver.toHexString()
+	const id = dateStr + "_" + source.toHexString() + "_" + solver.toHexString()
 	let sodh = SolverOnlyDailyHistory.load(id)
 	if (sodh == null) {
 		sodh = new SolverOnlyDailyHistory(id)
@@ -117,8 +117,8 @@ export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver:
 	return sodh
 }
 
-export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null): TotalSolverHistory {
-	const id = solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null, source: Bytes): TotalSolverHistory {
+	const id = solver.toHexString() + "_" + source.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let th = TotalSolverHistory.load(id)
 	if (th == null) {
 		th = new TotalSolverHistory(id)
@@ -135,6 +135,7 @@ export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountS
 		th.fundingReceived = BigInt.zero()
 		th.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
 		th.solver = solver
+		th.source = source
 		th.save()
 	}
 	return th

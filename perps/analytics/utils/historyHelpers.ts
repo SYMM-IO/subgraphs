@@ -189,7 +189,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sodh.updateTimestamp = timestamp
 		sodh.save()
 
-		const tsh = getTotalSolverHistory(timestamp, params.solver!.account, params.accountSource)
+		const tsh = getTotalSolverHistory(timestamp, params.solver!.account, params.accountSource, params.source)
 		tsh.tradeVolume = tsh.tradeVolume.plus(openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume))
 		tsh.openTradeVolume = tsh.openTradeVolume.plus(openTradeVolume)
 		tsh.closeTradeVolume = tsh.closeTradeVolume.plus(closeTradeVolume)

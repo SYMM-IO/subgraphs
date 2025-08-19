@@ -139,6 +139,7 @@ type TotalHistory @entity(immutable: false) {
 
 type TotalSolverHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
 	closeTradeVolume: BigInt!
