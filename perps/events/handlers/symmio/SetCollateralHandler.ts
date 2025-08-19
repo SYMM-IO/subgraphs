@@ -2,6 +2,7 @@ import { SetCollateral as SetCollateralEntity } from "../../../../generated/sche
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
+import { getSource } from "../../../common/utils/get_source";
 
 export class SetCollateralHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,5 +21,9 @@ export class SetCollateralHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 		entity.save()
+
+		let sourceConfig = getSource(event)
+		sourceConfig.source = event.address
+		sourceConfig.save()
 	}
 }

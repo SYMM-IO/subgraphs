@@ -2,7 +2,8 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { AddAccountHandler as CommonAddAccountHandler } from "../../../common/handlers/symmioMultiAccount/AddAccountHandler"
 import { User } from "../../../../generated/schema"
 import { MultiAccountVersion } from "../../../common/BaseHandler"
-import { getConfiguration, getDailyHistoryForTimestamp, getSource, getTotalHistory } from "../../utils/builders"
+import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory } from "../../utils/builders"
+import { getSource } from "../../../common/utils/get_source";
 
 export class AddAccountHandler<T> extends CommonAddAccountHandler<T> {
 	handle(_event: ethereum.Event, version: MultiAccountVersion): void {

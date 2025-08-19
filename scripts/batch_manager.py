@@ -5,8 +5,8 @@ import subprocess
 def main():
     configs = [
         # "./configs/perps/fantom_just_8_0.json",
-        # "./configs/perps/base_just_8_0.json",
-        # "./configs/perps/bnb_just_8_0.json",
+        # # "./configs/perps/base_just_8_0.json",
+        # # "./configs/perps/bnb_just_8_0.json",
         # "./configs/perps/bnb.json",
         # "./configs/perps/base.json",
         # "./configs/perps/blast.json",
@@ -17,7 +17,7 @@ def main():
         # "./configs/perps/polygon.json",
         # "./configs/perps/bera.json",
         # "./configs/perps/sonic.json",
-        # "./configs/perps/base_lc.json",
+        # # "./configs/perps/base_lc.json",
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",
         # "./configs/vaults/bnb.json",

@@ -1,8 +1,8 @@
 import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { BaseMultiAccountHandler, MultiAccountVersion } from "../../BaseHandler"
-import { AccountType, createNewAccountIfNotExists, getPlayers } from "../../utils/builders"
+import { AccountType, createNewAccountIfNotExists, getPlayers } from "../../utils/builders";
 import { Affiliate } from "../../../../generated/schema"
-import { getSource } from "../../../analytics/utils/builders";
+import { getSource } from "../../utils/get_source";
 
 export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {

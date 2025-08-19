@@ -1,6 +1,7 @@
 {
   "importModels": [
     "GlobalCounter",
-    "DebugEntity"
+    "DebugEntity",
+    "SourceConfig"
   ]
 }

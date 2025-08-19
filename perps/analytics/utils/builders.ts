@@ -395,16 +395,6 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 	return configuration
 }
 
-export function getSource(event: ethereum.Event): SourceConfig {
-	let sourceConfig = SourceConfig.load("0")
-	if (sourceConfig == null) {
-		sourceConfig = new SourceConfig("0")
-		sourceConfig.source = event.address // Will be replaced shortly after creation
-		sourceConfig.save()
-	}
-	return sourceConfig
-}
-
 export function getAlreadyCreatedConfiguration(event: ethereum.Event, version: Version): Configuration {
 	let conf = Configuration.load("0")!
 	if (conf.collateral == event.address) {

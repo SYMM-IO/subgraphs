@@ -1,5 +1,5 @@
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
-import { Account as AccountModel, User as UserModel, Players } from "../../../generated/schema"
+import { Account as AccountModel, Players, User as UserModel } from "../../../generated/schema"
 import { getGlobalCounterAndInc } from "../utils"
 
 export enum AccountType {

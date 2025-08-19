@@ -1,0 +1,4 @@
+type SourceConfig @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+}

@@ -248,11 +248,6 @@ type Configuration @entity(immutable: false) {
 	updateTransaction: Bytes!
 }
 
-type SourceConfig @entity(immutable: false) {
-	id: ID!
-	source: Bytes!
-}
-
 type GrantedRole @entity(immutable: false) {
 	id: ID!
 	role: String!

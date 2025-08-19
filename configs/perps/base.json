@@ -38,28 +38,28 @@
 			"abi": "symmioMultiAccount",
 			"version": "1",
 			"startBlock": "5897272",
-			"name": "intentx_multi_account"
+			"name": "intentx_multi_account_v1"
 		},
 		{
 			"address": "0x5de6949717f3aa8e0fbed5ce8b611ebcf1e44ae9",
 			"abi": "symmioMultiAccount",
 			"version": "1",
 			"startBlock": "2230256",
-			"name": "based_multi_account"
+			"name": "based_multi_account_v1"
 		},
 		{
 			"address": "0x8Ab178C07184ffD44F0ADfF4eA2ce6cFc33F3b86",
 			"abi": "symmioMultiAccount",
-			"version": "2",
+			"version": "1",
 			"startBlock": "8616108",
-			"name": "intentx_multi_account"
+			"name": "intentx_multi_account_v2"
 		},
 		{
 			"address": "0x1c03B6480a4efC2d4123ba90d7857f0e1878B780",
 			"abi": "symmioMultiAccount",
-			"version": "2",
+			"version": "1",
 			"startBlock": "8616108",
-			"name": "based_multi_account"
+			"name": "based_multi_account_v2"
 		},
 		{
 			"address": "0x6D63921D8203044f6AbaD8F346d3AEa9A2719dDD",

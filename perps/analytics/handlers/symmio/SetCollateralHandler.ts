@@ -1,7 +1,8 @@
 import { SetCollateralHandler as CommonSetCollateralHandler } from "../../../common/handlers/symmio/SetCollateralHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { getConfiguration, getSource } from "../../utils/builders"
+import { getConfiguration } from "../../utils/builders"
+import { getSource } from "../../../common/utils/get_source";
 
 export class SetCollateralHandler<T> extends CommonSetCollateralHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
