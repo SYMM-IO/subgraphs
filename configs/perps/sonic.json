@@ -10,7 +10,7 @@
 		{
 			"address": "0xd90ACA50eE8Cb7C3dD1fEe84A722d574186cdd17",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "35977779",
 			"name": "Spooky"
 		}

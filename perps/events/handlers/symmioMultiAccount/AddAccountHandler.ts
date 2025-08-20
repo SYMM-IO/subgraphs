@@ -10,7 +10,7 @@ export class AddAccountHandler<T> {
 		const event = changetype<T>(_event)
 		let entity = new AddAccount(event.params.account.toHexString())
 		entity.user = event.params.user
-		entity.source = getSource(event).source
+		entity.source = getSource<T>(event, version)
 		entity.counterId = getGlobalCounterAndInc()
 		entity.account = event.params.account
 		entity.accountSource = event.address

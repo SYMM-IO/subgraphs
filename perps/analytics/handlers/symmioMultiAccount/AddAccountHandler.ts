@@ -14,8 +14,8 @@ export class AddAccountHandler<T> extends CommonAddAccountHandler<T> {
 		let user = User.load(event.params.user.toHexString())
 		super.handleAccount(_event, version)
 
-		const dh = getDailyHistoryForTimestamp(event.block.timestamp, event.address, getSource(event).source)
-		const th = getTotalHistory(event.block.timestamp, event.address, getConfiguration(event).collateral, getSource(event).source)
+		const dh = getDailyHistoryForTimestamp(event.block.timestamp, event.address, getSource<T>(event, version))
+		const th = getTotalHistory(event.block.timestamp, event.address, getConfiguration(event).collateral, getSource<T>(event, version))
 		if (user == null) {
 			dh.newUsers = dh.newUsers.plus(BigInt.fromString("1"))
 			th.users = th.users.plus(BigInt.fromString("1"))

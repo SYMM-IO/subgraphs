@@ -18,7 +18,7 @@ export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 			event.params.name,
 			true,
 		)
-		account.source = getSource(event).source
+		account.source = getSource<T>(event, version)
 		account.save()
 
 		const affId = event.address.toHexString()

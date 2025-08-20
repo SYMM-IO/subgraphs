@@ -7,7 +7,6 @@
 		"Account",
 		"Players",
 		"Affiliate",
-		"DebugEntity",
-		"SourceConfig"
+		"DebugEntity"
 	]
 }

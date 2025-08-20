@@ -10,7 +10,6 @@ import {
 	OpenInterest,
 	SolverDailyHistory,
 	SolverOnlyDailyHistory,
-	SourceConfig,
 	SymbolTradeHistory,
 	TotalHistory,
 	TotalSolverHistory,
@@ -66,7 +65,8 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 
 export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null, source: Bytes): SolverDailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
-	const id = dateStr + "_" + source.toHexString() + "_" + solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+	const id =
+		dateStr + "_" + source.toHexString() + "_" + solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let sdh = SolverDailyHistory.load(id)
 	if (sdh == null) {
 		sdh = new SolverDailyHistory(id)

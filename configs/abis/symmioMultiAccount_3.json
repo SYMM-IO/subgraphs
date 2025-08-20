@@ -5,6 +5,58 @@
 		"type": "constructor"
 	},
 	{
+		"inputs": [],
+		"name": "AccessControlBadConfirmation",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes32",
+				"name": "neededRole",
+				"type": "bytes32"
+			}
+		],
+		"name": "AccessControlUnauthorizedAccount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "EnforcedPause",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ExpectedPause",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidInitialization",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotInitializing",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			}
+		],
+		"name": "SafeERC20FailedOperation",
+		"type": "error"
+	},
+	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -60,6 +112,25 @@
 			{
 				"indexed": false,
 				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "partyB",
+				"type": "address"
+			}
+		],
+		"name": "BindToPartyB",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			},
@@ -89,6 +160,68 @@
 			}
 		],
 		"name": "Call",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes4",
+				"name": "selector",
+				"type": "bytes4"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "state",
+				"type": "bool"
+			}
+		],
+		"name": "DelegateAccess",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes4[]",
+				"name": "selector",
+				"type": "bytes4[]"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "state",
+				"type": "bool"
+			}
+		],
+		"name": "DelegateAccesses",
 		"type": "event"
 	},
 	{
@@ -165,9 +298,9 @@
 		"inputs": [
 			{
 				"indexed": false,
-				"internalType": "uint8",
+				"internalType": "uint64",
 				"name": "version",
-				"type": "uint8"
+				"type": "uint64"
 			}
 		],
 		"name": "Initialized",
@@ -184,6 +317,31 @@
 			}
 		],
 		"name": "Paused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes4[]",
+				"name": "selector",
+				"type": "bytes4[]"
+			}
+		],
+		"name": "ProposeToRevokeAccesses",
 		"type": "event"
 	},
 	{
@@ -296,7 +454,45 @@
 				"type": "address"
 			}
 		],
-		"name": "SetSymmioAddress",
+		"name": "SetAccountsAdmin",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "oldCooldown",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newCooldown",
+				"type": "uint256"
+			}
+		],
+		"name": "SetRevokeCooldown",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "oldAddress",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "newAddress",
+				"type": "address"
+			}
+		],
+		"name": "SetVibeRflAddress",
 		"type": "event"
 	},
 	{
@@ -465,14 +661,132 @@
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
+				"components": [
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "partyB",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "rflCode",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "referrerTokenId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "symmioAddress",
+						"type": "address"
+					}
+				],
+				"internalType": "struct IMultiAccount.AccountCreationParams[]",
+				"name": "params",
+				"type": "tuple[]"
 			}
 		],
-		"name": "addAccount",
+		"name": "createAccounts",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "accountAddresses",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes4",
+				"name": "selector",
+				"type": "bytes4"
+			},
+			{
+				"internalType": "bool",
+				"name": "state",
+				"type": "bool"
+			}
+		],
+		"name": "delegateAccess",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes4[]",
+				"name": "selector",
+				"type": "bytes4[]"
+			},
+			{
+				"internalType": "bool",
+				"name": "state",
+				"type": "bool"
+			}
+		],
+		"name": "delegateAccesses",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"name": "delegatedAccesses",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -611,6 +925,112 @@
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "getVibeAccount",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "accountAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "boundPartyB",
+								"type": "address"
+							},
+							{
+								"internalType": "address",
+								"name": "symmioAddress",
+								"type": "address"
+							}
+						],
+						"internalType": "struct IMultiAccount.VibeAccountData",
+						"name": "data",
+						"type": "tuple"
+					}
+				],
+				"internalType": "struct IMultiAccount.VibeAccount",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "start",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "size",
+				"type": "uint256"
+			}
+		],
+		"name": "getVibeAccounts",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "accountAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "boundPartyB",
+								"type": "address"
+							},
+							{
+								"internalType": "address",
+								"name": "symmioAddress",
+								"type": "address"
+							}
+						],
+						"internalType": "struct IMultiAccount.VibeAccountData",
+						"name": "data",
+						"type": "tuple"
+					}
+				],
+				"internalType": "struct IMultiAccount.VibeAccount[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "bytes32",
 				"name": "role",
 				"type": "bytes32"
@@ -677,11 +1097,6 @@
 				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "symmioAddress_",
-				"type": "address"
-			},
-			{
 				"internalType": "bytes",
 				"name": "accountImplementation_",
 				"type": "bytes"
@@ -734,19 +1149,107 @@
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes4[]",
+				"name": "selector",
+				"type": "bytes4[]"
+			}
+		],
+		"name": "proposeToRevokeAccesses",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "bytes32",
 				"name": "role",
 				"type": "bytes32"
 			},
 			{
 				"internalType": "address",
-				"name": "account",
+				"name": "callerConfirmation",
 				"type": "address"
 			}
 		],
 		"name": "renounceRole",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "target",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes4[]",
+				"name": "selector",
+				"type": "bytes4[]"
+			}
+		],
+		"name": "revokeAccesses",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "revokeCooldown",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "bytes4",
+				"name": "",
+				"type": "bytes4"
+			}
+		],
+		"name": "revokeProposalTimestamp",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -797,11 +1300,37 @@
 		"inputs": [
 			{
 				"internalType": "address",
+				"name": "admin",
+				"type": "address"
+			}
+		],
+		"name": "setAccountsAdmin",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "cooldown",
+				"type": "uint256"
+			}
+		],
+		"name": "setRevokeCooldown",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
 				"name": "addr",
 				"type": "address"
 			}
 		],
-		"name": "setSymmioAddress",
+		"name": "setVibeRflAddress",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -827,11 +1356,29 @@
 	},
 	{
 		"inputs": [],
-		"name": "symmioAddress",
-		"outputs": [
+		"name": "unpause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
 			{
 				"internalType": "address",
 				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "vibeAccountData",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "boundPartyB",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "symmioAddress",
 				"type": "address"
 			}
 		],
@@ -840,9 +1387,15 @@
 	},
 	{
 		"inputs": [],
-		"name": "unpause",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"name": "vibeRfl",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
