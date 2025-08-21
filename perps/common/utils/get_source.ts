@@ -25,8 +25,8 @@ export function getVibeDiamond<T>(_event: ethereum.Event): Bytes {
 	// @ts-ignore
 	const event = changetype<T>(_event)
 	const contract = symmioMultiAccount_3.bind(event.address)
-	let vibe_account = contract.getVibeAccount(event.params.account)
-	return vibe_account.data.symmioAddress
+	let result = contract.try_getVibeAccount(event.params.account)
+	return result.reverted ? Bytes.fromHexString(ZERO_ADDRESS) : result.value.data.symmioAddress
 }
 
 export function getSource<T>(event: ethereum.Event, version: MultiAccountVersion): Bytes {
