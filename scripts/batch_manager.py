@@ -13,7 +13,7 @@ def main():
         # "./configs/perps/mantle.json",
         # "./configs/perps/mode.json",
         # "./configs/perps/arbitrum.json",
-        # "./configs/perps/iota.json",
+        # # "./configs/perps/iota.json",
         # "./configs/perps/polygon.json",
         # "./configs/perps/bera.json",
         # "./configs/perps/sonic.json",

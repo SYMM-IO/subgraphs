@@ -1,5 +1,5 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
-import { Account, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { Version } from "../../../common/BaseHandler"
@@ -18,12 +18,25 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		return
 	}
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
+
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
 	history.volume = history.volume.plus(additionalVolume)
 	history.updateTimestamp = event.block.timestamp
 	history.quoteStatus = quote.quoteStatus
 	history.quote = event.params.quoteId
 	history.save()
+
+	let closeHistory = new CloseHistory(
+		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString() + "-" + event.block.timestamp.toString(),
+	)
+	closeHistory.account = event.params.partyA
+	closeHistory.volume = additionalVolume
+	closeHistory.timestamp = event.block.timestamp
+	closeHistory.blockNumber = event.block.number
+	closeHistory.transaction = event.transaction.hash
+	closeHistory.quoteStatus = quote.quoteStatus
+	closeHistory.quote = event.params.quoteId
+	closeHistory.save()
 
 	let account = Account.load(event.params.partyA.toHexString())!
 	let solverAccount = Account.load(quote.partyB!.toHexString())!

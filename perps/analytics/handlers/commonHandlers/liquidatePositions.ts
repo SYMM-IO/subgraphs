@@ -1,7 +1,7 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Version } from "../../../common/BaseHandler"
 import { BigInt } from "@graphprotocol/graph-ts"
-import { Account, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
 import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
 import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
@@ -64,6 +64,16 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	history.updateTimestamp = event.block.timestamp
 	history.quote = qId
 	history.save()
+
+	let closeHistory = new CloseHistory(event.params.partyA.toHexString() + "-" + qId.toString() + "-" + event.block.timestamp.toString())
+	closeHistory.account = event.params.partyA
+	closeHistory.volume = additionalVolume
+	closeHistory.timestamp = event.block.timestamp
+	closeHistory.blockNumber = event.block.number
+	closeHistory.transaction = event.transaction.hash
+	closeHistory.quoteStatus = QuoteStatus.LIQUIDATED
+	closeHistory.quote = qId
+	closeHistory.save()
 
 	let account = Account.load(quote.partyA.toHexString())!
 	let solverAccount = Account.load(quote.partyB!.toHexString())!

@@ -30,6 +30,17 @@ type TradeHistory @entity(immutable: false) {
 	quote: BigInt!
 }
 
+type CloseHistory @entity(immutable: false) {
+	id: ID!
+	account: Bytes!
+	volume: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+	quoteStatus: Int!
+	quote: BigInt!
+}
+
 type DailyHistory @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
