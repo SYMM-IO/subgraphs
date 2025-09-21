@@ -58,7 +58,7 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	}
 	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 
-	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString() + "-" + event.address.toHexString())!
+	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!
 	history.volume = history.volume.plus(additionalVolume)
 	history.quoteStatus = QuoteStatus.LIQUIDATED
 	history.updateTimestamp = event.block.timestamp

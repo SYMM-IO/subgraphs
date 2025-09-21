@@ -20,7 +20,6 @@ type BalanceChange @entity(immutable: false) {
 
 type TradeHistory @entity(immutable: false) {
 	id: ID!
-	source: Bytes!
 	account: Bytes!
 	volume: BigInt!
 	timestamp: BigInt!
