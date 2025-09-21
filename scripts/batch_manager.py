@@ -18,10 +18,12 @@ def main():
         # "./configs/perps/bera.json",
         # "./configs/perps/sonic.json",
         # # "./configs/perps/base_lc.json",
+
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",
         # "./configs/vaults/bnb.json",
         # "./configs/vaults/mantle.json",
+
         # "./configs/timelocks/base.json",
         # "./configs/timelocks/arbitrum.json",
         # "./configs/timelocks/bnb.json",

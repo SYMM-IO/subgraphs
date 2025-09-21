@@ -79,6 +79,7 @@ type Quote @entity(immutable: false) {
     timestampSendQuote: BigInt
     timestampRequestToLimitClosePosition: BigInt
     timestampUnlockQuote: BigInt
+    timestampSettleUpnl: BigInt
     timestampRequestToClosePosition: BigInt
     timestampLiquidatePendingPositionsPartyA: BigInt
     timestampLiquidatePositionsPartyA: BigInt
@@ -101,6 +102,7 @@ type Quote @entity(immutable: false) {
     txHashSendQuote: Bytes
     txHashRequestToLimitClosePosition: Bytes
     txHashUnlockQuote: Bytes
+    txHashSettleUpnl: Bytes
     txHashRequestToClosePosition: Bytes
     txHashLiquidatePendingPositionsPartyA: Bytes
     txHashLiquidatePositionsPartyA: Bytes

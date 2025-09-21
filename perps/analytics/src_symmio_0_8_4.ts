@@ -39,6 +39,7 @@ import {
 	Withdraw,
 	SetSymbolValidationState,
 	SetSymbolFundingState,
+	SettleUpnl,
 } from "../../generated/symmio_0_8_4/symmio_0_8_4"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
@@ -78,6 +79,7 @@ import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
+import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler";
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -271,5 +273,10 @@ export function handleUnlockQuote(event: UnlockQuote): void {
 
 export function handleWithdraw(event: Withdraw): void {
 	let handler = new WithdrawHandler<Withdraw>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleSettleUpnl(event: SettleUpnl): void {
+	let handler = new SettleUpnlHandler<SettleUpnl>()
 	handler.handle(event, Version.v_0_8_4)
 }

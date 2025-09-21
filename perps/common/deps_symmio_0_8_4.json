@@ -14,7 +14,8 @@
     "ForceClosePosition",
     "EmergencyClosePosition",
     "FillCloseRequest",
-    "OpenPosition"
+    "OpenPosition",
+    "SettleUpnl"
   ],
   "User": [
     "SendQuote",

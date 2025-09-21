@@ -20,6 +20,7 @@ type BalanceChange @entity(immutable: false) {
 
 type TradeHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	account: Bytes!
 	volume: BigInt!
 	timestamp: BigInt!
@@ -32,6 +33,7 @@ type TradeHistory @entity(immutable: false) {
 
 type CloseHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	account: Bytes!
 	volume: BigInt!
 	timestamp: BigInt!
@@ -122,6 +124,15 @@ type MonthlyHistory @entity(immutable: false) {
 	tradeVolume: BigInt!
 	activeUsers: BigInt!
 	accountSource: Bytes
+	timestamp: BigInt!
+}
+
+type QuotePriceUpdate @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	quoteId: BigInt!
+	prevPrice: BigInt!
+	newPrice: BigInt!
 	timestamp: BigInt!
 }
 

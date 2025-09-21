@@ -19,7 +19,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	}
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
 
-	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())!
+	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString() + "-" + event.address.toHexString())!
 	history.volume = history.volume.plus(additionalVolume)
 	history.updateTimestamp = event.block.timestamp
 	history.quoteStatus = quote.quoteStatus
@@ -27,8 +27,9 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	history.save()
 
 	let closeHistory = new CloseHistory(
-		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString() + "-" + event.block.timestamp.toString(),
+		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
 	)
+	closeHistory.source = event.address
 	closeHistory.account = event.params.partyA
 	closeHistory.volume = additionalVolume
 	closeHistory.timestamp = event.block.timestamp

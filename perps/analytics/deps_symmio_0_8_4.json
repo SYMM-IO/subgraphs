@@ -160,5 +160,9 @@
   "Account": [
     "RequestToCancelCloseRequest",
     "RequestToCancelQuote"
+  ],
+  "QuotePriceUpdate": [
+    "ChargeFundingRate",
+    "SettleUpnl"
   ]
 }

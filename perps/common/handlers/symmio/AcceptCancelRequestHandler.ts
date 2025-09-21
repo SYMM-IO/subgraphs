@@ -42,6 +42,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
@@ -71,6 +73,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
@@ -100,6 +104,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
@@ -129,6 +135,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
@@ -157,6 +165,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.mm
 					quote.initialPartyBmm = q.lockedValues.mm
+					quote.partyAmm = q.lockedValues.mm
+					quote.partyBmm = q.lockedValues.mm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice

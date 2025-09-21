@@ -19,7 +19,8 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 
 		let account = Account.load(event.params.partyA.toHexString())!
 		let volume = unDecimal(event.params.filledAmount.times(event.params.openedPrice))
-		let history = new TradeHistory(account.id + "-" + event.params.quoteId.toString())
+		let history = new TradeHistory(account.id + "-" + event.params.quoteId.toString() + "-" + event.address.toHexString())
+		history.source = event.address
 		history.account = event.params.partyA
 		history.timestamp = event.block.timestamp
 		history.blockNumber = event.block.number
