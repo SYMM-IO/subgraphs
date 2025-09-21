@@ -21,6 +21,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			quote_price_update.quoteId = quoteId
 			quote_price_update.source = event.address
 			quote_price_update.prevPrice = quote.openedPrice!
+			quote_price_update.type = "ChargeFundingRate"
 			quote_price_update.timestamp = event.block.timestamp
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 			let funding: BigInt

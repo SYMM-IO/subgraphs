@@ -22,6 +22,7 @@ export class SettleUpnlHandler<T> extends BaseHandler {
 			quote_price_update.quoteId = data.quoteId
 			quote_price_update.prevPrice = data.currentPrice
 			quote_price_update.newPrice = event.params.updatedPrices[i]
+			quote_price_update.type = "SettleUpnl"
 			quote_price_update.timestamp = event.block.timestamp
 
 			setEventTimestampAndTransactionHashAndAction(quote, "SettleUpnl", _event)
