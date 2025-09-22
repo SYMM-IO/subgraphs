@@ -559,7 +559,7 @@ def main():
             "create",
             f"{deploy_url}/{args.version}",
             "--tag",
-            "multi_source",
+            "latest",  # "multi_source",
         ]
         subprocess.run(command, check=True)
 

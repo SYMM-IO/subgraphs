@@ -130,6 +130,7 @@ type QuotePriceUpdate @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
 	quoteId: BigInt!
+	openQuantity: BigInt!
 	prevPrice: BigInt!
 	newPrice: BigInt!
     type: String!
