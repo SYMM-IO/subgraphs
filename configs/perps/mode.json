@@ -34,6 +34,20 @@
 			"version": "2",
 			"startBlock": "16673330",
 			"name": "xpanse_multi_account"
+		},
+		{
+			"address": "0x5d51a2d77111f6A0aa1e0144f8025752cb1CEbA4",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "14239807",
+			"name": "bmx"
+		},
+		{
+			"address": "0x46b7763dCBddb72b303675B623BA480B3c145F9B",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "18634741",
+			"name": "horizon"
 		}
 	],
 	"deploy_urls": {

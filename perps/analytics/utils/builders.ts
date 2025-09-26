@@ -25,9 +25,7 @@ import { getCollateral as getCollateral_0_8_3 } from "../../common/contract_util
 import { getCollateral as getCollateral_0_8_2 } from "../../common/contract_utils_0_8_2"
 import { getCollateral as getCollateral_0_8_1 } from "../../common/contract_utils_0_8_1"
 import { getCollateral as getCollateral_0_8_0 } from "../../common/contract_utils_0_8_0"
-
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-const ZERO_ADDRESS_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
+import { ZERO_ADDRESS, ZERO_ADDRESS_BYTES } from "./constants";
 
 export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null, source: Bytes): DailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
@@ -51,6 +49,7 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.activeUsers = BigInt.zero()
 		dh.newAccounts = BigInt.zero()
 		dh.platformFee = BigInt.zero()
+		dh.symmioShare = BigInt.zero()
 		dh.openInterest = BigInt.zero()
 		dh.fundingPaid = BigInt.zero()
 		dh.fundingReceived = BigInt.zero()

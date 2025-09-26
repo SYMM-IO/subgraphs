@@ -34,6 +34,27 @@
 			"version": "2",
 			"startBlock": "65237918",
 			"name": "multi_account_cloverfield"
+		},
+		{
+			"address": "0xA2C779F0950Aa771663cf1b0B8Ce64D5B3B29c19",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "69087829",
+			"name": "intentx"
+		},
+		{
+			"address": "0x8952F24fa7A3F800532634791Fe8592e031aEb3c",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "69087699",
+			"name": "vibe"
+		},
+		{
+			"address": "0x4882900e76fE1fE8c5a034a85Abd71eB20b72E85",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "69087795",
+			"name": "cloverfield"
 		}
 	],
 	"deploy_urls": {

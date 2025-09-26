@@ -61,6 +61,7 @@ abi_versions = {
     "symm_token": ["1"],
     "options": ["1"],
     "optionsMultiAccount": ["1"],
+    "feeCollector": ["1"],
 }
 
 

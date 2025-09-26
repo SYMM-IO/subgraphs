@@ -70,6 +70,8 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	)
 	closeHistory.source = event.address
 	closeHistory.account = event.params.partyA
+	closeHistory.amount = liquidAmount
+	closeHistory.closePrice = liquidPrice
 	closeHistory.volume = additionalVolume
 	closeHistory.timestamp = event.block.timestamp
 	closeHistory.blockNumber = event.block.number

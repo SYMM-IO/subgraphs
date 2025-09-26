@@ -138,6 +138,27 @@
 			"version": "2",
 			"startBlock": "43400343",
 			"name": "alpha_multi_account_8"
+		},
+		{
+			"address": "0xD889bf3Ca766038d54BC1129171fB76D62ea140f",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "42242687",
+			"name": "alpha"
+		},
+		{
+			"address": "0x6D4174955FEFB63f2B436C643f5C33c3D30c4ACD",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "42242612",
+			"name": "vibe"
+		},
+		{
+			"address": "0xcd97db5818B2dA73C9D28c04BBC4477e3f5355f1",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "42242663",
+			"name": "cloverfield"
 		}
 	],
 	"deploy_urls": {

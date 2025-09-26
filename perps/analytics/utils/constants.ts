@@ -1,3 +1,8 @@
+import { Bytes } from "@graphprotocol/graph-ts"
+
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+export const ZERO_ADDRESS_BYTES = Bytes.fromHexString(ZERO_ADDRESS)
+
 // @ts-ignore
 let rolesNames = new Map<string, string>()
 rolesNames.set("0x1effbbff9c66c5e59634f24fe842750c60d18891155c32dd155fc2d661a4c86d", "DEFAULT_ADMIN_ROLE")

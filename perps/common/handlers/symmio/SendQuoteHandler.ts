@@ -15,6 +15,7 @@ import { getQuote as getQuote_0_8_3, symbolIdToSymbolName as symbolIdToSymbolNam
 import { getQuote as getQuote_0_8_4, symbolIdToSymbolName as symbolIdToSymbolName_0_8_4 } from "../../contract_utils_0_8_4"
 
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { ZERO_ADDRESS_BYTES } from "../../../analytics/utils/constants";
 
 export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -124,7 +125,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		}
 
 		const accountSource = Account.load(event.params.partyA.toHexString())!.accountSource
-		quote.affiliate = accountSource === null ? Bytes.fromHexString("0x0000000000000000000000000000000000000000") : accountSource
+		quote.affiliate = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
 
 		quote.timestamp = event.block.timestamp
 		quote.save()

@@ -8,6 +8,7 @@ type UserActivity @entity(immutable: false) {
 
 type BalanceChange @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	type: String!
 	account: Bytes!
 	sideAccount: Bytes
@@ -34,6 +35,8 @@ type CloseHistory @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
 	account: Bytes!
+	amount: BigInt!
+	closePrice: BigInt!
 	volume: BigInt!
 	timestamp: BigInt!
 	blockNumber: BigInt!
@@ -59,6 +62,7 @@ type DailyHistory @entity(immutable: false) {
 	newUsers: BigInt!
 	newAccounts: BigInt!
 	platformFee: BigInt!
+	symmioShare: BigInt!
 	openInterest: BigInt!
 	fundingPaid: BigInt!
 	fundingReceived: BigInt!
@@ -67,6 +71,16 @@ type DailyHistory @entity(immutable: false) {
 	accountSource: Bytes
 	updateTimestamp: BigInt!
 	timestamp: BigInt!
+}
+
+type AffiliateFeeCollector @entity(immutable: false) {
+    id: ID!  # affiliate
+    feeCollector: Bytes!
+}
+
+type FeeCollectorShare @entity(immutable: false) {
+    id: ID!  # feeCollector
+    symmioShare: BigInt
 }
 
 type SolverDailyHistory @entity(immutable: false) {

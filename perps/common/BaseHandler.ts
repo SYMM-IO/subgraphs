@@ -15,6 +15,10 @@ export enum MultiAccountVersion {
 	v_3,
 }
 
+export enum FeeCollectorVersion {
+	v_1,
+}
+
 export class BaseHandler {
 
 	constructor() {
@@ -46,6 +50,19 @@ export class BaseMultiAccountHandler {
 	}
 
 	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
+	}
+
+	handleGlobalCounter(): BigInt {
+		return getGlobalCounterAndInc()
+	}
+}
+
+export class BaseFeeCollectorHandler {
+
+	constructor() {
+	}
+
+	handle(_event: ethereum.Event, version: FeeCollectorVersion): void {
 	}
 
 	handleGlobalCounter(): BigInt {

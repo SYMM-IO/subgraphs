@@ -27,6 +27,13 @@
 			"version": "2",
 			"startBlock": "49420747",
 			"name": "MultiAccount1"
+		},
+		{
+			"address": "0x0000000000000000000000000000000000000000",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "59068459",
+			"endBlock": "59068460"
 		}
 	],
 	"deploy_urls": {

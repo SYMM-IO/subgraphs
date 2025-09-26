@@ -39,8 +39,8 @@ import {
 	Withdraw,
 	SetSymbolValidationState,
 	SetSymbolFundingState,
-	SettleUpnl,
-} from "../../generated/symmio_0_8_4/symmio_0_8_4"
+	SettleUpnl, SetFeeCollector,
+} from "../../generated/symmio_0_8_4/symmio_0_8_4";
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
@@ -80,6 +80,7 @@ import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
 import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler";
+import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler";
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -278,5 +279,10 @@ export function handleWithdraw(event: Withdraw): void {
 
 export function handleSettleUpnl(event: SettleUpnl): void {
 	let handler = new SettleUpnlHandler<SettleUpnl>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleSetFeeCollector(event: SetFeeCollector): void {
+	let handler = new SetFeeCollectorHandler<SetFeeCollector>()
 	handler.handle(event, Version.v_0_8_4)
 }

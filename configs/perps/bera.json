@@ -20,6 +20,13 @@
 			"version": "2",
 			"startBlock": "837565",
 			"name": "lode_multi_account"
+		},
+		{
+			"address": "0xFa323f509F36919aF51c58d3E8593027C09f57a0",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "901540",
+			"name": "ivx"
 		}
 	],
 	"deploy_urls": {

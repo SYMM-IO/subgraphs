@@ -2,8 +2,8 @@ import { Address, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { MultiAccountVersion } from "../BaseHandler"
 import { symmioMultiAccount_2 } from "../../../generated/symmioMultiAccount_2/symmioMultiAccount_2"
 import { symmioMultiAccount_3 } from "../../../generated/symmioMultiAccount_3/symmioMultiAccount_3"
+import { ZERO_ADDRESS_BYTES } from "../../analytics/utils/constants";
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 let sourceMap = new Map<string, string>()
 
 // base
@@ -26,7 +26,7 @@ export function getVibeDiamond<T>(_event: ethereum.Event): Bytes {
 	const event = changetype<T>(_event)
 	const contract = symmioMultiAccount_3.bind(event.address)
 	let result = contract.try_getVibeAccount(event.params.account)
-	return result.reverted ? Bytes.fromHexString(ZERO_ADDRESS) : result.value.data.symmioAddress
+	return result.reverted ? ZERO_ADDRESS_BYTES : result.value.data.symmioAddress
 }
 
 export function getSource<T>(event: ethereum.Event, version: MultiAccountVersion): Bytes {
@@ -38,6 +38,6 @@ export function getSource<T>(event: ethereum.Event, version: MultiAccountVersion
 		case MultiAccountVersion.v_3:
 			return getVibeDiamond<T>(event)
 		default:
-			return Bytes.fromHexString(ZERO_ADDRESS)
+			return ZERO_ADDRESS_BYTES
 	}
 }

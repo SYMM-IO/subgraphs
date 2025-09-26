@@ -136,6 +136,97 @@
 			"version": "3",
 			"startBlock": "34656113",
 			"name": "vibe_multi_account"
+		},
+		{
+			"address": "0xDaa78e134665a277cFAD722F71ffBa0C58d55592",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757629",
+			"name": "befi"
+		},
+		{
+			"address": "0xc9577c97782F3cd1B61895A3ca2f9fEBd19505a4",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757545",
+			"name": "bmx"
+		},
+		{
+			"address": "0x1279655FEED886F44958733BBB6b26252D1D4F99",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757339",
+			"name": "intentx"
+		},
+		{
+			"address": "0x97F1dCeC1A4038F72a9a7A9EC2501D942F66e1B0",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19840937",
+			"name": "based"
+		},
+		{
+			"address": "0xc2C7D07AE9Af9E758ED45268451c3e84E6629766",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757520",
+			"name": "vibe"
+		},
+		{
+			"address": "0xeBEc8d18358f117629DDf1D2049d2b0D21f9C38D",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757578",
+			"name": "cloverfield"
+		},
+		{
+			"address": "0x68aEFE794b0CcC01BeCFbbcabd0c7B375B0A8AAf",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "20846300",
+			"name": "privex"
+		},
+		{
+			"address": "0x65b19B57517Ba60e744F206deABA75F08607f60F",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "21489766",
+			"name": "peppy"
+		},
+		{
+			"address": "0x4EE4a86759781FBAc4F7DF9B3b50C1A372c36bA1",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "22391582",
+			"name": "zklink"
+		},
+		{
+			"address": "0xA234F375d1733994720547BB12D92a84122648E1",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "24876459",
+			"name": "xpanse"
+		},
+		{
+			"address": "0x3c6EB71ffB66D3694eEd9FC63F2e5BeED1029270",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "28047285",
+			"name": "carbon"
+		},
+		{
+			"address": "0x6332B2461AF9BF22733E6A2d88441dfde8c37403",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "33880934",
+			"name": "pear"
+		},
+		{
+			"address": "0x86AAc363B8471206Eb5b52e121783027d7bc62E1",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "35702812",
+			"name": "quickswap"
 		}
 	],
 	"deploy_urls": {

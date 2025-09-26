@@ -22,6 +22,7 @@ export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T>
 		updateActivityTimestamps(account, event.block.timestamp, event.address)
 		if (version < Version.v_0_8_3) {
 			let deallocate = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
+			deallocate.source = event.address
 			deallocate.type = balanceChangeTypes.get(BalanceChangeType.DEALLOCATE)
 			deallocate.timestamp = event.block.timestamp
 			deallocate.blockNumber = event.block.number

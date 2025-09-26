@@ -5,14 +5,16 @@ import {
 	getDailyHistoryForTimestamp,
 	getDailySymbolTradesHistory,
 	getDailyUserHistoryForTimestamp,
-	getSolverDailyHistoryForTimestamp, getSolverOnlyDailyHistoryForTimestamp,
+	getSolverDailyHistoryForTimestamp,
+	getSolverOnlyDailyHistoryForTimestamp,
 	getSymbolTradeHistory,
 	getTotalHistory,
 	getTotalSolverHistory,
 	getTotalSymbolTradesHistory,
 	getTotalUserHistory,
-} from "./builders";
+} from "./builders"
 import { Version } from "../../common/BaseHandler"
+import { getSymmioShare } from "./common"
 
 export class UpdateHistoriesParams {
 	version: Version
@@ -138,6 +140,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.closeTradeVolume = dh.closeTradeVolume.plus(closeTradeVolume)
 	dh.liquidateTradeVolume = dh.liquidateTradeVolume.plus(liquidateTradeVolume)
 	dh.platformFee = dh.platformFee.plus(params._tradingFee)
+	dh.symmioShare = getSymmioShare(params.accountSource, dh.platformFee)
 	dh.allocate = dh.allocate.plus(params._allocate)
 	dh.deallocate = dh.deallocate.plus(params._deallocate)
 	dh.deposit = dh.deposit.plus(params._deposit)

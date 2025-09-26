@@ -25,6 +25,7 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		account.save()
 		updateActivityTimestamps(account, event.block.timestamp, event.address)
 		let withdraw = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
+		withdraw.source = event.address
 		withdraw.type = "WITHDRAW"
 		withdraw.timestamp = event.block.timestamp
 		withdraw.blockNumber = event.block.number

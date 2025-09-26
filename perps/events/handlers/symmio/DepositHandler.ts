@@ -1,5 +1,5 @@
 import { Deposit as DepositEntity } from "../../../../generated/schema"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
@@ -21,6 +21,12 @@ export class DepositHandler<T> {
 		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
+		if (
+			entity.transactionHash.toHexString() == "0xd87280448339c9bec39f98ea17e7371f13562b8b446863db7ee8f4ce53261c71" &&
+			entity.blockNumber == BigInt.fromI32(35228647) &&
+			entity.source.toHexString() == "0xC6a7cc26fd84aE573b705423b7d1831139793025".toLowerCase()
+		)
+			entity.amount = event.params.amount.div(BigInt.fromI32(1000000))
 		entity.save()
 	}
 }

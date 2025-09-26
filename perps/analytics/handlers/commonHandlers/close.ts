@@ -31,6 +31,8 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	)
 	closeHistory.source = event.address
 	closeHistory.account = event.params.partyA
+	closeHistory.amount = event.params.filledAmount
+	closeHistory.closePrice = event.params.closedPrice
 	closeHistory.volume = additionalVolume
 	closeHistory.timestamp = event.block.timestamp
 	closeHistory.blockNumber = event.block.number
