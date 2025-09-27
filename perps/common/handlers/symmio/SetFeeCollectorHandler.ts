@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler";
 import { ethereum } from "@graphprotocol/graph-ts";
 import { AffiliateFeeCollector, FeeCollectorShare } from "../../../../generated/schema";
-import { getSymmioSharePercent } from "../../../analytics/utils/common";
+import { getSymmioSharePercent } from "../../../analytics/utils/feeCollectorHelper";
 
 export class SetFeeCollectorHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {

@@ -1,106 +1,115 @@
 {
-  "network": "arbitrum-one",
-  "contracts": [
-    {
-      "address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
-      "abi": "symmio",
-      "version": "0_8_4",
-      "startBlock": "292927488"
-    },
-    {
-      "address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
-      "abi": "symmio",
-      "version": "0_8_3",
-      "startBlock": "249345343",
-      "endBlock": "292927488"
-    },
-    {
-      "address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
-      "abi": "symmio",
-      "version": "0_8_2",
-      "startBlock": "210771536",
-      "endBlock": "249345343"
-    },
-    {
-      "address": "0x6273242a7E88b3De90822b31648C212215caaFE4",
-      "abi": "symmioMultiAccount",
-      "version": "2",
-      "startBlock": "210771536",
-      "name": "multi_account_pear"
-    },
-    {
-      "address": "0x6a3C63Ed5e558a4c4810ecC980ba6075476602D6",
-      "abi": "symmioMultiAccount",
-      "version": "2",
-      "startBlock": "222717579",
-      "name": "multi_account_cloverfield"
-    },
-    {
-      "address": "0x141269E29a770644C34e05B127AB621511f20109",
-      "abi": "symmioMultiAccount",
-      "version": "2",
-      "startBlock": "259657700",
-      "name": "multi_account_intentx"
-    },
-    {
-      "address": "0x3334226b27FCdda639620eE10c4dfca30f084969",
-      "abi": "symmioMultiAccount",
-      "version": "2",
-      "startBlock": "277773113",
-      "name": "multi_account_vibe"
-    },
-    {
-      "address": "0x263A8220e9351c5d0cC13567Db4d7BF58e7470c6",
-      "abi": "symmioMultiAccount",
-      "version": "2",
-      "startBlock": "293024249",
-      "name": "multi_account_xpanse"
-    },
-    {
-      "address": "0x96AF9f2893F1fd79fa039ECb56c4B47425c8f74B",
-      "abi": "feeCollector",
-      "version": "1",
-      "startBlock": "253380917",
-      "name": "pear"
-    },
-    {
-      "address": "0xAF2AbcaBDE3d965354868385B6C657c27267989A",
-      "abi": "feeCollector",
-      "version": "1",
-      "startBlock": "253381472",
-      "name": "vibe"
-    },
-    {
-      "address": "0xb719545849b099b40172782753626c22cf086eD8",
-      "abi": "feeCollector",
-      "version": "1",
-      "startBlock": "253381704",
-      "name": "cloverfield"
-    },
-    {
-      "address": "0x0532C5008A9214e669c41CE782C0E64095e6fb22",
-      "abi": "feeCollector",
-      "version": "1",
-      "startBlock": "262025900",
-      "name": "intentx"
-    },
-    {
-      "address": "0x94054634E2F54C753187F204d7803B25FC2375b5",
-      "abi": "feeCollector",
-      "version": "1",
-      "startBlock": "294079800",
-      "name": "horizon"
-    },
-    {
-      "address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",
-      "abi": "feeCollector",
-      "version": "1",
-      "startBlock": "382142226",
-      "name": "gryps"
-    }
-  ],
-  "deploy_urls": {
-    "perps/analytics": "arbitrum_analytics",
-    "perps/events": "arbitrum_events"
-  }
+	"network": "arbitrum-one",
+	"contracts": [
+		{
+			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+			"abi": "symmio",
+			"version": "0_8_4",
+			"startBlock": "292927488",
+			"dependencies": [
+				"feeCollector_1"
+			]
+		},
+		{
+			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+			"abi": "symmio",
+			"version": "0_8_3",
+			"startBlock": "249345343",
+			"endBlock": "292927488",
+			"dependencies": [
+				"feeCollector_1"
+			]
+		},
+		{
+			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+			"abi": "symmio",
+			"version": "0_8_2",
+			"startBlock": "210771536",
+			"endBlock": "249345343",
+			"dependencies": [
+				"feeCollector_1"
+			]
+		},
+		{
+			"address": "0x6273242a7E88b3De90822b31648C212215caaFE4",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "210771536",
+			"name": "multi_account_pear"
+		},
+		{
+			"address": "0x6a3C63Ed5e558a4c4810ecC980ba6075476602D6",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "222717579",
+			"name": "multi_account_cloverfield"
+		},
+		{
+			"address": "0x141269E29a770644C34e05B127AB621511f20109",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "259657700",
+			"name": "multi_account_intentx"
+		},
+		{
+			"address": "0x3334226b27FCdda639620eE10c4dfca30f084969",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "277773113",
+			"name": "multi_account_vibe"
+		},
+		{
+			"address": "0x263A8220e9351c5d0cC13567Db4d7BF58e7470c6",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "293024249",
+			"name": "multi_account_xpanse"
+		},
+		{
+			"address": "0x96AF9f2893F1fd79fa039ECb56c4B47425c8f74B",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "253380917",
+			"name": "pear"
+		},
+		{
+			"address": "0xAF2AbcaBDE3d965354868385B6C657c27267989A",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "253381472",
+			"name": "vibe"
+		},
+		{
+			"address": "0xb719545849b099b40172782753626c22cf086eD8",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "253381704",
+			"name": "cloverfield"
+		},
+		{
+			"address": "0x0532C5008A9214e669c41CE782C0E64095e6fb22",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "262025900",
+			"name": "intentx"
+		},
+		{
+			"address": "0x94054634E2F54C753187F204d7803B25FC2375b5",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "294079800",
+			"name": "horizon"
+		},
+		{
+			"address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "382142226",
+			"name": "gryps"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "arbitrum_analytics",
+		"perps/events": "arbitrum_events"
+	}
 }

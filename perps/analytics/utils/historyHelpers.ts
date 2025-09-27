@@ -14,7 +14,7 @@ import {
 	getTotalUserHistory,
 } from "./builders"
 import { Version } from "../../common/BaseHandler"
-import { getSymmioShare } from "./common"
+import { getSymmioShare } from "./feeCollectorHelper"
 
 export class UpdateHistoriesParams {
 	version: Version

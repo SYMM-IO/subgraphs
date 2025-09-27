@@ -5,34 +5,49 @@
 			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
 			"abi": "symmio",
 			"version": "0_8_4",
-			"startBlock": "44807119"
+			"startBlock": "44807119",
+			"dependencies": [
+				"feeCollector_1"
+			]
 		},
 		{
 			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
 			"abi": "symmio",
 			"version": "0_8_3",
 			"startBlock": "41900351",
-			"endBlock": "44807119"
+			"endBlock": "44807119",
+			"dependencies": [
+				"feeCollector_1"
+			]
 		},
 		{
 			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
 			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "34693893",
-			"endBlock": "41900351"
+			"endBlock": "41900351",
+			"dependencies": [
+				"feeCollector_1"
+			]
 		},
 		{
 			"address": "0x9A9F48888600FC9c05f11E03Eab575EBB2Fc2c8f",
 			"abi": "symmio",
 			"version": "0_8_1",
 			"startBlock": "34345963",
-			"endBlock": "34693893"
+			"endBlock": "34693893",
+			"dependencies": [
+				"feeCollector_1"
+			]
 		},
 		{
 			"address": "0x059a8ad9FeFae3818bCCB5811d1Bf9688CA9137C",
 			"abi": "symmio",
 			"version": "0_8_0",
-			"startBlock": "29380515"
+			"startBlock": "29380515",
+			"dependencies": [
+				"feeCollector_1"
+			]
 		},
 		{
 			"address": "0x058Ba7574d8bC66F1a1DCc44bb5B18894D4190e0",

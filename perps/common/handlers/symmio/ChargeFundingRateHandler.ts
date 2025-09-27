@@ -66,7 +66,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
-			if (!paid) fundingPaid = funding
+			if (paid) fundingPaid = funding
 			else fundingReceived = funding
 
 			quote.userPaidFunding = quote.userPaidFunding!.plus(fundingPaid)
