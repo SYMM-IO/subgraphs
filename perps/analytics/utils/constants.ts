@@ -1,4 +1,6 @@
-import { Bytes } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
+
+export const SYMMIO_SHARE_DEFAULT = BigInt.fromI32(40)
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 export const ZERO_ADDRESS_BYTES = Bytes.fromHexString(ZERO_ADDRESS)
@@ -54,6 +56,7 @@ export enum BalanceChangeType {
 	LF_OUT,
 	DEPOSIT,
 	WITHDRAW,
+	BRIDGE,
 }
 
 // @ts-ignore
@@ -70,3 +73,4 @@ balanceChangeTypes.set(BalanceChangeType.LF_IN, "LF_IN")
 balanceChangeTypes.set(BalanceChangeType.LF_OUT, "LF_OUT")
 balanceChangeTypes.set(BalanceChangeType.DEPOSIT, "DEPOSIT")
 balanceChangeTypes.set(BalanceChangeType.WITHDRAW, "WITHDRAW")
+balanceChangeTypes.set(BalanceChangeType.BRIDGE, "BRIDGE")

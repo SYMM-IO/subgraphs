@@ -32,13 +32,15 @@ import {
 	RoleGranted,
 	RoleRevoked,
 	SendQuote,
-	SetCollateral, SetFeeCollector,
+	SetCollateral,
+	SetFeeCollector,
 	SetSymbolFundingState,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
+	TransferToBridge,
 	UnlockQuote,
 	Withdraw,
-} from "../../generated/symmio_0_8_3/symmio_0_8_3";
+} from "../../generated/symmio_0_8_3/symmio_0_8_3"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
@@ -77,7 +79,8 @@ import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
-import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler";
+import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
+import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -271,5 +274,10 @@ export function handleWithdraw(event: Withdraw): void {
 
 export function handleSetFeeCollector(event: SetFeeCollector): void {
 	let handler = new SetFeeCollectorHandler<SetFeeCollector>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleTransferToBridge(event: TransferToBridge): void {
+	let handler = new TransferToBridgeHandler<TransferToBridge>()
 	handler.handle(event, Version.v_0_8_3)
 }

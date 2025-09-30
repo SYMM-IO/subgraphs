@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { ZERO_ADDRESS_BYTES } from "./constants"
+import { SYMMIO_SHARE_DEFAULT, ZERO_ADDRESS_BYTES } from "./constants";
 import { unDecimal } from "./common"
 import { feeCollector_1 } from "../../../generated/feeCollector_1/feeCollector_1"
 import { AffiliateFeeCollector, FeeCollectorShare } from "../../../generated/schema"
@@ -13,8 +13,8 @@ export function getSymmioSharePercent(address: Address): BigInt | null {
 export function getSymmioShare(affiliate: Bytes | null, fee: BigInt): BigInt {
 	let affAddr = affiliate === null ? ZERO_ADDRESS_BYTES : affiliate
 	let affFeeCol = AffiliateFeeCollector.load(affAddr.toHexString())
-	if (!affFeeCol) return fee.div(BigInt.fromI32(2))
+	if (!affFeeCol) return fee.times(SYMMIO_SHARE_DEFAULT).div(BigInt.fromI32(100))
 	let feeColShare = FeeCollectorShare.load(affFeeCol.feeCollector.toHexString())!
 	if (feeColShare.symmioShare) return fee.times(unDecimal(feeColShare.symmioShare!).div(BigInt.fromI32(100)))
-	else return fee.div(BigInt.fromI32(2))
+	else return fee.times(SYMMIO_SHARE_DEFAULT).div(BigInt.fromI32(100))
 }

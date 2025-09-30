@@ -14,7 +14,8 @@
 		"Deposit",
 		"Withdraw",
 		"BalanceChangePartyA",
-		"BalanceChangePartyB"
+		"BalanceChangePartyB",
+		"TransferToBridge"
 	],
 	"TradeHistory": [
 		"OpenPosition",

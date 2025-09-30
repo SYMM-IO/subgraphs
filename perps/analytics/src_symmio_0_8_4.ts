@@ -13,8 +13,8 @@ import {
 	DeallocatePartyA,
 	Deposit,
 	EmergencyClosePosition,
-	ExpireQuoteOpen,
 	ExpireQuoteClose,
+	ExpireQuoteOpen,
 	FillCloseRequest,
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
@@ -34,13 +34,15 @@ import {
 	RoleRevoked,
 	SendQuote,
 	SetCollateral,
+	SetFeeCollector,
+	SetSymbolFundingState,
 	SetSymbolTradingFee,
+	SetSymbolValidationState,
+	SettleUpnl,
+	TransferToBridge,
 	UnlockQuote,
 	Withdraw,
-	SetSymbolValidationState,
-	SetSymbolFundingState,
-	SettleUpnl, SetFeeCollector,
-} from "../../generated/symmio_0_8_4/symmio_0_8_4";
+} from "../../generated/symmio_0_8_4/symmio_0_8_4"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
@@ -79,8 +81,9 @@ import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
-import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler";
-import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler";
+import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler"
+import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
+import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -284,5 +287,10 @@ export function handleSettleUpnl(event: SettleUpnl): void {
 
 export function handleSetFeeCollector(event: SetFeeCollector): void {
 	let handler = new SetFeeCollectorHandler<SetFeeCollector>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleTransferToBridge(event: TransferToBridge): void {
+	let handler = new TransferToBridgeHandler<TransferToBridge>()
 	handler.handle(event, Version.v_0_8_4)
 }
