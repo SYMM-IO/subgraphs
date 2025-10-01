@@ -117,7 +117,8 @@
 		"SendQuote",
 		"OpenPosition",
 		"FillCloseRequest",
-		"EmergencyClosePosition"
+		"EmergencyClosePosition",
+		"SettlePartyALiquidation"
 	],
 	"TotalUserHistory": [
 		"OpenPosition",
@@ -168,5 +169,9 @@
 	],
 	"AffiliateFeeCollector": [
 		"SetFeeCollector"
+	],
+	"CvaLf": [
+		"BalanceChangePartyA",
+		"SettlePartyALiquidation"
 	]
 }

@@ -36,11 +36,11 @@ import {
 	SetFeeCollector,
 	SetSymbolFundingState,
 	SetSymbolTradingFee,
-	SetSymbolValidationState,
+	SetSymbolValidationState, SettlePartyALiquidation,
 	TransferToBridge,
 	UnlockQuote,
 	Withdraw,
-} from "../../generated/symmio_0_8_3/symmio_0_8_3"
+} from "../../generated/symmio_0_8_3/symmio_0_8_3";
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
@@ -81,6 +81,7 @@ import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolVali
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
 import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
 import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
+import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler";
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -279,5 +280,10 @@ export function handleSetFeeCollector(event: SetFeeCollector): void {
 
 export function handleTransferToBridge(event: TransferToBridge): void {
 	let handler = new TransferToBridgeHandler<TransferToBridge>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
+	let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
 	handler.handle(event, Version.v_0_8_3)
 }

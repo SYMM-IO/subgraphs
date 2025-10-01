@@ -38,6 +38,8 @@ export class UpdateHistoriesParams {
 	_fundingReceived: BigInt = BigInt.zero()
 	_loss: BigInt = BigInt.zero()
 	_profit: BigInt = BigInt.zero()
+	_cvaPaid: BigInt = BigInt.zero()
+	_lfPaid: BigInt = BigInt.zero()
 	_positionsCount: BigInt = BigInt.zero()
 
 	constructor(version: Version, account: Account, solver: Account | null, event: ethereum.Event, accountSource: Bytes | null = Bytes.empty()) {
@@ -123,6 +125,16 @@ export class UpdateHistoriesParams {
 
 	profit(profit: BigInt): UpdateHistoriesParams {
 		this._profit = profit
+		return this
+	}
+
+	cvaPaid(cvaPaid: BigInt): UpdateHistoriesParams {
+		this._cvaPaid = cvaPaid
+		return this
+	}
+
+	lfPaid(lfPaid: BigInt): UpdateHistoriesParams {
+		this._lfPaid = lfPaid
 		return this
 	}
 }
@@ -242,6 +254,8 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	duh.fundingReceived = duh.fundingReceived.plus(params._fundingReceived)
 	duh.loss = duh.loss.plus(params._loss)
 	duh.profit = duh.profit.plus(params._profit)
+	duh.cvaPaid = duh.cvaPaid.plus(params._cvaPaid)
+	duh.lfPaid = duh.lfPaid.plus(params._lfPaid)
 	duh.updateTimestamp = timestamp
 	duh.save()
 

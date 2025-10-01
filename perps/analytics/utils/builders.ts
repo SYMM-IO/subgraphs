@@ -297,6 +297,9 @@ export function getDailyUserHistoryForTimestamp(timestamp: BigInt, account: Acco
 		dh.fundingReceived = BigInt.zero()
 		dh.loss = BigInt.zero()
 		dh.profit = BigInt.zero()
+		dh.cvaPaid = BigInt.zero()
+		dh.lfPaid = BigInt.zero()
+		dh.profit = BigInt.zero()
 		dh.accountSource = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
 		dh.save()
 	}

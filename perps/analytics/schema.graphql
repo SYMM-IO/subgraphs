@@ -19,6 +19,17 @@ type BalanceChange @entity(immutable: false) {
 	transaction: Bytes!
 }
 
+type CvaLf @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	type: String!
+	account: Bytes!
+	amount: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}
+
 type TradeHistory @entity(immutable: false) {
 	id: ID!
 	account: Bytes!
@@ -211,6 +222,8 @@ type DailyUserHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	loss: BigInt!
 	profit: BigInt!
+	cvaPaid: BigInt!
+	lfPaid: BigInt!
 	accountSource: Bytes
 	updateTimestamp: BigInt!
 	timestamp: BigInt!

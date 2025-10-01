@@ -38,6 +38,7 @@ import {
 	SetSymbolFundingState,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
+	SettlePartyALiquidation,
 	SettleUpnl,
 	TransferToBridge,
 	UnlockQuote,
@@ -84,6 +85,7 @@ import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFunding
 import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler"
 import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
 import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
+import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -292,5 +294,10 @@ export function handleSetFeeCollector(event: SetFeeCollector): void {
 
 export function handleTransferToBridge(event: TransferToBridge): void {
 	let handler = new TransferToBridgeHandler<TransferToBridge>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
+	let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
 	handler.handle(event, Version.v_0_8_4)
 }
