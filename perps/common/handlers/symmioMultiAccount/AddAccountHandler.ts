@@ -1,8 +1,9 @@
-import { Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseMultiAccountHandler, MultiAccountVersion } from "../../BaseHandler"
-import { AccountType, createNewAccountIfNotExists, getPlayers } from "../../utils/builders";
-import { Affiliate } from "../../../../generated/schema"
-import { getSource } from "../../utils/get_source";
+import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
+import { SymmioEntity } from "../../../../generated/schema"
+import { getSource } from "../../utils/get_source"
+import { AFFILIATES } from "../../../analytics/utils/constants"
 
 export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
@@ -22,18 +23,13 @@ export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 		account.save()
 
 		const affId = event.address.toHexString()
-		let affiliate = Affiliate.load(affId)
-		if (!affiliate) {
-			affiliate = new Affiliate(affId)
-			affiliate.save()
-			let players = getPlayers()
-			let affiliates: Bytes[] = []
-			for (let i = 0, len = players.affiliates.length; i < len; i++) {
-				affiliates.push(players.affiliates[i])
-			}
-			affiliates.push(event.address)
-			players.affiliates = affiliates
-			players.save()
+		let player = SymmioEntity.load(affId)
+		if (!player) {
+			player = new SymmioEntity(affId)
+			player.address = event.address
+			player.type = "Affiliate"
+			player.name = AFFILIATES.get(affId)
+			player.save()
 		}
 	}
 }

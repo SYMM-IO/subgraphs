@@ -24,6 +24,7 @@ type CvaLf @entity(immutable: false) {
 	source: Bytes!
 	type: String!
 	account: Bytes!
+	sideAccount: Bytes
 	amount: BigInt!
 	timestamp: BigInt!
 	blockNumber: BigInt!
@@ -261,6 +262,7 @@ type SymbolTradeHistory @entity(immutable: false) {
 
 type DailySymbolTradesHistory @entity(immutable: false) {
 	id: ID! # account_source + account + symbolId
+	source: Bytes!
 	day: BigInt!
 	updateTimestamp: BigInt!
 	account: Bytes!

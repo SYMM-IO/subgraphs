@@ -7,7 +7,6 @@
 		"ForceCancelCloseRequest",
 		"ForceClosePosition",
 		"RequestToCancelCloseRequest",
-		"RequestToCancelQuote",
 		"RequestToCancelQuote"
 	],
 	"BalanceChange": [
@@ -85,8 +84,7 @@
 		"AllocatePartyA",
 		"DeallocatePartyA",
 		"Deposit",
-		"Withdraw",
-		"OpenPosition"
+		"Withdraw"
 	],
 	"TotalSymbolTradesHistory": [
 		"OpenPosition",
@@ -99,8 +97,7 @@
 		"AllocatePartyA",
 		"DeallocatePartyA",
 		"Deposit",
-		"Withdraw",
-		"OpenPosition"
+		"Withdraw"
 	],
 	"DailyUserHistory": [
 		"OpenPosition",
@@ -115,9 +112,6 @@
 		"Deposit",
 		"Withdraw",
 		"SendQuote",
-		"OpenPosition",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
 		"SettlePartyALiquidation"
 	],
 	"TotalUserHistory": [
@@ -132,10 +126,7 @@
 		"DeallocatePartyA",
 		"Deposit",
 		"Withdraw",
-		"SendQuote",
-		"OpenPosition",
-		"FillCloseRequest",
-		"EmergencyClosePosition"
+		"SendQuote"
 	],
 	"PriceCheck": [
 		"OpenPosition",
@@ -164,7 +155,20 @@
 		"RequestToCancelQuote"
 	],
 	"AffiliateFeeCollector": [
-		"SetFeeCollector"
+		"SetFeeCollector",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"SendQuote",
+		"OpenPosition",
+		"SettlePartyALiquidation"
 	],
 	"CvaLf": [
 		"BalanceChangePartyA",

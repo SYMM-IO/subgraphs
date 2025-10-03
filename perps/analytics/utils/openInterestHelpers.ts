@@ -1,5 +1,5 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { Account, OpenInterest, OpenInterestSettleDay } from "../../../generated/schema"
+import { Account, OpenInterest, OpenInterestSettleDay, SymmioEntity } from "../../../generated/schema";
 import {
 	getDailyHistoryForTimestamp,
 	getOpenInterest,
@@ -9,7 +9,7 @@ import {
 	getSolverOpenInterest,
 } from "./builders"
 import { diffInSeconds, endOfDayTimestamp, getDayNumber, SECONDS_IN_DAY, startOfDayTimestamp } from "./time"
-import { getPlayers } from "../../common/utils/builders"
+import { AFFILIATES, SOLVERS } from "./constants";
 
 export function updateDailyOpenInterest(
 	blockTimestamp: BigInt,
@@ -194,22 +194,21 @@ export function catchUpHistories(blockTimestamp: BigInt, source: Bytes): void {
 
 	if (settleDay.dayNumber.ge(yesterday)) return
 
-	let players = getPlayers()
-	if (!players || !players.affiliates || !players.solvers) return
-
-	let lenAffiliates = players.affiliates.length
-	let lenSolvers = players.solvers.length
-
 	let timestamp = yesterday.plus(BigInt.fromI32(1)).times(SECONDS_IN_DAY).minus(BigInt.fromI32(1))
 
-	for (let i = 0; i < lenAffiliates; i++) {
-		let affiliate = players.affiliates[i]
+	for (let i = 0; i < AFFILIATES.keys.length; i++) {
+		let affiliateAddress = AFFILIATES.keys()[i]
+		let affiliatePlayer = SymmioEntity.load(affiliateAddress)
+		if (!affiliatePlayer) continue
 
-		for (let j = 0; j < lenSolvers; j++) {
-			let solver = Account.load(players.solvers[j].toHexString())
-			if (!solver) continue
+		for (let j = 0; j < SOLVERS.keys.length; j++) {
+			let solverAddress = SOLVERS.keys()[j]
+			let solverPlayer = SymmioEntity.load(solverAddress)
+			if (!solverPlayer) continue
+			let solverAccount = Account.load(solverAddress)
+			if (!solverAccount) continue
 
-			updateDailyOpenInterest(timestamp, BigInt.zero(), true, solver, BigInt.fromByteArray(affiliate) == BigInt.zero() ? null : affiliate, source)
+			updateDailyOpenInterest(timestamp, BigInt.zero(), true, solverAccount, BigInt.fromByteArray(affiliatePlayer.address) == BigInt.zero() ? null : affiliatePlayer.address, source)
 		}
 	}
 

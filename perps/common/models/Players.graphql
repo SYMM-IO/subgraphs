@@ -1,6 +1,0 @@
-type Players @entity(immutable: false) {
-	id: ID!
-	solvers: [Bytes!]!
-	liquidators: [Bytes!]!
-	affiliates: [Bytes!]!
-}

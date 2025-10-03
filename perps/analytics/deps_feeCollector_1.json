@@ -1,5 +1,18 @@
 {
 	"FeeCollectorShare": [
-		"SymmioStakeholderUpdated"
+		"SymmioStakeholderUpdated",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"SendQuote",
+		"OpenPosition",
+		"SettlePartyALiquidation"
 	]
 }

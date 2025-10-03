@@ -25,7 +25,7 @@ import { getCollateral as getCollateral_0_8_3 } from "../../common/contract_util
 import { getCollateral as getCollateral_0_8_2 } from "../../common/contract_utils_0_8_2"
 import { getCollateral as getCollateral_0_8_1 } from "../../common/contract_utils_0_8_1"
 import { getCollateral as getCollateral_0_8_0 } from "../../common/contract_utils_0_8_0"
-import { ZERO_ADDRESS, ZERO_ADDRESS_BYTES } from "./constants";
+import { ZERO_ADDRESS, ZERO_ADDRESS_BYTES } from "./constants"
 
 export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null, source: Bytes): DailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
@@ -221,15 +221,25 @@ export function getDailySymbolTradesHistory(
 	account: Bytes,
 	accountSource: Bytes | null,
 	symbolId: BigInt,
+	source: Bytes,
 ): DailySymbolTradesHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
 	const id =
-		dateStr + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) + "_" + account.toHexString() + "_" + symbolId.toHexString()
+		dateStr +
+		"_" +
+		source.toHexString() +
+		"_" +
+		(accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) +
+		"_" +
+		account.toHexString() +
+		"_" +
+		symbolId.toHexString()
 
 	let history = DailySymbolTradesHistory.load(id)
 
 	if (history == null) {
 		history = new DailySymbolTradesHistory(id)
+		history.source = source
 		history.day = getDayNumber(timestamp)
 		history.updateTimestamp = timestamp
 		history.account = account
@@ -299,7 +309,6 @@ export function getDailyUserHistoryForTimestamp(timestamp: BigInt, account: Acco
 		dh.profit = BigInt.zero()
 		dh.cvaPaid = BigInt.zero()
 		dh.lfPaid = BigInt.zero()
-		dh.profit = BigInt.zero()
 		dh.accountSource = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
 		dh.save()
 	}

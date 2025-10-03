@@ -282,7 +282,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		stv.updateTimestamp = timestamp
 		stv.save()
 
-		const dst = getDailySymbolTradesHistory(timestamp, account.account, params.accountSource, params._symbolId)
+		const dst = getDailySymbolTradesHistory(timestamp, account.account, params.accountSource, params._symbolId, params.source)
 		dst.totalTrades = dst.totalTrades.plus(BigInt.fromString("1"))
 		dst.platformFeePaid = dst.platformFeePaid.plus(params._tradingFee)
 		dst.fundingPaid = dst.fundingPaid.plus(params._fundingPaid)

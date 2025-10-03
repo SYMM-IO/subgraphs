@@ -15,6 +15,6 @@ export function getSymmioShare(affiliate: Bytes | null, fee: BigInt): BigInt {
 	let affFeeCol = AffiliateFeeCollector.load(affAddr.toHexString())
 	if (!affFeeCol) return fee.times(SYMMIO_SHARE_DEFAULT).div(BigInt.fromI32(100))
 	let feeColShare = FeeCollectorShare.load(affFeeCol.feeCollector.toHexString())!
-	if (feeColShare.symmioShare) return fee.times(unDecimal(feeColShare.symmioShare!).div(BigInt.fromI32(100)))
+	if (feeColShare.symmioShare) return unDecimal(fee.times(feeColShare.symmioShare!))
 	else return fee.times(SYMMIO_SHARE_DEFAULT).div(BigInt.fromI32(100))
 }

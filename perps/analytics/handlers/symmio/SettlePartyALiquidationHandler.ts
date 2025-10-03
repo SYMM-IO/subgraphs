@@ -10,13 +10,13 @@ export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 		const event = changetype<SettlePartyALiquidation>(_event)
 
 		let cvaPaid = BigInt.zero()
-		let cva = CvaLf.load(event.transaction.hash.toHex() + "-6")
+		const cva = CvaLf.load(event.transaction.hash.toHex() + "-6")
 		if (cva) {
 			cvaPaid = cva.amount
 		}
 
 		let lfPaid = BigInt.zero()
-		let lf = CvaLf.load(event.transaction.hash.toHex() + "-8")
+		const lf = CvaLf.load(event.transaction.hash.toHex() + "-8")
 		if (lf) {
 			lfPaid = lf.amount
 		}

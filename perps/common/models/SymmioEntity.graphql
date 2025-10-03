@@ -1,0 +1,6 @@
+type SymmioEntity @entity(immutable: false) {
+	id: ID!
+	address: Bytes!
+	type: String!
+	name: String
+}
