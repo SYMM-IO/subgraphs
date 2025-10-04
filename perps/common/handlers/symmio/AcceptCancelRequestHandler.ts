@@ -47,6 +47,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
+					quote.affiliate = q.affiliate
 					if (q.partyBsWhiteList) {
 						let partyBsWhiteList: Bytes[] = []
 						for (let i = 0, len = q.partyBsWhiteList.length; i < len; i++) {
@@ -78,6 +79,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
+					quote.affiliate = q.affiliate
 					if (q.partyBsWhiteList) {
 						let partyBsWhiteList: Bytes[] = []
 						for (let i = 0, len = q.partyBsWhiteList.length; i < len; i++) {

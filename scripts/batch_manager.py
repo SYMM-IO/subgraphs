@@ -18,6 +18,7 @@ def main():
         # "./configs/perps/bera.json",
         # "./configs/perps/sonic.json",
         # # "./configs/perps/base_lc.json",
+        # "./configs/perps/plasma.json",
 
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",

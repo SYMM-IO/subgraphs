@@ -66,6 +66,13 @@
 			"name": "multi_account_xpanse"
 		},
 		{
+			"address": "0xB27691603361C87aF0F02dBd88FF569207810346",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "379781208",
+			"name": "multi_account_gryps"
+		},
+		{
 			"address": "0x96AF9f2893F1fd79fa039ECb56c4B47425c8f74B",
 			"abi": "feeCollector",
 			"version": "1",

@@ -1,6 +1,5 @@
-import { Account } from "../../../../generated/schema"
+import { Account, Quote } from "../../../../generated/schema"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
-import { Quote } from "../../../../generated/schema"
 import { SendQuote as SendQuote_0_8_0 } from "../../../../generated/symmio_0_8_0/symmio_0_8_0"
 import { SendQuote as SendQuote_0_8_1 } from "../../../../generated/symmio_0_8_1/symmio_0_8_1"
 import { SendQuote as SendQuote_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
@@ -15,7 +14,7 @@ import { getQuote as getQuote_0_8_3, symbolIdToSymbolName as symbolIdToSymbolNam
 import { getQuote as getQuote_0_8_4, symbolIdToSymbolName as symbolIdToSymbolName_0_8_4 } from "../../contract_utils_0_8_4"
 
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
-import { ZERO_ADDRESS_BYTES } from "../../../analytics/utils/constants";
+import { ZERO_ADDRESS_BYTES } from "../../../analytics/utils/constants"
 
 export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -46,6 +45,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.initialLf = event.params.lf
 
 		let symbolName: string
+		const account = Account.load(event.params.partyA.toHexString())!
 		switch (version) {
 			case Version.v_0_8_4: {
 				// @ts-ignore
@@ -57,6 +57,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				quote.tradingFee = e.params.tradingFee
 				const q = getQuote_0_8_4(event.address, event.params.quoteId)!
 				quote.maxFundingRate = q.maxFundingRate
+				account.accountSource = account.accountSource === null ? q.affiliate : account.accountSource
 				symbolName = symbolIdToSymbolName_0_8_4(event.params.symbolId, event.address)
 				break
 			}
@@ -70,6 +71,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 				quote.tradingFee = e.params.tradingFee
 				const q = getQuote_0_8_3(event.address, event.params.quoteId)!
 				quote.maxFundingRate = q.maxFundingRate
+				account.accountSource = account.accountSource === null ? q.affiliate : account.accountSource
 				symbolName = symbolIdToSymbolName_0_8_3(event.params.symbolId, event.address)
 				break
 			}
@@ -114,7 +116,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 			}
 		}
 
-		quote.symbol = symbolName
+		account.save()
 
 		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
@@ -124,9 +126,8 @@ export class SendQuoteHandler<T> extends BaseHandler {
 			quote.partyBsWhiteList = partyBsWhiteList
 		}
 
-		const accountSource = Account.load(event.params.partyA.toHexString())!.accountSource
-		quote.affiliate = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
-
+		quote.symbol = symbolName
+		quote.affiliate = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
 		quote.timestamp = event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "SendQuote", event)

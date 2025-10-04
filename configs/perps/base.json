@@ -156,6 +156,34 @@
 			"name": "vibe_multi_account"
 		},
 		{
+			"address": "0x39EcC772f6073242d6FD1646d81FA2D87fe95314",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "27724870",
+			"name": "multi_account_carbon"
+		},
+		{
+			"address": "0xE43166cE17d3511B09438a359dAa53513225101D",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "33631378",
+			"name": "multi_account_pear"
+		},
+		{
+			"address": "0x0B4779a37C5E6cD7060cc265105Ff44a03b47b26",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "35694654",
+			"name": "multi_account_quickswap"
+		},
+		{
+			"address": "0x72b03E85B40A745B07f3a15e7A02E66F7f8352F3",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "36184338",
+			"name": "multi_account_treble"
+		},
+		{
 			"address": "0xDaa78e134665a277cFAD722F71ffBa0C58d55592",
 			"abi": "feeCollector",
 			"version": "1",
@@ -245,6 +273,13 @@
 			"version": "1",
 			"startBlock": "35702812",
 			"name": "quickswap"
+		},
+		{
+			"address": "0x76bc5889c0cfcC20960b0D81F541595d81a95122",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "36225201",
+			"name": "treble"
 		}
 	],
 	"deploy_urls": {
