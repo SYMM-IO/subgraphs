@@ -2,15 +2,6 @@
 	"network": "base",
 	"contracts": [
 		{
-			"address": "0x6cfa75476ACB7778390Ce8ADCBa8264064c11f14",
-			"abi": "symmio",
-			"version": "0_8_4",
-			"startBlock": "34586824",
-			"dependencies": [
-				"feeCollector_1"
-			]
-		},
-		{
 			"address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",
 			"abi": "symmio",
 			"version": "0_8_4",
@@ -146,13 +137,6 @@
 			"abi": "symmioMultiAccount",
 			"version": "3",
 			"startBlock": "33579587",
-			"name": "vibe_multi_account"
-		},
-		{
-			"address": "0x96CB0251D67Ea2a3E6a1e5b7B41F7cD63d6c530f",
-			"abi": "symmioMultiAccount",
-			"version": "3",
-			"startBlock": "34656113",
 			"name": "vibe_multi_account"
 		},
 		{

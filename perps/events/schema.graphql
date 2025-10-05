@@ -1541,6 +1541,22 @@ type AddAccount @entity(immutable: true) {
 	blockHash: Bytes!
 }
 
+type SymmioStakeholderUpdated @entity(immutable: true) {
+	id: ID!
+	source: Bytes!
+	counterId: BigInt!
+	oldReceiver: Bytes!
+	newReceiver: Bytes!
+	oldShare: BigInt!
+	newShare: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
 type DiamondCut @entity(immutable: true) {
 	id: ID!
 	source: Bytes!
