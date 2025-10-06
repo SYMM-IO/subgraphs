@@ -11,7 +11,7 @@ export enum AccountType {
 }
 
 // @ts-ignore
-let accountTypes = new Map<number, string>()
+export const accountTypes = new Map<number, string>()
 accountTypes.set(AccountType.NORMAL, "NORMAL")
 accountTypes.set(AccountType.SOLVER, "SOLVER")
 accountTypes.set(AccountType.LIQUIDATOR, "LIQUIDATOR")
@@ -28,20 +28,20 @@ export function createNewAccountIfNotExists(
 	name: string | null = null,
 	replaceOnExisting: boolean = false,
 ): AccountModel {
-	let u = UserModel.load(user.toHexString())
-	if (u == null) {
-		u = new UserModel(user.toHexString())
-		u.address = user
-		u.timestamp = block.timestamp
-		u.transaction = transaction.hash
-		u.globalCounter = getGlobalCounterAndInc()
-		u.save()
-	}
 	let account = AccountModel.load(address.toHexString())
 	if (account != null && !replaceOnExisting) {
 		return account
 	}
 	if (account == null) {
+		let u = UserModel.load(user.toHexString())
+		if (u == null) {
+			u = new UserModel(user.toHexString())
+			u.address = user
+			u.timestamp = block.timestamp
+			u.transaction = transaction.hash
+			u.globalCounter = getGlobalCounterAndInc()
+			u.save()
+		}
 		account = new AccountModel(address.toHexString())
 	}
 

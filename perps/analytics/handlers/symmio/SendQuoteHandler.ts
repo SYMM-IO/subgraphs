@@ -12,9 +12,9 @@ export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
+		super.handleAccount(_event, version)
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
-		super.handleAccount(_event, version)
 
 		let account = Account.load(event.params.partyA.toHexString())!
 		updateActivityTimestamps(account, event.block.timestamp, event.address)

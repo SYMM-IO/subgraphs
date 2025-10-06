@@ -83,7 +83,22 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	let account = Account.load(quote.partyA.toHexString())!
 	let solverAccount = Account.load(quote.partyB!.toHexString())!
 
-	updateHistories(new UpdateHistoriesParams(version, account, solverAccount, event).liquidateTradeVolume(additionalVolume).symbolId(quote.symbolId!))
+	const pnl = unDecimal(
+		(quote.positionType == 0 ? BigInt.fromString("1") : BigInt.fromString("1").neg())
+			.times(liquidPrice.minus(quote.openedPrice!))
+			.times(liquidAmount),
+	)
+	let profit = BigInt.zero()
+	let loss = BigInt.zero()
+	if (pnl.gt(BigInt.zero())) profit = pnl
+	else loss = pnl
+
+	updateHistories(new UpdateHistoriesParams(version, account, solverAccount, event)
+		.liquidateTradeVolume(additionalVolume)
+		.symbolId(quote.symbolId!)
+		.loss(loss)
+		.profit(profit)
+	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
 		// From this timestamp we count partyB volumes in analytics as well
 		updateHistories(
