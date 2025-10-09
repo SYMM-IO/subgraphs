@@ -1,12 +1,13 @@
 import { DebugEntity, Quote } from "../../../../generated/schema"
 import { BaseHandler, Version } from "../../BaseHandler"
-import { ethereum } from "@graphprotocol/graph-ts";
-import { getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4";
-import { getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3";
-import { getQuote as getQuote_0_8_2 } from "../../contract_utils_0_8_2";
-import { getQuote as getQuote_0_8_1 } from "../../contract_utils_0_8_1";
-import { getQuote as getQuote_0_8_0 } from "../../contract_utils_0_8_0";
-import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
+import { ethereum } from "@graphprotocol/graph-ts"
+import { getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4"
+import { getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3"
+import { getQuote as getQuote_0_8_2 } from "../../contract_utils_0_8_2"
+import { getQuote as getQuote_0_8_1 } from "../../contract_utils_0_8_1"
+import { getQuote as getQuote_0_8_0 } from "../../contract_utils_0_8_0"
+import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { QuoteStatus } from "../../../analytics/utils/constants"
 
 export class FillCloseRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -92,10 +93,13 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 		quote.quoteId = event.params.quoteId
 		quote.fillAmount = event.params.filledAmount
 		quote.closedPrice = event.params.closedPrice
-		quote.quoteStatus = event.params.quoteStatus
-		quote.averageClosedPrice = (quote.closedAmount!.times(quote.averageClosedPrice!).plus(event.params.filledAmount.times(event.params.closedPrice))).div(quote.closedAmount!.plus(event.params.filledAmount))
+		quote.averageClosedPrice = quote
+			.closedAmount!.times(quote.averageClosedPrice!)
+			.plus(event.params.filledAmount.times(event.params.closedPrice))
+			.div(quote.closedAmount!.plus(event.params.filledAmount))
 		quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
+		if (quote.quantity! == quote.closedAmount!) quote.quoteStatus = QuoteStatus.CLOSED
 		quote.save()
-		setEventTimestampAndTransactionHashAndAction(quote, 'FillCloseRequest', _event)
+		setEventTimestampAndTransactionHashAndAction(quote, "FillCloseRequest", _event)
 	}
 }

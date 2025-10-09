@@ -27,7 +27,13 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	history.save()
 
 	let closeHistory = new CloseHistory(
-		event.params.partyA.toHexString() + "-" + event.params.quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+		event.params.partyA.toHexString() +
+			"-" +
+			event.params.quoteId.toString() +
+			"-" +
+			event.address.toHexString() +
+			"-" +
+			event.block.timestamp.toString(),
 	)
 	closeHistory.source = event.address
 	closeHistory.account = event.params.partyA
@@ -68,6 +74,14 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 				.closeTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!),
 		)
+		// updateDailyOpenInterest(
+		// 	event.block.timestamp,
+		// 	unDecimal(event.params.filledAmount.times(quote.initialOpenedPrice!)),
+		// 	false,
+		// 	solverAccount,
+		// 	account.accountSource,
+		// 	event.address,
+		// )
 	}
 	updateDailyOpenInterest(
 		event.block.timestamp,

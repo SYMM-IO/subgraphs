@@ -50,6 +50,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 			updateHistories(
 				new UpdateHistoriesParams(version, solverAccount, null, event, account.accountSource).openTradeVolume(volume).symbolId(quote.symbolId!),
 			)
+			// updateDailyOpenInterest(event.block.timestamp, volume, true, solverAccount, account.accountSource, event.address)
 		}
 		updateDailyOpenInterest(event.block.timestamp, volume, true, solverAccount, account.accountSource, event.address)
 	}

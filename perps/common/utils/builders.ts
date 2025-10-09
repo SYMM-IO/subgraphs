@@ -1,7 +1,7 @@
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Account as AccountModel, User as UserModel } from "../../../generated/schema"
 import { getGlobalCounterAndInc } from "../utils"
-
+import { store } from "@graphprotocol/graph-ts"
 export enum AccountType {
 	NORMAL,
 	SOLVER,
@@ -29,12 +29,12 @@ export function createNewAccountIfNotExists(
 	replaceOnExisting: boolean = false,
 ): AccountModel {
 	let account = AccountModel.load(address.toHexString())
-	if (account != null && !replaceOnExisting) {
+	if (account && !replaceOnExisting) {
 		return account
 	}
-	if (account == null) {
+	if (!account) {
 		let u = UserModel.load(user.toHexString())
-		if (u == null) {
+		if (!u) {
 			u = new UserModel(user.toHexString())
 			u.address = user
 			u.timestamp = block.timestamp
@@ -43,6 +43,25 @@ export function createNewAccountIfNotExists(
 			u.save()
 		}
 		account = new AccountModel(address.toHexString())
+	} else if (account.type == accountTypes.get(AccountType.UNKNOWN)) {
+		let u = UserModel.load(address.toHexString())
+		if (u) {
+			store.remove("User", address.toHexString())
+			u = new UserModel(user.toHexString())
+			u.address = user
+			u.timestamp = block.timestamp
+			u.transaction = transaction.hash
+			u.globalCounter = getGlobalCounterAndInc()
+			u.save()
+			account.type = accountTypes.get(type)
+			account.lastActivityTimestamp = block.timestamp
+			account.user = user
+			account.updateTimestamp = block.timestamp
+			account.accountSource = accountSource
+			account.name = name
+			account.save()
+			return account
+		}
 	}
 
 	account.account = address

@@ -93,11 +93,12 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	if (pnl.gt(BigInt.zero())) profit = pnl
 	else loss = pnl
 
-	updateHistories(new UpdateHistoriesParams(version, account, solverAccount, event)
-		.liquidateTradeVolume(additionalVolume)
-		.symbolId(quote.symbolId!)
-		.loss(loss)
-		.profit(profit)
+	updateHistories(
+		new UpdateHistoriesParams(version, account, solverAccount, event)
+			.liquidateTradeVolume(additionalVolume)
+			.symbolId(quote.symbolId!)
+			.loss(loss)
+			.profit(profit),
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
 		// From this timestamp we count partyB volumes in analytics as well
@@ -106,6 +107,14 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 				.liquidateTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!),
 		)
+		// updateDailyOpenInterest(
+		// 	event.block.timestamp,
+		// 	unDecimal(liquidAmount.times(quote.initialOpenedPrice!)),
+		// 	false,
+		// 	solverAccount,
+		// 	account.accountSource,
+		// 	event.address,
+		// )
 	}
 	updateDailyOpenInterest(
 		event.block.timestamp,
