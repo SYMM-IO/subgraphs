@@ -26,7 +26,7 @@ export class DepositHandler<T> {
 			entity.blockNumber == BigInt.fromI32(35228647) &&
 			entity.source.toHexString() == "0xc6a7cc26fd84ae573b705423b7d1831139793025"
 		)
-			entity.amount = event.params.amount.div(BigInt.fromI32(1000000))
+			entity.amount = event.params.amount.div(BigInt.fromString("1000000000000"))
 		entity.save()
 	}
 }

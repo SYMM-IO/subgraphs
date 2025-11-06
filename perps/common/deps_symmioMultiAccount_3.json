@@ -4,5 +4,8 @@
 		"EditAccountName",
 		"RoleGranted",
 		"RoleRevoked"
+	],
+	"SymmioEntity": [
+		"AddAccount"
 	]
 }

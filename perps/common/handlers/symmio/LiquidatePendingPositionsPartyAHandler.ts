@@ -34,6 +34,20 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
 		for (let index = 0; index < quoteIds.length; index++) {
 			let quote = Quote.load(quoteIds[index].toString() + "-" + event.address.toHexString())!
 			quote.quoteStatus = QuoteStatus.LIQUIDATED_PENDING
+			switch (version) {
+				case Version.v_0_8_4: {
+					// @ts-ignore
+					let e = changetype<LiquidatePendingPositionsPartyA_0_8_4>(event)
+					quote.liquidationId = e.params.liquidationId
+					break
+				}
+				case Version.v_0_8_3: {
+					// @ts-ignore
+					let e = changetype<LiquidatePendingPositionsPartyA_0_8_3>(event)
+					quote.liquidationId = e.params.liquidationId
+					break
+				}
+			}
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePendingPositionsPartyA", _event)
 		}
@@ -43,7 +57,14 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
 		super.handleAccount(_event, version)
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let account = createNewAccountIfNotExists(event.params.liquidator, event.params.liquidator, null, AccountType.LIQUIDATOR, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(
+			event.params.liquidator,
+			event.params.liquidator,
+			null,
+			AccountType.LIQUIDATOR,
+			event.block,
+			event.transaction,
+		)
 		account.source = event.address
 		account.save()
 	}

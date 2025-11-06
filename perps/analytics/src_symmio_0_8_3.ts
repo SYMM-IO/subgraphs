@@ -14,6 +14,8 @@ import {
 	Deposit,
 	EmergencyClosePosition,
 	ExpireQuote,
+	ExpireQuoteClose,
+	ExpireQuoteOpen,
 	FillCloseRequest,
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
@@ -36,11 +38,12 @@ import {
 	SetFeeCollector,
 	SetSymbolFundingState,
 	SetSymbolTradingFee,
-	SetSymbolValidationState, SettlePartyALiquidation,
+	SetSymbolValidationState,
+	SettlePartyALiquidation,
 	TransferToBridge,
 	UnlockQuote,
 	Withdraw,
-} from "../../generated/symmio_0_8_3/symmio_0_8_3";
+} from "../../generated/symmio_0_8_3/symmio_0_8_3"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
@@ -81,7 +84,9 @@ import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolVali
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
 import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
 import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
-import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler";
+import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
+import { ExpireQuoteOpenHandler } from "./handlers/symmio/ExpireQuoteOpenHandler"
+import { ExpireQuoteCloseHandler } from "./handlers/symmio/ExpireQuoteCloseHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -150,6 +155,16 @@ export function handleEmergencyClosePosition(event: EmergencyClosePosition): voi
 
 export function handleExpireQuote(event: ExpireQuote): void {
 	let handler = new ExpireQuoteHandler<ExpireQuote>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleExpireQuoteOpen(event: ExpireQuoteOpen): void {
+	let handler = new ExpireQuoteOpenHandler<ExpireQuoteOpen>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleExpireQuoteClose(event: ExpireQuoteClose): void {
+	let handler = new ExpireQuoteCloseHandler<ExpireQuoteClose>()
 	handler.handle(event, Version.v_0_8_3)
 }
 

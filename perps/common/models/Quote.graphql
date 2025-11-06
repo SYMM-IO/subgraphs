@@ -55,6 +55,7 @@ type Quote @entity(immutable: false) {
     liquidatePrice: BigInt
     liquidateAmount: BigInt
     liquidatedSide: Int
+    liquidationId: Bytes
 
     # funding rate
     userPaidFunding: BigInt
