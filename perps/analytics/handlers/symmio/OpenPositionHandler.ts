@@ -1,6 +1,6 @@
 import { OpenPositionHandlerWithAccount as CommonOpenPositionHandler } from "../../../common/handlers/symmio/OpenPositionHandlerWithAccount"
-import { Account, DebugEntity, Quote, Symbol, TradeHistory } from "../../../../generated/schema"
-import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
+import { Account, Quote, Symbol, TradeHistory } from "../../../../generated/schema"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { QuoteStatus } from "../../utils/constants"
 
@@ -17,13 +17,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
-		let account = Account.load(event.params.partyA.toHexString())
-		if (account == null) {
-			let db = new DebugEntity("Account_" + event.params.partyA.toHexString() + "_" + event.block.timestamp.toString())
-			db.message = `Account not found for partyA: ${event.params.partyA.toHexString()}`
-			db.save()
-			return // Should never happen
-		}
+		let account = Account.load(event.params.partyA.toHexString())!
 		let volume = unDecimal(event.params.filledAmount.times(event.params.openedPrice))
 		let history = new TradeHistory(account.id + "-" + event.params.quoteId.toString())
 		history.account = event.params.partyA
@@ -36,20 +30,8 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		history.updateTimestamp = event.block.timestamp
 		history.save()
 
-		let quote = Quote.load(event.params.quoteId.toString())
-		if (quote == null) {
-			let db = new DebugEntity("Quote_" + event.params.quoteId.toString() + "_" + event.block.timestamp.toString())
-			db.message = `Quote not found for quoteId: ${event.params.quoteId.toString()}`
-			db.save()
-			return // Should never happen
-		}
-		const symbol = Symbol.load(quote.symbolId!.toString())
-		if (symbol == null) {
-			let db = new DebugEntity("Symbol_" + quote.symbolId!.toString() + "_" + event.block.timestamp.toString())
-			db.message = `Symbol not found for symbolId: ${quote.symbolId!.toString()}`
-			db.save()
-			return // Should never happen
-		}
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())!
+		const symbol = Symbol.load(quote.symbolId!.toString() + "-" + event.address.toHexString())!
 
 		let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
 
