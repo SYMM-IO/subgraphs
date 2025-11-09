@@ -14,6 +14,8 @@ import {
 	Deposit,
 	EmergencyClosePosition,
 	ExpireQuote,
+	ExpireQuoteClose,
+	ExpireQuoteOpen,
 	FillCloseRequest,
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
@@ -33,9 +35,12 @@ import {
 	RoleRevoked,
 	SendQuote,
 	SetCollateral,
+	SetFeeCollector,
 	SetSymbolFundingState,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
+	SettlePartyALiquidation,
+	TransferToBridge,
 	UnlockQuote,
 	Withdraw,
 } from "../../generated/symmio_0_8_3/symmio_0_8_3"
@@ -77,6 +82,11 @@ import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
+import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
+import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
+import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
+import { ExpireQuoteOpenHandler } from "./handlers/symmio/ExpireQuoteOpenHandler"
+import { ExpireQuoteCloseHandler } from "./handlers/symmio/ExpireQuoteCloseHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -145,6 +155,16 @@ export function handleEmergencyClosePosition(event: EmergencyClosePosition): voi
 
 export function handleExpireQuote(event: ExpireQuote): void {
 	let handler = new ExpireQuoteHandler<ExpireQuote>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleExpireQuoteOpen(event: ExpireQuoteOpen): void {
+	let handler = new ExpireQuoteOpenHandler<ExpireQuoteOpen>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleExpireQuoteClose(event: ExpireQuoteClose): void {
+	let handler = new ExpireQuoteCloseHandler<ExpireQuoteClose>()
 	handler.handle(event, Version.v_0_8_3)
 }
 
@@ -265,5 +285,20 @@ export function handleUnlockQuote(event: UnlockQuote): void {
 
 export function handleWithdraw(event: Withdraw): void {
 	let handler = new WithdrawHandler<Withdraw>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleSetFeeCollector(event: SetFeeCollector): void {
+	let handler = new SetFeeCollectorHandler<SetFeeCollector>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleTransferToBridge(event: TransferToBridge): void {
+	let handler = new TransferToBridgeHandler<TransferToBridge>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
+	let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
 	handler.handle(event, Version.v_0_8_3)
 }

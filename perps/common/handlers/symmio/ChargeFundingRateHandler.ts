@@ -1,6 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { GlobalFee, Quote } from "../../../../generated/schema"
+import { GlobalFee, Quote, QuotePriceUpdate } from "../../../../generated/schema";
 import { getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4"
 import { getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_2 } from "../../contract_utils_0_8_2"
@@ -16,36 +16,48 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
 			const rate = event.params.rates[i]
-			let quote = Quote.load(quoteId.toString())!
+			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())!
+			let quote_price_update = new QuotePriceUpdate(quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString())
+			quote_price_update.quoteId = quoteId
+			quote_price_update.source = event.address
+			quote_price_update.prevPrice = quote.openedPrice!
+			quote_price_update.type = "ChargeFundingRate"
+			quote_price_update.timestamp = event.block.timestamp
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
+			quote_price_update.openQuantity = openAmount
 			let funding: BigInt
 			switch (version) {
 				case Version.v_0_8_4: {
-					let chainQuote = getQuote_0_8_4(event.address, BigInt.fromString(quote.id))!
+					let chainQuote = getQuote_0_8_4(event.address, quote.quoteId)!
+					quote_price_update.newPrice = chainQuote.openedPrice
 					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
 					quote.openedPrice = chainQuote.openedPrice
 					break
 				}
 				case Version.v_0_8_3: {
-					let chainQuote = getQuote_0_8_3(event.address, BigInt.fromString(quote.id))!
+					let chainQuote = getQuote_0_8_3(event.address, quote.quoteId)!
+					quote_price_update.newPrice = chainQuote.openedPrice
 					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
 					quote.openedPrice = chainQuote.openedPrice
 					break
 				}
 				case Version.v_0_8_2: {
-					let chainQuote = getQuote_0_8_2(event.address, BigInt.fromString(quote.id))!
+					let chainQuote = getQuote_0_8_2(event.address, quote.quoteId)!
+					quote_price_update.newPrice = chainQuote.openedPrice
 					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
 					quote.openedPrice = chainQuote.openedPrice
 					break
 				}
 				case Version.v_0_8_1: {
-					let chainQuote = getQuote_0_8_1(event.address, BigInt.fromString(quote.id))!
+					let chainQuote = getQuote_0_8_1(event.address, quote.quoteId)!
+					quote_price_update.newPrice = chainQuote.openedPrice
 					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
 					quote.openedPrice = chainQuote.openedPrice
 					break
 				}
 				case Version.v_0_8_0: {
-					let chainQuote = getQuote_0_8_0(event.address, BigInt.fromString(quote.id))!
+					let chainQuote = getQuote_0_8_0(event.address, quote.quoteId)!
+					quote_price_update.newPrice = chainQuote.openedPrice
 					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
 					quote.openedPrice = chainQuote.openedPrice
 					break
@@ -54,12 +66,13 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
-			if (!paid) fundingPaid = funding
+			if (paid) fundingPaid = funding
 			else fundingReceived = funding
 
 			quote.userPaidFunding = quote.userPaidFunding!.plus(fundingPaid)
 			quote.userReceivedFunding = quote.userReceivedFunding!.plus(fundingReceived)
 			quote.save()
+			quote_price_update.save()
 
 			let globalEntity = GlobalFee.load("GlobalEntity")
 			if (!globalEntity) {

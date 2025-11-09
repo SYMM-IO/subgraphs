@@ -8,13 +8,24 @@ import { getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
+import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 
 export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 	handleAccount(_event: ethereum.Event, version: Version): void {
 		super.handleAccount(_event, version)
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		createNewAccountIfNotExists(event.params.liquidator, event.params.liquidator, null, AccountType.LIQUIDATOR, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(
+			event.params.liquidator,
+			event.params.liquidator,
+			null,
+			AccountType.LIQUIDATOR,
+			event.block,
+			event.transaction,
+		)
+		account.source = event.address
+		account.save()
 	}
 
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -22,7 +33,7 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 		const event = changetype<T>(_event)
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
-			let quote = Quote.load(quoteId.toString())!
+			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())!
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.liquidatedSide = 0
 			quote.quoteStatus = 8
@@ -31,11 +42,17 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 				case Version.v_0_8_4: {
 					let q = getQuote_0_8_4(event.address, quoteId)!
 					avgClosedPrice = q.avgClosedPrice
+					// @ts-ignore
+					let e = changetype<LiquidatePositionsPartyA_0_8_4>(event)
+					quote.liquidationId = e.params.liquidationId
 					break
 				}
 				case Version.v_0_8_3: {
 					let q = getQuote_0_8_3(event.address, quoteId)!
 					avgClosedPrice = q.avgClosedPrice
+					// @ts-ignore
+					let e = changetype<LiquidatePositionsPartyA_0_8_3>(event)
+					quote.liquidationId = e.params.liquidationId
 					break
 				}
 				case Version.v_0_8_2: {

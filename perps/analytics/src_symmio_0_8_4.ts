@@ -13,8 +13,8 @@ import {
 	DeallocatePartyA,
 	Deposit,
 	EmergencyClosePosition,
-	ExpireQuoteOpen,
 	ExpireQuoteClose,
+	ExpireQuoteOpen,
 	FillCloseRequest,
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
@@ -34,11 +34,15 @@ import {
 	RoleRevoked,
 	SendQuote,
 	SetCollateral,
+	SetFeeCollector,
+	SetSymbolFundingState,
 	SetSymbolTradingFee,
+	SetSymbolValidationState,
+	SettlePartyALiquidation,
+	SettleUpnl,
+	TransferToBridge,
 	UnlockQuote,
 	Withdraw,
-	SetSymbolValidationState,
-	SetSymbolFundingState,
 } from "../../generated/symmio_0_8_4/symmio_0_8_4"
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
@@ -78,6 +82,10 @@ import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
+import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler"
+import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
+import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
+import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -271,5 +279,25 @@ export function handleUnlockQuote(event: UnlockQuote): void {
 
 export function handleWithdraw(event: Withdraw): void {
 	let handler = new WithdrawHandler<Withdraw>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleSettleUpnl(event: SettleUpnl): void {
+	let handler = new SettleUpnlHandler<SettleUpnl>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleSetFeeCollector(event: SetFeeCollector): void {
+	let handler = new SetFeeCollectorHandler<SetFeeCollector>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleTransferToBridge(event: TransferToBridge): void {
+	let handler = new TransferToBridgeHandler<TransferToBridge>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
+	let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
 	handler.handle(event, Version.v_0_8_4)
 }

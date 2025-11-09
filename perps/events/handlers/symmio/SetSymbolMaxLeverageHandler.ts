@@ -10,6 +10,7 @@ export class SetSymbolMaxLeverageHandler<T> {
 
 		let entity = new SetSymbolMaxLeverageEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.symbolId = event.params.symbolId
 		entity.oldMaxLeverage = event.params.oldMaxLeverage
 		entity.maxLeverage = event.params.maxLeverage

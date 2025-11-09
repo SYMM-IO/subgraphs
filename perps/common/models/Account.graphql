@@ -1,5 +1,6 @@
 type Account @entity(immutable: false) {
 	id: ID!
+	source: Bytes
 	account: Bytes!
 	globalCounter: BigInt!
 	user: Bytes!

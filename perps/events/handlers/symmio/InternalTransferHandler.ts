@@ -10,6 +10,7 @@ export class InternalTransferHandler<T> {
 
 		let entity = new InternalTransferEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 
 		entity.amount = event.params.amount
 		entity.sender = event.params.sender

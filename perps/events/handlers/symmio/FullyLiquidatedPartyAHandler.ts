@@ -12,6 +12,7 @@ export class FullyLiquidatedPartyAHandler<T> {
 
 		let entity = new FullyLiquidatedPartyAEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex

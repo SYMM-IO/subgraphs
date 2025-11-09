@@ -11,6 +11,7 @@ export class PauseAccountingHandler<T> {
 		let entity = new PauseAccountingEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash

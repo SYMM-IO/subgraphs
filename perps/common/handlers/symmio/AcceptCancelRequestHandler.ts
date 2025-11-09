@@ -13,10 +13,11 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let quote = Quote.load(event.params.quoteId.toString())
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) {
-			quote = new Quote(event.params.quoteId.toString())
+			quote = new Quote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 			quote.globalCounter = super.handleGlobalCounter()
+			quote.source = event.address
 			quote.quoteId = event.params.quoteId
 			quote.timestamp = event.block.timestamp
 			quote.timestampSendQuote = event.block.timestamp
@@ -41,9 +42,12 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
+					quote.affiliate = q.affiliate
 					if (q.partyBsWhiteList) {
 						let partyBsWhiteList: Bytes[] = []
 						for (let i = 0, len = q.partyBsWhiteList.length; i < len; i++) {
@@ -70,9 +74,12 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
+					quote.affiliate = q.affiliate
 					if (q.partyBsWhiteList) {
 						let partyBsWhiteList: Bytes[] = []
 						for (let i = 0, len = q.partyBsWhiteList.length; i < len; i++) {
@@ -99,6 +106,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
@@ -128,6 +137,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.partyAmm
 					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice
@@ -156,6 +167,8 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.initialLf = q.lockedValues.lf
 					quote.initialPartyAmm = q.lockedValues.mm
 					quote.initialPartyBmm = q.lockedValues.mm
+					quote.partyAmm = q.lockedValues.mm
+					quote.partyBmm = q.lockedValues.mm
 					quote.openDeadline = q.deadline
 					quote.quoteStatus = q.quoteStatus
 					quote.marketPrice = q.marketPrice

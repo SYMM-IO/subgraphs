@@ -11,6 +11,7 @@ export class DeferredLiquidatePartyAHandler<T> {
 		let entity = new DeferredLiquidatePartyAEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 
+		entity.source = event.address
 		entity.allocatedBalance = event.params.allocatedBalance
 		entity.liquidationAllocatedBalance = event.params.liquidationAllocatedBalance
 		entity.liquidationBlockNumber = event.params.liquidationBlockNumber

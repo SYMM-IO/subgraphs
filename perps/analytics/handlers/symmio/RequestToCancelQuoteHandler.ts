@@ -15,6 +15,6 @@ export class RequestToCancelQuoteHandler<T> extends CommonRequestToCancelQuoteHa
 		super.handleAccount(_event, version)
 
 		let account = Account.load(event.params.partyA.toHexString())!
-		updateActivityTimestamps(account, event.block.timestamp)
+		updateActivityTimestamps(account, event.block.timestamp, event.address)
 	}
 }

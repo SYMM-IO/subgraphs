@@ -1,7 +1,7 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Version } from "../../../common/BaseHandler"
 import { BigInt } from "@graphprotocol/graph-ts"
-import { Account, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
 import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
 import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
@@ -15,7 +15,7 @@ import { unDecimal } from "../../utils/common"
 export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
-	const quote = Quote.load(qId.toString())!
+	const quote = Quote.load(qId.toString() + "-" + event.address.toHexString())!
 
 	let liquidAmount: BigInt
 	let liquidPrice: BigInt
@@ -65,10 +65,41 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	history.quote = qId
 	history.save()
 
+	let closeHistory = new CloseHistory(
+		event.params.partyA.toHexString() + "-" + qId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+	)
+	closeHistory.source = event.address
+	closeHistory.account = event.params.partyA
+	closeHistory.amount = liquidAmount
+	closeHistory.closePrice = liquidPrice
+	closeHistory.volume = additionalVolume
+	closeHistory.timestamp = event.block.timestamp
+	closeHistory.blockNumber = event.block.number
+	closeHistory.transaction = event.transaction.hash
+	closeHistory.quoteStatus = QuoteStatus.LIQUIDATED
+	closeHistory.quote = qId
+	closeHistory.save()
+
 	let account = Account.load(quote.partyA.toHexString())!
 	let solverAccount = Account.load(quote.partyB!.toHexString())!
 
-	updateHistories(new UpdateHistoriesParams(version, account, solverAccount, event).liquidateTradeVolume(additionalVolume).symbolId(quote.symbolId!))
+	const pnl = unDecimal(
+		(quote.positionType == 0 ? BigInt.fromString("1") : BigInt.fromString("1").neg())
+			.times(liquidPrice.minus(quote.openedPrice!))
+			.times(liquidAmount),
+	)
+	let profit = BigInt.zero()
+	let loss = BigInt.zero()
+	if (pnl.gt(BigInt.zero())) profit = pnl
+	else loss = pnl
+
+	updateHistories(
+		new UpdateHistoriesParams(version, account, solverAccount, event)
+			.liquidateTradeVolume(additionalVolume)
+			.symbolId(quote.symbolId!)
+			.loss(loss)
+			.profit(profit),
+	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
 		// From this timestamp we count partyB volumes in analytics as well
 		updateHistories(
@@ -76,6 +107,14 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 				.liquidateTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!),
 		)
+		// updateDailyOpenInterest(
+		// 	event.block.timestamp,
+		// 	unDecimal(liquidAmount.times(quote.initialOpenedPrice!)),
+		// 	false,
+		// 	solverAccount,
+		// 	account.accountSource,
+		// 	event.address,
+		// )
 	}
 	updateDailyOpenInterest(
 		event.block.timestamp,
@@ -83,5 +122,6 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 		false,
 		solverAccount,
 		account.accountSource,
+		event.address,
 	)
 }

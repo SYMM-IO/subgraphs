@@ -2,94 +2,273 @@
 	"network": "base",
 	"contracts": [
 		{
+			"address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",
+			"abi": "symmio",
+			"version": "0_8_4",
+			"startBlock": "33454349",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2"
+			]
+		},
+		{
 			"address": "0x91Cf2D8Ed503EC52768999aA6D8DBeA6e52dbe43",
 			"abi": "symmio",
 			"version": "0_8_4",
-			"startBlock": "24730204"
+			"startBlock": "24730204",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2"
+			]
 		},
 		{
 			"address": "0x91Cf2D8Ed503EC52768999aA6D8DBeA6e52dbe43",
 			"abi": "symmio",
 			"version": "0_8_3",
 			"startBlock": "19458660",
-			"endBlock": "24730204"
+			"endBlock": "24730204",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2"
+			]
 		},
 		{
 			"address": "0x91Cf2D8Ed503EC52768999aA6D8DBeA6e52dbe43",
 			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "8443806",
-			"endBlock": "19458660"
+			"endBlock": "19458660",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2"
+			]
+		},
+		{
+			"address": "0x52e2230cdb80edebdadafcf24033608c9a636d7d",
+			"abi": "symmio",
+			"version": "0_8_0",
+			"startBlock": "2228875",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2"
+			]
+		},
+		{
+			"address": "0x5de6949717f3aa8e0fbed5ce8b611ebcf1e44ae9",
+			"abi": "symmioMultiAccount",
+			"version": "1",
+			"startBlock": "2230256",
+			"name": "based_multi_account_v1"
+		},
+		{
+			"address": "0x724796d2e9143920b1b58651b04e1ed201b8cc98",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "5897272",
+			"name": "intentx_multi_account_v1"
 		},
 		{
 			"address": "0x8Ab178C07184ffD44F0ADfF4eA2ce6cFc33F3b86",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "8616108",
 			"name": "intentx_multi_account_v2"
 		},
 		{
 			"address": "0x1c03B6480a4efC2d4123ba90d7857f0e1878B780",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "8616108",
 			"name": "based_multi_account_v2"
 		},
 		{
-			"address": "0x6D63921D8203044f6AbaD8F346d3AEa9A2719dDD",
-			"abi": "symmioMultiAccount",
-			"version": "1",
-			"startBlock": "13927535",
-			"name": "bmx_multi_account"
-		},
-		{
 			"address": "0xc6Ecf3AB3D09ba6f1565Ad6E139B5D3ba30bB774",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "12933620",
 			"name": "beFi_multi_account"
 		},
 		{
+			"address": "0x6D63921D8203044f6AbaD8F346d3AEa9A2719dDD",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "13927535",
+			"name": "bmx_multi_account"
+		},
+		{
 			"address": "0xF7F56d7E02D5c7bF33525AE2eecB049a17Ef4580",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "15908605",
 			"name": "cloverfield_multi_account"
 		},
 		{
-			"address": "0x8a98f69139534Ef85775b473082CE4Af1373cd63",
-			"abi": "symmioMultiAccount",
-			"version": "1",
-			"startBlock": "19460596",
-			"name": "vibe_multi_account"
-		},
-		{
 			"address": "0x921Dd892D67Aed3d492F9ad77b30b60160B53Fe1",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "18701626",
 			"name": "multi_account_privex"
 		},
 		{
+			"address": "0x8a98f69139534Ef85775b473082CE4Af1373cd63",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "19460596",
+			"name": "vibe_multi_account"
+		},
+		{
 			"address": "0xdfC2a55a44aD3d3aAbFe8D1C498Ea923c6D39526",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "21330641",
 			"name": "multi_account_peppy"
 		},
 		{
 			"address": "0xf2215724516A564eFC5b3f1F77A7d5f8770A58EF",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "22086878",
 			"name": "multi_account_zklink"
 		},
 		{
 			"address": "0xDE6446197Cd1AE02E1C5B7191a626Fb0c1757377",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "24743092",
 			"name": "multi_account_xpanse"
+		},
+		{
+			"address": "0x95605c64356572eb5C076Cb9c027c88b527A2059",
+			"abi": "symmioMultiAccount",
+			"version": "3",
+			"startBlock": "33579587",
+			"name": "vibe_multi_account"
+		},
+		{
+			"address": "0x39EcC772f6073242d6FD1646d81FA2D87fe95314",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "27724870",
+			"name": "multi_account_carbon"
+		},
+		{
+			"address": "0xE43166cE17d3511B09438a359dAa53513225101D",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "33631378",
+			"name": "multi_account_pear"
+		},
+		{
+			"address": "0x0B4779a37C5E6cD7060cc265105Ff44a03b47b26",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "35694654",
+			"name": "multi_account_quickswap"
+		},
+		{
+			"address": "0x72b03E85B40A745B07f3a15e7A02E66F7f8352F3",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "36184338",
+			"name": "multi_account_treble"
+		},
+		{
+			"address": "0xDaa78e134665a277cFAD722F71ffBa0C58d55592",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757629",
+			"name": "befi"
+		},
+		{
+			"address": "0xc9577c97782F3cd1B61895A3ca2f9fEBd19505a4",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757545",
+			"name": "bmx"
+		},
+		{
+			"address": "0x1279655FEED886F44958733BBB6b26252D1D4F99",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757339",
+			"name": "intentx"
+		},
+		{
+			"address": "0x97F1dCeC1A4038F72a9a7A9EC2501D942F66e1B0",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19840937",
+			"name": "based"
+		},
+		{
+			"address": "0xc2C7D07AE9Af9E758ED45268451c3e84E6629766",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757520",
+			"name": "vibe"
+		},
+		{
+			"address": "0xeBEc8d18358f117629DDf1D2049d2b0D21f9C38D",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "19757578",
+			"name": "cloverfield"
+		},
+		{
+			"address": "0x68aEFE794b0CcC01BeCFbbcabd0c7B375B0A8AAf",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "20846300",
+			"name": "privex"
+		},
+		{
+			"address": "0x65b19B57517Ba60e744F206deABA75F08607f60F",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "21489766",
+			"name": "peppy"
+		},
+		{
+			"address": "0x4EE4a86759781FBAc4F7DF9B3b50C1A372c36bA1",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "22391582",
+			"name": "zklink"
+		},
+		{
+			"address": "0xA234F375d1733994720547BB12D92a84122648E1",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "24876459",
+			"name": "xpanse"
+		},
+		{
+			"address": "0x3c6EB71ffB66D3694eEd9FC63F2e5BeED1029270",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "28047285",
+			"name": "carbon"
+		},
+		{
+			"address": "0x6332B2461AF9BF22733E6A2d88441dfde8c37403",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "33880934",
+			"name": "pear"
+		},
+		{
+			"address": "0x86AAc363B8471206Eb5b52e121783027d7bc62E1",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "35702812",
+			"name": "quickswap"
+		},
+		{
+			"address": "0x76bc5889c0cfcC20960b0D81F541595d81a95122",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "36225201",
+			"name": "treble"
 		}
 	],
 	"deploy_urls": {

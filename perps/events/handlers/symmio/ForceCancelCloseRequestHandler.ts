@@ -13,8 +13,9 @@ export class ForceCancelCloseRequestHandler<T> {
 
 		let entity = new ForceCancelCloseRequestEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		entity.quoteStatus = event.params.quoteStatus
 		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex

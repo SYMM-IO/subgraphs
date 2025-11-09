@@ -13,10 +13,11 @@ export class RequestToCancelCloseRequestHandler<T> {
 
 		let entity = new RequestToCancelCloseRequestEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		entity.quoteStatus = event.params.quoteStatus
 		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex

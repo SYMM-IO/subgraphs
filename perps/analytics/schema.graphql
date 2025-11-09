@@ -8,11 +8,24 @@ type UserActivity @entity(immutable: false) {
 
 type BalanceChange @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	type: String!
 	account: Bytes!
 	sideAccount: Bytes
 	amount: BigInt!
 	collateral: Bytes!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}
+
+type CvaLf @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	type: String!
+	account: Bytes!
+	sideAccount: Bytes
+	amount: BigInt!
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
@@ -30,8 +43,23 @@ type TradeHistory @entity(immutable: false) {
 	quote: BigInt!
 }
 
+type CloseHistory @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	account: Bytes!
+	amount: BigInt!
+	closePrice: BigInt!
+	volume: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+	quoteStatus: Int!
+	quote: BigInt!
+}
+
 type DailyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	day: BigInt!
 	quotesCount: BigInt!
 	tradeVolume: BigInt!
@@ -46,6 +74,7 @@ type DailyHistory @entity(immutable: false) {
 	newUsers: BigInt!
 	newAccounts: BigInt!
 	platformFee: BigInt!
+	symmioShare: BigInt!
 	openInterest: BigInt!
 	fundingPaid: BigInt!
 	fundingReceived: BigInt!
@@ -56,8 +85,19 @@ type DailyHistory @entity(immutable: false) {
 	timestamp: BigInt!
 }
 
+type AffiliateFeeCollector @entity(immutable: false) {
+    id: ID!  # affiliate
+    feeCollector: Bytes!
+}
+
+type FeeCollectorShare @entity(immutable: false) {
+    id: ID!  # feeCollector
+    symmioShare: BigInt
+}
+
 type SolverDailyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	day: BigInt!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
@@ -77,6 +117,7 @@ type SolverDailyHistory @entity(immutable: false) {
 
 type SolverOnlyDailyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	day: BigInt!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
@@ -95,6 +136,7 @@ type SolverOnlyDailyHistory @entity(immutable: false) {
 
 type WeeklyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	tradeVolume: BigInt!
 	activeUsers: BigInt!
 	accountSource: Bytes
@@ -103,14 +145,27 @@ type WeeklyHistory @entity(immutable: false) {
 
 type MonthlyHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	tradeVolume: BigInt!
 	activeUsers: BigInt!
 	accountSource: Bytes
 	timestamp: BigInt!
 }
 
+type QuotePriceUpdate @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	quoteId: BigInt!
+	openQuantity: BigInt!
+	prevPrice: BigInt!
+	newPrice: BigInt!
+    type: String!
+	timestamp: BigInt!
+}
+
 type TotalHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	quotesCount: BigInt!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
@@ -133,6 +188,7 @@ type TotalHistory @entity(immutable: false) {
 
 type TotalSolverHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	tradeVolume: BigInt!
 	openTradeVolume: BigInt!
 	closeTradeVolume: BigInt!
@@ -167,6 +223,8 @@ type DailyUserHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	loss: BigInt!
 	profit: BigInt!
+	cvaPaid: BigInt!
+	lfPaid: BigInt!
 	accountSource: Bytes
 	updateTimestamp: BigInt!
 	timestamp: BigInt!
@@ -204,6 +262,7 @@ type SymbolTradeHistory @entity(immutable: false) {
 
 type DailySymbolTradesHistory @entity(immutable: false) {
 	id: ID! # account_source + account + symbolId
+	source: Bytes!
 	day: BigInt!
 	updateTimestamp: BigInt!
 	account: Bytes!

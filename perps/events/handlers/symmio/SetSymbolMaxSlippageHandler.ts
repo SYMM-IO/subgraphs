@@ -10,6 +10,7 @@ export class SetSymbolMaxSlippageHandler<T> {
 
 		let entity = new SetSymbolMaxSlippageEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.symbolId = event.params.symbolId
 		entity.oldMaxSlippage = event.params.oldMaxSlippage
 		entity.maxSlippage = event.params.maxSlippage

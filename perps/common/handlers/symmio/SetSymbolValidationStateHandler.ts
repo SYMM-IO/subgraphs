@@ -14,15 +14,15 @@ export class SetSymbolValidationStateHandler<T> extends BaseHandler {
 		if (version == Version.v_0_8_0) {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_0>(_event)
-			symbol = Symbol.load(e.params.id.toString())!
+			symbol = Symbol.load(e.params.id.toString() + "-" + event.address.toHexString())!
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_2>(_event)
-			symbol = Symbol.load(e.params.id.toString())!
+			symbol = Symbol.load(e.params.id.toString() + "-" + event.address.toHexString())!
 		} else {
 			// @ts-ignore
 			const e = changetype<SetSymbolValidationState_8_3>(_event)
-			symbol = Symbol.load(e.params.symbolId.toString())!
+			symbol = Symbol.load(e.params.symbolId.toString() + "-" + event.address.toHexString())!
 		}
 		symbol.isValid = event.params.isValid
 		symbol.updateTimestamp = _event.block.timestamp

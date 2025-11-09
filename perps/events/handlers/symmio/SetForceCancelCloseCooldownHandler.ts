@@ -10,6 +10,7 @@ export class SetForceCancelCloseCooldownHandler<T> {
 
 		let entity = new SetForceCancelCloseCooldownEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.oldForceCancelCloseCooldown = event.params.oldForceCancelCloseCooldown
 		entity.newForceCancelCloseCooldown = event.params.newForceCancelCloseCooldown
 

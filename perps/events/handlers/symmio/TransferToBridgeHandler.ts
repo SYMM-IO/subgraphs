@@ -10,6 +10,7 @@ export class TransferToBridgeHandler<T> {
 
 		let entity = new TransferToBridgeEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 
 		entity.amount = event.params.amount
 		entity.bridgeAddress = event.params.bridgeAddress

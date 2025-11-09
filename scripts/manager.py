@@ -8,7 +8,7 @@ import sys
 import textwrap
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import yaml
 
@@ -28,7 +28,7 @@ class Contract:
     abi: str
     version: str
     startBlock: str
-    fake: bool
+    fake: bool = False
     endBlock: Optional[str] = None
     name: Optional[str] = None
     events: List[Event] = field(default_factory=list)
@@ -46,13 +46,13 @@ class Config:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Config":
-        contracts = [Contract(**c, fake=False) for c in data["contracts"]]
+        contracts = [Contract(**c) for c in data["contracts"]]
         return cls(data["network"], contracts, data["deploy_urls"])
 
 
 abi_versions = {
     "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3", "0_8_4"],
-    "symmioMultiAccount": ["1"],
+    "symmioMultiAccount": ["1", "2", "3"],
     "timelock": ["1"],
     "vault": ["1"],
     "vault_token": ["1"],
@@ -61,6 +61,7 @@ abi_versions = {
     "symm_token": ["1"],
     "options": ["1"],
     "optionsMultiAccount": ["1"],
+    "feeCollector": ["1"],
 }
 
 
@@ -261,7 +262,7 @@ def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
     return signatures
 
 
-def get_events_with_signatures(needed_events: List[str], contract: Contract) -> List[Event]:
+def get_events_with_signatures(needed_events: Set[str], contract: Contract) -> List[Event]:
     events = []
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
@@ -289,19 +290,13 @@ def prepare_module(config: Config, target_module: str):
     create_schema_file(target_module, target_config)
     models = get_scheme_models()
 
-    # First pass: Collect all needed events across all contracts
-    all_needed_events = set()
-    for contract in config.contracts:
-        needed_events = set(get_needed_events_for(models, target_module, contract))
-        all_needed_events.update(needed_events)
-
     # Create a set of all unique ABIs
     unique_abis = set(contract.abi for contract in config.contracts)
 
     # Create a list to store all contracts, including the new versions
     all_contracts = []
 
-    # Second pass: Process events for each contract and add missing versions
+    # Process events for each contract and add missing versions
     for abi in unique_abis:
         versions = abi_versions[abi]
         max_start_block = max(int(c.startBlock) for c in config.contracts if c.abi == abi)
@@ -325,9 +320,16 @@ def prepare_module(config: Config, target_module: str):
                 )
                 all_contracts.append(new_contract)
 
+    # Collect all needed events across all contracts
+    all_needed_events = {}
+    for contract in all_contracts:
+        if contract.path() not in all_needed_events:
+            all_needed_events[contract.path()] = []
+        all_needed_events[contract.path()].extend(get_needed_events_for(models, target_module, contract))
+
     # Process events for all contracts
     for contract in all_contracts:
-        events = get_events_with_signatures(list(all_needed_events), contract)
+        events = get_events_with_signatures(set(all_needed_events.get(contract.path(), [])), contract)
 
         event_counter = {}
         for e in events:
@@ -558,7 +560,7 @@ def main():
             "create",
             f"{deploy_url}/{args.version}",
             "--tag",
-            "latest",
+            "latest",  # "multi_source",
         ]
         subprocess.run(command, check=True)
 

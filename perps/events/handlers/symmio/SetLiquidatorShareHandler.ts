@@ -10,6 +10,7 @@ export class SetLiquidatorShareHandler<T> {
 
 		let entity = new SetLiquidatorShareEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 
 		entity.oldLiquidatorShare = event.params.oldLiquidatorShare
 		entity.newLiquidatorShare = event.params.newLiquidatorShare

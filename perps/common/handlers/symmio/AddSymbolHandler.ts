@@ -14,21 +14,25 @@ export class AddSymbolHandler<T> extends BaseHandler {
 		if (version == Version.v_0_8_0) {
 			// @ts-ignore
 			const e = changetype<AddSymbol_8_0>(_event)
-			symbol = new Symbol(e.params.id.toString())
+			symbol = new Symbol(e.params.id.toString() + "-" + event.address.toHexString())
+			symbol.symbolId = e.params.id
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<AddSymbol_8_2>(_event)
-			symbol = new Symbol(e.params.id.toString())
+			symbol = new Symbol(e.params.id.toString() + "-" + event.address.toHexString())
+			symbol.symbolId = e.params.id
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		} else {
 			// @ts-ignore
 			const e = changetype<AddSymbol_8_3>(_event)
-			symbol = new Symbol(e.params.symbolId.toString())
+			symbol = new Symbol(e.params.symbolId.toString() + "-" + event.address.toHexString())
+			symbol.symbolId = e.params.symbolId
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		}
 		symbol.globalCounter = globalCounter
+		symbol.source = event.address
 		symbol.name = event.params.name
 		symbol.tradingFee = event.params.tradingFee
 		symbol.minAcceptableQuoteValue = event.params.minAcceptableQuoteValue

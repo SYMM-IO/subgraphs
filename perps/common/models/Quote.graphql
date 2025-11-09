@@ -1,5 +1,6 @@
 type Quote @entity(immutable: false) {
     id: String!
+	source: Bytes!
     globalCounter: BigInt!
     quoteId: BigInt!
     quoteStatus: Int
@@ -54,6 +55,7 @@ type Quote @entity(immutable: false) {
     liquidatePrice: BigInt
     liquidateAmount: BigInt
     liquidatedSide: Int
+    liquidationId: Bytes
 
     # funding rate
     userPaidFunding: BigInt
@@ -78,6 +80,7 @@ type Quote @entity(immutable: false) {
     timestampSendQuote: BigInt
     timestampRequestToLimitClosePosition: BigInt
     timestampUnlockQuote: BigInt
+    timestampSettleUpnl: BigInt
     timestampRequestToClosePosition: BigInt
     timestampLiquidatePendingPositionsPartyA: BigInt
     timestampLiquidatePositionsPartyA: BigInt
@@ -100,6 +103,7 @@ type Quote @entity(immutable: false) {
     txHashSendQuote: Bytes
     txHashRequestToLimitClosePosition: Bytes
     txHashUnlockQuote: Bytes
+    txHashSettleUpnl: Bytes
     txHashRequestToClosePosition: Bytes
     txHashLiquidatePendingPositionsPartyA: Bytes
     txHashLiquidatePositionsPartyA: Bytes

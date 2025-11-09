@@ -1,7 +1,7 @@
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
-import { Account as AccountModel, User as UserModel, Players } from "../../../generated/schema"
+import { Account as AccountModel, User as UserModel } from "../../../generated/schema"
 import { getGlobalCounterAndInc } from "../utils"
-
+import { store } from "@graphprotocol/graph-ts"
 export enum AccountType {
 	NORMAL,
 	SOLVER,
@@ -11,7 +11,7 @@ export enum AccountType {
 }
 
 // @ts-ignore
-let accountTypes = new Map<number, string>()
+export const accountTypes = new Map<number, string>()
 accountTypes.set(AccountType.NORMAL, "NORMAL")
 accountTypes.set(AccountType.SOLVER, "SOLVER")
 accountTypes.set(AccountType.LIQUIDATOR, "LIQUIDATOR")
@@ -28,21 +28,40 @@ export function createNewAccountIfNotExists(
 	name: string | null = null,
 	replaceOnExisting: boolean = false,
 ): AccountModel {
-	let u = UserModel.load(user.toHexString())
-	if (u == null) {
-		u = new UserModel(user.toHexString())
-		u.address = user
-		u.timestamp = block.timestamp
-		u.transaction = transaction.hash
-		u.globalCounter = getGlobalCounterAndInc()
-		u.save()
-	}
 	let account = AccountModel.load(address.toHexString())
-	if (account != null && !replaceOnExisting) {
+	if (account && !replaceOnExisting) {
 		return account
 	}
-	if (account == null) {
+	if (!account) {
+		let u = UserModel.load(user.toHexString())
+		if (!u) {
+			u = new UserModel(user.toHexString())
+			u.address = user
+			u.timestamp = block.timestamp
+			u.transaction = transaction.hash
+			u.globalCounter = getGlobalCounterAndInc()
+			u.save()
+		}
 		account = new AccountModel(address.toHexString())
+	} else if (account.type == accountTypes.get(AccountType.UNKNOWN)) {
+		let u = UserModel.load(address.toHexString())
+		if (u) {
+			store.remove("User", address.toHexString())
+			u = new UserModel(user.toHexString())
+			u.address = user
+			u.timestamp = block.timestamp
+			u.transaction = transaction.hash
+			u.globalCounter = getGlobalCounterAndInc()
+			u.save()
+			account.type = accountTypes.get(type)
+			account.lastActivityTimestamp = block.timestamp
+			account.user = user
+			account.updateTimestamp = block.timestamp
+			account.accountSource = accountSource
+			account.name = name
+			account.save()
+			return account
+		}
 	}
 
 	account.account = address
@@ -64,19 +83,4 @@ export function createNewAccountIfNotExists(
 	account.blockNumber = block.number
 	account.save()
 	return account
-}
-
-export function getPlayers(): Players {
-	const id = "SymmioPlayers"
-	let players = Players.load(id)
-	if (!players) {
-		players = new Players(id)
-		let affiliates: Bytes[] = []
-		affiliates.push(Bytes.fromHexString("0x0000000000000000000000000000000000000000"))
-		players.affiliates = affiliates
-		players.solvers = []
-		players.liquidators = []
-		players.save()
-	}
-	return players
 }

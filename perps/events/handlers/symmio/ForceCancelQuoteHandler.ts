@@ -11,8 +11,9 @@ export class ForceCancelQuoteHandler<T> {
 
 		let entity = new ForceCancelQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		entity.quoteStatus = event.params.quoteStatus
 
 		entity.blockTimestamp = event.block.timestamp

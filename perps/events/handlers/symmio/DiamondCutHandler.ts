@@ -9,6 +9,7 @@ export class DiamondCutHandler<T> {
 		const event = changetype<T>(_event)
 		let entity = new DiamondCut(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash

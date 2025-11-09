@@ -18,7 +18,7 @@ import {
 	LiquidatePositionsPartyA,
 	LiquidatePositionsPartyB,
 	LockQuote,
-	OpenPosition,
+	OpenPosition, RegisterPartyB,
 	RequestToCancelCloseRequest,
 	RequestToCancelQuote,
 	RequestToClosePosition,
@@ -30,7 +30,7 @@ import {
 	SetSymbolValidationState,
 	UnlockQuote,
 	Withdraw,
-} from "../../generated/symmio_0_8_0/symmio_0_8_0"
+} from "../../generated/symmio_0_8_0/symmio_0_8_0";
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
 import { AllocateForPartyBHandler } from "./handlers/symmio/AllocateForPartyBHandler"
@@ -61,6 +61,7 @@ import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolTradingFeeHandler } from "./handlers/symmio/SetSymbolTradingFeeHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
+import { RegisterPartyBHandler } from "./handlers/symmio/RegisterPartyBHandler";
 
 export function handleForceCancelCloseRequest(event: ForceCancelCloseRequest): void {
 	let handler = new ForceCancelCloseRequestHandler<ForceCancelCloseRequest>()
@@ -209,5 +210,10 @@ export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyB):
 
 export function handleSetSymbolValidationState(event: SetSymbolValidationState): void {
 	let handler = new SetSymbolValidationStateHandler<SetSymbolValidationState>()
+	handler.handle(event, Version.v_0_8_0)
+}
+
+export function handleRegisterPartyB(event: RegisterPartyB): void {
+	let handler = new RegisterPartyBHandler<RegisterPartyB>()
 	handler.handle(event, Version.v_0_8_0)
 }

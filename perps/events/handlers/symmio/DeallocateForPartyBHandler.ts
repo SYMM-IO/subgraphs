@@ -12,6 +12,7 @@ export class DeallocateForPartyBHandler<T> {
 
 		let entity = new DeallocateForPartyBEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.partyB = event.params.partyB
 		entity.partyA = event.params.partyA
 		entity.amount = event.params.amount

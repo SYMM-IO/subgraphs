@@ -13,6 +13,7 @@ export class SettlePartyALiquidationHandler<T> {
 
 		let entity = new SettlePartyALiquidationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.transactionIndex = event.transaction.index
 		entity.logIndex = event.logIndex

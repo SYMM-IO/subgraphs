@@ -5,8 +5,7 @@
 		"Symbol",
 		"User",
 		"Account",
-		"Players",
-		"Affiliate",
+		"SymmioEntity",
 		"DebugEntity"
 	]
 }

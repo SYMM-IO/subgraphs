@@ -8,7 +8,8 @@ import {
 	DailyUserHistory,
 	MonthlyHistory,
 	OpenInterest,
-	SolverDailyHistory, SolverOnlyDailyHistory,
+	SolverDailyHistory,
+	SolverOnlyDailyHistory,
 	SymbolTradeHistory,
 	TotalHistory,
 	TotalSolverHistory,
@@ -16,7 +17,7 @@ import {
 	TotalUserHistory,
 	UserActivity,
 	WeeklyHistory,
-} from "../../../generated/schema";
+} from "../../../generated/schema"
 import { getDayNumber, startOfDay, startOfMonth, startOfWeek } from "./time"
 import { Version } from "../../common/BaseHandler"
 import { getCollateral as getCollateral_0_8_4 } from "../../common/contract_utils_0_8_4"
@@ -24,13 +25,11 @@ import { getCollateral as getCollateral_0_8_3 } from "../../common/contract_util
 import { getCollateral as getCollateral_0_8_2 } from "../../common/contract_utils_0_8_2"
 import { getCollateral as getCollateral_0_8_1 } from "../../common/contract_utils_0_8_1"
 import { getCollateral as getCollateral_0_8_0 } from "../../common/contract_utils_0_8_0"
+import { ZERO_ADDRESS, ZERO_ADDRESS_BYTES } from "./constants"
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-const ZERO_ADDRESS_BYTES = Bytes.fromHexString("0x0000000000000000000000000000000000000000")
-
-export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): DailyHistory {
+export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null, source: Bytes): DailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
-	const id = dateStr + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+	const id = dateStr + "_" + source.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let dh = DailyHistory.load(id)
 	if (dh == null) {
 		dh = new DailyHistory(id)
@@ -50,20 +49,23 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.activeUsers = BigInt.zero()
 		dh.newAccounts = BigInt.zero()
 		dh.platformFee = BigInt.zero()
+		dh.symmioShare = BigInt.zero()
 		dh.openInterest = BigInt.zero()
 		dh.fundingPaid = BigInt.zero()
 		dh.fundingReceived = BigInt.zero()
 		dh.positionsCount = BigInt.zero()
 		dh.averagePositionSize = BigInt.zero()
 		dh.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
+		dh.source = source
 		dh.save()
 	}
 	return dh
 }
 
-export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null): SolverDailyHistory {
+export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null, source: Bytes): SolverDailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
-	const id = dateStr + "_" + solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+	const id =
+		dateStr + "_" + source.toHexString() + "_" + solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let sdh = SolverDailyHistory.load(id)
 	if (sdh == null) {
 		sdh = new SolverDailyHistory(id)
@@ -82,14 +84,15 @@ export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Byt
 		sdh.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
 		sdh.solver = solver
 		sdh.platformFee = BigInt.zero()
+		sdh.source = source
 		sdh.save()
 	}
 	return sdh
 }
 
-export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes): SolverOnlyDailyHistory {
+export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver: Bytes, source: Bytes): SolverOnlyDailyHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
-	const id = dateStr + "_" + solver.toHexString()
+	const id = dateStr + "_" + source.toHexString() + "_" + solver.toHexString()
 	let sodh = SolverOnlyDailyHistory.load(id)
 	if (sodh == null) {
 		sodh = new SolverOnlyDailyHistory(id)
@@ -107,13 +110,14 @@ export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver:
 		sodh.fundingReceived = BigInt.zero()
 		sodh.solver = solver
 		sodh.platformFee = BigInt.zero()
+		sodh.source = source
 		sodh.save()
 	}
 	return sodh
 }
 
-export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null): TotalSolverHistory {
-	const id = solver.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountSource: Bytes | null, source: Bytes): TotalSolverHistory {
+	const id = solver.toHexString() + "_" + source.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let th = TotalSolverHistory.load(id)
 	if (th == null) {
 		th = new TotalSolverHistory(id)
@@ -130,14 +134,15 @@ export function getTotalSolverHistory(timestamp: BigInt, solver: Bytes, accountS
 		th.fundingReceived = BigInt.zero()
 		th.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
 		th.solver = solver
+		th.source = source
 		th.save()
 	}
 	return th
 }
 
-export function getWeeklyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): WeeklyHistory {
+export function getWeeklyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null, source: Bytes): WeeklyHistory {
 	const dateStr = startOfWeek(timestamp).getTime().toString()
-	const id = dateStr + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+	const id = dateStr + "_" + source.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let wh = WeeklyHistory.load(id)
 	if (wh == null) {
 		wh = new WeeklyHistory(id)
@@ -145,14 +150,15 @@ export function getWeeklyHistoryForTimestamp(timestamp: BigInt, accountSource: B
 		wh.tradeVolume = BigInt.zero()
 		wh.activeUsers = BigInt.zero()
 		wh.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
+		wh.source = source
 		wh.save()
 	}
 	return wh
 }
 
-export function getMonthlyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null): MonthlyHistory {
+export function getMonthlyHistoryForTimestamp(timestamp: BigInt, accountSource: Bytes | null, source: Bytes): MonthlyHistory {
 	const dateStr = startOfMonth(timestamp).getTime().toString()
-	const id = dateStr + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+	const id = dateStr + "_" + source.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let mh = MonthlyHistory.load(id)
 	if (mh == null) {
 		mh = new MonthlyHistory(id)
@@ -160,13 +166,14 @@ export function getMonthlyHistoryForTimestamp(timestamp: BigInt, accountSource: 
 		mh.tradeVolume = BigInt.zero()
 		mh.activeUsers = BigInt.zero()
 		mh.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
+		mh.source = source
 		mh.save()
 	}
 	return mh
 }
 
-export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null, collateral: Bytes): TotalHistory {
-	const id = (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) + "_" + collateral.toHexString()
+export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null, collateral: Bytes, source: Bytes): TotalHistory {
+	const id = source.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) + "_" + collateral.toHexString()
 	let th = TotalHistory.load(id)
 	if (th == null) {
 		th = new TotalHistory(id)
@@ -188,6 +195,7 @@ export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null, 
 		th.fundingPaid = BigInt.zero()
 		th.collateral = collateral
 		th.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
+		th.source = source
 		th.save()
 	}
 	return th
@@ -213,15 +221,25 @@ export function getDailySymbolTradesHistory(
 	account: Bytes,
 	accountSource: Bytes | null,
 	symbolId: BigInt,
+	source: Bytes,
 ): DailySymbolTradesHistory {
 	const dateStr = startOfDay(timestamp).getTime().toString()
 	const id =
-		dateStr + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) + "_" + account.toHexString() + "_" + symbolId.toHexString()
+		dateStr +
+		"_" +
+		source.toHexString() +
+		"_" +
+		(accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) +
+		"_" +
+		account.toHexString() +
+		"_" +
+		symbolId.toHexString()
 
 	let history = DailySymbolTradesHistory.load(id)
 
 	if (history == null) {
 		history = new DailySymbolTradesHistory(id)
+		history.source = source
 		history.day = getDayNumber(timestamp)
 		history.updateTimestamp = timestamp
 		history.account = account
@@ -289,6 +307,8 @@ export function getDailyUserHistoryForTimestamp(timestamp: BigInt, account: Acco
 		dh.fundingReceived = BigInt.zero()
 		dh.loss = BigInt.zero()
 		dh.profit = BigInt.zero()
+		dh.cvaPaid = BigInt.zero()
+		dh.lfPaid = BigInt.zero()
 		dh.accountSource = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
 		dh.save()
 	}

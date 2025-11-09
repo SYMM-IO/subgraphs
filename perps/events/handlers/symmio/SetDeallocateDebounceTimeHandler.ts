@@ -10,6 +10,7 @@ export class SetDeallocateDebounceTimeHandler<T> {
 
 		let entity = new SetDeallocateDebounceTimeEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 
 		entity.newDeallocateDebounceTime = event.params.newDeallocateDebounceTime
 		entity.oldDeallocateDebounceTime = event.params.oldDeallocateDebounceTime

@@ -19,8 +19,8 @@ export class AcceptCancelRequestHandler<T> {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		if (SendQuoteEntity.load(event.params.quoteId.toString()) == null) {
-			let send_quote_entity = new SendQuoteEntity(event.params.quoteId.toString())
+		if (SendQuoteEntity.load(event.params.quoteId.toString() + "-" + event.address.toHexString()) == null) {
+			let send_quote_entity = new SendQuoteEntity(event.params.quoteId.toString() + "-" + event.address.toHexString())
 			let lock_quote_entity = new LockQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 			let request_to_cancel_quote_entity = new RequestToCancelQuoteEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 			switch (version) {
@@ -168,7 +168,8 @@ export class AcceptCancelRequestHandler<T> {
 
 			send_quote_entity.counterId = getGlobalCounterAndInc()
 			send_quote_entity.quoteId = event.params.quoteId
-			send_quote_entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+			send_quote_entity.source = event.address
+			send_quote_entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 			send_quote_entity.blockTimestamp = event.block.timestamp
 			send_quote_entity.blockNumber = event.block.number
 			send_quote_entity.transactionHash = event.transaction.hash
@@ -179,7 +180,8 @@ export class AcceptCancelRequestHandler<T> {
 
 			lock_quote_entity.counterId = getGlobalCounterAndInc()
 			lock_quote_entity.quoteId = event.params.quoteId
-			lock_quote_entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+			lock_quote_entity.source = event.address
+			lock_quote_entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 			lock_quote_entity.blockTimestamp = event.block.timestamp
 			lock_quote_entity.blockNumber = event.block.number
 			lock_quote_entity.transactionHash = event.transaction.hash
@@ -190,7 +192,8 @@ export class AcceptCancelRequestHandler<T> {
 
 			request_to_cancel_quote_entity.counterId = getGlobalCounterAndInc()
 			request_to_cancel_quote_entity.quoteId = event.params.quoteId
-			request_to_cancel_quote_entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+			request_to_cancel_quote_entity.source = event.address
+			request_to_cancel_quote_entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 			request_to_cancel_quote_entity.blockTimestamp = event.block.timestamp
 			request_to_cancel_quote_entity.blockNumber = event.block.number
 			request_to_cancel_quote_entity.transactionHash = event.transaction.hash
@@ -203,7 +206,8 @@ export class AcceptCancelRequestHandler<T> {
 		let entity = new AcceptCancelRequestEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
 		entity.quoteId = event.params.quoteId
-		entity.accountSource = findAccountSourceForQuote(event.params.quoteId)
+		entity.source = event.address
+		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		entity.quoteStatus = event.params.quoteStatus
 
 		entity.blockTimestamp = event.block.timestamp

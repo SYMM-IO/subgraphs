@@ -12,13 +12,13 @@ export class SetSymbolFundingStateHandler<T> extends BaseHandler {
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_2>(_event)
-			symbol = Symbol.load(e.params.id.toString())!
+			symbol = Symbol.load(e.params.id.toString() + "-" + e.address.toHexString())!
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		} else {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_3>(_event)
-			symbol = Symbol.load(e.params.symbolId.toString())!
+			symbol = Symbol.load(e.params.symbolId.toString() + "-" + e.address.toHexString())!
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		}

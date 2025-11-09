@@ -7,7 +7,7 @@ export class ForceCancelQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let quote = Quote.load(event.params.quoteId.toString())!
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())!
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteId = event.params.quoteId
 		quote.quoteStatus = event.params.quoteStatus

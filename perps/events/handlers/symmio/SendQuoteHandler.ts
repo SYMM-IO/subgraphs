@@ -14,8 +14,9 @@ export class SendQuoteHandler<T> {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		let entity = new SendQuoteEntity(event.params.quoteId.toString())
+		let entity = new SendQuoteEntity(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.quoteId = event.params.quoteId
 		entity.accountSource = findAccountSourceForQuoteForAccount(event.params.partyA)

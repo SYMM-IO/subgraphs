@@ -10,6 +10,7 @@ export class RegisterPartyBHandler<T> {
 
 		let entity = new RegisterPartyBEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.partyB = event.params.partyB
 
 		entity.blockTimestamp = event.block.timestamp

@@ -1,0 +1,33 @@
+{
+	"network": "plasma",
+	"contracts": [
+		{
+			"address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",
+			"abi": "symmio",
+			"version": "0_8_4",
+			"startBlock": "2297671",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2"
+			]
+		},
+		{
+			"address": "0x78B1b8134A4236e69aE3728691e90B31f02C3001",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "2306095",
+			"name": "lonex"
+		},
+		{
+			"address": "0xB0aB50D9c82Bb2eB88B99e3FdD1Ab1C97B844396",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "2366718",
+			"name": "spooky"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "plasma_analytics",
+		"perps/events": "plasma_events"
+	}
+}

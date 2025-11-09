@@ -19,11 +19,13 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 
 		let account = createNewAccountIfNotExists(event.params.sender, event.params.sender, null, AccountType.UNKNOWN, event.block, event.transaction)
 		account.globalCounter = globalCounter
+		account.source = event.address
 		account.withdraw = account.withdraw.plus(event.params.amount)
 		account.updateTimestamp = event.block.timestamp
 		account.save()
-		updateActivityTimestamps(account, event.block.timestamp)
+		updateActivityTimestamps(account, event.block.timestamp, event.address)
 		let withdraw = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
+		withdraw.source = event.address
 		withdraw.type = "WITHDRAW"
 		withdraw.timestamp = event.block.timestamp
 		withdraw.blockNumber = event.block.number

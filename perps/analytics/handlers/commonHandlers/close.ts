@@ -1,5 +1,5 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
-import { Account, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { Version } from "../../../common/BaseHandler"
@@ -9,7 +9,7 @@ import { unDecimal } from "../../utils/common"
 export function handleClose<T>(_event: ethereum.Event, name: string, version: Version): void {
 	// @ts-ignore
 	const event = changetype<T>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
-	let quote = Quote.load(event.params.quoteId.toString())
+	let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 	if (!quote) {
 		log.debug("quote not exist. quoteId {}", [event.params.quoteId.toString()])
 		let db = new DebugEntity("handleClose")
@@ -31,6 +31,27 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	history.quoteStatus = quote.quoteStatus
 	history.quote = event.params.quoteId
 	history.save()
+
+	let closeHistory = new CloseHistory(
+		event.params.partyA.toHexString() +
+			"-" +
+			event.params.quoteId.toString() +
+			"-" +
+			event.address.toHexString() +
+			"-" +
+			event.block.timestamp.toString(),
+	)
+	closeHistory.source = event.address
+	closeHistory.account = event.params.partyA
+	closeHistory.amount = event.params.filledAmount
+	closeHistory.closePrice = event.params.closedPrice
+	closeHistory.volume = additionalVolume
+	closeHistory.timestamp = event.block.timestamp
+	closeHistory.blockNumber = event.block.number
+	closeHistory.transaction = event.transaction.hash
+	closeHistory.quoteStatus = quote.quoteStatus
+	closeHistory.quote = event.params.quoteId
+	closeHistory.save()
 
 	let account = Account.load(event.params.partyA.toHexString())!
 	let solverAccount = Account.load(quote.partyB!.toHexString())!
@@ -59,6 +80,14 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 				.closeTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!),
 		)
+		// updateDailyOpenInterest(
+		// 	event.block.timestamp,
+		// 	unDecimal(event.params.filledAmount.times(quote.initialOpenedPrice!)),
+		// 	false,
+		// 	solverAccount,
+		// 	account.accountSource,
+		// 	event.address,
+		// )
 	}
 	updateDailyOpenInterest(
 		event.block.timestamp,
@@ -66,5 +95,6 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		false,
 		solverAccount,
 		account.accountSource,
+		event.address,
 	)
 }

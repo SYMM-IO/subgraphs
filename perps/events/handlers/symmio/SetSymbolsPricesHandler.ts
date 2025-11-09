@@ -12,6 +12,7 @@ export class SetSymbolsPricesHandler<T> {
 
 		let entity = new SetSymbolsPricesEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		entity.source = event.address
 		entity.liquidator = event.params.liquidator
 		entity.partyA = event.params.partyA
 		entity.symbolIds = event.params.symbolIds
