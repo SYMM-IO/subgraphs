@@ -10,9 +10,15 @@
 		{
 			"address": "0xbF318724218cED9A3ff7CfC642c71a0CA1952b0F",
 			"abi": "symmioMultiAccount",
-			"version": "1",
+			"version": "2",
 			"startBlock": "639223",
 			"name": "privex_multi_account"
+		},
+		{
+			"address": "0x80c98e1b606C96eeBEBC1E8e6458C368B155fE16",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "1130515"
 		}
 	],
 	"deploy_urls": {
