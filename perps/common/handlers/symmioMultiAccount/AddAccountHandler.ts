@@ -28,7 +28,13 @@ export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 			player = new SymmioEntity(affId)
 			player.address = event.address
 			player.type = "Affiliate"
-			player.name = AFFILIATES.get(affId)
+
+			if (AFFILIATES.has(affId)) {
+				player.name = AFFILIATES.get(affId)
+			} else {
+				player.name = null
+			}
+
 			player.save()
 		}
 	}

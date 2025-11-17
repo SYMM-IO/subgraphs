@@ -16,7 +16,13 @@ export class RegisterPartyBHandler<T> extends BaseHandler {
 		let player = new SymmioEntity(event.params.partyB.toHexString())
 		player.address = event.params.partyB
 		player.type = "Solver"
-		player.name = SOLVERS.get(event.params.partyB.toHexString())
+
+		if (SOLVERS.has(event.params.partyB.toHexString())) {
+			player.name = SOLVERS.get(event.params.partyB.toHexString())
+		} else {
+			player.name = null
+		}
+
 		player.save()
 	}
 }
