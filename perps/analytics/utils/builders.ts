@@ -201,11 +201,12 @@ export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null, 
 	return th
 }
 
-export function getSymbolTradeHistory(symbol: BigInt, timestamp: BigInt, accountSource: Bytes | null): SymbolTradeHistory {
-	const id = symbol.toString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
+export function getSymbolTradeHistory(symbol: BigInt, timestamp: BigInt, accountSource: Bytes | null, source: Bytes): SymbolTradeHistory {
+	const id = symbol.toString() + "_" + source.toHexString() + "_" + (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString())
 	let stv = SymbolTradeHistory.load(id)
 	if (stv == null) {
 		stv = new SymbolTradeHistory(id)
+		stv.source = source
 		stv.updateTimestamp = timestamp
 		stv.timestamp = timestamp
 		stv.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
@@ -233,7 +234,7 @@ export function getDailySymbolTradesHistory(
 		"_" +
 		account.toHexString() +
 		"_" +
-		symbolId.toHexString()
+		symbolId.toString()
 
 	let history = DailySymbolTradesHistory.load(id)
 
@@ -249,6 +250,7 @@ export function getDailySymbolTradesHistory(
 		history.fundingPaid = BigInt.zero()
 		history.fundingReceived = BigInt.zero()
 		history.platformFeePaid = BigInt.zero()
+		history.volume = BigInt.zero()
 		history.save()
 	}
 	return history
@@ -259,13 +261,22 @@ export function getTotalSymbolTradesHistory(
 	account: Bytes,
 	accountSource: Bytes | null,
 	symbolId: BigInt,
+	source: Bytes,
 ): TotalSymbolTradesHistory {
-	const id = (accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) + "_" + account.toHexString() + "_" + symbolId.toHexString()
+	const id =
+		source.toHexString() +
+		"_" +
+		(accountSource === null ? ZERO_ADDRESS : accountSource.toHexString()) +
+		"_" +
+		account.toHexString() +
+		"_" +
+		symbolId.toString()
 
 	let history = TotalSymbolTradesHistory.load(id)
 
 	if (history == null) {
 		history = new TotalSymbolTradesHistory(id)
+		history.source = source
 		history.updateTimestamp = timestamp
 		history.account = account
 		history.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
@@ -274,6 +285,7 @@ export function getTotalSymbolTradesHistory(
 		history.fundingPaid = BigInt.zero()
 		history.fundingReceived = BigInt.zero()
 		history.platformFeePaid = BigInt.zero()
+		history.volume = BigInt.zero()
 		history.save()
 	}
 	return history

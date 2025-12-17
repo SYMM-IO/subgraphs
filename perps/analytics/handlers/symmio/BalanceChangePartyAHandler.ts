@@ -9,7 +9,7 @@ export class BalanceChangePartyAHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<BalanceChangePartyA>(_event)
-		let bc = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
+		let bc = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		bc.source = event.address
 		bc.amount = event.params.amount
 		bc.account = event.params.partyA
