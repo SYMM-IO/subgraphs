@@ -1,5 +1,5 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
-import { Account, OpenInterest, OpenInterestSettleDay, SymmioEntity } from "../../../generated/schema";
+import { Account, OpenInterest, OpenInterestSettleDay, SymmioEntity } from "../../../generated/schema"
 import {
 	getDailyHistoryForTimestamp,
 	getOpenInterest,
@@ -9,7 +9,7 @@ import {
 	getSolverOpenInterest,
 } from "./builders"
 import { diffInSeconds, endOfDayTimestamp, getDayNumber, SECONDS_IN_DAY, startOfDayTimestamp } from "./time"
-import { AFFILIATES, SOLVERS } from "./constants";
+import { AFFILIATES, SOLVERS } from "./constants"
 
 export function updateDailyOpenInterest(
 	blockTimestamp: BigInt,
@@ -67,7 +67,7 @@ function processOpenInterest(
 	increase: boolean,
 	accountSource: Bytes | null,
 	source: Bytes,
-	isSolver: number,
+	mode: number, // 0=affiliate, 1=solver, 2=solver-only
 	solverAccount: Bytes | null = null,
 ): void {
 	let lastUpdateTimestamp = openInterest.timestamp
@@ -153,12 +153,12 @@ function processOpenInterest(
 			openInterest.weightedAmount = accumulatedFirstPart.plus(accumulatedSecondPart)
 		}
 
-		if (isSolver == 1) {
+		if (mode == 1) {
 			let solverDailyHistory = getSolverDailyHistoryForTimestamp(processingTimestamp, solverAccount!, accountSource, source)
 			solverDailyHistory.openInterest = dailyOpenInterest
 			solverDailyHistory.updateTimestamp = processingTimestamp
 			solverDailyHistory.save()
-		} else if (isSolver == 2) {
+		} else if (mode == 2) {
 			let solverOnlyDailyHistory = getSolverOnlyDailyHistoryForTimestamp(processingTimestamp, solverAccount!, source)
 			solverOnlyDailyHistory.openInterest = dailyOpenInterest
 			solverOnlyDailyHistory.updateTimestamp = processingTimestamp
@@ -196,19 +196,28 @@ export function catchUpHistories(blockTimestamp: BigInt, source: Bytes): void {
 
 	let timestamp = yesterday.plus(BigInt.fromI32(1)).times(SECONDS_IN_DAY).minus(BigInt.fromI32(1))
 
+	const affiliates = AFFILIATES.keys()
 	for (let i = 0; i < AFFILIATES.keys.length; i++) {
-		let affiliateAddress = AFFILIATES.keys()[i]
+		let affiliateAddress = affiliates[i]
 		let affiliatePlayer = SymmioEntity.load(affiliateAddress)
 		if (!affiliatePlayer) continue
 
+		const solvers = SOLVERS.keys()
 		for (let j = 0; j < SOLVERS.keys.length; j++) {
-			let solverAddress = SOLVERS.keys()[j]
+			let solverAddress = solvers[j]
 			let solverPlayer = SymmioEntity.load(solverAddress)
 			if (!solverPlayer) continue
 			let solverAccount = Account.load(solverAddress)
 			if (!solverAccount) continue
 
-			updateDailyOpenInterest(timestamp, BigInt.zero(), true, solverAccount, BigInt.fromByteArray(affiliatePlayer.address) == BigInt.zero() ? null : affiliatePlayer.address, source)
+			updateDailyOpenInterest(
+				timestamp,
+				BigInt.zero(),
+				true,
+				solverAccount,
+				BigInt.fromByteArray(affiliatePlayer.address) == BigInt.zero() ? null : affiliatePlayer.address,
+				source,
+			)
 		}
 	}
 

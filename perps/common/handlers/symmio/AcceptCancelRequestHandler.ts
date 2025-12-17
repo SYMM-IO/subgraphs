@@ -1,4 +1,4 @@
-import { Quote } from "../../../../generated/schema"
+import { Account, Quote } from "../../../../generated/schema";
 import { BaseHandler, Version } from "../../BaseHandler"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
@@ -8,6 +8,9 @@ import { getQuote as getQuote_0_8_1, symbolIdToSymbolName as symbolIdToSymbolNam
 import { getQuote as getQuote_0_8_2, symbolIdToSymbolName as symbolIdToSymbolName_0_8_2 } from "../../contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_3, symbolIdToSymbolName as symbolIdToSymbolName_0_8_3 } from "../../contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_4, symbolIdToSymbolName as symbolIdToSymbolName_0_8_4 } from "../../contract_utils_0_8_4"
+import { updateActivityTimestamps } from "../../../analytics/utils/activityHelpers";
+import { updateHistories, UpdateHistoriesParams } from "../../../analytics/utils/historyHelpers";
+import { catchUpHistories } from "../../../analytics/utils/openInterestHelpers";
 
 export class AcceptCancelRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -34,7 +37,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.symbolId = q.symbolId
 					quote.tradingFee = q.tradingFee
 					quote.positionType = q.positionType
-					quote.requestedOpenPrice = q.marketPrice
+					quote.requestedOpenPrice = q.requestedOpenPrice
 					quote.quantity = q.quantity
 					quote.cva = q.lockedValues.cva
 					quote.lf = q.lockedValues.lf
@@ -66,7 +69,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.symbolId = q.symbolId
 					quote.tradingFee = q.tradingFee
 					quote.positionType = q.positionType
-					quote.requestedOpenPrice = q.marketPrice
+					quote.requestedOpenPrice = q.requestedOpenPrice
 					quote.quantity = q.quantity
 					quote.cva = q.lockedValues.cva
 					quote.lf = q.lockedValues.lf
@@ -98,7 +101,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.symbolId = q.symbolId
 					quote.tradingFee = q.tradingFee
 					quote.positionType = q.positionType
-					quote.requestedOpenPrice = q.marketPrice
+					quote.requestedOpenPrice = q.requestedOpenPrice
 					quote.quantity = q.quantity
 					quote.cva = q.lockedValues.cva
 					quote.lf = q.lockedValues.lf
@@ -129,7 +132,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.symbolId = q.symbolId
 					quote.tradingFee = q.tradingFee
 					quote.positionType = q.positionType
-					quote.requestedOpenPrice = q.marketPrice
+					quote.requestedOpenPrice = q.requestedOpenPrice
 					quote.quantity = q.quantity
 					quote.cva = q.lockedValues.cva
 					quote.lf = q.lockedValues.lf
@@ -159,7 +162,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 					quote.symbolId = q.symbolId
 					quote.tradingFee = BigInt.zero()
 					quote.positionType = q.positionType
-					quote.requestedOpenPrice = q.marketPrice
+					quote.requestedOpenPrice = q.requestedOpenPrice
 					quote.quantity = q.quantity
 					quote.cva = q.lockedValues.cva
 					quote.lf = q.lockedValues.lf
@@ -185,6 +188,12 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 			}
 
 			quote.symbol = symbolName
+
+			let account = Account.load(quote.partyA.toHexString())!
+			updateActivityTimestamps(account, event.block.timestamp, event.address)
+
+			updateHistories(new UpdateHistoriesParams(version, account, null, event).quotesCount(BigInt.fromString("1")))
+			catchUpHistories(_event.block.timestamp, event.address)
 		}
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.blockNumber = event.block.number

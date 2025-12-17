@@ -1,5 +1,5 @@
 import {BaseHandler, Version} from "../../BaseHandler"
-import {DebugEntity, Quote} from "../../../../generated/schema"
+import {Quote} from "../../../../generated/schema"
 import {BigInt, ethereum} from "@graphprotocol/graph-ts"
 import {getQuote as getQuote_0_8_0} from "../../contract_utils_0_8_0";
 import {getQuote as getQuote_0_8_1} from "../../contract_utils_0_8_1";
@@ -12,13 +12,7 @@ export class OpenPositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let quote = Quote.load(event.params.quoteId.toString())
-		if (!quote) {
-			let db = new DebugEntity("OpenPositionHandler")
-			db.message = `quote not exist. quoteId ${event.params.quoteId.toString()}`
-			db.save()
-			return
-		}
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())!
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteId = event.params.quoteId
 		quote.fillAmount = event.params.filledAmount
