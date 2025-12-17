@@ -16,7 +16,7 @@ export class DeallocateForPartyBHandler<T> extends CommonDeallocateForPartyBHand
 		const event = changetype<T>(_event)
 
 		if (version < Version.v_0_8_3) {
-			let allocate = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
+			let allocate = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 			allocate.source = event.address
 			allocate.type = balanceChangeTypes.get(BalanceChangeType.DEALLOCATE)
 			allocate.timestamp = event.block.timestamp

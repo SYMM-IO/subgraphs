@@ -24,6 +24,7 @@ export class SendQuoteHandlerWithAccount<T> extends SendQuoteHandler<T> {
 					accountName,
 					true,
 				)
+				account.source = event.address
 			}
 		}
 		account.quotesCount = account.quotesCount.plus(BigInt.fromString("1"))

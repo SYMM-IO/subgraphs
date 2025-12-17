@@ -77,7 +77,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			let globalEntity = GlobalFee.load("GlobalEntity")
 			if (!globalEntity) {
 				globalEntity = new GlobalFee("GlobalEntity")
-				globalEntity.globalFee = BigInt.fromI32(0)
+				globalEntity.globalFee = BigInt.zero()
 			}
 			globalEntity.latestTimestamp = event.block.timestamp
 			if (!paid) globalEntity.globalFee = globalEntity.globalFee.plus(funding)

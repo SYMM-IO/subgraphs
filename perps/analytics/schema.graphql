@@ -253,6 +253,7 @@ type TotalUserHistory @entity(immutable: false) {
 
 type SymbolTradeHistory @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	symbolId: BigInt!
 	timestamp: BigInt!
 	updateTimestamp: BigInt!
@@ -261,7 +262,7 @@ type SymbolTradeHistory @entity(immutable: false) {
 }
 
 type DailySymbolTradesHistory @entity(immutable: false) {
-	id: ID! # account_source + account + symbolId
+	id: ID! # date + source + account_source + account + symbolId
 	source: Bytes!
 	day: BigInt!
 	updateTimestamp: BigInt!
@@ -272,10 +273,12 @@ type DailySymbolTradesHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	fundingPaid: BigInt!
 	platformFeePaid: BigInt!
+	volume: BigInt!
 }
 
 type TotalSymbolTradesHistory @entity(immutable: false) {
-	id: ID! # account_source + account + symbolId
+	id: ID! # source + account_source + account + symbolId
+	source: Bytes!
 	updateTimestamp: BigInt!
 	account: Bytes!
 	accountSource: Bytes
@@ -284,6 +287,7 @@ type TotalSymbolTradesHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	fundingPaid: BigInt!
 	platformFeePaid: BigInt!
+	volume: BigInt!
 }
 
 type OpenInterest @entity(immutable: false) {

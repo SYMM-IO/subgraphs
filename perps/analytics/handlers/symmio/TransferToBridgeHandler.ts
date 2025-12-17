@@ -9,7 +9,7 @@ export class TransferToBridgeHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<TransferToBridge>(_event)
-		let bridge = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toHexString())
+		let bridge = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		bridge.source = event.address
 		bridge.amount = event.params.amount
 		bridge.account = event.params.user
