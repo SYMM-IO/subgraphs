@@ -168,7 +168,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.updateTimestamp = timestamp
 	dh.save()
 
-	if (params.solver != null) {
+	if (params.solver) {
 		const sdh = getSolverDailyHistoryForTimestamp(timestamp, params.solver!.account, params.accountSource, params.source)
 		sdh.tradeVolume = sdh.tradeVolume.plus(tradeVolume)
 		sdh.openTradeVolume = sdh.openTradeVolume.plus(openTradeVolume)

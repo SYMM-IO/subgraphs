@@ -14,7 +14,7 @@ def main():
         # "./configs/perps/mode.json",
         # "./configs/perps/arbitrum.json",
         # # "./configs/perps/iota.json",
-        # "./configs/perps/polygon.json",
+        # # "./configs/perps/polygon.json",
         # "./configs/perps/bera.json",
         # "./configs/perps/sonic.json",
         # # "./configs/perps/base_lc.json",

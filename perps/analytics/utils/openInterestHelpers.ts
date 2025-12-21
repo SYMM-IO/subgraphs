@@ -92,12 +92,10 @@ function processOpenInterest(
 
 		if (firstDay && !lastDay) {
 			let firstIntervalStart = startOfDayTimestamp(processingTimestamp)
-			let firstIntervalEnd = processingTimestamp
 
 			let secondIntervalStart = processingTimestamp
 			let secondIntervalEnd = endOfDayTimestamp(processingTimestamp)
 
-			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart)
 			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart)
 			let totalInterval = diffInSeconds(secondIntervalEnd, firstIntervalStart)
 
@@ -131,7 +129,6 @@ function processOpenInterest(
 		} else if (firstDay && lastDay) {
 			processingTimestamp = lastUpdateTimestamp
 			let firstIntervalStart = startOfDayTimestamp(processingTimestamp)
-			let firstIntervalEnd = processingTimestamp
 
 			let secondIntervalStart = processingTimestamp
 			let secondIntervalEnd = currentTimestamp
@@ -139,7 +136,6 @@ function processOpenInterest(
 			let thirdIntervalStart = currentTimestamp
 			let thirdIntervalEnd = endOfDayTimestamp(processingTimestamp)
 
-			let firstInterval = diffInSeconds(firstIntervalEnd, firstIntervalStart)
 			let secondInterval = diffInSeconds(secondIntervalEnd, secondIntervalStart)
 			let thirdInterval = diffInSeconds(thirdIntervalEnd, thirdIntervalStart)
 			let totalInterval = diffInSeconds(thirdIntervalEnd, firstIntervalStart)
@@ -197,13 +193,15 @@ export function catchUpHistories(blockTimestamp: BigInt, source: Bytes): void {
 	let timestamp = yesterday.plus(BigInt.fromI32(1)).times(SECONDS_IN_DAY).minus(BigInt.fromI32(1))
 
 	const affiliates = AFFILIATES.keys()
-	for (let i = 0; i < AFFILIATES.keys.length; i++) {
+	const affiliatesLen = AFFILIATES.keys.length
+	const solvers = SOLVERS.keys()
+	const solversLen = SOLVERS.keys.length
+	for (let i = 0; i < affiliatesLen; i++) {
 		let affiliateAddress = affiliates[i]
 		let affiliatePlayer = SymmioEntity.load(affiliateAddress)
 		if (!affiliatePlayer) continue
 
-		const solvers = SOLVERS.keys()
-		for (let j = 0; j < SOLVERS.keys.length; j++) {
+		for (let j = 0; j < solversLen; j++) {
 			let solverAddress = solvers[j]
 			let solverPlayer = SymmioEntity.load(solverAddress)
 			if (!solverPlayer) continue

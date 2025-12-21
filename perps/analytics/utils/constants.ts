@@ -107,7 +107,7 @@ SOLVERS.set("0x94d2c48821f7667923d7656acc3529b953b40d09", "Zenith")
 SOLVERS.set("0xf49d008921de3cbe9eefb6c2f781cb804d7945f7", "Rasa")
 SOLVERS.set("0x15c544d6a630b88b45cb699522da20b7fda1ea89", "Superflow")
 SOLVERS.set("0xb49cae38c96f6425ce4a46e8220549c6a13362be", "Carbon")
-SOLVERS.set("0x9F20BaD77CCa97f2F96De88b146603Ca3F65baD5", "Carbon")
+SOLVERS.set("0x9f20bad77cca97f2f96de88b146603ca3f65bad5", "Carbon")
 SOLVERS.set("0xecd1d9dc751316831d893b1ab3ef0d36392b20db", "Superflow")
 SOLVERS.set("0x939ca7b7de3be50b537bfb59586c20cbe724570b", "PerpsHub")
 // bera
@@ -130,7 +130,7 @@ SOLVERS.set("0x3b5ac601c7bb74999ab3135fa43cbdbc6ab74570", "PerpsHub")
 SOLVERS.set("0xaed9e4568da7140bdcc23a57c8448cd894d7df4a", "PerpsHub")
 SOLVERS.set("0x3239c8043f1035c9a32f12a962183e07c2bd2fec", "PerpsHub")
 SOLVERS.set("0x293a276ab8e6550f8c8aa192a2c4b1215144d943", "PerpsHub")
-SOLVERS.set("0x94d2c48821f7667923d7656acc3529b953b40d09", "PerpsHub")
+// SOLVERS.set("0x94d2c48821f7667923d7656acc3529b953b40d09", "PerpsHub")
 SOLVERS.set("0x1bdff5940ebd182ed217bf2ff380caf4db4eac91", "PerpsHub")
 SOLVERS.set("0x63fab7819459fb6f09d3d3f4a86a17f1d29e0798", "PerpsHub")
 SOLVERS.set("0x53d9ddce4bc6cd9bb7c96ff064fa0e366e965b18", "PerpsHub")
@@ -138,9 +138,9 @@ SOLVERS.set("0x880ed0d338793ca7595306491d665585c22659cf", "PerpsHub")
 // blast
 SOLVERS.set("0xecbd0788bb5a72f9dfdac1ffeaaf9b7c2b26e456", "Rasa")
 // plasma
-SOLVERS.set("0x78E76Ac7fEc050cA785c19fFADDF57137b890543", "Orbs")
-SOLVERS.set("0xdB91D232E93969130272De309d3d914547604426", "Orbs")
-SOLVERS.set("0x7D387771f6E23f353a4afCE21af521875C0825D0", "Orbs")
+// SOLVERS.set("0x78e76ac7fec050ca785c19ffaddf57137b890543", "Orbs")
+// SOLVERS.set("0xdb91d232e93969130272de309d3d914547604426", "Orbs")
+// SOLVERS.set("0x7d387771f6e23f353a4afce21af521875c0825d0", "Orbs")
 
 export const AFFILIATES = new Map<string, string>()
 AFFILIATES.set(ZERO_ADDRESS, "Unknown")
@@ -206,7 +206,7 @@ AFFILIATES.set("0xc362b32af10b28ef775c429d26f6143d143a6e60", "Vibe")
 AFFILIATES.set("0x083267d20dbe6c2b0a83bd0e601dc2299ed99015", "IntentX")
 AFFILIATES.set("0xd6ee1fd75d11989e57b57aa6fd75f558fbf02a5e", "Core")
 // plasma
-AFFILIATES.set("0x78B1b8134A4236e69aE3728691e90B31f02C3001", "Lonex")
+// AFFILIATES.set("0x78B1b8134a4236e69aE3728691e90B31f02C3001", "Lonex")
 
 export const LIQUIDATORS = [
 	// mantle

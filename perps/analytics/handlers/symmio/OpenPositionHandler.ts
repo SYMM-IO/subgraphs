@@ -35,8 +35,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 
 		let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
 
-		const partyB = event.params.partyB.toHexString()
-		let solverAccount = Account.load(partyB)!
+		let solverAccount = Account.load(event.params.partyB.toHexString())!
 
 		updateHistories(
 			new UpdateHistoriesParams(version, account, solverAccount, event)
