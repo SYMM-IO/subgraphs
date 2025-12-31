@@ -110,6 +110,7 @@ SOLVERS.set("0xb49cae38c96f6425ce4a46e8220549c6a13362be", "Carbon")
 SOLVERS.set("0x9f20bad77cca97f2f96de88b146603ca3f65bad5", "Carbon")
 SOLVERS.set("0xecd1d9dc751316831d893b1ab3ef0d36392b20db", "Superflow")
 SOLVERS.set("0x939ca7b7de3be50b537bfb59586c20cbe724570b", "PerpsHub")
+SOLVERS.set("0x81631953E0C093e72935C1CAA4C7D519B2A0E407", "Rasa")
 // bera
 SOLVERS.set("0xdfed11fe4af63b059edbbdf53e9c633b331ed432", "PerpsHub")
 SOLVERS.set("0x78b1b8134a4236e69ae3728691e90b31f02c3001", "PerpsHub")
@@ -198,6 +199,7 @@ AFFILIATES.set("0xc0ff4b56f62f20ba45f4229cc6baad986fa2a904", "BMX")
 AFFILIATES.set("0xde6446197cd1ae02e1c5b7191a626fb0c1757377", "Xpanse")
 // sonic
 AFFILIATES.set("0xd90aca50ee8cb7c3dd1fee84a722d574186cdd17", "Spooky")
+AFFILIATES.set("0xB0FB2aE3BaF577061CA28C1Ba47Dd1Db2f00F8c5", "Spooky")
 // polygon
 AFFILIATES.set("0xffe2c25404525d2d4351d75177b92f18d9daf4af", "Cloverfield")
 AFFILIATES.set("0x53c3923ef2e64a2a259b2ac6f140deaa1ac59f64", "Vibe")
