@@ -19,11 +19,25 @@
 			"name": "spooky"
 		},
 		{
+			"address": "0xB0FB2aE3BaF577061CA28C1Ba47Dd1Db2f00F8c5",
+			"abi": "symmioMultiAccount",
+			"version": "3",
+			"startBlock": "56761092",
+			"name": "echoes"
+		},
+		{
 			"address": "0x61662eA0EeecAf693538284d4332ec6F2828f5F4",
 			"abi": "feeCollector",
 			"version": "1",
 			"startBlock": "38737044",
 			"name": "spooky"
+		},
+		{
+			"address": "0xE516F085D6Bb465FFe44855ce586dBbAa89FBf5a",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "57213241",
+			"name": "echoes"
 		}
 	],
 	"deploy_urls": {

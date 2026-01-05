@@ -199,7 +199,7 @@ AFFILIATES.set("0xc0ff4b56f62f20ba45f4229cc6baad986fa2a904", "BMX")
 AFFILIATES.set("0xde6446197cd1ae02e1c5b7191a626fb0c1757377", "Xpanse")
 // sonic
 AFFILIATES.set("0xd90aca50ee8cb7c3dd1fee84a722d574186cdd17", "Spooky")
-AFFILIATES.set("0xb0fb2ae3baf577061ca28c1ba47dd1db2f00f8c5", "Spooky")
+AFFILIATES.set("0xb0fb2ae3baf577061ca28c1ba47dd1db2f00f8c5", "Echoes")
 // polygon
 AFFILIATES.set("0xffe2c25404525d2d4351d75177b92f18d9daf4af", "Cloverfield")
 AFFILIATES.set("0x53c3923ef2e64a2a259b2ac6f140deaa1ac59f64", "Vibe")
