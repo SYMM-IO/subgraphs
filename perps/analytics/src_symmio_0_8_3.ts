@@ -11,6 +11,7 @@ import {
 	ChargeFundingRate,
 	DeallocateForPartyB,
 	DeallocatePartyA,
+	DeferredLiquidatePartyA,
 	Deposit,
 	EmergencyClosePosition,
 	ExpireQuote,
@@ -37,6 +38,7 @@ import {
 	SetCollateral,
 	SetFeeCollector,
 	SetSymbolFundingState,
+	SetSymbolsPrices,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
 	SettlePartyALiquidation,
@@ -87,6 +89,8 @@ import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandl
 import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
 import { ExpireQuoteOpenHandler } from "./handlers/symmio/ExpireQuoteOpenHandler"
 import { ExpireQuoteCloseHandler } from "./handlers/symmio/ExpireQuoteCloseHandler"
+import { DeferredLiquidatePartyAHandler } from "./handlers/symmio/DeferredLiquidatePartyAHandler"
+import { SetSymbolsPricesHandler } from "./handlers/symmio/SetSymbolsPricesHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -300,5 +304,15 @@ export function handleTransferToBridge(event: TransferToBridge): void {
 
 export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
 	let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyA): void {
+	let handler = new DeferredLiquidatePartyAHandler<DeferredLiquidatePartyA>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
+	let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
 	handler.handle(event, Version.v_0_8_3)
 }

@@ -1,5 +1,5 @@
 {
-	"network": "plasma",
+	"network": "plasma-mainnet",
 	"contracts": [
 		{
 			"address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",

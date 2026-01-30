@@ -160,5 +160,9 @@
 	"Account": [
 		"RequestToCancelCloseRequest",
 		"RequestToCancelQuote"
+	],
+	"LiquidationDetail": [
+		"SetSymbolsPrices",
+		"LiquidatePartyA"
 	]
 }

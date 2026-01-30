@@ -177,5 +177,10 @@
 	"CvaLf": [
 		"BalanceChangePartyA",
 		"SettlePartyALiquidation"
+	],
+	"LiquidationDetail": [
+		"DeferredLiquidatePartyA",
+		"SetSymbolsPrices",
+		"LiquidatePartyA"
 	]
 }

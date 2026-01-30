@@ -319,3 +319,19 @@ type OpenInterestSettleDay @entity(immutable: false) {
 	dayNumber: BigInt!
 	timestamp: BigInt!
 }
+
+type LiquidationDetail @entity(immutable: false) {
+	id: ID!
+	partyA: Bytes!
+	liquidationId: Bytes!
+	liquidationType: Int!
+	upnl: BigInt!
+	totalUnrealizedLoss: BigInt!
+	deficit: BigInt!
+	liquidationFee: BigInt!
+	timestamp: BigInt
+	involvedPartyBCounts: BigInt!
+	partyAAccumulatedUpnl: BigInt!
+	disputed: Boolean!
+	liquidationTimestamp: BigInt!
+}

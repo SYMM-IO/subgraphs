@@ -31,6 +31,7 @@ import {
 	SendQuote,
 	SetCollateral,
 	SetSymbolFundingState,
+	SetSymbolsPrices,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
 	UnlockQuote,
@@ -71,6 +72,7 @@ import { Version } from "../common/BaseHandler"
 import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
+import { SetSymbolsPricesHandler } from "./handlers/symmio/SetSymbolsPricesHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -244,5 +246,10 @@ export function handleUnlockQuote(event: UnlockQuote): void {
 
 export function handleWithdraw(event: Withdraw): void {
 	let handler = new WithdrawHandler<Withdraw>()
+	handler.handle(event, Version.v_0_8_1)
+}
+
+export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
+	let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
 	handler.handle(event, Version.v_0_8_1)
 }

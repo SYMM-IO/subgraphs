@@ -10,7 +10,7 @@ import {
 	BalanceChangePartyB,
 	ChargeFundingRate,
 	DeallocateForPartyB,
-	DeallocatePartyA,
+	DeallocatePartyA, DeferredLiquidatePartyA,
 	Deposit,
 	EmergencyClosePosition,
 	ExpireQuoteClose,
@@ -35,7 +35,7 @@ import {
 	SendQuote,
 	SetCollateral,
 	SetFeeCollector,
-	SetSymbolFundingState,
+	SetSymbolFundingState, SetSymbolsPrices,
 	SetSymbolTradingFee,
 	SetSymbolValidationState,
 	SettlePartyALiquidation,
@@ -43,7 +43,7 @@ import {
 	TransferToBridge,
 	UnlockQuote,
 	Withdraw,
-} from "../../generated/symmio_0_8_4/symmio_0_8_4"
+} from "../../generated/symmio_0_8_4/symmio_0_8_4";
 import { AcceptCancelRequestHandler } from "./handlers/symmio/AcceptCancelRequestHandler"
 import { AddBridgeHandler } from "./handlers/symmio/AddBridgeHandler"
 import { AddSymbolHandler } from "./handlers/symmio/AddSymbolHandler"
@@ -86,6 +86,8 @@ import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler"
 import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
 import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
 import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
+import { DeferredLiquidatePartyAHandler } from "../common/handlers/symmio/DeferredLiquidatePartyAHandler";
+import { SetSymbolsPricesHandler } from "./handlers/symmio/SetSymbolsPricesHandler";
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -299,5 +301,15 @@ export function handleTransferToBridge(event: TransferToBridge): void {
 
 export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
 	let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyA): void {
+	let handler = new DeferredLiquidatePartyAHandler<DeferredLiquidatePartyA>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
+	let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
 	handler.handle(event, Version.v_0_8_4)
 }
