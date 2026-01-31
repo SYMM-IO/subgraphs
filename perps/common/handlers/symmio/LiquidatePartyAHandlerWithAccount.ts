@@ -64,6 +64,7 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 			}
 		}
 		let entity = new LiquidationDetail(event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString())
+		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.liquidationId = liquidationId
 		entity.liquidationType = 0

@@ -26,6 +26,7 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 					entity = new LiquidationDetail(
 						event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
+				entity.source = event.address
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType
 				entity.upnl = liquidationDetail.upnl
@@ -52,6 +53,7 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 					entity = new LiquidationDetail(
 						event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
+				entity.source = event.address
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType
 				entity.upnl = liquidationDetail.upnl
@@ -76,6 +78,7 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 					entity = new LiquidationDetail(
 						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
+				entity.source = event.address
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType
 				entity.upnl = liquidationDetail.upnl
@@ -99,6 +102,7 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 					entity = new LiquidationDetail(
 						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
+				entity.source = event.address
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType
 				entity.upnl = liquidationDetail.upnl

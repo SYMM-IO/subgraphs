@@ -322,6 +322,7 @@ type OpenInterestSettleDay @entity(immutable: false) {
 
 type LiquidationDetail @entity(immutable: false) {
 	id: ID!
+	source: Bytes!
 	partyA: Bytes!
 	liquidationId: Bytes!
 	liquidationType: Int!
