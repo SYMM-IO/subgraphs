@@ -20,11 +20,11 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_4(event.address, event.params.partyA)
 				if (!liquidationDetail) break
 				let entity = LiquidationDetail.load(
-					event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toString() + "-" + event.address.toHexString(),
+					event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
 				)
 				if (!entity)
 					entity = new LiquidationDetail(
-						event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toString() + "-" + event.address.toHexString(),
+						event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType
@@ -46,11 +46,11 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_3(event.address, event.params.partyA)
 				if (!liquidationDetail) break
 				let entity = LiquidationDetail.load(
-					event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toString() + "-" + event.address.toHexString(),
+					event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
 				)
 				if (!entity)
 					entity = new LiquidationDetail(
-						event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toString() + "-" + event.address.toHexString(),
+						event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType
@@ -70,11 +70,11 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_2(event.address, event.params.partyA)
 				if (!liquidationDetail) break
 				let entity = LiquidationDetail.load(
-					event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toString() + "-" + event.address.toHexString(),
+					event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
 				)
 				if (!entity)
 					entity = new LiquidationDetail(
-						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toString() + "-" + event.address.toHexString(),
+						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType
@@ -93,11 +93,11 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_1(event.address, event.params.partyA)
 				if (!liquidationDetail) break
 				let entity = LiquidationDetail.load(
-					event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toString() + "-" + event.address.toHexString(),
+					event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
 				)
 				if (!entity)
 					entity = new LiquidationDetail(
-						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toString() + "-" + event.address.toHexString(),
+						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
 					)
 				entity.liquidationId = liquidationDetail.liquidationId
 				entity.liquidationType = liquidationDetail.liquidationType

@@ -6,7 +6,7 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let entity = new LiquidationDetail(event.params.partyA.toHexString() + "-" + event.params.liquidationId.toString() + "-" + event.address.toHexString())
+		let entity = new LiquidationDetail(event.params.partyA.toHexString() + "-" + event.params.liquidationId.toHexString() + "-" + event.address.toHexString())
 		entity.partyA = event.params.partyA
 		entity.liquidationId = event.params.liquidationId
 		entity.liquidationType = 0
