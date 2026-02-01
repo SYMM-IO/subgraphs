@@ -1,11 +1,11 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { Quote } from "../../../../generated/schema"
+import { LiquidationDetail, Quote } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuote as getQuote_0_8_0 } from "../../contract_utils_0_8_0"
-import { getQuote as getQuote_0_8_1 } from "../../contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_2 } from "../../contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4"
+import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_1, getQuote as getQuote_0_8_1 } from "../../contract_utils_0_8_1"
+import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_2, getQuote as getQuote_0_8_2 } from "../../contract_utils_0_8_2"
+import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_3, getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3"
+import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_4, getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
@@ -45,6 +45,27 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 					// @ts-ignore
 					let e = changetype<LiquidatePositionsPartyA_0_8_4>(event)
 					quote.liquidationId = e.params.liquidationId
+					const liquidationDetail = getLiquidatedStateOfPartyA_0_8_4(event.address, event.params.partyA)!
+					let entity = LiquidationDetail.load(
+						event.params.partyA.toHexString() + "-" + e.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
+					)
+					if (!entity)
+						entity = new LiquidationDetail(
+							event.params.partyA.toHexString() + "-" + e.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
+						)
+					entity.source = event.address
+					entity.liquidationId = liquidationDetail.liquidationId
+					entity.liquidationType = liquidationDetail.liquidationType
+					entity.upnl = liquidationDetail.upnl
+					entity.totalUnrealizedLoss = liquidationDetail.totalUnrealizedLoss
+					entity.deficit = liquidationDetail.deficit
+					entity.liquidationFee = liquidationDetail.liquidationFee
+					entity.timestamp = liquidationDetail.timestamp
+					entity.involvedPartyBCounts = liquidationDetail.involvedPartyBCounts
+					entity.partyAAccumulatedUpnl = liquidationDetail.partyAAccumulatedUpnl
+					entity.disputed = liquidationDetail.disputed
+					entity.liquidationTimestamp = liquidationDetail.liquidationTimestamp
+					entity.save()
 					break
 				}
 				case Version.v_0_8_3: {
@@ -53,16 +74,77 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 					// @ts-ignore
 					let e = changetype<LiquidatePositionsPartyA_0_8_3>(event)
 					quote.liquidationId = e.params.liquidationId
+					const liquidationDetail = getLiquidatedStateOfPartyA_0_8_3(event.address, event.params.partyA)!
+					let entity = LiquidationDetail.load(
+						event.params.partyA.toHexString() + "-" + e.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
+					)
+					if (!entity)
+						entity = new LiquidationDetail(
+							event.params.partyA.toHexString() + "-" + e.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
+						)
+					entity.source = event.address
+					entity.liquidationId = liquidationDetail.liquidationId
+					entity.liquidationType = liquidationDetail.liquidationType
+					entity.upnl = liquidationDetail.upnl
+					entity.totalUnrealizedLoss = liquidationDetail.totalUnrealizedLoss
+					entity.deficit = liquidationDetail.deficit
+					entity.liquidationFee = liquidationDetail.liquidationFee
+					entity.timestamp = liquidationDetail.timestamp
+					entity.involvedPartyBCounts = liquidationDetail.involvedPartyBCounts
+					entity.partyAAccumulatedUpnl = liquidationDetail.partyAAccumulatedUpnl
+					entity.disputed = liquidationDetail.disputed
+					entity.liquidationTimestamp = liquidationDetail.liquidationTimestamp
+					entity.save()
 					break
 				}
 				case Version.v_0_8_2: {
 					let q = getQuote_0_8_2(event.address, quoteId)!
 					avgClosedPrice = q.avgClosedPrice
+					const liquidationDetail = getLiquidatedStateOfPartyA_0_8_2(event.address, event.params.partyA)!
+					let entity = LiquidationDetail.load(
+						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
+					)
+					if (!entity)
+						entity = new LiquidationDetail(
+							event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
+						)
+					entity.source = event.address
+					entity.liquidationId = liquidationDetail.liquidationId
+					entity.liquidationType = liquidationDetail.liquidationType
+					entity.upnl = liquidationDetail.upnl
+					entity.totalUnrealizedLoss = liquidationDetail.totalUnrealizedLoss
+					entity.deficit = liquidationDetail.deficit
+					entity.liquidationFee = liquidationDetail.liquidationFee
+					entity.timestamp = liquidationDetail.timestamp
+					entity.involvedPartyBCounts = liquidationDetail.involvedPartyBCounts
+					entity.partyAAccumulatedUpnl = liquidationDetail.partyAAccumulatedUpnl
+					entity.disputed = liquidationDetail.disputed
+					entity.save()
 					break
 				}
 				case Version.v_0_8_1: {
 					let q = getQuote_0_8_1(event.address, quoteId)!
 					avgClosedPrice = q.avgClosedPrice
+					const liquidationDetail = getLiquidatedStateOfPartyA_0_8_1(event.address, event.params.partyA)!
+					let entity = LiquidationDetail.load(
+						event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
+					)
+					if (!entity)
+						entity = new LiquidationDetail(
+							event.params.partyA.toHexString() + "-" + liquidationDetail.liquidationId.toHexString() + "-" + event.address.toHexString(),
+						)
+					entity.source = event.address
+					entity.liquidationId = liquidationDetail.liquidationId
+					entity.liquidationType = liquidationDetail.liquidationType
+					entity.upnl = liquidationDetail.upnl
+					entity.totalUnrealizedLoss = liquidationDetail.totalUnrealizedLoss
+					entity.deficit = liquidationDetail.deficit
+					entity.liquidationFee = liquidationDetail.liquidationFee
+					entity.timestamp = liquidationDetail.timestamp
+					entity.involvedPartyBCounts = liquidationDetail.involvedPartyBCounts
+					entity.partyAAccumulatedUpnl = liquidationDetail.partyAAccumulatedUpnl
+					entity.disputed = liquidationDetail.disputed
+					entity.save()
 					break
 				}
 				case Version.v_0_8_0: {
