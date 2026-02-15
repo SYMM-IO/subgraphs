@@ -3,7 +3,9 @@ import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { Account, CvaLf, LiquidationDetail } from "../../../../generated/schema"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
+import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_5 } from "../../../common/contract_utils_0_8_5"
 import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_4 } from "../../../common/contract_utils_0_8_4"
 import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_3 } from "../../../common/contract_utils_0_8_3"
 import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_2 } from "../../../common/contract_utils_0_8_2"
@@ -27,6 +29,32 @@ export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 		}
 
 		switch (version) {
+			case Version.v_0_8_5: {
+				// @ts-ignore
+				const event_ = changetype<SettlePartyALiquidation_0_8_5>(_event)
+				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_5(event.address, event.params.partyA)!
+				let entity = LiquidationDetail.load(
+					event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
+				)
+				if (!entity)
+					entity = new LiquidationDetail(
+						event.params.partyA.toHexString() + "-" + event_.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
+					)
+				entity.source = event.address
+				entity.liquidationId = liquidationDetail.liquidationId
+				entity.liquidationType = liquidationDetail.liquidationType
+				entity.upnl = liquidationDetail.upnl
+				entity.totalUnrealizedLoss = liquidationDetail.totalUnrealizedLoss
+				entity.deficit = liquidationDetail.deficit
+				entity.liquidationFee = liquidationDetail.liquidationFee
+				entity.timestamp = liquidationDetail.timestamp
+				entity.involvedPartyBCounts = liquidationDetail.involvedPartyBCounts
+				entity.partyAAccumulatedUpnl = liquidationDetail.partyAAccumulatedUpnl
+				entity.disputed = liquidationDetail.disputed
+				entity.liquidationTimestamp = liquidationDetail.liquidationTimestamp
+				entity.save()
+				break
+			}
 			case Version.v_0_8_4: {
 				// @ts-ignore
 				const event_ = changetype<SettlePartyALiquidation_0_8_4>(_event)

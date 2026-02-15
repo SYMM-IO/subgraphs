@@ -6,6 +6,7 @@ import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0
 import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
+import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
 import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
 import { QuoteStatus } from "../../utils/constants"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
@@ -20,6 +21,13 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	let liquidAmount: BigInt
 	let liquidPrice: BigInt
 	switch (version) {
+		case Version.v_0_8_5: {
+			const chainQuote = getQuote_0_8_5(event.address, qId)
+			if (chainQuote == null) return
+			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
+			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
+			break
+		}
 		case Version.v_0_8_4: {
 			const chainQuote = getQuote_0_8_4(event.address, qId)
 			if (chainQuote == null) return

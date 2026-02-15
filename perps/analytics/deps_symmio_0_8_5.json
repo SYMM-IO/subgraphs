@@ -1,0 +1,238 @@
+{
+	"UserActivity": [
+		"SendQuote",
+		"RequestToClosePosition",
+		"ForceCancelQuote",
+		"ForceCancelCloseRequest",
+		"ForceClosePosition",
+		"RequestToCancelCloseRequest",
+		"RequestToCancelQuote"
+	],
+	"BalanceChange": [
+		"Deposit",
+		"Withdraw",
+		"BalanceChangePartyA",
+		"BalanceChangePartyB",
+		"TransferToBridge",
+		"WithdrawInitiated",
+		"WithdrawFinalized"
+	],
+	"TradeHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse"
+	],
+	"CloseHistory": [
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse"
+	],
+	"DailyHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee",
+		"TradingFeeCharged",
+		"WithdrawInitiated",
+		"WithdrawFinalized"
+	],
+	"TotalHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee",
+		"TradingFeeCharged",
+		"WithdrawInitiated",
+		"WithdrawFinalized"
+	],
+	"SymbolTradeHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse"
+	],
+	"OpenInterest": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse"
+	],
+	"DailySymbolTradesHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee",
+		"TradingFeeCharged"
+	],
+	"TotalSymbolTradesHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee",
+		"TradingFeeCharged"
+	],
+	"DailyUserHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"SendQuote",
+		"SettlePartyALiquidation",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee",
+		"TradingFeeCharged"
+	],
+	"TotalUserHistory": [
+		"OpenPosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"SendQuote",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee",
+		"TradingFeeCharged"
+	],
+	"PriceCheck": [
+		"OpenPosition",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition"
+	],
+	"PartyALiquidation": [
+		"SetSymbolsPrices"
+	],
+	"PartyBLiquidation": [
+		"LiquidatePartyB"
+	],
+	"PartyALiquidationDisputed": [
+		"LiquidationDisputed"
+	],
+	"Configuration": [
+		"SetCollateral"
+	],
+	"GrantedRole": [
+		"RoleGranted",
+		"RoleRevoked"
+	],
+	"Account": [
+		"RequestToCancelCloseRequest",
+		"RequestToCancelQuote"
+	],
+	"QuotePriceUpdate": [
+		"ChargeFundingRate",
+		"SettleUpnl",
+		"SettleUpnlUnified"
+	],
+	"AffiliateFeeCollector": [
+		"SetFeeCollector",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"ChargeFundingRate",
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"SendQuote",
+		"OpenPosition",
+		"SettlePartyALiquidation",
+		"ADLClose",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"TradingFeeCharged"
+	],
+	"CvaLf": [
+		"BalanceChangePartyA",
+		"SettlePartyALiquidation"
+	],
+	"LiquidationDetail": [
+		"DeferredLiquidatePartyA",
+		"SetSymbolsPrices",
+		"LiquidatePartyA"
+	]
+}

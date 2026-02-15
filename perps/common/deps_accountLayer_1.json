@@ -1,0 +1,12 @@
+{
+	"Account": [
+		"SubAccountCreated",
+		"VirtualAccountCreated",
+		"VirtualAccountDeleted",
+		"VirtualAccountReused",
+		"EditAccountName",
+		"LegacyAccountImported",
+		"SingleVAModeChanged",
+		"SubAccountDeleted"
+	]
+}

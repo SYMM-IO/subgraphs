@@ -62,6 +62,7 @@ abi_versions = {
     "options": ["1"],
     "optionsMultiAccount": ["1"],
     "feeCollector": ["1"],
+    "accountLayer": ["1"],
 }
 
 
@@ -290,16 +291,43 @@ def prepare_module(config: Config, target_module: str):
     create_schema_file(target_module, target_config)
     models = get_scheme_models()
 
-    # Create a set of all unique ABIs
+    # Create a set of all unique ABIs from config
     unique_abis = set(contract.abi for contract in config.contracts)
+    config_abis = set(unique_abis)  # snapshot before auto-detection
+
+    # Also detect ABIs needed by the module (deps/src files exist) but not in config
+    common_prefix, *_ = target_module.split("/")
+    common_dir = os.path.join(common_prefix, "common")
+    for abi, versions in abi_versions.items():
+        if abi in unique_abis:
+            continue
+        for version in versions:
+            if (
+                os.path.exists(os.path.join(target_module, f"deps_{abi}_{version}.json"))
+                or os.path.exists(os.path.join(common_dir, f"deps_{abi}_{version}.json"))
+                or os.path.exists(os.path.join(target_module, f"src_{abi}_{version}.ts"))
+            ):
+                unique_abis.add(abi)
+                break
 
     # Create a list to store all contracts, including the new versions
     all_contracts = []
+    global_max_start_block = max(int(c.startBlock) for c in config.contracts)
 
     # Process events for each contract and add missing versions
     for abi in unique_abis:
         versions = abi_versions[abi]
-        max_start_block = max(int(c.startBlock) for c in config.contracts if c.abi == abi)
+        contracts_for_abi = [c for c in config.contracts if c.abi == abi]
+
+        if contracts_for_abi:
+            max_start_block = max(int(c.startBlock) for c in contracts_for_abi)
+            base_address = next(c.address for c in contracts_for_abi)
+            base_name = next((c.name for c in contracts_for_abi if c.name), None)
+        else:
+            # ABI needed by module but not in config - use global max block and zero address
+            max_start_block = global_max_start_block
+            base_address = "0x0000000000000000000000000000000000000000"
+            base_name = None
 
         for version in versions:
             existing_contracts = [c for c in config.contracts if c.abi == abi and c.version == version]
@@ -308,15 +336,12 @@ def prepare_module(config: Config, target_module: str):
             else:
                 new_contract = Contract(
                     fake=True,
-                    address=next(c.address for c in config.contracts if c.abi == abi),
+                    address=base_address,
                     abi=abi,
                     version=version,
                     startBlock=str(max_start_block),
                     endBlock=str(max_start_block),
-                    name=next(
-                        (c.name for c in config.contracts if c.abi == abi and c.name),
-                        None,
-                    ),
+                    name=base_name,
                 )
                 all_contracts.append(new_contract)
 
@@ -380,6 +405,13 @@ def prepare_module(config: Config, target_module: str):
 
         if len(contract.dependencies) > 0:
             source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in contract.dependencies]
+
+        # Auto-include ABIs that were detected from deps/src files but not in config
+        existing_abi_names = set(a["name"] for a in source_config["mapping"]["abis"])
+        for c in all_contracts:
+            if c.abi not in config_abis and c.path() not in existing_abi_names:
+                source_config["mapping"]["abis"].append({"name": c.path(), "file": f"./abis/{c.path()}.json"})
+                existing_abi_names.add(c.path())
 
         contract_indexes[(contract.abi, contract.version)] += 1
 

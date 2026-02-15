@@ -5,6 +5,7 @@ import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0
 import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
+import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
 import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
 import { Version } from "../../../common/BaseHandler"
 
@@ -28,6 +29,11 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 			let funding: BigInt
 			switch (version) {
+				case Version.v_0_8_5: {
+					let chainQuote = getQuote_0_8_5(event.address, quote.quoteId)!
+					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
+					break
+				}
 				case Version.v_0_8_4: {
 					let chainQuote = getQuote_0_8_4(event.address, quote.quoteId)!
 					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))

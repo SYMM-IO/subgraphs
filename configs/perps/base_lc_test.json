@@ -6,6 +6,12 @@
 			"abi": "symmio",
 			"version": "0_8_5",
 			"startBlock": "41664666"
+		},
+		{
+			"address": "0xb5230Cb273299826E991808D34Ef8E1D25349F8D",
+			"abi": "accountLayer",
+			"version": "1",
+			"startBlock": "41664666"
 		}
 	],
 	"deploy_urls": {

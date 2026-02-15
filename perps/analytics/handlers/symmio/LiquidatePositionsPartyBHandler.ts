@@ -8,6 +8,7 @@ import {LiquidatePositionsPartyB as LiquidatePositionsPartyB_0_8_1} from "../../
 import {LiquidatePositionsPartyB as LiquidatePositionsPartyB_0_8_2} from "../../../../generated/symmio_0_8_2/symmio_0_8_2";
 import {LiquidatePositionsPartyB as LiquidatePositionsPartyB_0_8_3} from "../../../../generated/symmio_0_8_3/symmio_0_8_3";
 import {LiquidatePositionsPartyB as LiquidatePositionsPartyB_0_8_4} from "../../../../generated/symmio_0_8_4/symmio_0_8_4";
+import {LiquidatePositionsPartyB as LiquidatePositionsPartyB_0_8_5} from "../../../../generated/symmio_0_8_5/symmio_0_8_5";
 import {handleLiquidatePosition} from "../commonHandlers/liquidatePositions";
 
 export class LiquidatePositionsPartyBHandler<T> extends CommonLiquidatePositionsPartyBHandler<T> {
@@ -21,6 +22,10 @@ export class LiquidatePositionsPartyBHandler<T> extends CommonLiquidatePositions
 		for (let i = 0; i < event.params.quoteIds.length; i++) {
 			const qId = event.params.quoteIds[i]
 			switch (version) {
+				case Version.v_0_8_5: {
+					handleLiquidatePosition<LiquidatePositionsPartyB_0_8_5>(event, version, qId)
+					break
+				}
 				case Version.v_0_8_4: {
 					handleLiquidatePosition<LiquidatePositionsPartyB_0_8_4>(event, version, qId)
 					break

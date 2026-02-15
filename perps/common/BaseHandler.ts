@@ -70,3 +70,23 @@ export class BaseFeeCollectorHandler {
 		return getGlobalCounterAndInc()
 	}
 }
+
+export enum AccountLayerVersion {
+	v_1,
+}
+
+export class BaseAccountLayerHandler {
+
+	constructor() {
+	}
+
+	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
+	}
+
+	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
+	}
+
+	handleGlobalCounter(): BigInt {
+		return getGlobalCounterAndInc()
+	}
+}

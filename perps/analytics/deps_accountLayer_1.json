@@ -1,0 +1,24 @@
+{
+	"Account": [
+		"SubAccountCreated",
+		"VirtualAccountCreated",
+		"VirtualAccountDeleted",
+		"VirtualAccountReused",
+		"EditAccountName",
+		"LegacyAccountImported",
+		"SingleVAModeChanged",
+		"SubAccountDeleted"
+	],
+	"GrantedRole": [
+		"RoleGranted",
+		"RoleRevoked"
+	],
+	"DailyHistory": [
+		"SubAccountCreated",
+		"LegacyAccountImported"
+	],
+	"TotalHistory": [
+		"SubAccountCreated",
+		"LegacyAccountImported"
+	]
+}

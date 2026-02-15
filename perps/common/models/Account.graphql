@@ -18,4 +18,9 @@ type Account @entity(immutable: false) {
 	withdraw: BigInt!
 	allocated: BigInt!
 	deallocated: BigInt!
+	parentAddress: Bytes
+	isVirtual: Boolean
+	isDeleted: Boolean
+	singleVAMode: Boolean
+	affiliate: Bytes
 }
