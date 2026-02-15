@@ -5,6 +5,7 @@ import { Quote } from "../../../../generated/schema"
 import { QuoteStatus } from "../../../analytics/utils/constants"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 
 export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
@@ -14,6 +15,12 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
 		const event = changetype<T>(_event)
 		let quoteIds: Array<BigInt>
 		switch (version) {
+			case Version.v_0_8_5: {
+				// @ts-ignore
+				const event = changetype<LiquidatePendingPositionsPartyA_0_8_5>(_event)
+				quoteIds = event.params.quoteIds
+				break
+			}
 			case Version.v_0_8_4: {
 				// @ts-ignore
 				const event = changetype<LiquidatePendingPositionsPartyA_0_8_4>(_event)
@@ -35,6 +42,12 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
 			let quote = Quote.load(quoteIds[index].toString() + "-" + event.address.toHexString())!
 			quote.quoteStatus = QuoteStatus.LIQUIDATED_PENDING
 			switch (version) {
+				case Version.v_0_8_5: {
+					// @ts-ignore
+					let e = changetype<LiquidatePendingPositionsPartyA_0_8_5>(event)
+					quote.liquidationId = e.params.liquidationId
+					break
+				}
 				case Version.v_0_8_4: {
 					// @ts-ignore
 					let e = changetype<LiquidatePendingPositionsPartyA_0_8_4>(event)

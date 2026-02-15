@@ -1,0 +1,15 @@
+{
+	"network": "base",
+	"contracts": [
+		{
+			"address": "0x0f4352e4a88b5Dc0531a98B538F04893Fb22489C",
+			"abi": "symmio",
+			"version": "0_8_5",
+			"startBlock": "41664666"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "base_lc_test_analytics",
+		"perps/events": "base_lc_test_events"
+	}
+}

@@ -2,6 +2,7 @@ import { BaseHandler, Version } from "../../BaseHandler"
 import { DebugEntity, Quote } from "../../../../generated/schema"
 import { ethereum, log } from "@graphprotocol/graph-ts";
 import { RequestToClosePosition as RequestToClosePosition_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4";
+import { RequestToClosePosition as RequestToClosePosition_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5";
 import { RequestToClosePosition as RequestToClosePosition_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3";
 import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
 
@@ -24,6 +25,11 @@ export class RequestToClosePositionHandler<T> extends BaseHandler {
 		quote.quantityToClose = event.params.quantityToClose
 		quote.quoteStatus = event.params.quoteStatus
 		switch (version) {
+			case Version.v_0_8_5:
+				// @ts-ignore
+				const e = changetype<RequestToClosePosition_0_8_5>(_event)
+				quote.closeId = e.params.closeId
+				break
 			case Version.v_0_8_4:
 				// @ts-ignore
 				const e = changetype<RequestToClosePosition_0_8_4>(_event)

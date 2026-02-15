@@ -1,0 +1,57 @@
+{
+	"Quote": [
+		"AcceptCancelRequest",
+		"AcceptCancelCloseRequest",
+		"SendQuote",
+		"LockQuote",
+		"UnlockQuote",
+		"ChargeFundingRate",
+		"LiquidatePositionsPartyB",
+		"LiquidatePositionsPartyA",
+		"RequestToClosePosition",
+		"ExpireQuoteClose",
+		"ExpireQuoteOpen",
+		"handleForceCancelCloseRe",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"FillCloseRequest",
+		"OpenPosition",
+		"SettleUpnl",
+		"ADLClose",
+		"SettleUpnlUnified",
+		"ForceClosePartyBInsolvent"
+	],
+	"User": [
+		"SendQuote",
+		"AddAccount"
+	],
+	"Symbol": [
+		"AddSymbol",
+		"SetSymbolTradingFee",
+		"SetSymbolValidationState",
+		"SetSymbolFundingState"
+	],
+	"Account": [
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit",
+		"Withdraw",
+		"AllocateForPartyB",
+		"DeallocateForPartyB",
+		"SendQuote",
+		"OpenPosition",
+		"RequestToClosePosition",
+		"RequestToClosePosition",
+		"LiquidatePartyA",
+		"LiquidatePositionsPartyA",
+		"LiquidatePendingPositionsPartyA",
+		"LiquidatePartyB",
+		"LiquidatePositionsPartyB",
+		"RegisterPartyB",
+		"AddBridge"
+	],
+	"SymmioEntity": [
+		"SendQuote",
+		"RegisterPartyB"
+	]
+}

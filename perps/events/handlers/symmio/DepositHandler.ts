@@ -15,6 +15,11 @@ export class DepositHandler<T> {
 		entity.user = event.params.user
 		entity.amount = event.params.amount
 
+		// New variant (0.8.5) has isVirtual as 4th param
+		if (_event.parameters.length >= 4) {
+			entity.isVirtual = _event.parameters[3].value.toBoolean()
+		}
+
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash

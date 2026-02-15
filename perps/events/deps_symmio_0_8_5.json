@@ -1,0 +1,590 @@
+{
+  "ADLClose": [
+    "ADLClose"
+  ],
+  "AcceptCancelCloseRequest": [
+    "AcceptCancelCloseRequest"
+  ],
+  "AcceptCancelRequest": [
+    "AcceptCancelRequest"
+  ],
+  "AcceptVirtualExternalTransfer": [
+    "AcceptVirtualExternalTransfer"
+  ],
+  "AccumulatedFundingActivated": [
+    "AccumulatedFundingActivated"
+  ],
+  "ActivateCrossPartyB": [
+    "ActivateCrossPartyB"
+  ],
+  "ActivateInstantActionMode": [
+    "ActivateInstantActionMode"
+  ],
+  "ActiveEmergencyMode": [
+    "ActiveEmergencyMode"
+  ],
+  "AddBridge": [
+    "AddBridge"
+  ],
+  "AddRelayerForExternalTransferTarget": [
+    "AddRelayerForExternalTransferTarget"
+  ],
+  "AddSymbol": [
+    "AddSymbol"
+  ],
+  "AllocateForPartyB": [
+    "AllocateForPartyB"
+  ],
+  "AllocatePartyA": [
+    "AllocatePartyA"
+  ],
+  "AllocatePartyB": [
+    "AllocatePartyB"
+  ],
+  "AutoTakeoverPartyALiquidation": [
+    "AutoTakeoverPartyALiquidation"
+  ],
+  "BalanceChangePartyA": [
+    "BalanceChangePartyA"
+  ],
+  "BalanceChangePartyB": [
+    "BalanceChangePartyB"
+  ],
+  "BindToPartyB": [
+    "BindToPartyB"
+  ],
+  "BlacklistSymbols": [
+    "BlacklistSymbols"
+  ],
+  "CancelUnbindRequest": [
+    "CancelUnbindRequest"
+  ],
+  "CancelVirtualExternalTransfer": [
+    "CancelVirtualExternalTransfer"
+  ],
+  "ChargeAccumulatedFundingFee": [
+    "ChargeAccumulatedFundingFee"
+  ],
+  "ChargeFundingRate": [
+    "ChargeFundingRate"
+  ],
+  "CompleteUnbindRequest": [
+    "CompleteUnbindRequest"
+  ],
+  "CrossLockedValuesMigrated": [
+    "CrossLockedValuesMigrated"
+  ],
+  "DeactivateInstantActionMode": [
+    "DeactivateInstantActionMode"
+  ],
+  "DeactiveEmergencyMode": [
+    "DeactiveEmergencyMode"
+  ],
+  "DeallocateForClearingHouse": [
+    "DeallocateForClearingHouse"
+  ],
+  "DeallocateForPartyB": [
+    "DeallocateForPartyB"
+  ],
+  "DeallocatePartyA": [
+    "DeallocatePartyA"
+  ],
+  "DeallocateSuspendedUser": [
+    "DeallocateSuspendedUser"
+  ],
+  "DeferredLiquidatePartyA": [
+    "DeferredLiquidatePartyA"
+  ],
+  "Deposit": [
+    "Deposit"
+  ],
+  "DepositToReserveVault": [
+    "DepositToReserveVault"
+  ],
+  "DepositVirtualFunds": [
+    "DepositVirtualFunds"
+  ],
+  "DeregisterAffiliate": [
+    "DeregisterAffiliate"
+  ],
+  "DeregisterPartyB": [
+    "DeregisterPartyB"
+  ],
+  "DisputeForLiquidation": [
+    "DisputeForLiquidation"
+  ],
+  "DistributeForClearingHouse": [
+    "DistributeForClearingHouse"
+  ],
+  "EmergencyClosePosition": [
+    "EmergencyClosePosition"
+  ],
+  "ExpireQuoteClose": [
+    "ExpireQuoteClose"
+  ],
+  "ExpireQuoteOpen": [
+    "ExpireQuoteOpen"
+  ],
+  "ExternalTransfer": [
+    "ExternalTransfer"
+  ],
+  "FillCloseRequest": [
+    "FillCloseRequest"
+  ],
+  "ForceCancelCloseRequest": [
+    "ForceCancelCloseRequest"
+  ],
+  "ForceCancelQuote": [
+    "ForceCancelQuote"
+  ],
+  "ForceCloseInitialized": [
+    "ForceCloseInitialized"
+  ],
+  "ForceClosePartyBInsolvent": [
+    "ForceClosePartyBInsolvent"
+  ],
+  "ForceClosePosition": [
+    "ForceClosePosition"
+  ],
+  "ForceFetchAllocated": [
+    "ForceFetchAllocated"
+  ],
+  "FullyLiquidatedPartyA": [
+    "FullyLiquidatedPartyA"
+  ],
+  "FullyLiquidatedPartyB": [
+    "FullyLiquidatedPartyB"
+  ],
+  "InitiateVirtualExternalTransfer": [
+    "InitiateVirtualExternalTransfer"
+  ],
+  "InternalTransfer": [
+    "InternalTransfer"
+  ],
+  "InternalTransferToBalance": [
+    "InternalTransferToBalance"
+  ],
+  "LegacyFundingDeprecated": [
+    "LegacyFundingDeprecated"
+  ],
+  "LegacyWithdrawalDeprecated": [
+    "LegacyWithdrawalDeprecated"
+  ],
+  "LiquidateCrossPartyB": [
+    "LiquidateCrossPartyB"
+  ],
+  "LiquidatePartyA": [
+    "LiquidatePartyA"
+  ],
+  "LiquidatePartyB": [
+    "LiquidatePartyB"
+  ],
+  "LiquidatePendingPositionsForClearingHouse": [
+    "LiquidatePendingPositionsForClearingHouse"
+  ],
+  "LiquidatePendingPositionsPartyA": [
+    "LiquidatePendingPositionsPartyA"
+  ],
+  "LiquidatePositionsForClearingHouse": [
+    "LiquidatePositionsForClearingHouse"
+  ],
+  "LiquidatePositionsPartyA": [
+    "LiquidatePositionsPartyA"
+  ],
+  "LiquidatePositionsPartyB": [
+    "LiquidatePositionsPartyB"
+  ],
+  "LiquidationDisputed": [
+    "LiquidationDisputed"
+  ],
+  "LockQuote": [
+    "LockQuote"
+  ],
+  "OpenPosition": [
+    "OpenPosition"
+  ],
+  "PauseAccounting": [
+    "PauseAccounting"
+  ],
+  "PauseExternalTransfer": [
+    "PauseExternalTransfer"
+  ],
+  "PauseGlobal": [
+    "PauseGlobal"
+  ],
+  "PauseInstantLayer": [
+    "PauseInstantLayer"
+  ],
+  "PauseInternalTransfer": [
+    "PauseInternalTransfer"
+  ],
+  "PauseLiquidation": [
+    "PauseLiquidation"
+  ],
+  "PausePartyAActions": [
+    "PausePartyAActions"
+  ],
+  "PausePartyBActions": [
+    "PausePartyBActions"
+  ],
+  "PausePartyBOpenPositions": [
+    "PausePartyBOpenPositions"
+  ],
+  "PledgeCollateralDeposited": [
+    "PledgeCollateralDeposited"
+  ],
+  "PledgeWithdrawApproved": [
+    "PledgeWithdrawApproved"
+  ],
+  "PledgeWithdrawCancelled": [
+    "PledgeWithdrawCancelled"
+  ],
+  "PledgeWithdrawRequested": [
+    "PledgeWithdrawRequested"
+  ],
+  "ProposeToDeactivateInstantActionMode": [
+    "ProposeToDeactivateInstantActionMode"
+  ],
+  "QuotesMigrated": [
+    "QuotesMigrated"
+  ],
+  "RegisterAffiliate": [
+    "RegisterAffiliate"
+  ],
+  "RegisterExpressProvider": [
+    "RegisterExpressProvider"
+  ],
+  "RegisterHook": [
+    "RegisterHook"
+  ],
+  "RegisterPartyB": [
+    "RegisterPartyB"
+  ],
+  "RegisterVirtualProvider": [
+    "RegisterVirtualProvider"
+  ],
+  "RemoveBridge": [
+    "RemoveBridge"
+  ],
+  "RemoveRelayerForExternalTransferTarget": [
+    "RemoveRelayerForExternalTransferTarget"
+  ],
+  "RemoveSymbolTypeFromWhitelist": [
+    "RemoveSymbolTypeFromWhitelist"
+  ],
+  "RemoveSymbolsFromBlacklist": [
+    "RemoveSymbolsFromBlacklist"
+  ],
+  "RemoveSymbolsFromWhitelist": [
+    "RemoveSymbolsFromWhitelist"
+  ],
+  "RequestToCancelCloseRequest": [
+    "RequestToCancelCloseRequest"
+  ],
+  "RequestToCancelQuote": [
+    "RequestToCancelQuote"
+  ],
+  "RequestToClosePosition": [
+    "RequestToClosePosition"
+  ],
+  "RequestToUnbindFromPartyB": [
+    "RequestToUnbindFromPartyB"
+  ],
+  "ResolveLiquidationDispute": [
+    "ResolveLiquidationDispute"
+  ],
+  "RestoreBridgeTransaction": [
+    "RestoreBridgeTransaction"
+  ],
+  "RoleAdminAdded": [
+    "RoleAdminAdded"
+  ],
+  "RoleAdminRemoved": [
+    "RoleAdminRemoved"
+  ],
+  "RoleGranted": [
+    "RoleGranted"
+  ],
+  "RoleRevoked": [
+    "RoleRevoked"
+  ],
+  "SendQuote": [
+    "SendQuote"
+  ],
+  "SetADLEnabled": [
+    "SetADLEnabled"
+  ],
+  "SetAffiliateFee": [
+    "SetAffiliateFee"
+  ],
+  "SetAffiliateFeeForUser": [
+    "SetAffiliateFeeForUser"
+  ],
+  "SetBalanceLimitPerUser": [
+    "SetBalanceLimitPerUser"
+  ],
+  "SetCollateral": [
+    "SetCollateral"
+  ],
+  "SetCrossPartyB": [
+    "SetCrossPartyB"
+  ],
+  "SetCrossPartyBModeActivated": [
+    "SetCrossPartyBModeActivated"
+  ],
+  "SetDeallocateCooldown": [
+    "SetDeallocateCooldown"
+  ],
+  "SetDeallocateDebounceTime": [
+    "SetDeallocateDebounceTime"
+  ],
+  "SetDefaultFeeCollector": [
+    "SetDefaultFeeCollector"
+  ],
+  "SetEntityMetadata": [
+    "SetEntityMetadata"
+  ],
+  "SetEpochDuration": [
+    "SetEpochDuration"
+  ],
+  "SetFeeCollector": [
+    "SetFeeCollector"
+  ],
+  "SetForceCancelCloseCooldown": [
+    "SetForceCancelCloseCooldown"
+  ],
+  "SetForceCancelCooldown": [
+    "SetForceCancelCooldown"
+  ],
+  "SetForceCloseCooldowns": [
+    "SetForceCloseCooldowns"
+  ],
+  "SetForceCloseGapRatio": [
+    "SetForceCloseGapRatio"
+  ],
+  "SetForceCloseMinSigPeriod": [
+    "SetForceCloseMinSigPeriod"
+  ],
+  "SetForceClosePricePenalty": [
+    "SetForceClosePricePenalty"
+  ],
+  "SetInvalidBridgedAmountsPool": [
+    "SetInvalidBridgedAmountsPool"
+  ],
+  "SetLegacyDeallocateDeprecated": [
+    "SetLegacyDeallocateDeprecated"
+  ],
+  "SetLiquidationInsuranceVaultParams": [
+    "SetLiquidationInsuranceVaultParams"
+  ],
+  "SetLiquidationTimeout": [
+    "SetLiquidationTimeout"
+  ],
+  "SetLiquidatorShare": [
+    "SetLiquidatorShare"
+  ],
+  "SetLongFundingFee": [
+    "SetLongFundingFee"
+  ],
+  "SetMaxPartyAConnectionLimit": [
+    "SetMaxPartyAConnectionLimit"
+  ],
+  "SetMaxWithdrawParts": [
+    "SetMaxWithdrawParts"
+  ],
+  "SetMinAffiliateFee": [
+    "SetMinAffiliateFee"
+  ],
+  "SetMinWithdrawCooldown": [
+    "SetMinWithdrawCooldown"
+  ],
+  "SetMuonConfig": [
+    "SetMuonConfig"
+  ],
+  "SetMuonIds": [
+    "SetMuonIds"
+  ],
+  "SetPartyBBindable": [
+    "SetPartyBBindable"
+  ],
+  "SetPartyBEmergencyStatus": [
+    "SetPartyBEmergencyStatus"
+  ],
+  "SetPendingQuotesValidLength": [
+    "SetPendingQuotesValidLength"
+  ],
+  "SetPureVirtualCancelBlackout": [
+    "SetPureVirtualCancelBlackout"
+  ],
+  "SetSettlementCooldown": [
+    "SetSettlementCooldown"
+  ],
+  "SetShortFundingFee": [
+    "SetShortFundingFee"
+  ],
+  "SetSignatureVerifierAddress": [
+    "SetSignatureVerifierAddress"
+  ],
+  "SetSoftLiquidationPenaltyCollector": [
+    "SetSoftLiquidationPenaltyCollector"
+  ],
+  "SetSpeedUpUser": [
+    "SetSpeedUpUser"
+  ],
+  "SetSuspendedAddress": [
+    "SetSuspendedAddress"
+  ],
+  "SetSymbolAcceptableValues": [
+    "SetSymbolAcceptableValues"
+  ],
+  "SetSymbolFundingState": [
+    "SetSymbolFundingState"
+  ],
+  "SetSymbolMaxLeverage": [
+    "SetSymbolMaxLeverage"
+  ],
+  "SetSymbolTradingFee": [
+    "SetSymbolTradingFee"
+  ],
+  "SetSymbolType": [
+    "SetSymbolType"
+  ],
+  "SetSymbolValidationState": [
+    "SetSymbolValidationState"
+  ],
+  "SetSymbolsPrices": [
+    "SetSymbolsPrices"
+  ],
+  "SetUnbindCooldown": [
+    "SetUnbindCooldown"
+  ],
+  "SetWithdrawCooldownPeriod": [
+    "SetWithdrawCooldownPeriod"
+  ],
+  "SettleCrossPartyBLiquidation": [
+    "SettleCrossPartyBLiquidation"
+  ],
+  "SettlePartyALiquidation": [
+    "SettlePartyALiquidation"
+  ],
+  "SettlePartyATakeover": [
+    "SettlePartyATakeover"
+  ],
+  "SettleUpnl": [
+    "SettleUpnl"
+  ],
+  "SettleUpnlUnified": [
+    "SettleUpnlUnified"
+  ],
+  "SignerSet": [
+    "SignerSet"
+  ],
+  "SoftPartyBLiquidation": [
+    "SoftPartyBLiquidation"
+  ],
+  "SuspendBridgeTransaction": [
+    "SuspendBridgeTransaction"
+  ],
+  "TakeoverPartyALiquidation": [
+    "TakeoverPartyALiquidation"
+  ],
+  "TradeVolumeRecorded": [
+    "TradeVolumeRecorded"
+  ],
+  "TradingFeeCharged": [
+    "TradingFeeCharged"
+  ],
+  "TransferAllocation": [
+    "TransferAllocation"
+  ],
+  "TransferToBridge": [
+    "TransferToBridge"
+  ],
+  "UnlockQuote": [
+    "UnlockQuote"
+  ],
+  "UnpauseAccounting": [
+    "UnpauseAccounting"
+  ],
+  "UnpauseExternalTransfer": [
+    "UnpauseExternalTransfer"
+  ],
+  "UnpauseGlobal": [
+    "UnpauseGlobal"
+  ],
+  "UnpauseInstantLayer": [
+    "UnpauseInstantLayer"
+  ],
+  "UnpauseInternalTransfer": [
+    "UnpauseInternalTransfer"
+  ],
+  "UnpauseLiquidation": [
+    "UnpauseLiquidation"
+  ],
+  "UnpausePartyAActions": [
+    "UnpausePartyAActions"
+  ],
+  "UnpausePartyBActions": [
+    "UnpausePartyBActions"
+  ],
+  "UnpausePartyBOpenPositions": [
+    "UnpausePartyBOpenPositions"
+  ],
+  "UnregisterExpressProvider": [
+    "UnregisterExpressProvider"
+  ],
+  "UnregisterVirtualProvider": [
+    "UnregisterVirtualProvider"
+  ],
+  "UpdateAccumulatedFundingFee": [
+    "UpdateAccumulatedFundingFee"
+  ],
+  "UserSlashed": [
+    "UserSlashed"
+  ],
+  "WhitelistSymbolType": [
+    "WhitelistSymbolType"
+  ],
+  "WhitelistSymbols": [
+    "WhitelistSymbols"
+  ],
+  "Withdraw": [
+    "Withdraw"
+  ],
+  "WithdrawAccepted": [
+    "WithdrawAccepted"
+  ],
+  "WithdrawCancelRequested": [
+    "WithdrawCancelRequested"
+  ],
+  "WithdrawCancelled": [
+    "WithdrawCancelled"
+  ],
+  "WithdrawFinalized": [
+    "WithdrawFinalized"
+  ],
+  "WithdrawFromReserveVault": [
+    "WithdrawFromReserveVault"
+  ],
+  "WithdrawInitiated": [
+    "WithdrawInitiated"
+  ],
+  "WithdrawReceivedBridgeValue": [
+    "WithdrawReceivedBridgeValue"
+  ],
+  "WithdrawReceivedBridgeValues": [
+    "WithdrawReceivedBridgeValues"
+  ],
+  "WithdrawRejected": [
+    "WithdrawRejected"
+  ],
+  "WithdrawSpeedUpAccepted": [
+    "WithdrawSpeedUpAccepted"
+  ],
+  "WithdrawSuspended": [
+    "WithdrawSuspended"
+  ],
+  "WithdrawSuspendedUser": [
+    "WithdrawSuspendedUser"
+  ]
+}

@@ -4,6 +4,7 @@ import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class LiquidatePositionsPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -21,6 +22,17 @@ export class LiquidatePositionsPartyAHandler<T> {
 		entity.blockHash = event.block.hash
 
 		switch (version) {
+			case Version.v_0_8_5: {
+				// @ts-ignore
+				const e = changetype<LiquidatePositionsPartyA_8_5>(_event)
+				entity.liquidationId = e.params.liquidationId
+				entity.liquidatedAmounts = e.params.liquidatedAmounts
+				// New variant has averageClosedPrices
+				if (_event.parameters.length >= 7) {
+					entity.averageClosedPrices = _event.parameters[5].value.toBigIntArray()
+				}
+				break
+			}
 			case Version.v_0_8_4: {
 				// @ts-ignore
 				const e = changetype<LiquidatePositionsPartyA_8_4>(_event)

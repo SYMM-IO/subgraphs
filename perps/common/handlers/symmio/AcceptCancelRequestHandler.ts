@@ -8,6 +8,7 @@ import { getQuote as getQuote_0_8_1, symbolIdToSymbolName as symbolIdToSymbolNam
 import { getQuote as getQuote_0_8_2, symbolIdToSymbolName as symbolIdToSymbolName_0_8_2 } from "../../contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_3, symbolIdToSymbolName as symbolIdToSymbolName_0_8_3 } from "../../contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_4, symbolIdToSymbolName as symbolIdToSymbolName_0_8_4 } from "../../contract_utils_0_8_4"
+import { getQuote as getQuote_0_8_5, symbolIdToSymbolName as symbolIdToSymbolName_0_8_5 } from "../../contract_utils_0_8_5"
 import { updateActivityTimestamps } from "../../../analytics/utils/activityHelpers";
 import { updateHistories, UpdateHistoriesParams } from "../../../analytics/utils/historyHelpers";
 import { catchUpHistories } from "../../../analytics/utils/openInterestHelpers";
@@ -29,6 +30,38 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 
 			let symbolName: string
 			switch (version) {
+				case Version.v_0_8_5: {
+					const q = getQuote_0_8_5(event.address, event.params.quoteId)!
+					quote.maxFundingRate = q.maxFundingRate
+					quote.orderTypeOpen = q.orderType
+					quote.partyA = q.partyA
+					quote.symbolId = q.symbolId
+					quote.tradingFee = q.tradingFee
+					quote.positionType = q.positionType
+					quote.requestedOpenPrice = q.requestedOpenPrice
+					quote.quantity = q.quantity
+					quote.cva = q.lockedValues.cva
+					quote.lf = q.lockedValues.lf
+					quote.initialCva = q.lockedValues.cva
+					quote.initialLf = q.lockedValues.lf
+					quote.initialPartyAmm = q.lockedValues.partyAmm
+					quote.initialPartyBmm = q.lockedValues.partyBmm
+					quote.partyAmm = q.lockedValues.partyAmm
+					quote.partyBmm = q.lockedValues.partyBmm
+					quote.openDeadline = q.deadline
+					quote.quoteStatus = q.quoteStatus
+					quote.marketPrice = q.marketPrice
+					quote.affiliate = q.affiliate
+					if (q.partyBsWhiteList) {
+						let partyBsWhiteList: Bytes[] = []
+						for (let i = 0, len = q.partyBsWhiteList.length; i < len; i++) {
+							partyBsWhiteList.push(q.partyBsWhiteList[i])
+						}
+						quote.partyBsWhiteList = partyBsWhiteList
+					}
+					symbolName = symbolIdToSymbolName_0_8_5(q.symbolId, event.address)
+					break
+				}
 				case Version.v_0_8_4: {
 					const q = getQuote_0_8_4(event.address, event.params.quoteId)!
 					quote.maxFundingRate = q.maxFundingRate

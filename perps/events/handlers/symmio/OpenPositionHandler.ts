@@ -19,6 +19,15 @@ export class OpenPositionHandler<T> {
 		entity.filledAmount = event.params.filledAmount
 		entity.openedPrice = event.params.openedPrice
 
+		// New variant (0.8.5) has lockedValues tuple as 6th param
+		if (_event.parameters.length >= 6) {
+			let lockedValuesTuple = _event.parameters[5].value.toTuple()
+			entity.lockedValuesCva = lockedValuesTuple[0].toBigInt()
+			entity.lockedValuesLf = lockedValuesTuple[1].toBigInt()
+			entity.lockedValuesPartyAmm = lockedValuesTuple[2].toBigInt()
+			entity.lockedValuesPartyBmm = lockedValuesTuple[3].toBigInt()
+		}
+
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash
