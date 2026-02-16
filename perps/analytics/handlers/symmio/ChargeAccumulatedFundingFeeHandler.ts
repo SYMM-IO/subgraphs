@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { Account, Quote } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
+import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { unDecimal } from "../../utils/common"
 
@@ -12,7 +12,6 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends BaseHandler {
 
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
-			const rate = event.params.rates[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
 
@@ -21,11 +20,13 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends BaseHandler {
 			let solverAccount = Account.load(quote.partyB!.toHexString())
 
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
-			let chainQuote = getQuote_0_8_5(event.address, quote.quoteId)
+			let chainQuote = getQuoteData(version, event.address, quote.quoteId)
 			if (chainQuote == null) continue
 
-			let funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-			const paid = rate.gt(BigInt.zero())
+			let priceDiff = chainQuote.openedPrice.minus(quote.openedPrice!)
+			let funding = unDecimal(priceDiff.abs().times(openAmount))
+			// Determine direction from price change (no rates param on this event)
+			const paid = priceDiff.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
 			if (paid) fundingPaid = funding

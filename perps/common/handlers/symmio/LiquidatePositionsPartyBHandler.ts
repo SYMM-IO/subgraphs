@@ -1,12 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { Quote } from "../../../../generated/schema"
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuote as getQuote_0_8_0 } from "../../contract_utils_0_8_0"
-import { getQuote as getQuote_0_8_1 } from "../../contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_2 } from "../../contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4"
-import { getQuote as getQuote_0_8_5 } from "../../contract_utils_0_8_5"
+import { ethereum } from "@graphprotocol/graph-ts"
+import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 
@@ -29,39 +24,10 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 			quote.globalCounter = super.handleGlobalCounter()
 			quote.liquidatedSide = 1
 			quote.quoteStatus = 8
-			let avgClosedPrice: BigInt
-			switch (version) {
-				case Version.v_0_8_5: {
-					let q = getQuote_0_8_5(event.address, quoteId)!
-					avgClosedPrice = q.avgClosedPrice
-					break
-				}
-				case Version.v_0_8_4: {
-					let q = getQuote_0_8_4(event.address, quoteId)!
-					avgClosedPrice = q.avgClosedPrice
-					break
-				}
-				case Version.v_0_8_3: {
-					let q = getQuote_0_8_3(event.address, quoteId)!
-					avgClosedPrice = q.avgClosedPrice
-					break
-				}
-				case Version.v_0_8_2: {
-					let q = getQuote_0_8_2(event.address, quoteId)!
-					avgClosedPrice = q.avgClosedPrice
-					break
-				}
-				case Version.v_0_8_1: {
-					let q = getQuote_0_8_1(event.address, quoteId)!
-					avgClosedPrice = q.avgClosedPrice
-					break
-				}
-				case Version.v_0_8_0: {
-					let q = getQuote_0_8_0(event.address, quoteId)!
-					avgClosedPrice = q.avgClosedPrice
-					break
-				}
-			}
+
+			let data = getQuoteData(version, event.address, quoteId)!
+			let avgClosedPrice = data.avgClosedPrice
+
 			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)
 			quote.liquidatePrice = avgClosedPrice
 				.times(quote.quantity!)

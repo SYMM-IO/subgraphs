@@ -65,6 +65,16 @@ abi_versions = {
     "accountLayer": ["1"],
 }
 
+# Maps ABI name → version enum name used in BaseHandler.ts
+abi_version_enums: Dict[str, str] = {
+    "symmio": "Version",
+    "symmioMultiAccount": "MultiAccountVersion",
+    "feeCollector": "FeeCollectorVersion",
+    "accountLayer": "AccountLayerVersion",
+    "options": "Version",
+    "optionsMultiAccount": "MultiAccountVersion",
+}
+
 
 def json_to_yaml(json_data):
     return yaml.dump(json_data, default_flow_style=False)
@@ -107,24 +117,37 @@ def generate_src_ts(target_module: str, contract: Contract):
     imports = set()
     handlers_code = []
 
+    # Determine import depth: multi-module (perps/events) = 2, single (vaults) = 1
+    depth = target_module.count("/") + 1
+    generated_prefix = "../" * depth
+
+    # Determine correct version enum for this ABI type
+    version_enum = abi_version_enums.get(contract.abi, "Version")
+
+    # Determine BaseHandler import path
+    if "/" in target_module:
+        base_handler_path = "../common/BaseHandler"
+    else:
+        base_handler_path = "./BaseHandler"
+
     # Sort events by name
     sorted_events = sorted(contract.events, key=lambda e: e.name)
 
     for event in sorted_events:
         imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
-        imports.add(f"import {{{event.numbered_name}}} from '../generated/{event.source}/{event.source}'")
+        imports.add(f"import {{{event.numbered_name}}} from '{generated_prefix}generated/{event.source}/{event.source}'")
         handlers_code.append(
             textwrap.dedent(
                 f"""
                 export function {event.handler_name}(event: {event.numbered_name}): void {{
                     let handler = new {event.name}Handler<{event.numbered_name}>()
-                    handler.handle(event, Version.v_{contract.version})
+                    handler.handle(event, {version_enum}.v_{contract.version})
                 }}
                 """
             )
         )
 
-    imports.add("import {Version} from '../common/BaseHandler'")
+    imports.add(f"import {{{version_enum}}} from '{base_handler_path}'")
 
     with open(os.path.join(target_module, f"src_{contract.path()}.ts"), "w") as src_file:
         src_file.write("\n".join(sorted(imports)))
@@ -504,6 +527,108 @@ def generate_and_print_entities(config: Config):
         print("}\n")
 
 
+def _abi_has_function(abi_file_path: str, function_name: str) -> bool:
+    """Check if an ABI file contains a specific function."""
+    try:
+        with open(abi_file_path, "r") as f:
+            abi = json.load(f)
+        return any(entry.get("type") == "function" and entry.get("name") == function_name for entry in abi)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return False
+
+
+def generate_contract_utils(common_dir: str, version: str):
+    """Generate a contract_utils_{version}.ts file for a symmio version."""
+    v = version  # short alias
+    abi_file = f"./configs/abis/symmio_{v}.json"
+    has_liquidation = _abi_has_function(abi_file, "getLiquidatedStateOfPartyA")
+
+    lines = []
+    lines.append(f'import {{Address, BigInt, Bytes, log}} from "@graphprotocol/graph-ts"')
+
+    # Build import list from generated types
+    imports = [
+        f"symmio_{v}",
+        f"symmio_{v}__balanceInfoOfPartyAResult",
+        f"symmio_{v}__balanceInfoOfPartyBResult",
+        f"symmio_{v}__getQuoteResultValue0Struct",
+    ]
+    if has_liquidation:
+        imports.append(f"symmio_{v}__getLiquidatedStateOfPartyAResultValue0Struct")
+
+    lines.append("import {")
+    lines.append("\t" + ",\n\t".join(imports) + ",")
+    lines.append(f'}} from "../../generated/symmio_{v}/symmio_{v}"')
+    lines.append("")
+
+    # getQuote
+    lines.append(f"export function getQuote(address: Address, id: BigInt): symmio_{v}__getQuoteResultValue0Struct | null {{")
+    lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+    lines.append(f"\tlet result = contract.try_getQuote(id)")
+    lines.append(f"\treturn result.reverted ? null : result.value")
+    lines.append(f"}}")
+    lines.append("")
+
+    # getCollateral
+    lines.append(f"export function getCollateral(address: Address,): Bytes | null {{")
+    lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+    lines.append(f"\tlet result = contract.try_getCollateral()")
+    lines.append(f"\treturn result.reverted ? null : result.value")
+    lines.append(f"}}")
+    lines.append("")
+
+    # getLiquidatedStateOfPartyA (only v0.8.1+)
+    if has_liquidation:
+        lines.append(
+            f"export function getLiquidatedStateOfPartyA(address: Address, partyA: Address): "
+            f"symmio_{v}__getLiquidatedStateOfPartyAResultValue0Struct | null {{"
+        )
+        lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+        lines.append(f"\tlet result = contract.try_getLiquidatedStateOfPartyA(partyA)")
+        lines.append(f"\treturn result.reverted ? null : result.value")
+        lines.append(f"}}")
+        lines.append("")
+
+    # getBalanceInfoOfPartyA
+    lines.append(
+        f"export function getBalanceInfoOfPartyA(address: Address, partyA: Address): "
+        f"symmio_{v}__balanceInfoOfPartyAResult | null {{"
+    )
+    lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+    lines.append(f"\tlet result = contract.try_balanceInfoOfPartyA(partyA)")
+    lines.append(f"\treturn result.reverted ? null : result.value")
+    lines.append(f"}}")
+    lines.append("")
+
+    # getBalanceInfoOfPartyB
+    lines.append(
+        f"export function getBalanceInfoOfPartyB(address: Address, partyA: Address, partyB: Address): "
+        f"symmio_{v}__balanceInfoOfPartyBResult | null {{"
+    )
+    lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+    lines.append(f"\tlet result = contract.try_balanceInfoOfPartyB(partyB, partyA)")
+    lines.append(f"\treturn result.reverted ? null : result.value")
+    lines.append(f"}}")
+    lines.append("")
+
+    # symbolIdToSymbolName
+    lines.append(f"export function symbolIdToSymbolName(symbolId: BigInt, contractAddress: Address): string {{")
+    lines.append(f"\tlet symmioContract = symmio_{v}.bind(contractAddress)")
+    lines.append(f"\tlet callResult = symmioContract.try_symbolNameById([symbolId])")
+    lines.append(f"\tif (callResult.reverted) {{")
+    lines.append(f'\t\tlog.error("error in symbol bind", [])')
+    lines.append(f'\t\treturn ""')
+    lines.append(f"\t}} else {{")
+    lines.append(f"\t\treturn callResult.value[0]")
+    lines.append(f"\t}}")
+    lines.append(f"}}")
+
+    out_path = os.path.join(common_dir, f"contract_utils_{v}.ts")
+    with open(out_path, "w") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"Generated {out_path}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Module preparation script.")
     parser.add_argument("config_file", type=str, help="Configuration file path")
@@ -521,6 +646,7 @@ def main():
         help="Delete 'latest' tag from the subgraph",
     )
     parser.add_argument("--generate-entities", action="store_true", help="Generate and print entities")  # New option
+    parser.add_argument("--create-utils", action="store_true", help="Generate contract_utils files for symmio versions")
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
@@ -540,6 +666,12 @@ def main():
 
     if not args.add_latest_tag and not args.delete_latest_tag and not args.delete:
         prepare_module(config, args.module_name)
+
+    if args.create_utils:
+        common_prefix, *_ = args.module_name.split("/")
+        common_dir = os.path.join(common_prefix, "common")
+        for version in abi_versions.get("symmio", []):
+            generate_contract_utils(common_dir, version)
 
     if args.create_src:
         for contract in config.contracts:

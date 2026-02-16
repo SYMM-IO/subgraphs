@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
+import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { QuoteStatus } from "../../utils/constants"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
@@ -16,7 +16,7 @@ export class ADLCloseHandler<T> extends BaseHandler {
 		let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return
 
-		const chainQuote = getQuote_0_8_5(event.address, quoteId)
+		const chainQuote = getQuoteData(version, event.address, quoteId)
 		if (chainQuote == null) return
 
 		const closedAmount = event.params.amount

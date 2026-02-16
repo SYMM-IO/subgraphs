@@ -1,13 +1,8 @@
 import {BaseHandler, Version} from "../../BaseHandler"
 import {Quote} from "../../../../generated/schema"
-import {BigInt, ethereum} from "@graphprotocol/graph-ts"
-import {getQuote as getQuote_0_8_0} from "../../contract_utils_0_8_0";
-import {getQuote as getQuote_0_8_1} from "../../contract_utils_0_8_1";
-import {getQuote as getQuote_0_8_2} from "../../contract_utils_0_8_2";
-import {getQuote as getQuote_0_8_3} from "../../contract_utils_0_8_3";
-import {getQuote as getQuote_0_8_4} from "../../contract_utils_0_8_4";
-import {getQuote as getQuote_0_8_5} from "../../contract_utils_0_8_5";
-import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote";
+import {ethereum} from "@graphprotocol/graph-ts"
+import {getQuoteData} from "../../VersionedQuoteLoader"
+import {setEventTimestampAndTransactionHashAndAction} from "../../utils/quote"
 
 export class OpenPositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -22,70 +17,16 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.quantity = event.params.filledAmount
 		quote.initialOpenedPrice = event.params.openedPrice
 
-		let newCva: BigInt
-		let newPartyAmm: BigInt
-		let newPartyBmm: BigInt
-		let newLF: BigInt
+		let data = getQuoteData(version, event.address, event.params.quoteId)!
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				let q = getQuote_0_8_5(event.address, event.params.quoteId)!
-				newCva = q.lockedValues.cva
-				newPartyAmm = q.lockedValues.partyAmm
-				newPartyBmm = q.lockedValues.partyBmm
-				newLF = q.lockedValues.lf
-				break
-			}
-			case Version.v_0_8_4: {
-				let q = getQuote_0_8_4(event.address, event.params.quoteId)!
-				newCva = q.lockedValues.cva
-				newPartyAmm = q.lockedValues.partyAmm
-				newPartyBmm = q.lockedValues.partyBmm
-				newLF = q.lockedValues.lf
-				break
-			}
-			case Version.v_0_8_3: {
-				let q = getQuote_0_8_3(event.address, event.params.quoteId)!
-				newCva = q.lockedValues.cva
-				newPartyAmm = q.lockedValues.partyAmm
-				newPartyBmm = q.lockedValues.partyBmm
-				newLF = q.lockedValues.lf
-				break
-			}
-			case Version.v_0_8_2: {
-				let q = getQuote_0_8_2(event.address, event.params.quoteId)!
-				newCva = q.lockedValues.cva
-				newPartyAmm = q.lockedValues.partyAmm
-				newPartyBmm = q.lockedValues.partyBmm
-				newLF = q.lockedValues.lf
-				break
-			}
-			case Version.v_0_8_1: {
-				let q = getQuote_0_8_1(event.address, event.params.quoteId)!
-				newCva = q.lockedValues.cva
-				newPartyAmm = q.lockedValues.partyAmm
-				newPartyBmm = q.lockedValues.partyBmm
-				newLF = q.lockedValues.lf
-				break
-			}
-			case Version.v_0_8_0: {
-				let q = getQuote_0_8_0(event.address, event.params.quoteId)!
-				newCva = q.lockedValues.cva
-				newPartyAmm = q.lockedValues.mm
-				newPartyBmm = q.lockedValues.mm
-				newLF = q.lockedValues.lf
-				break
-			}
-		}
-
-		quote.cva = newCva
-		quote.partyAmm = newPartyAmm
-		quote.partyBmm = newPartyBmm
-		quote.lf = newLF
-		quote.initialCva = newCva
-		quote.initialPartyAmm = newPartyAmm
-		quote.initialPartyBmm = newPartyBmm
-		quote.initialLf = newLF
+		quote.cva = data.cva
+		quote.partyAmm = data.partyAmm
+		quote.partyBmm = data.partyBmm
+		quote.lf = data.lf
+		quote.initialCva = data.cva
+		quote.initialPartyAmm = data.partyAmm
+		quote.initialPartyBmm = data.partyBmm
+		quote.initialLf = data.lf
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, 'OpenPosition', _event)
 	}

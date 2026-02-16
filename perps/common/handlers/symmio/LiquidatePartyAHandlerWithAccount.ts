@@ -2,15 +2,11 @@ import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { LiquidationDetail } from "../../../../generated/schema"
-import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_4 } from "../../contract_utils_0_8_4"
-import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_3 } from "../../contract_utils_0_8_3"
-import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_2 } from "../../contract_utils_0_8_2"
-import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_1 } from "../../contract_utils_0_8_1"
-import { getLiquidatedStateOfPartyA as getLiquidatedStateOfPartyA_0_8_5 } from "../../contract_utils_0_8_5"
+import { getLiquidationStateData } from "../../VersionedQuoteLoader"
+import { LiquidatePartyA as LiquidatePartyA_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
+import { LiquidatePartyA as LiquidatePartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePartyA as LiquidatePartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePartyA as LiquidatePartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
-import { LiquidatePartyA as LiquidatePartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { LiquidatePartyA as LiquidatePartyA_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 
 export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -21,61 +17,50 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 		let liquidationTimestamp: BigInt
 		let upnl: BigInt
 		let totalUnrealizedLoss: BigInt
-		switch (version) {
-			case Version.v_0_8_5: {
+
+		if (version >= Version.v_0_8_3) {
+			// v0.8.3+ has liquidationId, upnl, totalUnrealizedLoss on event
+			if (version == Version.v_0_8_5) {
 				// @ts-ignore
 				const event_ = changetype<LiquidatePartyA_0_8_5>(_event)
 				liquidationId = event_.params.liquidationId
 				upnl = event_.params.upnl
 				totalUnrealizedLoss = event_.params.totalUnrealizedLoss
-				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_5(event.address, event.params.partyA)!
-				timestamp = liquidationDetail.timestamp
-				liquidationTimestamp = liquidationDetail.liquidationTimestamp
-				break
-			}
-			case Version.v_0_8_4: {
+			} else if (version == Version.v_0_8_4) {
 				// @ts-ignore
 				const event_ = changetype<LiquidatePartyA_0_8_4>(_event)
 				liquidationId = event_.params.liquidationId
 				upnl = event_.params.upnl
 				totalUnrealizedLoss = event_.params.totalUnrealizedLoss
-				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_4(event.address, event.params.partyA)!
-				timestamp = liquidationDetail.timestamp
-				liquidationTimestamp = liquidationDetail.liquidationTimestamp
-				break
-			}
-			case Version.v_0_8_3: {
+			} else {
 				// @ts-ignore
 				const event_ = changetype<LiquidatePartyA_0_8_3>(_event)
 				liquidationId = event_.params.liquidationId
 				upnl = event_.params.upnl
 				totalUnrealizedLoss = event_.params.totalUnrealizedLoss
-				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_3(event.address, event.params.partyA)!
-				timestamp = liquidationDetail.timestamp
-				liquidationTimestamp = liquidationDetail.liquidationTimestamp
-				break
 			}
-			case Version.v_0_8_2: {
-				// @ts-ignore
-				const event_ = changetype<LiquidatePartyA_0_8_2>(_event)
-				upnl = event_.params.upnl
-				totalUnrealizedLoss = event_.params.totalUnrealizedLoss
-				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_2(event.address, event.params.partyA)!
-				liquidationId = liquidationDetail.liquidationId
-				timestamp = liquidationDetail.timestamp
-				liquidationTimestamp = liquidationDetail.timestamp
-				break
-			}
-			case Version.v_0_8_1: {
-				const liquidationDetail = getLiquidatedStateOfPartyA_0_8_1(event.address, event.params.partyA)!
-				liquidationId = liquidationDetail.liquidationId
-				timestamp = liquidationDetail.timestamp
-				liquidationTimestamp = liquidationDetail.timestamp
-				upnl = liquidationDetail.upnl
-				totalUnrealizedLoss = liquidationDetail.totalUnrealizedLoss
-				break
-			}
+			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)!
+			timestamp = liqState.timestamp
+			liquidationTimestamp = liqState.liquidationTimestamp
+		} else if (version == Version.v_0_8_2) {
+			// @ts-ignore
+			const event_ = changetype<LiquidatePartyA_0_8_2>(_event)
+			upnl = event_.params.upnl
+			totalUnrealizedLoss = event_.params.totalUnrealizedLoss
+			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)!
+			liquidationId = liqState.liquidationId
+			timestamp = liqState.timestamp
+			liquidationTimestamp = liqState.timestamp
+		} else {
+			// v0.8.1: all from struct
+			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)!
+			liquidationId = liqState.liquidationId
+			timestamp = liqState.timestamp
+			liquidationTimestamp = liqState.timestamp
+			upnl = liqState.upnl
+			totalUnrealizedLoss = liqState.totalUnrealizedLoss
 		}
+
 		let entity = new LiquidationDetail(event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString())
 		entity.source = event.address
 		entity.partyA = event.params.partyA

@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
+import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { QuoteStatus } from "../../utils/constants"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
@@ -17,7 +17,7 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 			const quote = Quote.load(qId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
 
-			const chainQuote = getQuote_0_8_5(event.address, qId)
+			const chainQuote = getQuoteData(version, event.address, qId)
 			if (chainQuote == null) continue
 
 			const liquidAmount = quote.quantity!.minus(quote.closedAmount!)

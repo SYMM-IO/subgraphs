@@ -1,12 +1,7 @@
 import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../../common/handlers/symmio/ChargeFundingRateHandler"
 import { Account, Quote } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
-import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
-import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
+import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { Version } from "../../../common/BaseHandler"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
@@ -27,39 +22,8 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			let account = Account.load(quote.partyA.toHexString())!
 			let solverAccount = Account.load(quote.partyB!.toHexString())
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
-			let funding: BigInt
-			switch (version) {
-				case Version.v_0_8_5: {
-					let chainQuote = getQuote_0_8_5(event.address, quote.quoteId)!
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					break
-				}
-				case Version.v_0_8_4: {
-					let chainQuote = getQuote_0_8_4(event.address, quote.quoteId)!
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					break
-				}
-				case Version.v_0_8_3: {
-					let chainQuote = getQuote_0_8_3(event.address, quote.quoteId)!
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					break
-				}
-				case Version.v_0_8_2: {
-					let chainQuote = getQuote_0_8_2(event.address, quote.quoteId)!
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					break
-				}
-				case Version.v_0_8_1: {
-					let chainQuote = getQuote_0_8_1(event.address, quote.quoteId)!
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					break
-				}
-				case Version.v_0_8_0: {
-					let chainQuote = getQuote_0_8_0(event.address, quote.quoteId)!
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					break
-				}
-			}
+			let chainQuote = getQuoteData(version, event.address, quote.quoteId)!
+			let funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()

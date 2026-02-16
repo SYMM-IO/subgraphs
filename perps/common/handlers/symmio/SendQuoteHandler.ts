@@ -1,20 +1,7 @@
 import { Account, Quote } from "../../../../generated/schema"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
-import { SendQuote as SendQuote_0_8_0 } from "../../../../generated/symmio_0_8_0/symmio_0_8_0"
-import { SendQuote as SendQuote_0_8_1 } from "../../../../generated/symmio_0_8_1/symmio_0_8_1"
-import { SendQuote as SendQuote_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
-import { SendQuote as SendQuote_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { SendQuote as SendQuote_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { SendQuote as SendQuote_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { BaseHandler, Version } from "../../BaseHandler"
-
-import { getQuote as getQuote_0_8_0, symbolIdToSymbolName as symbolIdToSymbolName_0_8_0 } from "../../contract_utils_0_8_0"
-import { getQuote as getQuote_0_8_1, symbolIdToSymbolName as symbolIdToSymbolName_0_8_1 } from "../../contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_2, symbolIdToSymbolName as symbolIdToSymbolName_0_8_2 } from "../../contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_3, symbolIdToSymbolName as symbolIdToSymbolName_0_8_3 } from "../../contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_4, symbolIdToSymbolName as symbolIdToSymbolName_0_8_4 } from "../../contract_utils_0_8_4"
-import { getQuote as getQuote_0_8_5, symbolIdToSymbolName as symbolIdToSymbolName_0_8_5 } from "../../contract_utils_0_8_5"
-
+import { getQuoteData, getSymbolName } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { ZERO_ADDRESS_BYTES } from "../../../analytics/utils/constants"
 
@@ -35,9 +22,9 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		let cva: BigInt
 		let lf: BigInt
 		let deadline: BigInt
-		let packedPartyAmm: BigInt = BigInt.zero()
-		let packedPartyBmm: BigInt = BigInt.zero()
-		let packedTradingFee: BigInt = BigInt.zero()
+		let partyAmm: BigInt = BigInt.zero()
+		let partyBmm: BigInt = BigInt.zero()
+		let tradingFee: BigInt = BigInt.zero()
 
 		if (_event.parameters.length <= 6) {
 			// New packed variant (SendQuote1): decode paramsData
@@ -56,9 +43,9 @@ export class SendQuoteHandler<T> extends BaseHandler {
 			quantity = tuple[5].toBigInt()
 			cva = tuple[6].toBigInt()
 			lf = tuple[7].toBigInt()
-			packedPartyAmm = tuple[8].toBigInt()
-			packedPartyBmm = tuple[9].toBigInt()
-			packedTradingFee = tuple[10].toBigInt()
+			partyAmm = tuple[8].toBigInt()
+			partyBmm = tuple[9].toBigInt()
+			tradingFee = tuple[10].toBigInt()
 			deadline = tuple[11].toBigInt()
 		} else {
 			// Old variant with individual params (indices 3-9 are consistent across all versions)
@@ -71,11 +58,17 @@ export class SendQuoteHandler<T> extends BaseHandler {
 			cva = _event.parameters[9].value.toBigInt()
 			if (version == Version.v_0_8_0) {
 				// v0.8.0: mm(10), lf(11), maxInterestRate(12), deadline(13), quoteStatus(14)
+				let mm = _event.parameters[10].value.toBigInt()
+				partyAmm = mm
+				partyBmm = mm
 				lf = _event.parameters[11].value.toBigInt()
 				deadline = _event.parameters[13].value.toBigInt()
 			} else {
 				// v0.8.1+: lf(10), partyAmm(11), partyBmm(12), tradingFee(13), deadline(14)
 				lf = _event.parameters[10].value.toBigInt()
+				partyAmm = _event.parameters[11].value.toBigInt()
+				partyBmm = _event.parameters[12].value.toBigInt()
+				tradingFee = _event.parameters[13].value.toBigInt()
 				deadline = _event.parameters[14].value.toBigInt()
 			}
 		}
@@ -92,6 +85,11 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.quantity = quantity
 		quote.cva = cva
 		quote.lf = lf
+		quote.partyAmm = partyAmm
+		quote.partyBmm = partyBmm
+		quote.initialPartyAmm = partyAmm
+		quote.initialPartyBmm = partyBmm
+		quote.tradingFee = tradingFee
 		quote.openDeadline = deadline
 		quote.quoteStatus = 0
 		quote.marketPrice = marketPrice
@@ -100,105 +98,17 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.userPaidFunding = BigInt.fromI32(0)
 		quote.userReceivedFunding = BigInt.fromI32(0)
 		quote.blockNumber = event.block.number
-
 		quote.initialCva = cva
 		quote.initialLf = lf
 
-		let symbolName: string
-		const account = Account.load(event.params.partyA.toHexString())!
-		switch (version) {
-			case Version.v_0_8_5: {
-				if (_event.parameters.length <= 6) {
-					// Packed variant - use pre-decoded values
-					quote.partyAmm = packedPartyAmm
-					quote.partyBmm = packedPartyBmm
-					quote.initialPartyAmm = packedPartyAmm
-					quote.initialPartyBmm = packedPartyBmm
-					quote.tradingFee = packedTradingFee
-				} else {
-					// @ts-ignore
-					const e = changetype<SendQuote_0_8_5>(_event)
-					quote.partyAmm = e.params.partyAmm
-					quote.partyBmm = e.params.partyBmm
-					quote.initialPartyAmm = e.params.partyAmm
-					quote.initialPartyBmm = e.params.partyBmm
-					quote.tradingFee = e.params.tradingFee
-				}
-				const q = getQuote_0_8_5(event.address, event.params.quoteId)!
-				quote.maxFundingRate = q.maxFundingRate
-				account.accountSource = account.accountSource === null ? q.affiliate : account.accountSource
-				symbolName = symbolIdToSymbolName_0_8_5(symbolId, event.address)
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<SendQuote_0_8_4>(_event)
-				quote.partyAmm = e.params.partyAmm
-				quote.partyBmm = e.params.partyBmm
-				quote.initialPartyAmm = e.params.partyAmm
-				quote.initialPartyBmm = e.params.partyBmm
-				quote.tradingFee = e.params.tradingFee
-				const q = getQuote_0_8_4(event.address, event.params.quoteId)!
-				quote.maxFundingRate = q.maxFundingRate
-				account.accountSource = account.accountSource === null ? q.affiliate : account.accountSource
-				symbolName = symbolIdToSymbolName_0_8_4(symbolId, event.address)
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<SendQuote_0_8_3>(_event)
-				quote.partyAmm = e.params.partyAmm
-				quote.partyBmm = e.params.partyBmm
-				quote.initialPartyAmm = e.params.partyAmm
-				quote.initialPartyBmm = e.params.partyBmm
-				quote.tradingFee = e.params.tradingFee
-				const q = getQuote_0_8_3(event.address, event.params.quoteId)!
-				quote.maxFundingRate = q.maxFundingRate
-				account.accountSource = account.accountSource === null ? q.affiliate : account.accountSource
-				symbolName = symbolIdToSymbolName_0_8_3(symbolId, event.address)
-				break
-			}
-			case Version.v_0_8_2: {
-				// @ts-ignore
-				const e = changetype<SendQuote_0_8_2>(_event)
-				quote.partyAmm = e.params.partyAmm
-				quote.partyBmm = e.params.partyBmm
-				quote.initialPartyAmm = e.params.partyAmm
-				quote.initialPartyBmm = e.params.partyBmm
-				quote.tradingFee = e.params.tradingFee
-				const q = getQuote_0_8_2(event.address, event.params.quoteId)!
-				quote.maxFundingRate = q.maxFundingRate
-				symbolName = symbolIdToSymbolName_0_8_2(symbolId, event.address)
-				break
-			}
-			case Version.v_0_8_1: {
-				// @ts-ignore
-				const e = changetype<SendQuote_0_8_1>(_event)
-				quote.partyAmm = e.params.partyAmm
-				quote.partyBmm = e.params.partyBmm
-				quote.initialPartyAmm = e.params.partyAmm
-				quote.initialPartyBmm = e.params.partyBmm
-				quote.tradingFee = e.params.tradingFee
-				const q = getQuote_0_8_1(event.address, event.params.quoteId)!
-				quote.maxFundingRate = q.maxFundingRate
-				symbolName = symbolIdToSymbolName_0_8_1(symbolId, event.address)
-				break
-			}
-			case Version.v_0_8_0: {
-				// @ts-ignore
-				const e = changetype<SendQuote_0_8_0>(_event)
-				quote.partyAmm = e.params.mm
-				quote.partyBmm = e.params.mm
-				quote.initialPartyAmm = e.params.mm
-				quote.initialPartyBmm = e.params.mm
-				quote.tradingFee = BigInt.zero() // Not available in event
-				const q = getQuote_0_8_0(event.address, event.params.quoteId)!
-				quote.maxFundingRate = q.maxInterestRate
-				symbolName = symbolIdToSymbolName_0_8_0(symbolId, event.address)
-				break
-			}
-		}
+		// Use VersionedQuoteLoader for chain state (maxFundingRate, affiliate, symbolName)
+		const q = getQuoteData(version, event.address, event.params.quoteId)!
+		quote.maxFundingRate = q.maxFundingRate
 
+		const account = Account.load(event.params.partyA.toHexString())!
+		if (version >= Version.v_0_8_3) {
+			account.accountSource = account.accountSource === null ? q.affiliate : account.accountSource
+		}
 		account.save()
 
 		if (event.params.partyBsWhiteList) {
@@ -209,7 +119,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 			quote.partyBsWhiteList = partyBsWhiteList
 		}
 
-		quote.symbol = symbolName
+		quote.symbol = getSymbolName(version, symbolId, event.address)
 		quote.affiliate = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
 		quote.timestamp = event.block.timestamp
 		quote.save()

@@ -2,12 +2,7 @@ import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Version } from "../../../common/BaseHandler"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
-import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
-import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
-import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
+import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { QuoteStatus } from "../../utils/constants"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
@@ -18,52 +13,10 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	const event = changetype<T>(_event)
 	const quote = Quote.load(qId.toString() + "-" + event.address.toHexString())!
 
-	let liquidAmount: BigInt
-	let liquidPrice: BigInt
-	switch (version) {
-		case Version.v_0_8_5: {
-			const chainQuote = getQuote_0_8_5(event.address, qId)
-			if (chainQuote == null) return
-			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
-			break
-		}
-		case Version.v_0_8_4: {
-			const chainQuote = getQuote_0_8_4(event.address, qId)
-			if (chainQuote == null) return
-			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
-			break
-		}
-		case Version.v_0_8_3: {
-			const chainQuote = getQuote_0_8_3(event.address, qId)
-			if (chainQuote == null) return
-			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
-			break
-		}
-		case Version.v_0_8_2: {
-			const chainQuote = getQuote_0_8_2(event.address, qId)
-			if (chainQuote == null) return
-			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
-			break
-		}
-		case Version.v_0_8_1: {
-			const chainQuote = getQuote_0_8_1(event.address, qId)
-			if (chainQuote == null) return
-			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
-			break
-		}
-		case Version.v_0_8_0: {
-			const chainQuote = getQuote_0_8_0(event.address, qId)
-			if (chainQuote == null) return
-			liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-			liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
-			break
-		}
-	}
+	const chainQuote = getQuoteData(version, event.address, qId)
+	if (chainQuote == null) return
+	let liquidAmount = quote.quantity!.minus(quote.closedAmount!)
+	let liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
 	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + qId.toString())!

@@ -1,12 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { GlobalFee, Quote, QuotePriceUpdate } from "../../../../generated/schema";
-import { getQuote as getQuote_0_8_4 } from "../../contract_utils_0_8_4"
-import { getQuote as getQuote_0_8_3 } from "../../contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_2 } from "../../contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_1 } from "../../contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_0 } from "../../contract_utils_0_8_0"
-import { getQuote as getQuote_0_8_5 } from "../../contract_utils_0_8_5"
+import { getQuoteData } from "../../VersionedQuoteLoader"
 import { unDecimal } from "../../utils"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote";
 
@@ -26,51 +21,12 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			quote_price_update.timestamp = event.block.timestamp
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 			quote_price_update.openQuantity = openAmount
-			let funding: BigInt
-			switch (version) {
-				case Version.v_0_8_5: {
-					let chainQuote = getQuote_0_8_5(event.address, quote.quoteId)!
-					quote_price_update.newPrice = chainQuote.openedPrice
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					quote.openedPrice = chainQuote.openedPrice
-					break
-				}
-				case Version.v_0_8_4: {
-					let chainQuote = getQuote_0_8_4(event.address, quote.quoteId)!
-					quote_price_update.newPrice = chainQuote.openedPrice
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					quote.openedPrice = chainQuote.openedPrice
-					break
-				}
-				case Version.v_0_8_3: {
-					let chainQuote = getQuote_0_8_3(event.address, quote.quoteId)!
-					quote_price_update.newPrice = chainQuote.openedPrice
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					quote.openedPrice = chainQuote.openedPrice
-					break
-				}
-				case Version.v_0_8_2: {
-					let chainQuote = getQuote_0_8_2(event.address, quote.quoteId)!
-					quote_price_update.newPrice = chainQuote.openedPrice
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					quote.openedPrice = chainQuote.openedPrice
-					break
-				}
-				case Version.v_0_8_1: {
-					let chainQuote = getQuote_0_8_1(event.address, quote.quoteId)!
-					quote_price_update.newPrice = chainQuote.openedPrice
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					quote.openedPrice = chainQuote.openedPrice
-					break
-				}
-				case Version.v_0_8_0: {
-					let chainQuote = getQuote_0_8_0(event.address, quote.quoteId)!
-					quote_price_update.newPrice = chainQuote.openedPrice
-					funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-					quote.openedPrice = chainQuote.openedPrice
-					break
-				}
-			}
+
+			let chainQuote = getQuoteData(version, event.address, quote.quoteId)!
+			quote_price_update.newPrice = chainQuote.openedPrice
+			let funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
+			quote.openedPrice = chainQuote.openedPrice
+
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
