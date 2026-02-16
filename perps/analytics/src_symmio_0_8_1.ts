@@ -20,6 +20,7 @@ import {
 	LiquidatePendingPositionsPartyA,
 	LiquidatePositionsPartyA,
 	LiquidatePositionsPartyB,
+	LiquidationDisputed,
 	LockQuote,
 	OpenPosition,
 	RegisterPartyB,
@@ -73,6 +74,7 @@ import { WithdrawHandler } from "./handlers/symmio/WithdrawHandler"
 import { SetSymbolValidationStateHandler } from "./handlers/symmio/SetSymbolValidationStateHandler"
 import { SetSymbolFundingStateHandler } from "./handlers/symmio/SetSymbolFundingStateHandler"
 import { SetSymbolsPricesHandler } from "./handlers/symmio/SetSymbolsPricesHandler"
+import { LiquidationDisputedHandler } from "./handlers/symmio/LiquidationDisputedHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -251,5 +253,10 @@ export function handleWithdraw(event: Withdraw): void {
 
 export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
 	let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
+	handler.handle(event, Version.v_0_8_1)
+}
+
+export function handleLiquidationDisputed(event: LiquidationDisputed): void {
+	let handler = new LiquidationDisputedHandler<LiquidationDisputed>()
 	handler.handle(event, Version.v_0_8_1)
 }

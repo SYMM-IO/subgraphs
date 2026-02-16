@@ -193,9 +193,9 @@ export function catchUpHistories(blockTimestamp: BigInt, source: Bytes): void {
 	let timestamp = yesterday.plus(BigInt.fromI32(1)).times(SECONDS_IN_DAY).minus(BigInt.fromI32(1))
 
 	const affiliates = AFFILIATES.keys()
-	const affiliatesLen = AFFILIATES.keys.length
+	const affiliatesLen = affiliates.length
 	const solvers = SOLVERS.keys()
-	const solversLen = SOLVERS.keys.length
+	const solversLen = solvers.length
 	for (let i = 0; i < affiliatesLen; i++) {
 		let affiliateAddress = affiliates[i]
 		let affiliatePlayer = SymmioEntity.load(affiliateAddress)
@@ -213,7 +213,7 @@ export function catchUpHistories(blockTimestamp: BigInt, source: Bytes): void {
 				BigInt.zero(),
 				true,
 				solverAccount,
-				BigInt.fromByteArray(affiliatePlayer.address) == BigInt.zero() ? null : affiliatePlayer.address,
+				BigInt.fromByteArray(affiliatePlayer.address).equals(BigInt.zero()) ? null : affiliatePlayer.address,
 				source,
 			)
 		}

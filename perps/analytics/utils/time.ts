@@ -32,15 +32,15 @@ export function startOfMonth(timestamp: BigInt): Date {
 }
 
 export function isSameDay(timestamp1: BigInt, timestamp2: BigInt): boolean {
-	return startOfDay(timestamp1).getTime().toString() == startOfDay(timestamp2).getTime().toString()
+	return startOfDay(timestamp1).getTime() == startOfDay(timestamp2).getTime()
 }
 
 export function isSameWeek(timestamp1: BigInt, timestamp2: BigInt): boolean {
-	return startOfWeek(timestamp1).getTime().toString() == startOfWeek(timestamp2).getTime().toString()
+	return startOfWeek(timestamp1).getTime() == startOfWeek(timestamp2).getTime()
 }
 
 export function isSameMonth(timestamp1: BigInt, timestamp2: BigInt): boolean {
-	return startOfMonth(timestamp1).getTime().toString() == startOfMonth(timestamp2).getTime().toString()
+	return startOfMonth(timestamp1).getTime() == startOfMonth(timestamp2).getTime()
 }
 
 export const SECONDS_IN_DAY = BigInt.fromI32(86400)

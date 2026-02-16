@@ -2,6 +2,8 @@
 	"UserActivity": [
 		"SendQuote",
 		"RequestToClosePosition",
+		"ExpireQuoteOpen",
+		"ExpireQuoteClose",
 		"ForceCancelQuote",
 		"ForceCancelCloseRequest",
 		"ForceClosePosition",
@@ -175,21 +177,6 @@
 		"ChargeAccumulatedFundingFee",
 		"TradingFeeCharged"
 	],
-	"PriceCheck": [
-		"OpenPosition",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition"
-	],
-	"PartyALiquidation": [
-		"SetSymbolsPrices"
-	],
-	"PartyBLiquidation": [
-		"LiquidatePartyB"
-	],
-	"PartyALiquidationDisputed": [
-		"LiquidationDisputed"
-	],
 	"Configuration": [
 		"SetCollateral"
 	],
@@ -233,6 +220,9 @@
 	"LiquidationDetail": [
 		"DeferredLiquidatePartyA",
 		"SetSymbolsPrices",
-		"LiquidatePartyA"
+		"LiquidatePartyA",
+		"LiquidationDisputed",
+		"SoftPartyBLiquidation",
+		"TakeoverPartyALiquidation"
 	]
 }

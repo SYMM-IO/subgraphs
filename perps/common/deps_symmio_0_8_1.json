@@ -10,7 +10,7 @@
 		"LiquidatePositionsPartyA",
 		"RequestToClosePosition",
 		"ExpireQuote",
-		"handleForceCancelCloseRe",
+		"ForceCancelCloseRequest",
 		"ForceClosePosition",
 		"EmergencyClosePosition",
 		"FillCloseRequest",

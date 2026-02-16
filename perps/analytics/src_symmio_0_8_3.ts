@@ -26,6 +26,7 @@ import {
 	LiquidatePendingPositionsPartyA,
 	LiquidatePositionsPartyA,
 	LiquidatePositionsPartyB,
+	LiquidationDisputed,
 	LockQuote,
 	OpenPosition,
 	RegisterPartyB,
@@ -91,6 +92,7 @@ import { ExpireQuoteOpenHandler } from "./handlers/symmio/ExpireQuoteOpenHandler
 import { ExpireQuoteCloseHandler } from "./handlers/symmio/ExpireQuoteCloseHandler"
 import { DeferredLiquidatePartyAHandler } from "./handlers/symmio/DeferredLiquidatePartyAHandler"
 import { SetSymbolsPricesHandler } from "./handlers/symmio/SetSymbolsPricesHandler"
+import { LiquidationDisputedHandler } from "./handlers/symmio/LiquidationDisputedHandler"
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -314,5 +316,10 @@ export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyA): v
 
 export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
 	let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
+	handler.handle(event, Version.v_0_8_3)
+}
+
+export function handleLiquidationDisputed(event: LiquidationDisputed): void {
+	let handler = new LiquidationDisputedHandler<LiquidationDisputed>()
 	handler.handle(event, Version.v_0_8_3)
 }

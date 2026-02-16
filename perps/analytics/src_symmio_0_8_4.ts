@@ -24,6 +24,7 @@ import {
 	LiquidatePendingPositionsPartyA,
 	LiquidatePositionsPartyA,
 	LiquidatePositionsPartyB,
+	LiquidationDisputed,
 	LockQuote,
 	OpenPosition,
 	RegisterPartyB,
@@ -56,7 +57,8 @@ import { DeallocateForPartyBHandler } from "./handlers/symmio/DeallocateForParty
 import { DeallocatePartyAHandler } from "./handlers/symmio/DeallocatePartyAHandler"
 import { DepositHandler } from "./handlers/symmio/DepositHandler"
 import { EmergencyClosePositionHandler } from "./handlers/symmio/EmergencyClosePositionHandler"
-import { ExpireQuoteHandler } from "./handlers/symmio/ExpireQuoteHandler"
+import { ExpireQuoteOpenHandler } from "./handlers/symmio/ExpireQuoteOpenHandler"
+import { ExpireQuoteCloseHandler } from "./handlers/symmio/ExpireQuoteCloseHandler"
 import { FillCloseRequestHandler } from "./handlers/symmio/FillCloseRequestHandler"
 import { ForceCancelCloseRequestHandler } from "./handlers/symmio/ForceCancelCloseRequestHandler"
 import { ForceCancelQuoteHandler } from "./handlers/symmio/ForceCancelQuoteHandler"
@@ -86,8 +88,9 @@ import { SettleUpnlHandler } from "./handlers/symmio/SettleUpnlHandler"
 import { SetFeeCollectorHandler } from "./handlers/symmio/SetFeeCollectorHandler"
 import { TransferToBridgeHandler } from "./handlers/symmio/TransferToBridgeHandler"
 import { SettlePartyALiquidationHandler } from "./handlers/symmio/SettlePartyALiquidationHandler"
-import { DeferredLiquidatePartyAHandler } from "../common/handlers/symmio/DeferredLiquidatePartyAHandler";
+import { DeferredLiquidatePartyAHandler } from "./handlers/symmio/DeferredLiquidatePartyAHandler";
 import { SetSymbolsPricesHandler } from "./handlers/symmio/SetSymbolsPricesHandler";
+import { LiquidationDisputedHandler } from "./handlers/symmio/LiquidationDisputedHandler";
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
 	let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
@@ -155,12 +158,12 @@ export function handleEmergencyClosePosition(event: EmergencyClosePosition): voi
 }
 
 export function handleExpireQuoteOpen(event: ExpireQuoteOpen): void {
-	let handler = new ExpireQuoteHandler<ExpireQuoteOpen>()
+	let handler = new ExpireQuoteOpenHandler<ExpireQuoteOpen>()
 	handler.handle(event, Version.v_0_8_4)
 }
 
 export function handleExpireQuoteClose(event: ExpireQuoteClose): void {
-	let handler = new ExpireQuoteHandler<ExpireQuoteClose>()
+	let handler = new ExpireQuoteCloseHandler<ExpireQuoteClose>()
 	handler.handle(event, Version.v_0_8_4)
 }
 
@@ -311,5 +314,10 @@ export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyA): v
 
 export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
 	let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
+	handler.handle(event, Version.v_0_8_4)
+}
+
+export function handleLiquidationDisputed(event: LiquidationDisputed): void {
+	let handler = new LiquidationDisputedHandler<LiquidationDisputed>()
 	handler.handle(event, Version.v_0_8_4)
 }

@@ -135,21 +135,6 @@
 		"FillCloseRequest",
 		"EmergencyClosePosition"
 	],
-	"PriceCheck": [
-		"OpenPosition",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition"
-	],
-	"PartyALiquidation": [
-		"SetSymbolsPrices"
-	],
-	"PartyBLiquidation": [
-		"LiquidatePartyB"
-	],
-	"PartyALiquidationDisputed": [
-		"LiquidationDisputed"
-	],
 	"Configuration": [
 		"SetCollateral"
 	],
@@ -163,6 +148,7 @@
 	],
 	"LiquidationDetail": [
 		"SetSymbolsPrices",
-		"LiquidatePartyA"
+		"LiquidatePartyA",
+		"LiquidationDisputed"
 	]
 }

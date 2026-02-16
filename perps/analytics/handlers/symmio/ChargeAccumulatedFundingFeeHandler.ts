@@ -12,6 +12,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends BaseHandler {
 
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
+			const rate = event.params.rates[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
 
@@ -24,8 +25,16 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends BaseHandler {
 			if (chainQuote == null) continue
 
 			let funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-			let fundingPaid = funding
+			const paid = rate.gt(BigInt.zero())
+			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
+			if (paid) fundingPaid = funding
+			else fundingReceived = funding
+
+			quote.openedPrice = chainQuote.openedPrice
+			quote.userPaidFunding = quote.userPaidFunding!.plus(fundingPaid)
+			quote.userReceivedFunding = quote.userReceivedFunding!.plus(fundingReceived)
+			quote.save()
 
 			updateHistories(
 				new UpdateHistoriesParams(version, account, solverAccount, event)

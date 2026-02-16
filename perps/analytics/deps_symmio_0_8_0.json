@@ -37,7 +37,6 @@
 		"FillCloseRequest",
 		"EmergencyClosePosition",
 		"ForceClosePosition",
-		"ChargeFundingRate",
 		"AllocatePartyA",
 		"DeallocatePartyA",
 		"Deposit",
@@ -50,7 +49,6 @@
 		"FillCloseRequest",
 		"EmergencyClosePosition",
 		"ForceClosePosition",
-		"ChargeFundingRate",
 		"AllocatePartyA",
 		"DeallocatePartyA",
 		"Deposit",
@@ -71,21 +69,6 @@
 		"FillCloseRequest",
 		"EmergencyClosePosition",
 		"ForceClosePosition"
-	],
-	"PriceCheck": [
-		"OpenPosition",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition"
-	],
-	"PartyALiquidation": [
-		"SetSymbolsPrices"
-	],
-	"PartyBLiquidation": [
-		"LiquidatePartyB"
-	],
-	"PartyALiquidationDisputed": [
-		"LiquidationDisputed"
 	],
 	"Configuration": [
 		"SetCollateral"

@@ -4,7 +4,7 @@ import {
 	EditAccountName,
 	RoleGranted,
 	RoleRevoked
-} from '../../generated/symmioMultiAccount_2/symmioMultiAccount_2'
+} from '../../generated/symmioMultiAccount_3/symmioMultiAccount_3'
 import {EditAccountNameHandler} from './handlers/symmioMultiAccount/EditAccountNameHandler'
 import {RoleGrantedHandler} from './handlers/symmioMultiAccount/RoleGrantedHandler'
 import {RoleRevokedHandler} from './handlers/symmioMultiAccount/RoleRevokedHandler'

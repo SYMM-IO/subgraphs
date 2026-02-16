@@ -11,7 +11,7 @@
 		"RequestToClosePosition",
 		"ExpireQuoteClose",
 		"ExpireQuoteOpen",
-		"handleForceCancelCloseRe",
+		"ForceCancelCloseRequest",
 		"ForceClosePosition",
 		"EmergencyClosePosition",
 		"FillCloseRequest",

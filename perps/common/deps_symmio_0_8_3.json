@@ -12,7 +12,7 @@
 		"ExpireQuote",
 		"ExpireQuoteClose",
 		"ExpireQuoteOpen",
-		"handleForceCancelCloseRe",
+		"ForceCancelCloseRequest",
 		"ForceClosePosition",
 		"EmergencyClosePosition",
 		"FillCloseRequest",

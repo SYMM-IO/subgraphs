@@ -5,12 +5,11 @@
 		"SendQuote",
 		"LockQuote",
 		"UnlockQuote",
-		"ChargeFundingRate",
 		"LiquidatePositionsPartyB",
 		"LiquidatePositionsPartyA",
 		"RequestToClosePosition",
 		"ExpireQuote",
-		"handleForceCancelCloseRe",
+		"ForceCancelCloseRequest",
 		"ForceClosePosition",
 		"EmergencyClosePosition",
 		"FillCloseRequest",
@@ -24,8 +23,7 @@
 	"Symbol": [
 		"AddSymbol",
 		"SetSymbolTradingFee",
-		"SetSymbolValidationState",
-		"SetSymbolFundingState"
+		"SetSymbolValidationState"
 	],
 	"Account": [
 		"AllocatePartyA",

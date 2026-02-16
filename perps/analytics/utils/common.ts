@@ -1,5 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 
+const FACTOR: BigInt = BigInt.fromString("1000000000000000000")
+
 export function unDecimal(value: BigInt): BigInt {
-	return value.div(BigInt.fromString("10").pow(18))
+	return value.div(FACTOR)
 }

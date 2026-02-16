@@ -422,37 +422,36 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 export function getAlreadyCreatedConfiguration(event: ethereum.Event, version: Version): Configuration {
 	let conf = Configuration.load("0")!
 	if (conf.collateral == event.address) {
+		let collateral: Bytes | null = null
 		switch (version) {
 			case Version.v_0_8_5: {
-				conf.collateral = getCollateral_0_8_5(event.address)!
-				conf.save()
+				collateral = getCollateral_0_8_5(event.address)
 				break
 			}
 			case Version.v_0_8_4: {
-				conf.collateral = getCollateral_0_8_4(event.address)!
-				conf.save()
+				collateral = getCollateral_0_8_4(event.address)
 				break
 			}
 			case Version.v_0_8_3: {
-				conf.collateral = getCollateral_0_8_3(event.address)!
-				conf.save()
+				collateral = getCollateral_0_8_3(event.address)
 				break
 			}
 			case Version.v_0_8_2: {
-				conf.collateral = getCollateral_0_8_2(event.address)!
-				conf.save()
+				collateral = getCollateral_0_8_2(event.address)
 				break
 			}
 			case Version.v_0_8_1: {
-				conf.collateral = getCollateral_0_8_1(event.address)!
-				conf.save()
+				collateral = getCollateral_0_8_1(event.address)
 				break
 			}
 			case Version.v_0_8_0: {
-				conf.collateral = getCollateral_0_8_0(event.address)!
-				conf.save()
+				collateral = getCollateral_0_8_0(event.address)
 				break
 			}
+		}
+		if (collateral) {
+			conf.collateral = collateral
+			conf.save()
 		}
 	}
 	return conf

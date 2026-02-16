@@ -153,7 +153,7 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	dh.closeTradeVolume = dh.closeTradeVolume.plus(closeTradeVolume)
 	dh.liquidateTradeVolume = dh.liquidateTradeVolume.plus(liquidateTradeVolume)
 	dh.platformFee = dh.platformFee.plus(params._tradingFee)
-	dh.symmioShare = getSymmioShare(params.accountSource, dh.platformFee)
+	dh.symmioShare = dh.symmioShare.plus(getSymmioShare(params.accountSource, params._tradingFee))
 	dh.allocate = dh.allocate.plus(params._allocate)
 	dh.deallocate = dh.deallocate.plus(params._deallocate)
 	dh.deposit = dh.deposit.plus(params._deposit)
