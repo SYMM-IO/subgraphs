@@ -33,17 +33,21 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())!
 		const symbol = Symbol.load(quote.symbolId!.toString() + "-" + event.address.toHexString())!
 
-		let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
-
 		let solverAccount = Account.load(event.params.partyB.toHexString())!
 
-		updateHistories(
-			new UpdateHistoriesParams(version, account, solverAccount, event)
-				.openTradeVolume(volume)
-				.symbolId(quote.symbolId!)
-				.positionsCount(BigInt.fromI32(1))
-				.tradingFee(tradingFee),
-		)
+		let params = new UpdateHistoriesParams(version, account, solverAccount, event)
+			.openTradeVolume(volume)
+			.symbolId(quote.symbolId!)
+			.positionsCount(BigInt.fromI32(1))
+
+		// For pre-v0.8.5, compute fee manually and record as openFee.
+		// For v0.8.5+, TradingFeeCharged event handles fees — skip to avoid double-counting.
+		if (version != Version.v_0_8_5) {
+			let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
+			params.openFee(tradingFee)
+		}
+
+		updateHistories(params)
 		if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
 			// From this timestamp we count partyB volumes in analytics as well
 			updateHistories(

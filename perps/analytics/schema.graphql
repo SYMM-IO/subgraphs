@@ -74,6 +74,8 @@ type DailyHistory @entity(immutable: false) {
 	newUsers: BigInt!
 	newAccounts: BigInt!
 	platformFee: BigInt!
+	openFee: BigInt!
+	closeFee: BigInt!
 	symmioShare: BigInt!
 	openInterest: BigInt!
 	fundingPaid: BigInt!
@@ -111,6 +113,8 @@ type SolverDailyHistory @entity(immutable: false) {
 	solver: Bytes!
 	accountSource: Bytes
 	platformFee: BigInt!
+	openFee: BigInt!
+	closeFee: BigInt!
 	updateTimestamp: BigInt!
 	timestamp: BigInt!
 }
@@ -130,6 +134,8 @@ type SolverOnlyDailyHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	solver: Bytes!
 	platformFee: BigInt!
+	openFee: BigInt!
+	closeFee: BigInt!
 	updateTimestamp: BigInt!
 	timestamp: BigInt!
 }
@@ -178,6 +184,8 @@ type TotalHistory @entity(immutable: false) {
 	users: BigInt!
 	accounts: BigInt!
 	platformFee: BigInt!
+	openFee: BigInt!
+	closeFee: BigInt!
 	fundingPaid: BigInt!
 	fundingReceived: BigInt!
 	accountSource: Bytes
@@ -219,6 +227,8 @@ type DailyUserHistory @entity(immutable: false) {
 	accAllocate: BigInt!
 	accDeallocate: BigInt!
 	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
 	fundingPaid: BigInt!
 	fundingReceived: BigInt!
 	loss: BigInt!
@@ -242,6 +252,8 @@ type TotalUserHistory @entity(immutable: false) {
 	allocate: BigInt!
 	deallocate: BigInt!
 	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
 	fundingPaid: BigInt!
 	fundingReceived: BigInt!
 	loss: BigInt!
@@ -273,6 +285,8 @@ type DailySymbolTradesHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	fundingPaid: BigInt!
 	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
 	volume: BigInt!
 }
 
@@ -287,6 +301,8 @@ type TotalSymbolTradesHistory @entity(immutable: false) {
 	fundingReceived: BigInt!
 	fundingPaid: BigInt!
 	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
 	volume: BigInt!
 }
 

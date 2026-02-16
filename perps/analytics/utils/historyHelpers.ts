@@ -28,7 +28,8 @@ export class UpdateHistoriesParams {
 	_closeTradeVolume: BigInt = BigInt.zero()
 	_liquidateTradeVolume: BigInt = BigInt.zero()
 	_symbolId: BigInt = BigInt.zero()
-	_tradingFee: BigInt = BigInt.zero()
+	_openFee: BigInt = BigInt.zero()
+	_closeFee: BigInt = BigInt.zero()
 	_allocate: BigInt = BigInt.zero()
 	_deallocate: BigInt = BigInt.zero()
 	_deposit: BigInt = BigInt.zero()
@@ -78,8 +79,13 @@ export class UpdateHistoriesParams {
 		return this
 	}
 
-	tradingFee(tradingFee: BigInt): UpdateHistoriesParams {
-		this._tradingFee = tradingFee
+	openFee(openFee: BigInt): UpdateHistoriesParams {
+		this._openFee = openFee
+		return this
+	}
+
+	closeFee(closeFee: BigInt): UpdateHistoriesParams {
+		this._closeFee = closeFee
 		return this
 	}
 
@@ -147,13 +153,17 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	const liquidateTradeVolume = params._liquidateTradeVolume
 	const tradeVolume = openTradeVolume.plus(closeTradeVolume).plus(liquidateTradeVolume)
 
+	const totalFee = params._openFee.plus(params._closeFee)
+
 	const dh = getDailyHistoryForTimestamp(timestamp, params.accountSource, params.source)
 	dh.tradeVolume = dh.tradeVolume.plus(tradeVolume)
 	dh.openTradeVolume = dh.openTradeVolume.plus(openTradeVolume)
 	dh.closeTradeVolume = dh.closeTradeVolume.plus(closeTradeVolume)
 	dh.liquidateTradeVolume = dh.liquidateTradeVolume.plus(liquidateTradeVolume)
-	dh.platformFee = dh.platformFee.plus(params._tradingFee)
-	dh.symmioShare = dh.symmioShare.plus(getSymmioShare(params.accountSource, params._tradingFee))
+	dh.platformFee = dh.platformFee.plus(totalFee)
+	dh.openFee = dh.openFee.plus(params._openFee)
+	dh.closeFee = dh.closeFee.plus(params._closeFee)
+	dh.symmioShare = dh.symmioShare.plus(getSymmioShare(params.accountSource, totalFee))
 	dh.allocate = dh.allocate.plus(params._allocate)
 	dh.deallocate = dh.deallocate.plus(params._deallocate)
 	dh.deposit = dh.deposit.plus(params._deposit)
@@ -176,7 +186,9 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sdh.liquidateTradeVolume = sdh.liquidateTradeVolume.plus(liquidateTradeVolume)
 		sdh.fundingPaid = sdh.fundingPaid.plus(params._fundingPaid)
 		sdh.fundingReceived = sdh.fundingReceived.plus(params._fundingReceived)
-		sdh.platformFee = sdh.platformFee.plus(params._tradingFee)
+		sdh.platformFee = sdh.platformFee.plus(totalFee)
+		sdh.openFee = sdh.openFee.plus(params._openFee)
+		sdh.closeFee = sdh.closeFee.plus(params._closeFee)
 		if (params._positionsCount.gt(BigInt.zero())) {
 			sdh.averagePositionSize = sdh.averagePositionSize
 				.times(sdh.positionsCount)
@@ -194,7 +206,9 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		sodh.liquidateTradeVolume = sodh.liquidateTradeVolume.plus(liquidateTradeVolume)
 		sodh.fundingPaid = sodh.fundingPaid.plus(params._fundingPaid)
 		sodh.fundingReceived = sodh.fundingReceived.plus(params._fundingReceived)
-		sodh.platformFee = sodh.platformFee.plus(params._tradingFee)
+		sodh.platformFee = sodh.platformFee.plus(totalFee)
+		sodh.openFee = sodh.openFee.plus(params._openFee)
+		sodh.closeFee = sodh.closeFee.plus(params._closeFee)
 		if (params._positionsCount.gt(BigInt.zero())) {
 			sodh.averagePositionSize = sodh.averagePositionSize
 				.times(sodh.positionsCount)
@@ -228,7 +242,9 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	th.openTradeVolume = th.openTradeVolume.plus(openTradeVolume)
 	th.closeTradeVolume = th.closeTradeVolume.plus(closeTradeVolume)
 	th.liquidateTradeVolume = th.liquidateTradeVolume.plus(liquidateTradeVolume)
-	th.platformFee = th.platformFee.plus(params._tradingFee)
+	th.platformFee = th.platformFee.plus(totalFee)
+	th.openFee = th.openFee.plus(params._openFee)
+	th.closeFee = th.closeFee.plus(params._closeFee)
 	th.allocate = th.allocate.plus(params._allocate)
 	th.deallocate = th.deallocate.plus(params._deallocate)
 	th.deposit = th.deposit.plus(params._deposit)
@@ -243,7 +259,9 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	duh.openTradeVolume = duh.openTradeVolume.plus(openTradeVolume)
 	duh.closeTradeVolume = duh.closeTradeVolume.plus(closeTradeVolume)
 	duh.liquidateTradeVolume = duh.liquidateTradeVolume.plus(liquidateTradeVolume)
-	duh.platformFeePaid = duh.platformFeePaid.plus(params._tradingFee)
+	duh.platformFeePaid = duh.platformFeePaid.plus(totalFee)
+	duh.openFeePaid = duh.openFeePaid.plus(params._openFee)
+	duh.closeFeePaid = duh.closeFeePaid.plus(params._closeFee)
 	duh.allocate = duh.allocate.plus(params._allocate)
 	duh.accAllocate = duh.accAllocate.plus(params._allocate)
 	duh.deallocate = duh.deallocate.plus(params._deallocate)
@@ -264,7 +282,9 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 	tuh.openTradeVolume = tuh.openTradeVolume.plus(openTradeVolume)
 	tuh.closeTradeVolume = tuh.closeTradeVolume.plus(closeTradeVolume)
 	tuh.liquidateTradeVolume = tuh.liquidateTradeVolume.plus(liquidateTradeVolume)
-	tuh.platformFeePaid = tuh.platformFeePaid.plus(params._tradingFee)
+	tuh.platformFeePaid = tuh.platformFeePaid.plus(totalFee)
+	tuh.openFeePaid = tuh.openFeePaid.plus(params._openFee)
+	tuh.closeFeePaid = tuh.closeFeePaid.plus(params._closeFee)
 	tuh.allocate = tuh.allocate.plus(params._allocate)
 	tuh.deallocate = tuh.deallocate.plus(params._deallocate)
 	tuh.deposit = tuh.deposit.plus(params._deposit)
@@ -286,7 +306,9 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		const dst = getDailySymbolTradesHistory(timestamp, account.account, params.accountSource, params._symbolId, params.source)
 		dst.volume = dst.volume.plus(tradeVolume)
 		dst.totalTrades = dst.totalTrades.plus(BigInt.fromString("1"))
-		dst.platformFeePaid = dst.platformFeePaid.plus(params._tradingFee)
+		dst.platformFeePaid = dst.platformFeePaid.plus(totalFee)
+		dst.openFeePaid = dst.openFeePaid.plus(params._openFee)
+		dst.closeFeePaid = dst.closeFeePaid.plus(params._closeFee)
 		dst.fundingPaid = dst.fundingPaid.plus(params._fundingPaid)
 		dst.fundingReceived = dst.fundingReceived.plus(params._fundingReceived)
 		dst.updateTimestamp = timestamp
@@ -295,7 +317,9 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		const tst = getTotalSymbolTradesHistory(timestamp, account.account, params.accountSource, params._symbolId, params.source)
 		tst.volume = tst.volume.plus(tradeVolume)
 		tst.totalTrades = tst.totalTrades.plus(BigInt.fromString("1"))
-		tst.platformFeePaid = tst.platformFeePaid.plus(params._tradingFee)
+		tst.platformFeePaid = tst.platformFeePaid.plus(totalFee)
+		tst.openFeePaid = tst.openFeePaid.plus(params._openFee)
+		tst.closeFeePaid = tst.closeFeePaid.plus(params._closeFee)
 		tst.fundingPaid = tst.fundingPaid.plus(params._fundingPaid)
 		tst.fundingReceived = tst.fundingReceived.plus(params._fundingReceived)
 		tst.updateTimestamp = timestamp

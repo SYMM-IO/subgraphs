@@ -13,10 +13,15 @@ export class TradingFeeChargedHandler<T> extends BaseHandler {
 
 		let solverAccount = Account.load(event.params.partyB.toHexString())
 
-		updateHistories(
-			new UpdateHistoriesParams(version, account, solverAccount, event)
-				.tradingFee(event.params.amount)
-				.symbolId(event.params.symbolId),
-		)
+		let feeType = _event.parameters[6].value.toI32()
+		let params = new UpdateHistoriesParams(version, account, solverAccount, event).symbolId(event.params.symbolId)
+
+		if (feeType == 0) {
+			params.openFee(event.params.amount)
+		} else {
+			params.closeFee(event.params.amount)
+		}
+
+		updateHistories(params)
 	}
 }

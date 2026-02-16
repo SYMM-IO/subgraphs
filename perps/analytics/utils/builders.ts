@@ -50,6 +50,8 @@ export function getDailyHistoryForTimestamp(timestamp: BigInt, accountSource: By
 		dh.activeUsers = BigInt.zero()
 		dh.newAccounts = BigInt.zero()
 		dh.platformFee = BigInt.zero()
+		dh.openFee = BigInt.zero()
+		dh.closeFee = BigInt.zero()
 		dh.symmioShare = BigInt.zero()
 		dh.openInterest = BigInt.zero()
 		dh.fundingPaid = BigInt.zero()
@@ -85,6 +87,8 @@ export function getSolverDailyHistoryForTimestamp(timestamp: BigInt, solver: Byt
 		sdh.accountSource = accountSource === null ? ZERO_ADDRESS_BYTES : accountSource
 		sdh.solver = solver
 		sdh.platformFee = BigInt.zero()
+		sdh.openFee = BigInt.zero()
+		sdh.closeFee = BigInt.zero()
 		sdh.source = source
 		sdh.save()
 	}
@@ -111,6 +115,8 @@ export function getSolverOnlyDailyHistoryForTimestamp(timestamp: BigInt, solver:
 		sodh.fundingReceived = BigInt.zero()
 		sodh.solver = solver
 		sodh.platformFee = BigInt.zero()
+		sodh.openFee = BigInt.zero()
+		sodh.closeFee = BigInt.zero()
 		sodh.source = source
 		sodh.save()
 	}
@@ -192,6 +198,8 @@ export function getTotalHistory(timestamp: BigInt, accountSource: Bytes | null, 
 		th.users = BigInt.zero()
 		th.accounts = BigInt.zero()
 		th.platformFee = BigInt.zero()
+		th.openFee = BigInt.zero()
+		th.closeFee = BigInt.zero()
 		th.fundingReceived = BigInt.zero()
 		th.fundingPaid = BigInt.zero()
 		th.collateral = collateral
@@ -251,6 +259,8 @@ export function getDailySymbolTradesHistory(
 		history.fundingPaid = BigInt.zero()
 		history.fundingReceived = BigInt.zero()
 		history.platformFeePaid = BigInt.zero()
+		history.openFeePaid = BigInt.zero()
+		history.closeFeePaid = BigInt.zero()
 		history.volume = BigInt.zero()
 		history.save()
 	}
@@ -286,6 +296,8 @@ export function getTotalSymbolTradesHistory(
 		history.fundingPaid = BigInt.zero()
 		history.fundingReceived = BigInt.zero()
 		history.platformFeePaid = BigInt.zero()
+		history.openFeePaid = BigInt.zero()
+		history.closeFeePaid = BigInt.zero()
 		history.volume = BigInt.zero()
 		history.save()
 	}
@@ -316,6 +328,8 @@ export function getDailyUserHistoryForTimestamp(timestamp: BigInt, account: Acco
 		dh.accAllocate = th.allocate // carry over from total history
 		dh.accDeallocate = th.deallocate // carry over from total history
 		dh.platformFeePaid = BigInt.zero()
+		dh.openFeePaid = BigInt.zero()
+		dh.closeFeePaid = BigInt.zero()
 		dh.fundingPaid = BigInt.zero()
 		dh.fundingReceived = BigInt.zero()
 		dh.loss = BigInt.zero()
@@ -344,6 +358,8 @@ export function getTotalUserHistory(timestamp: BigInt, account: Account): TotalU
 		th.allocate = BigInt.zero()
 		th.deallocate = BigInt.zero()
 		th.platformFeePaid = BigInt.zero()
+		th.openFeePaid = BigInt.zero()
+		th.closeFeePaid = BigInt.zero()
 		th.fundingPaid = BigInt.zero()
 		th.fundingReceived = BigInt.zero()
 		th.loss = BigInt.zero()
