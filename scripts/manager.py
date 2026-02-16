@@ -432,7 +432,7 @@ def prepare_module(config: Config, target_module: str):
         # Auto-include ABIs that were detected from deps/src files but not in config
         existing_abi_names = set(a["name"] for a in source_config["mapping"]["abis"])
         for c in all_contracts:
-            if c.abi not in config_abis and c.path() not in existing_abi_names:
+            if c.abi not in config_abis and c.path() not in existing_abi_names and c.events:
                 source_config["mapping"]["abis"].append({"name": c.path(), "file": f"./abis/{c.path()}.json"})
                 existing_abi_names.add(c.path())
 
