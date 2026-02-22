@@ -119,11 +119,23 @@ import {UnlockQuote} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {UpdateAccumulatedFundingFeeHandler} from './handlers/symmio/UpdateAccumulatedFundingFeeHandler'
 import {UpdateAccumulatedFundingFee} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {Version} from '../common/BaseHandler'
+import {WithdrawAcceptedHandler} from './handlers/symmio/WithdrawAcceptedHandler'
+import {WithdrawAccepted} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {WithdrawCancelRequestedHandler} from './handlers/symmio/WithdrawCancelRequestedHandler'
+import {WithdrawCancelRequested} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {WithdrawCancelledHandler} from './handlers/symmio/WithdrawCancelledHandler'
+import {WithdrawCancelled} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {WithdrawFinalizedHandler} from './handlers/symmio/WithdrawFinalizedHandler'
 import {WithdrawFinalized} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {WithdrawHandler} from './handlers/symmio/WithdrawHandler'
 import {WithdrawInitiatedHandler} from './handlers/symmio/WithdrawInitiatedHandler'
 import {WithdrawInitiated} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {WithdrawRejectedHandler} from './handlers/symmio/WithdrawRejectedHandler'
+import {WithdrawRejected} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {WithdrawSpeedUpAcceptedHandler} from './handlers/symmio/WithdrawSpeedUpAcceptedHandler'
+import {WithdrawSpeedUpAccepted} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {WithdrawSuspendedHandler} from './handlers/symmio/WithdrawSuspendedHandler'
+import {WithdrawSuspended} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {Withdraw} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 
 
@@ -511,6 +523,24 @@ export function handleWithdraw(event: Withdraw): void {
 }
 
 
+export function handleWithdrawAccepted(event: WithdrawAccepted): void {
+    let handler = new WithdrawAcceptedHandler<WithdrawAccepted>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleWithdrawCancelRequested(event: WithdrawCancelRequested): void {
+    let handler = new WithdrawCancelRequestedHandler<WithdrawCancelRequested>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleWithdrawCancelled(event: WithdrawCancelled): void {
+    let handler = new WithdrawCancelledHandler<WithdrawCancelled>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
 export function handleWithdrawFinalized(event: WithdrawFinalized): void {
     let handler = new WithdrawFinalizedHandler<WithdrawFinalized>()
     handler.handle(event, Version.v_0_8_5)
@@ -519,5 +549,23 @@ export function handleWithdrawFinalized(event: WithdrawFinalized): void {
 
 export function handleWithdrawInitiated(event: WithdrawInitiated): void {
     let handler = new WithdrawInitiatedHandler<WithdrawInitiated>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleWithdrawRejected(event: WithdrawRejected): void {
+    let handler = new WithdrawRejectedHandler<WithdrawRejected>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleWithdrawSpeedUpAccepted(event: WithdrawSpeedUpAccepted): void {
+    let handler = new WithdrawSpeedUpAcceptedHandler<WithdrawSpeedUpAccepted>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleWithdrawSuspended(event: WithdrawSuspended): void {
+    let handler = new WithdrawSuspendedHandler<WithdrawSuspended>()
     handler.handle(event, Version.v_0_8_5)
 }
