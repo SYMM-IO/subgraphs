@@ -175,6 +175,26 @@ This file is central to module-specific configurations and should be placed in t
    - The script constructs the deployment command based on the network (including Mantle if specified) and executes the
      `graph deploy` command.
 
+## Monitoring
+
+Use `scripts/monitor.py` to check the sync status and health of deployed subgraphs on Goldsky. Requires the `goldsky` CLI to be installed and authenticated.
+
+```bash
+# Check all subgraphs (defaults to "latest" tag)
+python3 scripts/monitor.py
+
+# Check a specific version
+python3 scripts/monitor.py --version v0.0.1
+
+# Filter by chain(s)
+python3 scripts/monitor.py --chain base bnb bera
+
+# Watch mode — re-check every 60 seconds
+python3 scripts/monitor.py --version v0.0.1 --watch 60
+```
+
+The script reports sync percentage, block range, and flags any errors or subgraphs that are not yet fully synced. Edit the `SUBGRAPHS` list at the top of the file to add or remove monitored subgraphs.
+
 ## Troubleshooting
 
 - **Missing Events**: If certain events are not indexed, ensure the dependency files correctly map the events to the
