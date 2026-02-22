@@ -84,8 +84,14 @@ import {SendQuoteHandler} from './handlers/symmio/SendQuoteHandler'
 import {SendQuote} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetCollateralHandler} from './handlers/symmio/SetCollateralHandler'
 import {SetCollateral} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {SetEpochDurationHandler} from './handlers/symmio/SetEpochDurationHandler'
+import {SetEpochDuration} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetFeeCollectorHandler} from './handlers/symmio/SetFeeCollectorHandler'
 import {SetFeeCollector} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {SetLongFundingFeeHandler} from './handlers/symmio/SetLongFundingFeeHandler'
+import {SetLongFundingFee} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {SetShortFundingFeeHandler} from './handlers/symmio/SetShortFundingFeeHandler'
+import {SetShortFundingFee} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetSymbolFundingStateHandler} from './handlers/symmio/SetSymbolFundingStateHandler'
 import {SetSymbolFundingState} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetSymbolTradingFeeHandler} from './handlers/symmio/SetSymbolTradingFeeHandler'
@@ -110,6 +116,8 @@ import {TransferToBridgeHandler} from './handlers/symmio/TransferToBridgeHandler
 import {TransferToBridge} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {UnlockQuoteHandler} from './handlers/symmio/UnlockQuoteHandler'
 import {UnlockQuote} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {UpdateAccumulatedFundingFeeHandler} from './handlers/symmio/UpdateAccumulatedFundingFeeHandler'
+import {UpdateAccumulatedFundingFee} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {Version} from '../common/BaseHandler'
 import {WithdrawFinalizedHandler} from './handlers/symmio/WithdrawFinalizedHandler'
 import {WithdrawFinalized} from '../../generated/symmio_0_8_5/symmio_0_8_5'
@@ -395,8 +403,26 @@ export function handleSetCollateral(event: SetCollateral): void {
 }
 
 
+export function handleSetEpochDuration(event: SetEpochDuration): void {
+    let handler = new SetEpochDurationHandler<SetEpochDuration>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
 export function handleSetFeeCollector(event: SetFeeCollector): void {
     let handler = new SetFeeCollectorHandler<SetFeeCollector>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleSetLongFundingFee(event: SetLongFundingFee): void {
+    let handler = new SetLongFundingFeeHandler<SetLongFundingFee>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleSetShortFundingFee(event: SetShortFundingFee): void {
+    let handler = new SetShortFundingFeeHandler<SetShortFundingFee>()
     handler.handle(event, Version.v_0_8_5)
 }
 
@@ -469,6 +495,12 @@ export function handleTransferToBridge(event: TransferToBridge): void {
 
 export function handleUnlockQuote(event: UnlockQuote): void {
     let handler = new UnlockQuoteHandler<UnlockQuote>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleUpdateAccumulatedFundingFee(event: UpdateAccumulatedFundingFee): void {
+    let handler = new UpdateAccumulatedFundingFeeHandler<UpdateAccumulatedFundingFee>()
     handler.handle(event, Version.v_0_8_5)
 }
 

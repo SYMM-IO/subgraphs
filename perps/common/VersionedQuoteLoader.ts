@@ -34,6 +34,7 @@ export class QuoteData {
 	marketPrice: BigInt
 	affiliate: Bytes
 	partyBsWhiteList: Bytes[]
+	accumulatedPaidFunding: BigInt
 
 	constructor() {
 		this.cva = BigInt.zero()
@@ -55,6 +56,7 @@ export class QuoteData {
 		this.marketPrice = BigInt.zero()
 		this.affiliate = Address.zero()
 		this.partyBsWhiteList = []
+		this.accumulatedPaidFunding = BigInt.zero()
 	}
 }
 
@@ -245,6 +247,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.quoteStatus = q.quoteStatus
 			data.marketPrice = q.marketPrice
 			data.affiliate = q.affiliate
+			data.accumulatedPaidFunding = q.accumulatedPaidFunding
 			if (q.partyBsWhiteList) data.partyBsWhiteList = convertAddressArrayToBytes(q.partyBsWhiteList)
 			break
 		}

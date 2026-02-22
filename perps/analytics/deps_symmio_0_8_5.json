@@ -216,5 +216,16 @@
 		"LiquidationDisputed",
 		"SoftPartyBLiquidation",
 		"TakeoverPartyALiquidation"
+	],
+	"FundingRateSnapshot": [
+		"SetLongFundingFee",
+		"SetShortFundingFee",
+		"UpdateAccumulatedFundingFee"
+	],
+	"FundingFeeState": [
+		"SetLongFundingFee",
+		"SetShortFundingFee",
+		"UpdateAccumulatedFundingFee",
+		"SetEpochDuration"
 	]
 }

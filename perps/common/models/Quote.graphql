@@ -60,6 +60,7 @@ type Quote @entity(immutable: false) {
     # funding rate
     userPaidFunding: BigInt
     userReceivedFunding: BigInt
+    accumulatedPaidFunding: BigInt
 
     # timestamps
     timestamp: BigInt!

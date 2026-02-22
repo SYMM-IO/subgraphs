@@ -334,6 +334,32 @@ type OpenInterestSettleDay @entity(immutable: false) {
 	timestamp: BigInt!
 }
 
+type FundingRateSnapshot @entity(immutable: true) {
+	id: ID!
+	source: Bytes!
+	symbolId: BigInt!
+	partyB: Bytes!
+	longFee: BigInt
+	shortFee: BigInt
+	marketPrice: BigInt!
+	eventType: String!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}
+
+type FundingFeeState @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	symbolId: BigInt!
+	partyB: Bytes!
+	currentLongRate: BigInt
+	currentShortRate: BigInt
+	epochDuration: BigInt
+	lastMarketPrice: BigInt
+	updateTimestamp: BigInt!
+}
+
 type LiquidationDetail @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
