@@ -376,3 +376,18 @@ type LiquidationDetail @entity(immutable: false) {
 	disputed: Boolean!
 	liquidationTimestamp: BigInt!
 }
+
+type WithdrawRequest @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	requestId: BigInt!
+	user: Bytes!
+	amount: BigInt!
+	speedUp: Boolean!
+	cooldownEndTime: BigInt!
+	status: String!
+	timestamp: BigInt!
+	updateTimestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}

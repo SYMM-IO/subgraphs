@@ -15,9 +15,7 @@
 		"Withdraw",
 		"BalanceChangePartyA",
 		"BalanceChangePartyB",
-		"TransferToBridge",
-		"WithdrawInitiated",
-		"WithdrawFinalized"
+		"TransferToBridge"
 	],
 	"CloseHistory": [
 		"LiquidatePositionsPartyA",
@@ -45,9 +43,7 @@
 		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
-		"TradingFeeCharged",
-		"WithdrawInitiated",
-		"WithdrawFinalized"
+		"TradingFeeCharged"
 	],
 	"TotalHistory": [
 		"OpenPosition",
@@ -65,9 +61,7 @@
 		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
-		"TradingFeeCharged",
-		"WithdrawInitiated",
-		"WithdrawFinalized"
+		"TradingFeeCharged"
 	],
 	"SymbolTradeHistory": [
 		"OpenPosition",
@@ -227,5 +221,15 @@
 		"SetShortFundingFee",
 		"UpdateAccumulatedFundingFee",
 		"SetEpochDuration"
+	],
+	"WithdrawRequest": [
+		"WithdrawInitiated",
+		"WithdrawAccepted",
+		"WithdrawFinalized",
+		"WithdrawCancelRequested",
+		"WithdrawCancelled",
+		"WithdrawRejected",
+		"WithdrawSuspended",
+		"WithdrawSpeedUpAccepted"
 	]
 }

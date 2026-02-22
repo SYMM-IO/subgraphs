@@ -1,10 +1,10 @@
 
-import { WithdrawFinalizedHandler as CommonWithdrawFinalizedHandler } from "../../../common/handlers/symmio/WithdrawFinalizedHandler"
+import { WithdrawRejectedHandler as CommonWithdrawRejectedHandler } from "../../../common/handlers/symmio/WithdrawRejectedHandler"
 import { WithdrawRequest } from "../../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 
-export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<T> {
+export class WithdrawRejectedHandler<T> extends CommonWithdrawRejectedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
@@ -13,7 +13,7 @@ export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<
 		let id = event.params.requestId.toString() + "-" + _event.address.toHexString()
 		let wr = WithdrawRequest.load(id)
 		if (!wr) return
-		wr.status = "FINALIZED"
+		wr.status = "REJECTED"
 		wr.updateTimestamp = _event.block.timestamp
 		wr.save()
 	}
