@@ -146,6 +146,9 @@
 		"RequestToCancelCloseRequest",
 		"RequestToCancelQuote"
 	],
+	"FundingHistory": [
+		"ChargeFundingRate"
+	],
 	"LiquidationDetail": [
 		"SetSymbolsPrices",
 		"LiquidatePartyA",

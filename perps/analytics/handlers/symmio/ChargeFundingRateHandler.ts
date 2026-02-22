@@ -1,11 +1,10 @@
 import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../../common/handlers/symmio/ChargeFundingRateHandler"
-import { Account, Quote } from "../../../../generated/schema"
+import { Account, FundingHistory, Quote } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { Version } from "../../../common/BaseHandler"
+import { unDecimal } from "../../utils/common"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
-import { unDecimal } from "../../utils/common"
 
 export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -15,20 +14,43 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
+		// Capture pre-update state before common handler modifies Quote
+		let prevPrices: Array<BigInt> = []
+		let openAmounts: Array<BigInt> = []
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
-			const rate = event.params.rates[i]
-			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())!
-			let account = Account.load(quote.partyA.toHexString())!
-			let solverAccount = Account.load(quote.partyB!.toHexString())
-			const openAmount = quote.quantity!.minus(quote.closedAmount!)
-			let chainQuote = getQuoteData(version, event.address, quote.quoteId)!
-			let funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
-			const paid = rate.gt(BigInt.zero())
+			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
+			if (quote) {
+				prevPrices.push(quote.openedPrice!)
+				openAmounts.push(quote.quantity!.minus(quote.closedAmount!))
+			} else {
+				prevPrices.push(BigInt.zero())
+				openAmounts.push(BigInt.zero())
+			}
+		}
+
+		super.handleQuote(_event, version)
+
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			let quoteId = event.params.quoteIds[i]
+			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
+			if (!quote) continue
+
+			let rate = event.params.rates[i]
+			let newPrice = quote.openedPrice!
+			let prevPrice = prevPrices[i]
+			let openAmount = openAmounts[i]
+			let funding = unDecimal(newPrice.minus(prevPrice).abs().times(openAmount))
+
+			let paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
 			if (paid) fundingPaid = funding
 			else fundingReceived = funding
+
+			let account = Account.load(quote.partyA.toHexString())
+			if (!account) continue
+			let solverAccount = Account.load(quote.partyB!.toHexString())
 
 			updateHistories(
 				new UpdateHistoriesParams(version, account, solverAccount, event)
@@ -36,7 +58,24 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 					.fundingPaid(fundingPaid)
 					.fundingReceived(fundingReceived),
 			)
+
+			let fundingHistory = new FundingHistory(
+				quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+			)
+			fundingHistory.source = event.address
+			fundingHistory.quoteId = quoteId
+			fundingHistory.quote = quoteId.toString() + "-" + event.address.toHexString()
+			fundingHistory.fundingType = "CHARGE_FUNDING_RATE"
+			fundingHistory.rate = rate
+			fundingHistory.fundingPaid = fundingPaid
+			fundingHistory.fundingReceived = fundingReceived
+			fundingHistory.prevPrice = prevPrice
+			fundingHistory.newPrice = newPrice
+			fundingHistory.openQuantity = openAmount
+			fundingHistory.timestamp = event.block.timestamp
+			fundingHistory.blockNumber = event.block.number
+			fundingHistory.transaction = event.transaction.hash
+			fundingHistory.save()
 		}
-		super.handleQuote(_event, version)
 	}
 }

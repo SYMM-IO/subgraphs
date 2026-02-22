@@ -1,16 +1,7 @@
-import {
-	ForceClosePositionHandler as CommonForceClosePositionHandler
-} from "../../../common/handlers/symmio/ForceClosePositionHandler"
-import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
-
-import {ForceClosePosition as ForceClosePosition_0_8_5} from "../../../../generated/symmio_0_8_5/symmio_0_8_5";
-import {ForceClosePosition as ForceClosePosition_0_8_4} from "../../../../generated/symmio_0_8_4/symmio_0_8_4";
-import {ForceClosePosition as ForceClosePosition_0_8_3} from "../../../../generated/symmio_0_8_3/symmio_0_8_3";
-import {ForceClosePosition as ForceClosePosition_0_8_2} from "../../../../generated/symmio_0_8_2/symmio_0_8_2";
-import {ForceClosePosition as ForceClosePosition_0_8_1} from "../../../../generated/symmio_0_8_1/symmio_0_8_1";
-import {ForceClosePosition as ForceClosePosition_0_8_0} from "../../../../generated/symmio_0_8_0/symmio_0_8_0";
-import {handleClose} from "../commonHandlers/close";
+import { ForceClosePositionHandler as CommonForceClosePositionHandler } from "../../../common/handlers/symmio/ForceClosePositionHandler"
+import { ethereum } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
+import { handleClose } from "../commonHandlers/close"
 
 export class ForceClosePositionHandler<T> extends CommonForceClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,32 +11,6 @@ export class ForceClosePositionHandler<T> extends CommonForceClosePositionHandle
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
-
-		switch (version) {
-			case Version.v_0_8_5: {
-				handleClose<ForceClosePosition_0_8_5>(event, "ForceClosePosition", version)
-				break
-			}
-			case Version.v_0_8_4: {
-				handleClose<ForceClosePosition_0_8_4>(event, "ForceClosePosition", version)
-				break
-			}
-			case Version.v_0_8_3: {
-				handleClose<ForceClosePosition_0_8_3>(event, "ForceClosePosition", version)
-				break
-			}
-			case Version.v_0_8_2: {
-				handleClose<ForceClosePosition_0_8_2>(event, "ForceClosePosition", version)
-				break
-			}
-			case Version.v_0_8_1: {
-				handleClose<ForceClosePosition_0_8_1>(event, "ForceClosePosition", version)
-				break
-			}
-			case Version.v_0_8_0: {
-				handleClose<ForceClosePosition_0_8_0>(event, "ForceClosePosition", version)
-				break
-			}
-		}
+		handleClose<T>(_event, "ForceClosePosition", version, "FORCE_CLOSE")
 	}
 }

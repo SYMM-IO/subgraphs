@@ -1,0 +1,10 @@
+type FeeClaim @entity(immutable: true) {
+	id: ID!
+	affiliate: Affiliate!
+	symmio: Bytes!
+	amount: BigInt!
+	source: Bytes!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}

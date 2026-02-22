@@ -1,9 +1,14 @@
-import { ethereum } from "@graphprotocol/graph-ts"
+
 import { SingleVAModeChangedHandler as CommonSingleVAModeChangedHandler } from "../../../common/handlers/accountLayer/SingleVAModeChangedHandler"
-import { AccountLayerVersion } from "../../../common/BaseHandler"
+import {ethereum} from "@graphprotocol/graph-ts";
+import {AccountLayerVersion} from "../../../common/BaseHandler";
 
 export class SingleVAModeChangedHandler<T> extends CommonSingleVAModeChangedHandler<T> {
-	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
-		super.handleAccount(_event, version)
-	}
+    handle(_event: ethereum.Event, version: AccountLayerVersion): void {
+        // @ts-ignore
+        const event = changetype<T>(_event)
+        // @ts-ignore
+        this.handleAccount(_event, version)
+
+    }
 }

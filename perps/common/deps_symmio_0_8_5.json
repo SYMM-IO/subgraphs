@@ -19,7 +19,9 @@
 		"SettleUpnl",
 		"ADLClose",
 		"SettleUpnlUnified",
-		"ForceClosePartyBInsolvent"
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee"
 	],
 	"User": [
 		"SendQuote",

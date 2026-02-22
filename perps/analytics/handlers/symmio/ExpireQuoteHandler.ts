@@ -1,6 +1,6 @@
-import {ExpireQuoteHandler as CommonExpireQuoteHandler} from "../../../common/handlers/symmio/ExpireQuoteHandler"
-import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
+import { ExpireQuoteHandler as CommonExpireQuoteHandler } from "../../../common/handlers/symmio/ExpireQuoteHandler"
+import { ethereum } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
 
 export class ExpireQuoteHandler<T> extends CommonExpireQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

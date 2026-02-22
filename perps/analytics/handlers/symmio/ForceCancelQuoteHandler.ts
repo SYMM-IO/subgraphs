@@ -1,8 +1,8 @@
 import {
 	ForceCancelQuoteHandler as CommonForceCancelQuoteHandler
 } from "../../../common/handlers/symmio/ForceCancelQuoteHandler"
-import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
+import { ethereum } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
 
 export class ForceCancelQuoteHandler<T> extends CommonForceCancelQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

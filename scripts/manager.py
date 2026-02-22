@@ -347,9 +347,10 @@ def prepare_module(config: Config, target_module: str):
             base_address = next(c.address for c in contracts_for_abi)
             base_name = next((c.name for c in contracts_for_abi if c.name), None)
         else:
-            # ABI needed by module but not in config - use global max block and zero address
+            # ABI needed by module but not in config - use global max block and a real address
+            # (zero address is rejected by Graph nodes during deployment)
             max_start_block = global_max_start_block
-            base_address = "0x0000000000000000000000000000000000000000"
+            base_address = config.contracts[0].address
             base_name = None
 
         for version in versions:

@@ -6,7 +6,7 @@ type UserActivity @entity(immutable: false) {
 	updateTimestamp: BigInt
 }
 
-type BalanceChange @entity(immutable: false) {
+type BalanceChange @entity(immutable: true) {
 	id: ID!
 	source: Bytes!
 	type: String!
@@ -14,18 +14,6 @@ type BalanceChange @entity(immutable: false) {
 	sideAccount: Bytes
 	amount: BigInt!
 	collateral: Bytes!
-	timestamp: BigInt!
-	blockNumber: BigInt!
-	transaction: Bytes!
-}
-
-type CvaLf @entity(immutable: false) {
-	id: ID!
-	source: Bytes!
-	type: String!
-	account: Bytes!
-	sideAccount: Bytes
-	amount: BigInt!
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
@@ -43,18 +31,51 @@ type TradeHistory @entity(immutable: false) {
 	quote: BigInt!
 }
 
-type CloseHistory @entity(immutable: false) {
+type CloseHistory @entity(immutable: true) {
 	id: ID!
 	source: Bytes!
 	account: Bytes!
 	amount: BigInt!
 	closePrice: BigInt!
 	volume: BigInt!
+	closeType: String!
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
 	quoteStatus: Int!
-	quote: BigInt!
+	quoteId: BigInt!
+	quote: Quote!
+}
+
+type SettleHistory @entity(immutable: true) {
+	id: ID!
+	source: Bytes!
+	quoteId: BigInt!
+	quote: Quote!
+	settleType: String!
+	prevPrice: BigInt!
+	newPrice: BigInt!
+	openQuantity: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}
+
+type FundingHistory @entity(immutable: true) {
+	id: ID!
+	source: Bytes!
+	quoteId: BigInt!
+	quote: Quote!
+	fundingType: String!
+	rate: BigInt
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	prevPrice: BigInt!
+	newPrice: BigInt!
+	openQuantity: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
 }
 
 type DailyHistory @entity(immutable: false) {
@@ -158,7 +179,7 @@ type MonthlyHistory @entity(immutable: false) {
 	timestamp: BigInt!
 }
 
-type QuotePriceUpdate @entity(immutable: false) {
+type QuotePriceUpdate @entity(immutable: true) {
 	id: ID!
 	source: Bytes!
 	quoteId: BigInt!

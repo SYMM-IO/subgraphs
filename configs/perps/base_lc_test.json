@@ -8,10 +8,10 @@
 			"startBlock": "41664666"
 		},
 		{
-			"address": "0xb5230Cb273299826E991808D34Ef8E1D25349F8D",
+			"address": "0xE566bcdC59a644A6D71564f4E941CF93b6A37846",
 			"abi": "accountLayer",
 			"version": "1",
-			"startBlock": "41664666"
+			"startBlock": "42302196"
 		}
 	],
 	"deploy_urls": {

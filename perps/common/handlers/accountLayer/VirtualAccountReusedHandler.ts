@@ -1,6 +1,6 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
-import { Account } from "../../../../generated/schema"
+import { Account, VirtualAccount } from "../../../../generated/schema"
 
 export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -11,6 +11,12 @@ export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 			account.isDeleted = false
 			account.updateTimestamp = event.block.timestamp
 			account.save()
+		}
+		let va = VirtualAccount.load(event.params.account.toHexString())
+		if (va) {
+			va.isDeleted = false
+			va.updateTimestamp = event.block.timestamp
+			va.save()
 		}
 	}
 }

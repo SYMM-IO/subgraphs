@@ -9,7 +9,8 @@ export class EditAccountNameHandler<T> extends CommonEditAccountNameHandler<T> {
 	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let account = Account.load(event.params.account.toHexString())!
+		let account = Account.load(event.params.account.toHexString())
+		if (!account) return
 		account.name = event.params.newName
 		account.updateTimestamp = event.block.timestamp
 		account.save()

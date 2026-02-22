@@ -1,8 +1,8 @@
-import {RoleRevokedHandler as CommonRoleRevokedHandler} from "../../../common/handlers/symmio/RoleRevokedHandler"
-import {GrantedRole} from "../../../../generated/schema"
-import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
-import {getRoleName} from "../../utils/constants";
+import { RoleRevokedHandler as CommonRoleRevokedHandler } from "../../../common/handlers/symmio/RoleRevokedHandler"
+import { GrantedRole } from "../../../../generated/schema"
+import { ethereum } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
+import { getRoleName } from "../../utils/constants"
 
 export class RoleRevokedHandler<T> extends CommonRoleRevokedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

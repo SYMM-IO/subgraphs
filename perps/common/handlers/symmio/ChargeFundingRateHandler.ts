@@ -12,19 +12,25 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
 			const rate = event.params.rates[i]
-			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())!
+			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
+			if (!quote) continue
 			let quote_price_update = new QuotePriceUpdate(quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString())
 			quote_price_update.quoteId = quoteId
 			quote_price_update.source = event.address
-			quote_price_update.prevPrice = quote.openedPrice!
+			let prevOpenedPrice = quote.openedPrice ? quote.openedPrice! : BigInt.zero()
+			quote_price_update.prevPrice = prevOpenedPrice
 			quote_price_update.type = "ChargeFundingRate"
 			quote_price_update.timestamp = event.block.timestamp
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 			quote_price_update.openQuantity = openAmount
 
-			let chainQuote = getQuoteData(version, event.address, quote.quoteId)!
+			let chainQuote = getQuoteData(version, event.address, quote.quoteId)
+			if (!chainQuote) {
+				quote.save()
+				continue
+			}
 			quote_price_update.newPrice = chainQuote.openedPrice
-			let funding = unDecimal(chainQuote.openedPrice.minus(quote.openedPrice!).abs().times(openAmount))
+			let funding = unDecimal(chainQuote.openedPrice.minus(prevOpenedPrice).abs().times(openAmount))
 			quote.openedPrice = chainQuote.openedPrice
 
 			const paid = rate.gt(BigInt.zero())

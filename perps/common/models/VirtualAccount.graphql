@@ -1,0 +1,10 @@
+type VirtualAccount @entity(immutable: false) {
+	id: ID!
+	address: Bytes!
+	parent: SubAccount!
+	isDeleted: Boolean!
+	source: Bytes!
+	timestamp: BigInt!
+	updateTimestamp: BigInt!
+	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "virtualAccount")
+}

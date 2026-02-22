@@ -1,0 +1,11 @@
+type MarginTransfer @entity(immutable: true) {
+	id: ID!
+	type: String!
+	virtualAccount: VirtualAccount!
+	subAccount: SubAccount!
+	amount: BigInt!
+	source: Bytes!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}

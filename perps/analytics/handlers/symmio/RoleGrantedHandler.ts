@@ -1,8 +1,8 @@
-import {RoleGrantedHandler as CommonRoleGrantedHandler} from "../../../common/handlers/symmio/RoleGrantedHandler"
-import {GrantedRole} from "../../../../generated/schema"
-import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
-import {getRoleName} from "../../utils/constants";
+import { RoleGrantedHandler as CommonRoleGrantedHandler } from "../../../common/handlers/symmio/RoleGrantedHandler"
+import { GrantedRole } from "../../../../generated/schema"
+import { ethereum } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
+import { getRoleName } from "../../utils/constants"
 
 export class RoleGrantedHandler<T> extends CommonRoleGrantedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

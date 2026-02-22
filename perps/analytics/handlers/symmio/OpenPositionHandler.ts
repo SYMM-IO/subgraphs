@@ -17,7 +17,8 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
-		let account = Account.load(event.params.partyA.toHexString())!
+		let account = Account.load(event.params.partyA.toHexString())
+		if (!account) return
 		let volume = unDecimal(event.params.filledAmount.times(event.params.openedPrice))
 		let history = new TradeHistory(account.id + "-" + event.params.quoteId.toString())
 		history.account = event.params.partyA
@@ -30,30 +31,28 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		history.updateTimestamp = event.block.timestamp
 		history.save()
 
-		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())!
-		const symbol = Symbol.load(quote.symbolId!.toString() + "-" + event.address.toHexString())!
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
+		if (!quote) return
+		const symbol = Symbol.load(quote.symbolId!.toString() + "-" + event.address.toHexString())
+		if (!symbol) return
 
-		let solverAccount = Account.load(event.params.partyB.toHexString())!
+		let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
 
-		let params = new UpdateHistoriesParams(version, account, solverAccount, event)
-			.openTradeVolume(volume)
-			.symbolId(quote.symbolId!)
-			.positionsCount(BigInt.fromI32(1))
+		let solverAccount = Account.load(event.params.partyB.toHexString())
+		if (!solverAccount) return
 
-		// For pre-v0.8.5, compute fee manually and record as openFee.
-		// For v0.8.5+, TradingFeeCharged event handles fees — skip to avoid double-counting.
-		if (version != Version.v_0_8_5) {
-			let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
-			params.openFee(tradingFee)
-		}
-
-		updateHistories(params)
+		updateHistories(
+			new UpdateHistoriesParams(version, account, solverAccount, event)
+				.openTradeVolume(volume)
+				.symbolId(quote.symbolId!)
+				.positionsCount(BigInt.fromI32(1))
+				.openFee(tradingFee),
+		)
 		if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
 			// From this timestamp we count partyB volumes in analytics as well
 			updateHistories(
 				new UpdateHistoriesParams(version, solverAccount, null, event, account.accountSource).openTradeVolume(volume).symbolId(quote.symbolId!),
 			)
-			// updateDailyOpenInterest(event.block.timestamp, volume, true, solverAccount, account.accountSource, event.address)
 		}
 		updateDailyOpenInterest(event.block.timestamp, volume, true, solverAccount, account.accountSource, event.address)
 	}

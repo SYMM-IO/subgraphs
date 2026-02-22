@@ -23,4 +23,6 @@ type Account @entity(immutable: false) {
 	isDeleted: Boolean
 	singleVAMode: Boolean
 	affiliate: Bytes
+	subAccount: Bytes
+	virtualAccount: Bytes
 }

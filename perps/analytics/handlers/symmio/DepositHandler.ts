@@ -17,7 +17,8 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 
-		let account = Account.load(event.params.user.toHexString())!
+		let account = Account.load(event.params.user.toHexString())
+		if (!account) return
 		updateActivityTimestamps(account, event.block.timestamp, event.address)
 		let deposit = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		deposit.source = event.address

@@ -1,30 +1,33 @@
-import { BaseHandler, Version } from "../../../common/BaseHandler"
+
+import { LiquidatePositionsForClearingHouseHandler as CommonLiquidatePositionsForClearingHouseHandler } from "../../../common/handlers/symmio/LiquidatePositionsForClearingHouseHandler"
+import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
 import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { QuoteStatus } from "../../utils/constants"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
+import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 
-export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
+export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidatePositionsForClearingHouseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
+		super.handle(_event, version)
 
-		for (let i = 0; i < event.params.quoteIds.length; i++) {
-			const qId = event.params.quoteIds[i]
-			const quote = Quote.load(qId.toString() + "-" + event.address.toHexString())
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			let qId = event.params.quoteIds[i]
+			let quote = Quote.load(qId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
 
 			const chainQuote = getQuoteData(version, event.address, qId)
 			if (chainQuote == null) continue
-
-			const liquidAmount = quote.quantity!.minus(quote.closedAmount!)
-			const liquidPrice = chainQuote.avgClosedPrice.times(quote.quantity!).minus(quote.averageClosedPrice!.times(quote.closedAmount!)).div(liquidAmount)
+			let liquidAmount = quote.liquidateAmount!
+			let liquidPrice = quote.liquidatePrice!
 			const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 
-			let history = TradeHistory.load(event.params.subject.toHexString() + "-" + qId.toString())
+			let history = TradeHistory.load(quote.partyA.toHexString() + "-" + qId.toString())
 			if (history) {
 				history.volume = history.volume.plus(additionalVolume)
 				history.quoteStatus = QuoteStatus.LIQUIDATED
@@ -34,22 +37,26 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 			}
 
 			let closeHistory = new CloseHistory(
-				event.params.subject.toHexString() + "-" + qId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+				quote.partyA.toHexString() + "-" + qId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
 			)
 			closeHistory.source = event.address
-			closeHistory.account = event.params.subject
+			closeHistory.account = quote.partyA
 			closeHistory.amount = liquidAmount
 			closeHistory.closePrice = liquidPrice
 			closeHistory.volume = additionalVolume
+			closeHistory.closeType = "LIQUIDATE_CLEARING_HOUSE"
 			closeHistory.timestamp = event.block.timestamp
 			closeHistory.blockNumber = event.block.number
 			closeHistory.transaction = event.transaction.hash
 			closeHistory.quoteStatus = QuoteStatus.LIQUIDATED
-			closeHistory.quote = qId
+			closeHistory.quoteId = qId
+			closeHistory.quote = qId.toString() + "-" + event.address.toHexString()
 			closeHistory.save()
 
-			let account = Account.load(quote.partyA.toHexString())!
-			let solverAccount = Account.load(quote.partyB!.toHexString())!
+			let account = Account.load(quote.partyA.toHexString())
+			if (!account) continue
+			let solverAccount = Account.load(quote.partyB!.toHexString())
+			if (!solverAccount) continue
 
 			const pnl = unDecimal(
 				(quote.positionType == 0 ? BigInt.fromString("1") : BigInt.fromString("1").neg())
@@ -68,6 +75,13 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 					.loss(loss)
 					.profit(profit),
 			)
+			if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
+				updateHistories(
+					new UpdateHistoriesParams(version, solverAccount, null, event, account.accountSource)
+						.liquidateTradeVolume(additionalVolume)
+						.symbolId(quote.symbolId!),
+				)
+			}
 			updateDailyOpenInterest(
 				event.block.timestamp,
 				unDecimal(liquidAmount.times(quote.initialOpenedPrice!)),

@@ -3,7 +3,7 @@ import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { BalanceChange } from "../../../../generated/schema"
 import { TransferToBridge } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { getConfiguration } from "../../utils/builders"
-import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants";
+import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 
 export class TransferToBridgeHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {

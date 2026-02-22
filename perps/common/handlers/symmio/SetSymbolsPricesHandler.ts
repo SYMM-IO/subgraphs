@@ -36,6 +36,7 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 		let entity = LiquidationDetail.load(entityId)
 		if (!entity) entity = new LiquidationDetail(entityId)
 		entity.source = event.address
+		entity.partyA = event.params.partyA
 		entity.liquidationId = liqState.liquidationId
 		entity.liquidationType = liqState.liquidationType
 		entity.upnl = liqState.upnl

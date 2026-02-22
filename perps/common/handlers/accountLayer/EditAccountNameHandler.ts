@@ -1,6 +1,6 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
-import { Account } from "../../../../generated/schema"
+import { Account, SubAccount } from "../../../../generated/schema"
 
 export class EditAccountNameHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -11,6 +11,12 @@ export class EditAccountNameHandler<T> extends BaseAccountLayerHandler {
 			account.name = event.params.name
 			account.updateTimestamp = event.block.timestamp
 			account.save()
+		}
+		let sub = SubAccount.load(event.params.account.toHexString())
+		if (sub) {
+			sub.name = event.params.name
+			sub.updateTimestamp = event.block.timestamp
+			sub.save()
 		}
 	}
 }

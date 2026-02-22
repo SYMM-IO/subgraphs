@@ -140,6 +140,12 @@
 		"RequestToCancelCloseRequest",
 		"RequestToCancelQuote"
 	],
+	"SettleHistory": [
+		"SettleUpnl"
+	],
+	"FundingHistory": [
+		"ChargeFundingRate"
+	],
 	"QuotePriceUpdate": [
 		"ChargeFundingRate",
 		"SettleUpnl"

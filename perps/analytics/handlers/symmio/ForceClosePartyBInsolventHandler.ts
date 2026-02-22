@@ -1,37 +1,53 @@
-import { BaseHandler, Version } from "../../../common/BaseHandler"
-import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { QuoteStatus } from "../../utils/constants"
+
+import { ForceClosePartyBInsolventHandler as CommonForceClosePartyBInsolventHandler } from "../../../common/handlers/symmio/ForceClosePartyBInsolventHandler"
+import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, log } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
+import { Account, CloseHistory, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 
-export class ForceClosePartyBInsolventHandler<T> extends BaseHandler {
+export class ForceClosePartyBInsolventHandler<T> extends CommonForceClosePartyBInsolventHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 
-		const quoteId = event.params.quoteId
-		let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
+		// Load quote BEFORE common handler updates it, to get the pre-update closedAmount
+		let quotePre = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
+		if (!quotePre) {
+			log.debug("quote not exist. quoteId {}", [event.params.quoteId.toString()])
+			let db = new DebugEntity("ForceCloseInsolvent-quote-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
+			db.message = `quote not exist. quoteId ${event.params.quoteId.toString()}`
+			db.save()
+			return
+		}
+		let fillAmount = quotePre.quantity!.minus(quotePre.closedAmount!)
+
+		super.handle(_event, version)
+
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return
 
-		const closedAmount = quote.quantity!.minus(quote.closedAmount!)
-		const closePrice = event.params.closedPrice
-		const additionalVolume = closedAmount.times(closePrice).div(BigInt.fromString("10").pow(18))
+		const additionalVolume = fillAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
 
-		let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + quoteId.toString())
-		if (history) {
-			history.volume = history.volume.plus(additionalVolume)
-			history.updateTimestamp = event.block.timestamp
-			history.quoteStatus = QuoteStatus.CLOSED
-			history.quote = quoteId
-			history.save()
+		let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())
+		if (!history) {
+			let db = new DebugEntity("ForceCloseInsolvent-history-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
+			db.message = `history not exist. partyA ${event.params.partyA.toHexString()}, quoteId ${event.params.quoteId.toString()}`
+			db.save()
+			return
 		}
+		history.volume = history.volume.plus(additionalVolume)
+		history.updateTimestamp = event.block.timestamp
+		history.quoteStatus = quote.quoteStatus
+		history.quote = event.params.quoteId
+		history.save()
 
 		let closeHistory = new CloseHistory(
 			event.params.partyA.toHexString() +
 				"-" +
-				quoteId.toString() +
+				event.params.quoteId.toString() +
 				"-" +
 				event.address.toHexString() +
 				"-" +
@@ -39,23 +55,27 @@ export class ForceClosePartyBInsolventHandler<T> extends BaseHandler {
 		)
 		closeHistory.source = event.address
 		closeHistory.account = event.params.partyA
-		closeHistory.amount = closedAmount
-		closeHistory.closePrice = closePrice
+		closeHistory.amount = fillAmount
+		closeHistory.closePrice = event.params.closedPrice
 		closeHistory.volume = additionalVolume
+		closeHistory.closeType = "FORCE_CLOSE_INSOLVENT"
 		closeHistory.timestamp = event.block.timestamp
 		closeHistory.blockNumber = event.block.number
 		closeHistory.transaction = event.transaction.hash
-		closeHistory.quoteStatus = QuoteStatus.CLOSED
-		closeHistory.quote = quoteId
+		closeHistory.quoteStatus = quote.quoteStatus
+		closeHistory.quoteId = event.params.quoteId
+		closeHistory.quote = event.params.quoteId.toString() + "-" + event.address.toHexString()
 		closeHistory.save()
 
-		let account = Account.load(event.params.partyA.toHexString())!
-		let solverAccount = Account.load(quote.partyB!.toHexString())!
+		let account = Account.load(event.params.partyA.toHexString())
+		if (!account) return
+		let solverAccount = Account.load(quote.partyB!.toHexString())
+		if (!solverAccount) return
 
 		const pnl = unDecimal(
 			(quote.positionType == 0 ? BigInt.fromString("1") : BigInt.fromString("1").neg())
-				.times(closePrice.minus(quote.openedPrice!))
-				.times(closedAmount),
+				.times(event.params.closedPrice.minus(quote.openedPrice!))
+				.times(fillAmount),
 		)
 		let profit = BigInt.zero()
 		let loss = BigInt.zero()
@@ -78,7 +98,7 @@ export class ForceClosePartyBInsolventHandler<T> extends BaseHandler {
 		}
 		updateDailyOpenInterest(
 			event.block.timestamp,
-			unDecimal(closedAmount.times(quote.initialOpenedPrice!)),
+			unDecimal(fillAmount.times(quote.initialOpenedPrice!)),
 			false,
 			solverAccount,
 			account.accountSource,

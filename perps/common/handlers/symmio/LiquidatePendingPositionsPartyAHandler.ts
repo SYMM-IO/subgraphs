@@ -39,7 +39,8 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
 			}
 		}
 		for (let index = 0; index < quoteIds.length; index++) {
-			let quote = Quote.load(quoteIds[index].toString() + "-" + event.address.toHexString())!
+			let quote = Quote.load(quoteIds[index].toString() + "-" + event.address.toHexString())
+			if (!quote) continue
 			quote.quoteStatus = QuoteStatus.LIQUIDATED_PENDING
 			switch (version) {
 				case Version.v_0_8_5: {

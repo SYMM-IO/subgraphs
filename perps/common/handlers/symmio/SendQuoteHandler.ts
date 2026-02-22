@@ -4,6 +4,7 @@ import { BaseHandler, Version } from "../../BaseHandler"
 import { getQuoteData, getSymbolName } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { ZERO_ADDRESS_BYTES } from "../../../analytics/utils/constants"
+import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 
 export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -102,11 +103,24 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.initialLf = lf
 
 		// Use VersionedQuoteLoader for chain state (maxFundingRate, affiliate, symbolName)
-		const q = getQuoteData(version, event.address, event.params.quoteId)!
-		quote.maxFundingRate = q.maxFundingRate
+		const q = getQuoteData(version, event.address, event.params.quoteId)
+		if (q) {
+			quote.maxFundingRate = q.maxFundingRate
+		}
 
-		const account = Account.load(event.params.partyA.toHexString())!
-		if (version >= Version.v_0_8_3) {
+		let account = Account.load(event.params.partyA.toHexString())
+		if (!account) {
+			account = createNewAccountIfNotExists(
+				event.params.partyA,
+				event.params.partyA,
+				null,
+				AccountType.UNKNOWN,
+				event.block,
+				event.transaction,
+			)
+			account.source = event.address
+		}
+		if (version >= Version.v_0_8_3 && q) {
 			account.accountSource = account.accountSource === null ? q.affiliate : account.accountSource
 		}
 		account.save()

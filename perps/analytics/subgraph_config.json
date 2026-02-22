@@ -6,6 +6,11 @@
 		"User",
 		"Account",
 		"SymmioEntity",
-		"DebugEntity"
+		"DebugEntity",
+		"Affiliate",
+		"SubAccount",
+		"VirtualAccount",
+		"MarginTransfer",
+		"FeeClaim"
 	]
 }

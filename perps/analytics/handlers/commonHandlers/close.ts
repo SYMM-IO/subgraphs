@@ -6,13 +6,13 @@ import { Version } from "../../../common/BaseHandler"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 
-export function handleClose<T>(_event: ethereum.Event, name: string, version: Version): void {
+export function handleClose<T>(_event: ethereum.Event, name: string, version: Version, closeType: string): void {
 	// @ts-ignore
 	const event = changetype<T>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
 	let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 	if (!quote) {
 		log.debug("quote not exist. quoteId {}", [event.params.quoteId.toString()])
-		let db = new DebugEntity("handleClose")
+		let db = new DebugEntity("handleClose-quote-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
 		db.message = `quote not exist. quoteId ${event.params.quoteId.toString()}`
 		db.save()
 		return
@@ -21,7 +21,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())
 	if (!history) {
 		log.debug("history not exist. partyA {}, quoteId {}", [event.params.partyA.toHexString(), event.params.quoteId.toString()])
-		let db = new DebugEntity("handleClose")
+		let db = new DebugEntity("handleClose-history-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
 		db.message = `history not exist. partyA ${event.params.partyA.toHexString()}, quoteId ${event.params.quoteId.toString()}`
 		db.save()
 		return
@@ -46,15 +46,19 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	closeHistory.amount = event.params.filledAmount
 	closeHistory.closePrice = event.params.closedPrice
 	closeHistory.volume = additionalVolume
+	closeHistory.closeType = closeType
 	closeHistory.timestamp = event.block.timestamp
 	closeHistory.blockNumber = event.block.number
 	closeHistory.transaction = event.transaction.hash
 	closeHistory.quoteStatus = quote.quoteStatus
-	closeHistory.quote = event.params.quoteId
+	closeHistory.quoteId = event.params.quoteId
+	closeHistory.quote = event.params.quoteId.toString() + "-" + event.address.toHexString()
 	closeHistory.save()
 
-	let account = Account.load(event.params.partyA.toHexString())!
-	let solverAccount = Account.load(quote.partyB!.toHexString())!
+	let account = Account.load(event.params.partyA.toHexString())
+	if (!account) return
+	let solverAccount = Account.load(quote.partyB!.toHexString())
+	if (!solverAccount) return
 
 	const pnl = unDecimal(
 		(quote.positionType == 0 ? BigInt.fromString("1") : BigInt.fromString("1").neg())

@@ -8,5 +8,36 @@
 		"LegacyAccountImported",
 		"SingleVAModeChanged",
 		"SubAccountDeleted"
+	],
+	"Affiliate": [
+		"AffiliateRegistered",
+		"AffiliateApproved",
+		"AffiliateUpdated",
+		"AffiliatePaused",
+		"AffiliateUnpaused",
+		"AdminTransferCompleted",
+		"ExpressRateSet",
+		"VirtualProviderSet",
+		"AccountManagerDeployed"
+	],
+	"SubAccount": [
+		"SubAccountCreated",
+		"SubAccountDeleted",
+		"LegacyAccountImported",
+		"EditAccountName",
+		"SingleVAModeChanged"
+	],
+	"VirtualAccount": [
+		"VirtualAccountCreated",
+		"VirtualAccountDeleted",
+		"VirtualAccountReused"
+	],
+	"MarginTransfer": [
+		"AddMargin",
+		"RemoveMargin",
+		"EmergencyMarginRecovered"
+	],
+	"FeeClaim": [
+		"FeesClaimed"
 	]
 }

@@ -1,5 +1,6 @@
-import { Account, Quote } from "../../../../generated/schema";
+import { Account, Quote } from "../../../../generated/schema"
 import { BaseHandler, Version } from "../../BaseHandler"
+import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuoteData, getSymbolName } from "../../VersionedQuoteLoader"
@@ -22,7 +23,19 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 			quote.timestampLockQuote = event.block.timestamp
 			quote.timestampRequestToCancelQuote = event.block.timestamp
 
-			const q = getQuoteData(version, event.address, event.params.quoteId)!
+			const q = getQuoteData(version, event.address, event.params.quoteId)
+			if (!q) {
+				quote.blockNumber = event.block.number
+				quote.quoteStatus = event.params.quoteStatus
+				quote.partyA = event.address
+				quote.tradingFee = BigInt.zero()
+				quote.initialCva = BigInt.zero()
+				quote.initialPartyBmm = BigInt.zero()
+				quote.initialLf = BigInt.zero()
+				quote.save()
+				setEventTimestampAndTransactionHashAndAction(quote, "AcceptCancelRequest", _event)
+				return
+			}
 
 			quote.orderTypeOpen = q.orderType
 			quote.partyA = q.partyA
@@ -56,7 +69,18 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 
 			quote.symbol = getSymbolName(version, q.symbolId, event.address)
 
-			let account = Account.load(quote.partyA.toHexString())!
+			let account = Account.load(quote.partyA.toHexString())
+			if (!account) {
+				account = createNewAccountIfNotExists(
+					quote.partyA,
+					quote.partyA,
+					null,
+					AccountType.UNKNOWN,
+					event.block,
+					event.transaction,
+				)
+				account.source = event.address
+			}
 			updateActivityTimestamps(account, event.block.timestamp, event.address)
 
 			updateHistories(new UpdateHistoriesParams(version, account, null, event).quotesCount(BigInt.fromString("1")))

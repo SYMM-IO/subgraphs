@@ -12,7 +12,7 @@ export class AllocateForPartyBHandler<T> extends BaseHandler {
 			account.updateTimestamp = event.block.timestamp
 			account.save()
 		} else {
-			let db = new DebugEntity("allocateForPartyB")
+			let db = new DebugEntity("allocateForPartyB-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
 			db.message = `in version ${version.toString()} partyB: ${event.params.partyB.toHexString()} not found`
 			db.save()
 		}

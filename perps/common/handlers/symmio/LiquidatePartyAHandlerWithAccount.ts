@@ -39,7 +39,8 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 				upnl = event_.params.upnl
 				totalUnrealizedLoss = event_.params.totalUnrealizedLoss
 			}
-			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)!
+			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)
+			if (!liqState) return
 			timestamp = liqState.timestamp
 			liquidationTimestamp = liqState.liquidationTimestamp
 		} else if (version == Version.v_0_8_2) {
@@ -47,13 +48,15 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 			const event_ = changetype<LiquidatePartyA_0_8_2>(_event)
 			upnl = event_.params.upnl
 			totalUnrealizedLoss = event_.params.totalUnrealizedLoss
-			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)!
+			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)
+			if (!liqState) return
 			liquidationId = liqState.liquidationId
 			timestamp = liqState.timestamp
 			liquidationTimestamp = liqState.timestamp
 		} else {
 			// v0.8.1: all from struct
-			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)!
+			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)
+			if (!liqState) return
 			liquidationId = liqState.liquidationId
 			timestamp = liqState.timestamp
 			liquidationTimestamp = liqState.timestamp

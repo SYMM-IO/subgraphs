@@ -1,8 +1,8 @@
 import {
 	LiquidatePartyBHandlerWithAccount as CommonLiquidatePartyBHandler
 } from "../../../common/handlers/symmio/LiquidatePartyBHandlerWithAccount"
-import {ethereum} from "@graphprotocol/graph-ts";
-import {Version} from "../../../common/BaseHandler";
+import { ethereum } from "@graphprotocol/graph-ts"
+import { Version } from "../../../common/BaseHandler"
 
 export class LiquidatePartyBHandler<T> extends CommonLiquidatePartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

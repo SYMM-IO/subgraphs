@@ -19,3 +19,7 @@ subgraph.yaml
 perps/analytics/currentConfig.json
 
 .envrc
+.venv/
+.python-version
+uv.lock
+pyproject.toml

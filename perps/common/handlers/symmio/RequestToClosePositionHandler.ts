@@ -13,7 +13,7 @@ export class RequestToClosePositionHandler<T> extends BaseHandler {
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) {  // TODO: remove after debug
 			log.debug('quote not exist.(request to close position) quoteId={}', [event.params.quoteId.toString()])
-			let db = new DebugEntity("RequestToClosePositionHandler")
+			let db = new DebugEntity("RequestToClose-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
 			db.message = `quoteId ${event.params.quoteId.toString()} not exist`
 			db.save()
 			return

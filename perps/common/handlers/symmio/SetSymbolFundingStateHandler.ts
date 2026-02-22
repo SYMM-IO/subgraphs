@@ -6,19 +6,21 @@ import { BaseHandler, Version } from "../../BaseHandler"
 
 export class SetSymbolFundingStateHandler<T> extends BaseHandler {
 	handleSymbol(_event: ethereum.Event, version: Version): void {
-		let symbol: Symbol
+		let symbol: Symbol | null
 		if (version == Version.v_0_8_0) {
 			return
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_2>(_event)
-			symbol = Symbol.load(e.params.id.toString() + "-" + e.address.toHexString())!
+			symbol = Symbol.load(e.params.id.toString() + "-" + e.address.toHexString())
+			if (!symbol) return
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		} else {
 			// @ts-ignore
 			const e = changetype<SetSymbolFundingState_8_3>(_event)
-			symbol = Symbol.load(e.params.symbolId.toString() + "-" + e.address.toHexString())!
+			symbol = Symbol.load(e.params.symbolId.toString() + "-" + e.address.toHexString())
+			if (!symbol) return
 			symbol.fundingRateEpochDuration = e.params.fundingRateEpochDuration
 			symbol.fundingRateWindowTime = e.params.fundingRateWindowTime
 		}

@@ -1,7 +1,7 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { createNewAccountIfNotExists, AccountType } from "../../utils/builders"
-import { Account } from "../../../../generated/schema"
+import { Account, VirtualAccount } from "../../../../generated/schema"
 
 export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -23,6 +23,17 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		account.isVirtual = true
 		account.isDeleted = false
 		account.parentAddress = event.params.parent
+		account.subAccount = event.params.parent
+		account.virtualAccount = event.params.account
 		account.save()
+
+		let va = new VirtualAccount(event.params.account.toHexString())
+		va.address = event.params.account
+		va.parent = event.params.parent.toHexString()
+		va.isDeleted = false
+		va.source = _event.address
+		va.timestamp = event.block.timestamp
+		va.updateTimestamp = event.block.timestamp
+		va.save()
 	}
 }

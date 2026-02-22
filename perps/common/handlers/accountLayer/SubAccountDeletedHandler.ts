@@ -1,6 +1,6 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
-import { Account } from "../../../../generated/schema"
+import { Account, SubAccount } from "../../../../generated/schema"
 
 export class SubAccountDeletedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -11,6 +11,12 @@ export class SubAccountDeletedHandler<T> extends BaseAccountLayerHandler {
 			account.isDeleted = true
 			account.updateTimestamp = event.block.timestamp
 			account.save()
+		}
+		let sub = SubAccount.load(event.params.account.toHexString())
+		if (sub) {
+			sub.isDeleted = true
+			sub.updateTimestamp = event.block.timestamp
+			sub.save()
 		}
 	}
 }
