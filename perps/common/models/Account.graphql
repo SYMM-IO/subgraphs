@@ -20,9 +20,7 @@ type Account @entity(immutable: false) {
 	deallocated: BigInt!
 	parentAddress: Bytes
 	isVirtual: Boolean
-	isDeleted: Boolean
-	singleVAMode: Boolean
 	affiliate: Bytes
-	subAccount: Bytes
-	virtualAccount: Bytes
+	subAccount: SubAccount
+	virtualAccount: VirtualAccount
 }

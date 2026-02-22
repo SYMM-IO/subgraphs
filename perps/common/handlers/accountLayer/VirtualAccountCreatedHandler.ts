@@ -21,10 +21,9 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		)
 		account.source = _event.address
 		account.isVirtual = true
-		account.isDeleted = false
 		account.parentAddress = event.params.parent
-		account.subAccount = event.params.parent
-		account.virtualAccount = event.params.account
+		account.subAccount = event.params.parent.toHexString()
+		account.virtualAccount = event.params.account.toHexString()
 		account.save()
 
 		let va = new VirtualAccount(event.params.account.toHexString())

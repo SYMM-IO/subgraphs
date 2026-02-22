@@ -19,9 +19,8 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		)
 		account.source = _event.address
 		account.isVirtual = false
-		account.isDeleted = false
 		account.affiliate = event.params.affiliate
-		account.subAccount = event.params.account
+		account.subAccount = event.params.account.toHexString()
 		account.save()
 
 		let sub = new SubAccount(event.params.account.toHexString())
