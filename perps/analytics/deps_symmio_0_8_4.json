@@ -17,14 +17,6 @@
 		"BalanceChangePartyB",
 		"TransferToBridge"
 	],
-	"TradeHistory": [
-		"OpenPosition",
-		"LiquidatePositionsPartyA",
-		"LiquidatePositionsPartyB",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition"
-	],
 	"CloseHistory": [
 		"LiquidatePositionsPartyA",
 		"LiquidatePositionsPartyB",
@@ -145,10 +137,6 @@
 	],
 	"FundingHistory": [
 		"ChargeFundingRate"
-	],
-	"QuotePriceUpdate": [
-		"ChargeFundingRate",
-		"SettleUpnl"
 	],
 	"AffiliateFeeCollector": [
 		"SetFeeCollector",

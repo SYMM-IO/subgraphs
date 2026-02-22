@@ -3,7 +3,7 @@ import { ForceClosePartyBInsolventHandler as CommonForceClosePartyBInsolventHand
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, CloseHistory, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, DebugEntity, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
@@ -30,19 +30,6 @@ export class ForceClosePartyBInsolventHandler<T> extends CommonForceClosePartyBI
 		if (!quote) return
 
 		const additionalVolume = fillAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
-
-		let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())
-		if (!history) {
-			let db = new DebugEntity("ForceCloseInsolvent-history-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
-			db.message = `history not exist. partyA ${event.params.partyA.toHexString()}, quoteId ${event.params.quoteId.toString()}`
-			db.save()
-			return
-		}
-		history.volume = history.volume.plus(additionalVolume)
-		history.updateTimestamp = event.block.timestamp
-		history.quoteStatus = quote.quoteStatus
-		history.quote = event.params.quoteId
-		history.save()
 
 		let closeHistory = new CloseHistory(
 			event.params.partyA.toHexString() +

@@ -3,7 +3,7 @@ import { LiquidatePositionsForClearingHouseHandler as CommonLiquidatePositionsFo
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, CloseHistory, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, Quote } from "../../../../generated/schema"
 import { QuoteStatus } from "../../utils/constants"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
@@ -26,15 +26,6 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidat
 			let liquidAmount = quote.liquidateAmount!
 			let liquidPrice = quote.liquidatePrice!
 			const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
-
-			let history = TradeHistory.load(quote.partyA.toHexString() + "-" + qId.toString())
-			if (history) {
-				history.volume = history.volume.plus(additionalVolume)
-				history.quoteStatus = QuoteStatus.LIQUIDATED
-				history.updateTimestamp = event.block.timestamp
-				history.quote = qId
-				history.save()
-			}
 
 			let closeHistory = new CloseHistory(
 				quote.partyA.toHexString() + "-" + qId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),

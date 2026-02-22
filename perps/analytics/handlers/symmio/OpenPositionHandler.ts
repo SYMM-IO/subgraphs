@@ -1,8 +1,7 @@
 import { OpenPositionHandlerWithAccount as CommonOpenPositionHandler } from "../../../common/handlers/symmio/OpenPositionHandlerWithAccount"
-import { Account, Quote, Symbol, TradeHistory } from "../../../../generated/schema"
+import { Account, Quote, Symbol } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { QuoteStatus } from "../../utils/constants"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
@@ -20,16 +19,6 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		let account = Account.load(event.params.partyA.toHexString())
 		if (!account) return
 		let volume = unDecimal(event.params.filledAmount.times(event.params.openedPrice))
-		let history = new TradeHistory(account.id + "-" + event.params.quoteId.toString())
-		history.account = event.params.partyA
-		history.timestamp = event.block.timestamp
-		history.blockNumber = event.block.number
-		history.transaction = event.transaction.hash
-		history.volume = volume
-		history.quoteStatus = QuoteStatus.OPENED
-		history.quote = event.params.quoteId
-		history.updateTimestamp = event.block.timestamp
-		history.save()
 
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return

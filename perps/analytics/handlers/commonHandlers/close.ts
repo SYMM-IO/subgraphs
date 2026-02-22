@@ -1,5 +1,5 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
-import { Account, CloseHistory, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, DebugEntity, Quote } from "../../../../generated/schema"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { Version } from "../../../common/BaseHandler"
@@ -18,19 +18,6 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		return
 	}
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
-	let history = TradeHistory.load(event.params.partyA.toHexString() + "-" + event.params.quoteId.toString())
-	if (!history) {
-		log.debug("history not exist. partyA {}, quoteId {}", [event.params.partyA.toHexString(), event.params.quoteId.toString()])
-		let db = new DebugEntity("handleClose-history-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
-		db.message = `history not exist. partyA ${event.params.partyA.toHexString()}, quoteId ${event.params.quoteId.toString()}`
-		db.save()
-		return
-	}
-	history.volume = history.volume.plus(additionalVolume)
-	history.updateTimestamp = event.block.timestamp
-	history.quoteStatus = quote.quoteStatus
-	history.quote = event.params.quoteId
-	history.save()
 
 	let closeHistory = new CloseHistory(
 		event.params.partyA.toHexString() +

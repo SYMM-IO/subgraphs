@@ -3,7 +3,7 @@ import { ADLCloseHandler as CommonADLCloseHandler } from "../../../common/handle
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, CloseHistory, DebugEntity, Quote, TradeHistory } from "../../../../generated/schema"
+import { Account, CloseHistory, DebugEntity, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
@@ -24,19 +24,6 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 		}
 
 		const additionalVolume = event.params.amount.times(event.params.price).div(BigInt.fromString("10").pow(18))
-
-		let history = TradeHistory.load(quote.partyA.toHexString() + "-" + event.params.quoteId.toString())
-		if (!history) {
-			let db = new DebugEntity("ADLClose-history-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
-			db.message = `history not exist. quoteId ${event.params.quoteId.toString()}`
-			db.save()
-			return
-		}
-		history.volume = history.volume.plus(additionalVolume)
-		history.updateTimestamp = event.block.timestamp
-		history.quoteStatus = quote.quoteStatus
-		history.quote = event.params.quoteId
-		history.save()
 
 		let closeHistory = new CloseHistory(
 			quote.partyA.toHexString() +

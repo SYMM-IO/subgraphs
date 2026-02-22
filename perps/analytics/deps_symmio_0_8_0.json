@@ -15,14 +15,6 @@
 		"Deposit",
 		"Withdraw"
 	],
-	"TradeHistory": [
-		"OpenPosition",
-		"LiquidatePositionsPartyA",
-		"LiquidatePositionsPartyB",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition"
-	],
 	"CloseHistory": [
 		"LiquidatePositionsPartyA",
 		"LiquidatePositionsPartyB",

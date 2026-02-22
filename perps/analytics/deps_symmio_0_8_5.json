@@ -19,17 +19,6 @@
 		"WithdrawInitiated",
 		"WithdrawFinalized"
 	],
-	"TradeHistory": [
-		"OpenPosition",
-		"LiquidatePositionsPartyA",
-		"LiquidatePositionsPartyB",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition",
-		"ADLClose",
-		"ForceClosePartyBInsolvent",
-		"LiquidatePositionsForClearingHouse"
-	],
 	"CloseHistory": [
 		"LiquidatePositionsPartyA",
 		"LiquidatePositionsPartyB",
@@ -195,11 +184,6 @@
 	"FundingHistory": [
 		"ChargeFundingRate",
 		"ChargeAccumulatedFundingFee"
-	],
-	"QuotePriceUpdate": [
-		"ChargeFundingRate",
-		"SettleUpnl",
-		"SettleUpnlUnified"
 	],
 	"AffiliateFeeCollector": [
 		"SetFeeCollector",

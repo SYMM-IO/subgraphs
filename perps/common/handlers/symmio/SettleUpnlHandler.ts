@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { ethereum } from "@graphprotocol/graph-ts"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
-import { Quote, QuotePriceUpdate } from "../../../../generated/schema"
+import { Quote } from "../../../../generated/schema"
 
 export class SettleUpnlHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -13,21 +13,8 @@ export class SettleUpnlHandler<T> extends BaseHandler {
 
 			let quote = Quote.load(data.quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
-			let prevOpenedPrice = quote.openedPrice ? quote.openedPrice! : BigInt.zero()
 			quote.openedPrice = event.params.updatedPrices[i]
 			quote.save()
-
-			let quote_price_update = new QuotePriceUpdate(
-				data.quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
-			)
-			quote_price_update.source = event.address
-			quote_price_update.quoteId = data.quoteId
-			quote_price_update.openQuantity = quote.quantity!.minus(quote.closedAmount!)
-			quote_price_update.prevPrice = prevOpenedPrice
-			quote_price_update.newPrice = event.params.updatedPrices[i]
-			quote_price_update.type = "SettleUpnl"
-			quote_price_update.timestamp = event.block.timestamp
-			quote_price_update.save()
 
 			setEventTimestampAndTransactionHashAndAction(quote, "SettleUpnl", _event)
 		}
