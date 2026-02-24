@@ -37,8 +37,8 @@ export class ForceClosePartyBInsolventHandler<T> extends CommonForceClosePartyBI
 			event.params.quoteId,
 			"FORCE_CLOSE_INSOLVENT",
 			new JSONBuilder()
+				.add("amount", fillAmount.toString())
 				.add("closedPrice", event.params.closedPrice.toString())
-				.add("volume", additionalVolume.toString())
 				.build(),
 		)
 

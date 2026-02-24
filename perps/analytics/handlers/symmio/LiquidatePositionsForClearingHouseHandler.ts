@@ -34,7 +34,6 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidat
 				new JSONBuilder()
 					.add("amount", liquidAmount.toString())
 					.add("closePrice", liquidPrice.toString())
-					.add("volume", additionalVolume.toString())
 					.build(),
 			)
 

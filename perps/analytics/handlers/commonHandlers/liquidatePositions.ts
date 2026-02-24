@@ -26,7 +26,6 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 		new JSONBuilder()
 			.add("amount", liquidAmount.toString())
 			.add("closePrice", liquidPrice.toString())
-			.add("volume", additionalVolume.toString())
 			.build(),
 	)
 

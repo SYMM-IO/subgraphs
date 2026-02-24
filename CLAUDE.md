@@ -100,6 +100,9 @@ The protocol has multiple on-chain contract versions (symmio 0_8_0 through 0_8_5
 - Global ordering uses `GlobalCounter` entity (monotonically incrementing BigInt via `getGlobalCounterAndInc()`)
 - All contract calls use `try_` variants to handle reverts gracefully (never call contract methods directly)
 
+## Goldsky Deployment Rules
+- **NEVER create, delete, or modify any Goldsky tag without explicit user confirmation.** Always ask before running any `goldsky subgraph tag` command. Deleting/creating versioned deployments themselves is fine, but all tag operations require user approval.
+
 ## Key Files
 
 - `scripts/manager.py` — main build/deploy orchestrator; defines `abi_versions` dict, generates subgraph.yaml, src files, handler scaffolds, contract_utils

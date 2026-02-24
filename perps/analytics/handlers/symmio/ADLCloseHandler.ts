@@ -33,7 +33,6 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 			new JSONBuilder()
 				.add("amount", event.params.amount.toString())
 				.add("closePrice", event.params.price.toString())
-				.add("volume", additionalVolume.toString())
 				.build(),
 		)
 
