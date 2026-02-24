@@ -1,0 +1,137 @@
+{
+	"AccountManagerDeployed": [
+		"AccountManagerDeployed"
+	],
+	"AccountManagerImplementationUpdated": [
+		"AccountManagerImplementationUpdated"
+	],
+	"AddMargin": [
+		"AddMargin"
+	],
+	"AdminTransferCancelled": [
+		"AdminTransferCancelled"
+	],
+	"AdminTransferCompleted": [
+		"AdminTransferCompleted"
+	],
+	"AdminTransferProposed": [
+		"AdminTransferProposed"
+	],
+	"AffiliateApproved": [
+		"AffiliateApproved"
+	],
+	"AffiliatePaused": [
+		"AffiliatePaused"
+	],
+	"AffiliateRegistered": [
+		"AffiliateRegistered"
+	],
+	"AffiliateUnpaused": [
+		"AffiliateUnpaused"
+	],
+	"AffiliateUpdated": [
+		"AffiliateUpdated"
+	],
+	"Call": [
+		"Call"
+	],
+	"CallAllowedSelectorsSet": [
+		"CallAllowedSelectorsSet"
+	],
+	"EditAccountName": [
+		"EditAccountName"
+	],
+	"EmergencyMarginRecovered": [
+		"EmergencyMarginRecovered"
+	],
+	"ExpressRateSet": [
+		"ExpressRateSet"
+	],
+	"FeeUpdateCancelled": [
+		"FeeUpdateCancelled"
+	],
+	"FeesClaimed": [
+		"FeesClaimed"
+	],
+	"FeesDistributed": [
+		"FeesDistributed"
+	],
+	"HookActionExecuted": [
+		"HookActionExecuted"
+	],
+	"HookAllowedSelectorsSet": [
+		"HookAllowedSelectorsSet"
+	],
+	"HookRemoved": [
+		"HookRemoved"
+	],
+	"HookSet": [
+		"HookSet"
+	],
+	"LegacyAccountImported": [
+		"LegacyAccountImported"
+	],
+	"OperatorSet": [
+		"OperatorSet"
+	],
+	"Paused": [
+		"Paused"
+	],
+	"RegistrationCancelled": [
+		"RegistrationCancelled"
+	],
+	"RegistrationRejected": [
+		"RegistrationRejected"
+	],
+	"RemoveMargin": [
+		"RemoveMargin"
+	],
+	"RoleAdminSet": [
+		"RoleAdminSet"
+	],
+	"RoleGranted": [
+		"RoleGranted"
+	],
+	"RoleRevoked": [
+		"RoleRevoked"
+	],
+	"SignerUpdated": [
+		"SignerUpdated"
+	],
+	"SingleVAModeChanged": [
+		"SingleVAModeChanged"
+	],
+	"StakeholdersUpdateRequested": [
+		"StakeholdersUpdateRequested"
+	],
+	"StakeholdersUpdated": [
+		"StakeholdersUpdated"
+	],
+	"SubAccountCreated": [
+		"SubAccountCreated"
+	],
+	"SubAccountDeleted": [
+		"SubAccountDeleted"
+	],
+	"SymmioFeeReceiverUpdated": [
+		"SymmioFeeReceiverUpdated"
+	],
+	"Unpaused": [
+		"Unpaused"
+	],
+	"VirtualAccountCreated": [
+		"VirtualAccountCreated"
+	],
+	"VirtualAccountDeleted": [
+		"VirtualAccountDeleted"
+	],
+	"VirtualAccountReused": [
+		"VirtualAccountReused"
+	],
+	"VirtualProviderSet": [
+		"VirtualProviderSet"
+	],
+	"WhitelistedSymmioCoreSet": [
+		"WhitelistedSymmioCoreSet"
+	]
+}

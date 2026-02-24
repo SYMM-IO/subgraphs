@@ -375,6 +375,17 @@ type LiquidationDetail @entity(immutable: false) {
 	partyAAccumulatedUpnl: BigInt!
 	disputed: Boolean!
 	liquidationTimestamp: BigInt!
+	liquidator: Bytes
+	allocatedBalance: BigInt
+	settled: Boolean!
+	fullyLiquidated: Boolean!
+	settledAmounts: [BigInt!]
+	settledPartyBs: [Bytes!]
+	affiliate: Bytes
+	totalPnl: BigInt
+	paidCva: BigInt
+	paidLf: BigInt
+	fullyLiquidatedTimestamp: BigInt
 }
 
 type WithdrawRequest @entity(immutable: false) {

@@ -835,7 +835,9 @@ type RoleGranted @entity(immutable: true) {
 	source: Bytes
 	counterId: BigInt!
 	role: Bytes!
-	user: Bytes!
+	user: Bytes
+	account: Bytes
+	sender: Bytes
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
 	transactionHash: Bytes!
@@ -849,7 +851,9 @@ type RoleRevoked @entity(immutable: true) {
 	source: Bytes
 	counterId: BigInt!
 	role: Bytes!
-	user: Bytes!
+	user: Bytes
+	account: Bytes
+	sender: Bytes
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
 	transactionHash: Bytes!
@@ -3015,6 +3019,623 @@ type WithdrawSuspendedUser @entity(immutable: true) {
 	user: Bytes!
 	recipient: Bytes!
 	amount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+# AccountLayer Events
+
+type Call @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	sender: Bytes!
+	account: Bytes!
+	callData: Bytes!
+	success: Boolean!
+	resultData: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type EditAccountName @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	name: String!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type HookActionExecuted @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	affiliate: Bytes!
+	selector: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type LegacyAccountImported @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	owner: Bytes!
+	legacyContract: Bytes!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type SingleVAModeChanged @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	subAccount: Bytes!
+	enabled: Boolean!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type SubAccountCreated @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	owner: Bytes!
+	affiliate: Bytes!
+	name: String!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type SubAccountDeleted @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	owner: Bytes!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type Unpaused @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VirtualAccountCreated @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	parent: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VirtualAccountDeleted @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	parent: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VirtualAccountReused @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	account: Bytes!
+	parent: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AdminTransferCancelled @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AdminTransferCompleted @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	oldAdmin: Bytes!
+	newAdmin: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AdminTransferProposed @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	newAdmin: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AffiliateApproved @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	feeDistributor: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AffiliatePaused @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AffiliateRegistered @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	name: String!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AffiliateUnpaused @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AffiliateUpdated @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	name: String!
+	brandColor: String!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type ExpressRateSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	expressRate: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type FeeUpdateCancelled @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type FeesClaimed @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	symmio: Bytes!
+	amount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type FeesDistributed @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	recipient: Bytes!
+	amount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type HookRemoved @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	selector: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type HookSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	selector: Bytes!
+	hook: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type OperatorSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	selector: Bytes!
+	operator: Bytes!
+	status: Boolean!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RegistrationCancelled @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RegistrationRejected @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	admin: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakeholdersUpdateRequested @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type StakeholdersUpdated @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type VirtualProviderSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	virtualProvider: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AddMargin @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	virtualAccount: Bytes!
+	subAccount: Bytes!
+	amount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type EmergencyMarginRecovered @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	virtualAccount: Bytes!
+	subAccount: Bytes!
+	amount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RemoveMargin @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	virtualAccount: Bytes!
+	subAccount: Bytes!
+	amount: BigInt!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AccountManagerDeployed @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	accountManager: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type AccountManagerImplementationUpdated @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	oldImplementation: Bytes!
+	newImplementation: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type CallAllowedSelectorsSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	selectors: [Bytes!]!
+	allowed: Boolean!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type HookAllowedSelectorsSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	affiliate: Bytes!
+	selectors: [Bytes!]!
+	allowed: Boolean!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type RoleAdminSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	role: Bytes!
+	account: Bytes!
+	status: Boolean!
+	sender: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type SignerUpdated @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	oldSigner: Bytes!
+	newSigner: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type SymmioFeeReceiverUpdated @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	oldReceiver: Bytes!
+	newReceiver: Bytes!
+	blockNumber: BigInt!
+	blockTimestamp: BigInt!
+	transactionHash: Bytes!
+	transactionIndex: BigInt!
+	logIndex: BigInt!
+	blockHash: Bytes!
+}
+
+type WhitelistedSymmioCoreSet @entity(immutable: true) {
+	id: ID!
+	source: Bytes
+	counterId: BigInt!
+	core: Bytes!
+	status: Boolean!
 	blockNumber: BigInt!
 	blockTimestamp: BigInt!
 	transactionHash: Bytes!

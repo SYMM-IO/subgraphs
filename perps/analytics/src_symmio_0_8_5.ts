@@ -46,6 +46,8 @@ import {ForceClosePartyBInsolventHandler} from './handlers/symmio/ForceClosePart
 import {ForceClosePartyBInsolvent} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {ForceClosePositionHandler} from './handlers/symmio/ForceClosePositionHandler'
 import {ForceClosePosition} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {FullyLiquidatedPartyAHandler} from './handlers/symmio/FullyLiquidatedPartyAHandler'
+import {FullyLiquidatedPartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePartyAHandler} from './handlers/symmio/LiquidatePartyAHandler'
 import {LiquidatePartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePartyBHandler} from './handlers/symmio/LiquidatePartyBHandler'
@@ -285,6 +287,12 @@ export function handleForceClosePartyBInsolvent(event: ForceClosePartyBInsolvent
 
 export function handleForceClosePosition(event: ForceClosePosition): void {
     let handler = new ForceClosePositionHandler<ForceClosePosition>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleFullyLiquidatedPartyA(event: FullyLiquidatedPartyA): void {
+    let handler = new FullyLiquidatedPartyAHandler<FullyLiquidatedPartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 

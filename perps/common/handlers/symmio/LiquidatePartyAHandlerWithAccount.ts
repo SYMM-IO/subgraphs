@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
-import { LiquidationDetail } from "../../../../generated/schema"
+import { Account, LiquidationDetail } from "../../../../generated/schema"
 import { getLiquidationStateData } from "../../VersionedQuoteLoader"
 import { LiquidatePartyA as LiquidatePartyA_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePartyA as LiquidatePartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
@@ -78,6 +78,29 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 		entity.partyAAccumulatedUpnl = BigInt.zero()
 		entity.disputed = false
 		entity.liquidationTimestamp = liquidationTimestamp
+		entity.liquidator = event.params.liquidator
+		if (version == Version.v_0_8_5) {
+			// @ts-ignore
+			entity.allocatedBalance = changetype<LiquidatePartyA_0_8_5>(_event).params.allocatedBalance
+		} else if (version == Version.v_0_8_4) {
+			// @ts-ignore
+			entity.allocatedBalance = changetype<LiquidatePartyA_0_8_4>(_event).params.allocatedBalance
+		} else if (version == Version.v_0_8_3) {
+			// @ts-ignore
+			entity.allocatedBalance = changetype<LiquidatePartyA_0_8_3>(_event).params.allocatedBalance
+		} else if (version == Version.v_0_8_2) {
+			// @ts-ignore
+			entity.allocatedBalance = changetype<LiquidatePartyA_0_8_2>(_event).params.allocatedBalance
+		}
+		entity.settled = false
+		entity.fullyLiquidated = false
+		entity.totalPnl = BigInt.zero()
+		entity.paidCva = BigInt.zero()
+		entity.paidLf = BigInt.zero()
+		let partyAAccount = Account.load(event.params.partyA.toHexString())
+		if (partyAAccount) {
+			entity.affiliate = partyAAccount.accountSource
+		}
 		entity.save()
 	}
 

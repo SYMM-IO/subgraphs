@@ -3,8 +3,12 @@ import {AccountManagerDeployedHandler} from './handlers/accountLayer/AccountMana
 import {AccountManagerDeployed} from '../../generated/accountLayer_1/accountLayer_1'
 import {AddMarginHandler} from './handlers/accountLayer/AddMarginHandler'
 import {AddMargin} from '../../generated/accountLayer_1/accountLayer_1'
+import {AdminTransferCancelledHandler} from './handlers/accountLayer/AdminTransferCancelledHandler'
+import {AdminTransferCancelled} from '../../generated/accountLayer_1/accountLayer_1'
 import {AdminTransferCompletedHandler} from './handlers/accountLayer/AdminTransferCompletedHandler'
 import {AdminTransferCompleted} from '../../generated/accountLayer_1/accountLayer_1'
+import {AdminTransferProposedHandler} from './handlers/accountLayer/AdminTransferProposedHandler'
+import {AdminTransferProposed} from '../../generated/accountLayer_1/accountLayer_1'
 import {AffiliateApprovedHandler} from './handlers/accountLayer/AffiliateApprovedHandler'
 import {AffiliateApproved} from '../../generated/accountLayer_1/accountLayer_1'
 import {AffiliatePausedHandler} from './handlers/accountLayer/AffiliatePausedHandler'
@@ -21,10 +25,16 @@ import {EmergencyMarginRecoveredHandler} from './handlers/accountLayer/Emergency
 import {EmergencyMarginRecovered} from '../../generated/accountLayer_1/accountLayer_1'
 import {ExpressRateSetHandler} from './handlers/accountLayer/ExpressRateSetHandler'
 import {ExpressRateSet} from '../../generated/accountLayer_1/accountLayer_1'
+import {FeeUpdateCancelledHandler} from './handlers/accountLayer/FeeUpdateCancelledHandler'
+import {FeeUpdateCancelled} from '../../generated/accountLayer_1/accountLayer_1'
 import {FeesClaimedHandler} from './handlers/accountLayer/FeesClaimedHandler'
 import {FeesClaimed} from '../../generated/accountLayer_1/accountLayer_1'
 import {LegacyAccountImportedHandler} from './handlers/accountLayer/LegacyAccountImportedHandler'
 import {LegacyAccountImported} from '../../generated/accountLayer_1/accountLayer_1'
+import {RegistrationCancelledHandler} from './handlers/accountLayer/RegistrationCancelledHandler'
+import {RegistrationCancelled} from '../../generated/accountLayer_1/accountLayer_1'
+import {RegistrationRejectedHandler} from './handlers/accountLayer/RegistrationRejectedHandler'
+import {RegistrationRejected} from '../../generated/accountLayer_1/accountLayer_1'
 import {RemoveMarginHandler} from './handlers/accountLayer/RemoveMarginHandler'
 import {RemoveMargin} from '../../generated/accountLayer_1/accountLayer_1'
 import {RoleGrantedHandler} from './handlers/accountLayer/RoleGrantedHandler'
@@ -33,6 +43,10 @@ import {RoleRevokedHandler} from './handlers/accountLayer/RoleRevokedHandler'
 import {RoleRevoked} from '../../generated/accountLayer_1/accountLayer_1'
 import {SingleVAModeChangedHandler} from './handlers/accountLayer/SingleVAModeChangedHandler'
 import {SingleVAModeChanged} from '../../generated/accountLayer_1/accountLayer_1'
+import {StakeholdersUpdateRequestedHandler} from './handlers/accountLayer/StakeholdersUpdateRequestedHandler'
+import {StakeholdersUpdateRequested} from '../../generated/accountLayer_1/accountLayer_1'
+import {StakeholdersUpdatedHandler} from './handlers/accountLayer/StakeholdersUpdatedHandler'
+import {StakeholdersUpdated} from '../../generated/accountLayer_1/accountLayer_1'
 import {SubAccountCreatedHandler} from './handlers/accountLayer/SubAccountCreatedHandler'
 import {SubAccountCreated} from '../../generated/accountLayer_1/accountLayer_1'
 import {SubAccountDeletedHandler} from './handlers/accountLayer/SubAccountDeletedHandler'
@@ -59,8 +73,20 @@ export function handleAddMargin(event: AddMargin): void {
 }
 
 
+export function handleAdminTransferCancelled(event: AdminTransferCancelled): void {
+    let handler = new AdminTransferCancelledHandler<AdminTransferCancelled>()
+    handler.handle(event, AccountLayerVersion.v_1)
+}
+
+
 export function handleAdminTransferCompleted(event: AdminTransferCompleted): void {
     let handler = new AdminTransferCompletedHandler<AdminTransferCompleted>()
+    handler.handle(event, AccountLayerVersion.v_1)
+}
+
+
+export function handleAdminTransferProposed(event: AdminTransferProposed): void {
+    let handler = new AdminTransferProposedHandler<AdminTransferProposed>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
@@ -113,6 +139,12 @@ export function handleExpressRateSet(event: ExpressRateSet): void {
 }
 
 
+export function handleFeeUpdateCancelled(event: FeeUpdateCancelled): void {
+    let handler = new FeeUpdateCancelledHandler<FeeUpdateCancelled>()
+    handler.handle(event, AccountLayerVersion.v_1)
+}
+
+
 export function handleFeesClaimed(event: FeesClaimed): void {
     let handler = new FeesClaimedHandler<FeesClaimed>()
     handler.handle(event, AccountLayerVersion.v_1)
@@ -121,6 +153,18 @@ export function handleFeesClaimed(event: FeesClaimed): void {
 
 export function handleLegacyAccountImported(event: LegacyAccountImported): void {
     let handler = new LegacyAccountImportedHandler<LegacyAccountImported>()
+    handler.handle(event, AccountLayerVersion.v_1)
+}
+
+
+export function handleRegistrationCancelled(event: RegistrationCancelled): void {
+    let handler = new RegistrationCancelledHandler<RegistrationCancelled>()
+    handler.handle(event, AccountLayerVersion.v_1)
+}
+
+
+export function handleRegistrationRejected(event: RegistrationRejected): void {
+    let handler = new RegistrationRejectedHandler<RegistrationRejected>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
@@ -145,6 +189,18 @@ export function handleRoleRevoked(event: RoleRevoked): void {
 
 export function handleSingleVAModeChanged(event: SingleVAModeChanged): void {
     let handler = new SingleVAModeChangedHandler<SingleVAModeChanged>()
+    handler.handle(event, AccountLayerVersion.v_1)
+}
+
+
+export function handleStakeholdersUpdateRequested(event: StakeholdersUpdateRequested): void {
+    let handler = new StakeholdersUpdateRequestedHandler<StakeholdersUpdateRequested>()
+    handler.handle(event, AccountLayerVersion.v_1)
+}
+
+
+export function handleStakeholdersUpdated(event: StakeholdersUpdated): void {
+    let handler = new StakeholdersUpdatedHandler<StakeholdersUpdated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 

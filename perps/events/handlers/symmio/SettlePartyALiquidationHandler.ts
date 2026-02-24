@@ -5,6 +5,7 @@ import { getGlobalCounterAndInc } from "../../../common/utils"
 import { SettlePartyALiquidation as SettlePartyALiquidation_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { SettlePartyALiquidation as SettlePartyALiquidation_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SettlePartyALiquidation as SettlePartyALiquidation_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
+import { SettlePartyALiquidation as SettlePartyALiquidation_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class SettlePartyALiquidationHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,6 +28,13 @@ export class SettlePartyALiquidationHandler<T> {
 		}
 
 		switch (version) {
+			case Version.v_0_8_5: {
+				// @ts-ignore
+				const e = changetype<SettlePartyALiquidation_8_5>(_event)
+				entity.liquidationId = e.params.liquidationId
+				entity.amounts = e.params.amounts
+				break
+			}
 			case Version.v_0_8_4: {
 				// @ts-ignore
 				const e = changetype<SettlePartyALiquidation_8_4>(_event)

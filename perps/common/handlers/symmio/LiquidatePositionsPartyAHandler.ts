@@ -1,5 +1,5 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { DebugEntity, LiquidationDetail, Quote } from "../../../../generated/schema"
+import { Account, DebugEntity, LiquidationDetail, Quote } from "../../../../generated/schema"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { getQuoteData, getLiquidationStateData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
@@ -75,7 +75,18 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 
 					let entityId = event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString()
 					let entity = LiquidationDetail.load(entityId)
-					if (!entity) entity = new LiquidationDetail(entityId)
+					if (!entity) {
+						entity = new LiquidationDetail(entityId)
+						entity.settled = false
+						entity.fullyLiquidated = false
+						entity.totalPnl = BigInt.zero()
+						entity.paidCva = BigInt.zero()
+						entity.paidLf = BigInt.zero()
+						let partyAAccount = Account.load(event.params.partyA.toHexString())
+						if (partyAAccount) {
+							entity.affiliate = partyAAccount.accountSource
+						}
+					}
 					entity.source = event.address
 					entity.partyA = event.params.partyA
 					entity.liquidationId = liqState.liquidationId

@@ -11,6 +11,7 @@ export class AffiliateRegisteredHandler<T> extends BaseAccountLayerHandler {
 		affiliate.name = event.params.name
 		affiliate.admin = event.transaction.from
 		affiliate.status = "PENDING"
+		affiliate.stakeholdersUpdatePending = false
 		affiliate.source = event.address
 		affiliate.timestamp = event.block.timestamp
 		affiliate.updateTimestamp = event.block.timestamp

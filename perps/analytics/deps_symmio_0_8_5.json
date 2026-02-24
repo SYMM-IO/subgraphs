@@ -209,7 +209,9 @@
 		"LiquidatePartyA",
 		"LiquidationDisputed",
 		"SoftPartyBLiquidation",
-		"TakeoverPartyALiquidation"
+		"TakeoverPartyALiquidation",
+		"SettlePartyALiquidation",
+		"FullyLiquidatedPartyA"
 	],
 	"FundingRateSnapshot": [
 		"SetLongFundingFee",

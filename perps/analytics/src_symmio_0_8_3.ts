@@ -40,6 +40,8 @@ import {ForceCancelQuoteHandler} from './handlers/symmio/ForceCancelQuoteHandler
 import {ForceCancelQuote} from '../../generated/symmio_0_8_3/symmio_0_8_3'
 import {ForceClosePositionHandler} from './handlers/symmio/ForceClosePositionHandler'
 import {ForceClosePosition} from '../../generated/symmio_0_8_3/symmio_0_8_3'
+import {FullyLiquidatedPartyAHandler} from './handlers/symmio/FullyLiquidatedPartyAHandler'
+import {FullyLiquidatedPartyA} from '../../generated/symmio_0_8_3/symmio_0_8_3'
 import {LiquidatePartyAHandler} from './handlers/symmio/LiquidatePartyAHandler'
 import {LiquidatePartyA} from '../../generated/symmio_0_8_3/symmio_0_8_3'
 import {LiquidatePartyBHandler} from './handlers/symmio/LiquidatePartyBHandler'
@@ -215,6 +217,12 @@ export function handleForceCancelQuote(event: ForceCancelQuote): void {
 
 export function handleForceClosePosition(event: ForceClosePosition): void {
     let handler = new ForceClosePositionHandler<ForceClosePosition>()
+    handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleFullyLiquidatedPartyA(event: FullyLiquidatedPartyA): void {
+    let handler = new FullyLiquidatedPartyAHandler<FullyLiquidatedPartyA>()
     handler.handle(event, Version.v_0_8_3)
 }
 

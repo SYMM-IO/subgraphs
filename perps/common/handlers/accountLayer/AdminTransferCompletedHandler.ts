@@ -9,6 +9,7 @@ export class AdminTransferCompletedHandler<T> extends BaseAccountLayerHandler {
 		let affiliate = Affiliate.load(event.params.affiliate.toHexString())
 		if (affiliate) {
 			affiliate.admin = event.params.newAdmin
+			affiliate.pendingAdmin = null
 			affiliate.updateTimestamp = event.block.timestamp
 			affiliate.save()
 		}

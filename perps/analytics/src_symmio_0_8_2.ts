@@ -68,6 +68,8 @@ import {SetSymbolValidationStateHandler} from './handlers/symmio/SetSymbolValida
 import {SetSymbolValidationState} from '../../generated/symmio_0_8_2/symmio_0_8_2'
 import {SetSymbolsPricesHandler} from './handlers/symmio/SetSymbolsPricesHandler'
 import {SetSymbolsPrices} from '../../generated/symmio_0_8_2/symmio_0_8_2'
+import {SettlePartyALiquidationHandler} from './handlers/symmio/SettlePartyALiquidationHandler'
+import {SettlePartyALiquidation} from '../../generated/symmio_0_8_2/symmio_0_8_2'
 import {UnlockQuoteHandler} from './handlers/symmio/UnlockQuoteHandler'
 import {UnlockQuote} from '../../generated/symmio_0_8_2/symmio_0_8_2'
 import {Version} from '../common/BaseHandler'
@@ -281,6 +283,12 @@ export function handleSetSymbolValidationState(event: SetSymbolValidationState):
 
 export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
     let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
+    handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
+    let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
     handler.handle(event, Version.v_0_8_2)
 }
 

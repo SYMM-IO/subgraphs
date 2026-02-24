@@ -16,6 +16,13 @@
 		"AffiliatePaused",
 		"AffiliateUnpaused",
 		"AdminTransferCompleted",
+		"AdminTransferProposed",
+		"AdminTransferCancelled",
+		"RegistrationCancelled",
+		"RegistrationRejected",
+		"StakeholdersUpdateRequested",
+		"StakeholdersUpdated",
+		"FeeUpdateCancelled",
 		"ExpressRateSet",
 		"VirtualProviderSet",
 		"AccountManagerDeployed"

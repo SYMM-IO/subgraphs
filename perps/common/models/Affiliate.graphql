@@ -4,12 +4,14 @@ type Affiliate @entity(immutable: false) {
 	name: String!
 	brandColor: String
 	admin: Bytes!
+	pendingAdmin: Bytes
 	feeDistributor: Bytes
 	status: String!
 	symmioShare: BigInt
 	expressRate: BigInt
 	virtualProvider: Bytes
 	accountManager: Bytes
+	stakeholdersUpdatePending: Boolean!
 	source: Bytes!
 	timestamp: BigInt!
 	updateTimestamp: BigInt!

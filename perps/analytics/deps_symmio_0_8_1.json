@@ -144,6 +144,8 @@
 	"LiquidationDetail": [
 		"SetSymbolsPrices",
 		"LiquidatePartyA",
-		"LiquidationDisputed"
+		"LiquidationDisputed",
+		"SettlePartyALiquidation",
+		"FullyLiquidatedPartyA"
 	]
 }

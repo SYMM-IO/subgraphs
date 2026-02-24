@@ -1,6 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { ethereum } from "@graphprotocol/graph-ts"
-import { LiquidationDetail } from "../../../../generated/schema"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { Account, LiquidationDetail } from "../../../../generated/schema"
 import { getLiquidationStateData } from "../../VersionedQuoteLoader"
 import { SetSymbolsPrices as SetSymbolsPrices_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SetSymbolsPrices as SetSymbolsPrices_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
@@ -34,7 +34,18 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 
 		let entityId = event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString()
 		let entity = LiquidationDetail.load(entityId)
-		if (!entity) entity = new LiquidationDetail(entityId)
+		if (!entity) {
+			entity = new LiquidationDetail(entityId)
+			entity.settled = false
+			entity.fullyLiquidated = false
+			entity.totalPnl = BigInt.zero()
+			entity.paidCva = BigInt.zero()
+			entity.paidLf = BigInt.zero()
+			let partyAAccount = Account.load(event.params.partyA.toHexString())
+			if (partyAAccount) {
+				entity.affiliate = partyAAccount.accountSource
+			}
+		}
 		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.liquidationId = liqState.liquidationId

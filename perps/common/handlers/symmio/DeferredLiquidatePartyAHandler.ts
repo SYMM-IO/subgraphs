@@ -1,6 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler";
 import { BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { LiquidationDetail } from "../../../../generated/schema";
+import { Account, LiquidationDetail } from "../../../../generated/schema";
 
 export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,6 +20,17 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.partyAAccumulatedUpnl = BigInt.zero()
 		entity.disputed = false
 		entity.liquidationTimestamp = event.params.liquidationTimestamp
+		entity.liquidator = event.params.liquidator
+		entity.allocatedBalance = event.params.allocatedBalance
+		entity.settled = false
+		entity.fullyLiquidated = false
+		entity.totalPnl = BigInt.zero()
+		entity.paidCva = BigInt.zero()
+		entity.paidLf = BigInt.zero()
+		let partyAAccount = Account.load(event.params.partyA.toHexString())
+		if (partyAAccount) {
+			entity.affiliate = partyAAccount.accountSource
+		}
 		entity.save()
 	}
 }
