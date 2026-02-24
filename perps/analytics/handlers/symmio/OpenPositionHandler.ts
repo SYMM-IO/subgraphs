@@ -6,6 +6,7 @@ import { Version } from "../../../common/BaseHandler"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -44,5 +45,19 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 			)
 		}
 		updateDailyOpenInterest(event.block.timestamp, volume, true, solverAccount, account.accountSource, event.address)
+
+		createQuoteEvent(
+			_event,
+			event.params.quoteId,
+			"OPEN_POSITION",
+			new JSONBuilder()
+				.add("filledAmount", event.params.filledAmount.toString())
+				.add("openedPrice", event.params.openedPrice.toString())
+				.addNullable("cva", quote.cva ? quote.cva!.toString() : null)
+				.addNullable("lf", quote.lf ? quote.lf!.toString() : null)
+				.addNullable("partyAmm", quote.partyAmm ? quote.partyAmm!.toString() : null)
+				.addNullable("partyBmm", quote.partyBmm ? quote.partyBmm!.toString() : null)
+				.build(),
+		)
 	}
 }

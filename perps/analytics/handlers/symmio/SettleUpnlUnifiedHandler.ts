@@ -3,7 +3,8 @@ import { SettleUpnlUnifiedHandler as CommonSettleUpnlUnifiedHandler } from "../.
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Quote, SettleHistory } from "../../../../generated/schema"
+import { Quote } from "../../../../generated/schema"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -25,20 +26,16 @@ export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<
 			let quote = Quote.load(data.quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
 
-			let settleHistory = new SettleHistory(
-				data.quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+			createQuoteEvent(
+				_event,
+				data.quoteId,
+				"SETTLE_UPNL_UNIFIED",
+				new JSONBuilder()
+					.add("prevPrice", prevPrices[i].toString())
+					.add("newPrice", event.params.updatedPrices[i].toString())
+					.add("openQuantity", quote.quantity!.minus(quote.closedAmount!).toString())
+					.build(),
 			)
-			settleHistory.source = event.address
-			settleHistory.quoteId = data.quoteId
-			settleHistory.quote = data.quoteId.toString() + "-" + event.address.toHexString()
-			settleHistory.settleType = "SETTLE_UPNL_UNIFIED"
-			settleHistory.prevPrice = prevPrices[i]
-			settleHistory.newPrice = event.params.updatedPrices[i]
-			settleHistory.openQuantity = quote.quantity!.minus(quote.closedAmount!)
-			settleHistory.timestamp = event.block.timestamp
-			settleHistory.blockNumber = event.block.number
-			settleHistory.transaction = event.transaction.hash
-			settleHistory.save()
 		}
 	}
 }

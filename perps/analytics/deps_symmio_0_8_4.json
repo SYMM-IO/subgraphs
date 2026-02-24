@@ -17,12 +17,28 @@
 		"BalanceChangePartyB",
 		"TransferToBridge"
 	],
-	"CloseHistory": [
+	"QuoteEvent": [
+		"SendQuote",
+		"LockQuote",
+		"UnlockQuote",
+		"OpenPosition",
+		"RequestToClosePosition",
+		"FillCloseRequest",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"ExpireQuoteOpen",
+		"ExpireQuoteClose",
+		"ForceCancelQuote",
+		"ForceCancelCloseRequest",
+		"RequestToCancelCloseRequest",
+		"RequestToCancelQuote",
+		"AcceptCancelRequest",
+		"AcceptCancelCloseRequest",
+		"ChargeFundingRate",
+		"SettleUpnl",
 		"LiquidatePositionsPartyA",
 		"LiquidatePositionsPartyB",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition"
+		"LiquidatePendingPositionsPartyA"
 	],
 	"DailyHistory": [
 		"OpenPosition",
@@ -131,12 +147,6 @@
 	"Account": [
 		"RequestToCancelCloseRequest",
 		"RequestToCancelQuote"
-	],
-	"SettleHistory": [
-		"SettleUpnl"
-	],
-	"FundingHistory": [
-		"ChargeFundingRate"
 	],
 	"AffiliateFeeCollector": [
 		"SetFeeCollector",

@@ -3,10 +3,11 @@ import { ForceClosePartyBInsolventHandler as CommonForceClosePartyBInsolventHand
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, CloseHistory, DebugEntity, Quote } from "../../../../generated/schema"
+import { Account, DebugEntity, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export class ForceClosePartyBInsolventHandler<T> extends CommonForceClosePartyBInsolventHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -31,28 +32,15 @@ export class ForceClosePartyBInsolventHandler<T> extends CommonForceClosePartyBI
 
 		const additionalVolume = fillAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
 
-		let closeHistory = new CloseHistory(
-			event.params.partyA.toHexString() +
-				"-" +
-				event.params.quoteId.toString() +
-				"-" +
-				event.address.toHexString() +
-				"-" +
-				event.block.timestamp.toString(),
+		createQuoteEvent(
+			_event,
+			event.params.quoteId,
+			"FORCE_CLOSE_INSOLVENT",
+			new JSONBuilder()
+				.add("closedPrice", event.params.closedPrice.toString())
+				.add("volume", additionalVolume.toString())
+				.build(),
 		)
-		closeHistory.source = event.address
-		closeHistory.account = event.params.partyA
-		closeHistory.amount = fillAmount
-		closeHistory.closePrice = event.params.closedPrice
-		closeHistory.volume = additionalVolume
-		closeHistory.closeType = "FORCE_CLOSE_INSOLVENT"
-		closeHistory.timestamp = event.block.timestamp
-		closeHistory.blockNumber = event.block.number
-		closeHistory.transaction = event.transaction.hash
-		closeHistory.quoteStatus = quote.quoteStatus
-		closeHistory.quoteId = event.params.quoteId
-		closeHistory.quote = event.params.quoteId.toString() + "-" + event.address.toHexString()
-		closeHistory.save()
 
 		let account = Account.load(event.params.partyA.toHexString())
 		if (!account) return

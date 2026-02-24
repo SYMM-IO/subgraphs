@@ -111,9 +111,7 @@ type Quote @entity(immutable: false) {
     txHashLiquidatePositionsPartyB: Bytes
 
     # derived
-    closeHistories: [CloseHistory!]! @derivedFrom(field: "quote")
-    settleHistories: [SettleHistory!]! @derivedFrom(field: "quote")
-    fundingHistories: [FundingHistory!]! @derivedFrom(field: "quote")
+    quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")
 }
 
 type PartyA @entity(immutable: false) {

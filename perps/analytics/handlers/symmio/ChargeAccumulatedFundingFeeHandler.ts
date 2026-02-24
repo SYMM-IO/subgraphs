@@ -2,9 +2,10 @@ import { ChargeAccumulatedFundingFeeHandler as CommonChargeAccumulatedFundingFee
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, FundingHistory, Quote } from "../../../../generated/schema"
+import { Account, Quote } from "../../../../generated/schema"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulatedFundingFeeHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -56,23 +57,18 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 					.fundingReceived(fundingReceived),
 			)
 
-			let fundingHistory = new FundingHistory(
-				quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+			createQuoteEvent(
+				_event,
+				quoteId,
+				"CHARGE_ACCUMULATED_FUNDING_FEE",
+				new JSONBuilder()
+					.add("fundingPaid", fundingPaid.toString())
+					.add("fundingReceived", fundingReceived.toString())
+					.add("prevPrice", quote.openedPrice!.toString())
+					.add("newPrice", quote.openedPrice!.toString())
+					.add("openQuantity", openAmount.toString())
+					.build(),
 			)
-			fundingHistory.source = event.address
-			fundingHistory.quoteId = quoteId
-			fundingHistory.quote = quoteId.toString() + "-" + event.address.toHexString()
-			fundingHistory.fundingType = "CHARGE_ACCUMULATED_FUNDING_FEE"
-			fundingHistory.rate = null
-			fundingHistory.fundingPaid = fundingPaid
-			fundingHistory.fundingReceived = fundingReceived
-			fundingHistory.prevPrice = quote.openedPrice!
-			fundingHistory.newPrice = quote.openedPrice!
-			fundingHistory.openQuantity = openAmount
-			fundingHistory.timestamp = event.block.timestamp
-			fundingHistory.blockNumber = event.block.number
-			fundingHistory.transaction = event.transaction.hash
-			fundingHistory.save()
 		}
 	}
 }

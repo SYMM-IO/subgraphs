@@ -1,10 +1,11 @@
 import { ChargeFundingRateHandler as CommonChargeFundingRateHandler } from "../../../common/handlers/symmio/ChargeFundingRateHandler"
-import { Account, FundingHistory, Quote } from "../../../../generated/schema"
+import { Account, Quote } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { unDecimal } from "../../utils/common"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -59,23 +60,19 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 					.fundingReceived(fundingReceived),
 			)
 
-			let fundingHistory = new FundingHistory(
-				quoteId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+			createQuoteEvent(
+				_event,
+				quoteId,
+				"CHARGE_FUNDING_RATE",
+				new JSONBuilder()
+					.add("rate", rate.toString())
+					.add("fundingPaid", fundingPaid.toString())
+					.add("fundingReceived", fundingReceived.toString())
+					.add("prevPrice", prevPrice.toString())
+					.add("newPrice", newPrice.toString())
+					.add("openQuantity", openAmount.toString())
+					.build(),
 			)
-			fundingHistory.source = event.address
-			fundingHistory.quoteId = quoteId
-			fundingHistory.quote = quoteId.toString() + "-" + event.address.toHexString()
-			fundingHistory.fundingType = "CHARGE_FUNDING_RATE"
-			fundingHistory.rate = rate
-			fundingHistory.fundingPaid = fundingPaid
-			fundingHistory.fundingReceived = fundingReceived
-			fundingHistory.prevPrice = prevPrice
-			fundingHistory.newPrice = newPrice
-			fundingHistory.openQuantity = openAmount
-			fundingHistory.timestamp = event.block.timestamp
-			fundingHistory.blockNumber = event.block.number
-			fundingHistory.transaction = event.transaction.hash
-			fundingHistory.save()
 		}
 	}
 }

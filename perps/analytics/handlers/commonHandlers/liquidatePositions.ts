@@ -1,11 +1,11 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Version } from "../../../common/BaseHandler"
 import { BigInt } from "@graphprotocol/graph-ts"
-import { Account, CloseHistory, Quote } from "../../../../generated/schema"
-import { QuoteStatus } from "../../utils/constants"
+import { Account, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt, closeType: string): void {
 	// @ts-ignore
@@ -19,22 +19,16 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	let liquidPrice = quote.liquidatePrice!
 	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 
-	let closeHistory = new CloseHistory(
-		event.params.partyA.toHexString() + "-" + qId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+	createQuoteEvent(
+		_event,
+		qId,
+		closeType,
+		new JSONBuilder()
+			.add("amount", liquidAmount.toString())
+			.add("closePrice", liquidPrice.toString())
+			.add("volume", additionalVolume.toString())
+			.build(),
 	)
-	closeHistory.source = event.address
-	closeHistory.account = event.params.partyA
-	closeHistory.amount = liquidAmount
-	closeHistory.closePrice = liquidPrice
-	closeHistory.volume = additionalVolume
-	closeHistory.closeType = closeType
-	closeHistory.timestamp = event.block.timestamp
-	closeHistory.blockNumber = event.block.number
-	closeHistory.transaction = event.transaction.hash
-	closeHistory.quoteStatus = QuoteStatus.LIQUIDATED
-	closeHistory.quoteId = qId
-	closeHistory.quote = qId.toString() + "-" + event.address.toHexString()
-	closeHistory.save()
 
 	let account = Account.load(quote.partyA.toHexString())
 	if (!account) return

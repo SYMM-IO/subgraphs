@@ -1,10 +1,11 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
-import { Account, CloseHistory, DebugEntity, Quote } from "../../../../generated/schema"
+import { Account, DebugEntity, Quote } from "../../../../generated/schema"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { Version } from "../../../common/BaseHandler"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export function handleClose<T>(_event: ethereum.Event, name: string, version: Version, closeType: string): void {
 	// @ts-ignore
@@ -19,28 +20,16 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	}
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
 
-	let closeHistory = new CloseHistory(
-		event.params.partyA.toHexString() +
-			"-" +
-			event.params.quoteId.toString() +
-			"-" +
-			event.address.toHexString() +
-			"-" +
-			event.block.timestamp.toString(),
+	createQuoteEvent(
+		_event,
+		event.params.quoteId,
+		closeType,
+		new JSONBuilder()
+			.add("amount", event.params.filledAmount.toString())
+			.add("closePrice", event.params.closedPrice.toString())
+			.add("quoteStatus", quote.quoteStatus.toString())
+			.build(),
 	)
-	closeHistory.source = event.address
-	closeHistory.account = event.params.partyA
-	closeHistory.amount = event.params.filledAmount
-	closeHistory.closePrice = event.params.closedPrice
-	closeHistory.volume = additionalVolume
-	closeHistory.closeType = closeType
-	closeHistory.timestamp = event.block.timestamp
-	closeHistory.blockNumber = event.block.number
-	closeHistory.transaction = event.transaction.hash
-	closeHistory.quoteStatus = quote.quoteStatus
-	closeHistory.quoteId = event.params.quoteId
-	closeHistory.quote = event.params.quoteId.toString() + "-" + event.address.toHexString()
-	closeHistory.save()
 
 	let account = Account.load(event.params.partyA.toHexString())
 	if (!account) return

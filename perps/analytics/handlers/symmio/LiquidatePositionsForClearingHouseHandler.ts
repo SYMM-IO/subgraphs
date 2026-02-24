@@ -3,12 +3,12 @@ import { LiquidatePositionsForClearingHouseHandler as CommonLiquidatePositionsFo
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, CloseHistory, Quote } from "../../../../generated/schema"
-import { QuoteStatus } from "../../utils/constants"
+import { Account, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { getQuoteData } from "../../../common/VersionedQuoteLoader"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidatePositionsForClearingHouseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,22 +27,16 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidat
 			let liquidPrice = quote.liquidatePrice!
 			const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 
-			let closeHistory = new CloseHistory(
-				quote.partyA.toHexString() + "-" + qId.toString() + "-" + event.address.toHexString() + "-" + event.block.timestamp.toString(),
+			createQuoteEvent(
+				_event,
+				qId,
+				"LIQUIDATE_CLEARING_HOUSE",
+				new JSONBuilder()
+					.add("amount", liquidAmount.toString())
+					.add("closePrice", liquidPrice.toString())
+					.add("volume", additionalVolume.toString())
+					.build(),
 			)
-			closeHistory.source = event.address
-			closeHistory.account = quote.partyA
-			closeHistory.amount = liquidAmount
-			closeHistory.closePrice = liquidPrice
-			closeHistory.volume = additionalVolume
-			closeHistory.closeType = "LIQUIDATE_CLEARING_HOUSE"
-			closeHistory.timestamp = event.block.timestamp
-			closeHistory.blockNumber = event.block.number
-			closeHistory.transaction = event.transaction.hash
-			closeHistory.quoteStatus = QuoteStatus.LIQUIDATED
-			closeHistory.quoteId = qId
-			closeHistory.quote = qId.toString() + "-" + event.address.toHexString()
-			closeHistory.save()
 
 			let account = Account.load(quote.partyA.toHexString())
 			if (!account) continue

@@ -16,12 +16,26 @@
 		"Deposit",
 		"Withdraw"
 	],
-	"CloseHistory": [
+	"QuoteEvent": [
+		"SendQuote",
+		"LockQuote",
+		"UnlockQuote",
+		"OpenPosition",
+		"RequestToClosePosition",
+		"FillCloseRequest",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"ExpireQuote",
+		"ForceCancelQuote",
+		"ForceCancelCloseRequest",
+		"RequestToCancelCloseRequest",
+		"RequestToCancelQuote",
+		"AcceptCancelRequest",
+		"AcceptCancelCloseRequest",
+		"ChargeFundingRate",
 		"LiquidatePositionsPartyA",
 		"LiquidatePositionsPartyB",
-		"FillCloseRequest",
-		"EmergencyClosePosition",
-		"ForceClosePosition"
+		"LiquidatePendingPositionsPartyA"
 	],
 	"DailyHistory": [
 		"OpenPosition",
@@ -137,9 +151,6 @@
 	"Account": [
 		"RequestToCancelCloseRequest",
 		"RequestToCancelQuote"
-	],
-	"FundingHistory": [
-		"ChargeFundingRate"
 	],
 	"LiquidationDetail": [
 		"SetSymbolsPrices",

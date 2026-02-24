@@ -19,48 +19,13 @@ type BalanceChange @entity(immutable: true) {
 	transaction: Bytes!
 }
 
-type CloseHistory @entity(immutable: true) {
-	id: ID!
-	source: Bytes!
-	account: Bytes!
-	amount: BigInt!
-	closePrice: BigInt!
-	volume: BigInt!
-	closeType: String!
-	timestamp: BigInt!
-	blockNumber: BigInt!
-	transaction: Bytes!
-	quoteStatus: Int!
-	quoteId: BigInt!
-	quote: Quote!
-}
-
-type SettleHistory @entity(immutable: true) {
+type QuoteEvent @entity(immutable: true) {
 	id: ID!
 	source: Bytes!
 	quoteId: BigInt!
 	quote: Quote!
-	settleType: String!
-	prevPrice: BigInt!
-	newPrice: BigInt!
-	openQuantity: BigInt!
-	timestamp: BigInt!
-	blockNumber: BigInt!
-	transaction: Bytes!
-}
-
-type FundingHistory @entity(immutable: true) {
-	id: ID!
-	source: Bytes!
-	quoteId: BigInt!
-	quote: Quote!
-	fundingType: String!
-	rate: BigInt
-	fundingPaid: BigInt!
-	fundingReceived: BigInt!
-	prevPrice: BigInt!
-	newPrice: BigInt!
-	openQuantity: BigInt!
+	type: String!
+	metadata: String
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!

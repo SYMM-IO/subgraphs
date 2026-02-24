@@ -26,7 +26,6 @@ import {DeallocatePartyAHandler} from './handlers/symmio/DeallocatePartyAHandler
 import {DeallocatePartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {DeferredLiquidatePartyAHandler} from './handlers/symmio/DeferredLiquidatePartyAHandler'
 import {DeferredLiquidatePartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
-import {Deposit1} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {DepositHandler} from './handlers/symmio/DepositHandler'
 import {Deposit} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {EmergencyClosePositionHandler} from './handlers/symmio/EmergencyClosePositionHandler'
@@ -35,7 +34,6 @@ import {ExpireQuoteCloseHandler} from './handlers/symmio/ExpireQuoteCloseHandler
 import {ExpireQuoteClose} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {ExpireQuoteOpenHandler} from './handlers/symmio/ExpireQuoteOpenHandler'
 import {ExpireQuoteOpen} from '../../generated/symmio_0_8_5/symmio_0_8_5'
-import {FillCloseRequest1} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {FillCloseRequestHandler} from './handlers/symmio/FillCloseRequestHandler'
 import {FillCloseRequest} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {ForceCancelCloseRequestHandler} from './handlers/symmio/ForceCancelCloseRequestHandler'
@@ -56,17 +54,14 @@ import {LiquidatePendingPositionsPartyAHandler} from './handlers/symmio/Liquidat
 import {LiquidatePendingPositionsPartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePositionsForClearingHouseHandler} from './handlers/symmio/LiquidatePositionsForClearingHouseHandler'
 import {LiquidatePositionsForClearingHouse} from '../../generated/symmio_0_8_5/symmio_0_8_5'
-import {LiquidatePositionsPartyA1} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePositionsPartyAHandler} from './handlers/symmio/LiquidatePositionsPartyAHandler'
 import {LiquidatePositionsPartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
-import {LiquidatePositionsPartyB1} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePositionsPartyBHandler} from './handlers/symmio/LiquidatePositionsPartyBHandler'
 import {LiquidatePositionsPartyB} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidationDisputedHandler} from './handlers/symmio/LiquidationDisputedHandler'
 import {LiquidationDisputed} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
 import {LockQuote} from '../../generated/symmio_0_8_5/symmio_0_8_5'
-import {OpenPosition1} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
 import {OpenPosition} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {RegisterPartyBHandler} from './handlers/symmio/RegisterPartyBHandler'
@@ -81,7 +76,6 @@ import {RoleGrantedHandler} from './handlers/symmio/RoleGrantedHandler'
 import {RoleGranted} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {RoleRevokedHandler} from './handlers/symmio/RoleRevokedHandler'
 import {RoleRevoked} from '../../generated/symmio_0_8_5/symmio_0_8_5'
-import {SendQuote1} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SendQuoteHandler} from './handlers/symmio/SendQuoteHandler'
 import {SendQuote} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetCollateralHandler} from './handlers/symmio/SetCollateralHandler'
@@ -231,12 +225,6 @@ export function handleDeposit(event: Deposit): void {
 }
 
 
-export function handleDeposit1(event: Deposit1): void {
-    let handler = new DepositHandler<Deposit1>()
-    handler.handle(event, Version.v_0_8_5)
-}
-
-
 export function handleEmergencyClosePosition(event: EmergencyClosePosition): void {
     let handler = new EmergencyClosePositionHandler<EmergencyClosePosition>()
     handler.handle(event, Version.v_0_8_5)
@@ -257,12 +245,6 @@ export function handleExpireQuoteOpen(event: ExpireQuoteOpen): void {
 
 export function handleFillCloseRequest(event: FillCloseRequest): void {
     let handler = new FillCloseRequestHandler<FillCloseRequest>()
-    handler.handle(event, Version.v_0_8_5)
-}
-
-
-export function handleFillCloseRequest1(event: FillCloseRequest1): void {
-    let handler = new FillCloseRequestHandler<FillCloseRequest1>()
     handler.handle(event, Version.v_0_8_5)
 }
 
@@ -327,20 +309,8 @@ export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyA):
 }
 
 
-export function handleLiquidatePositionsPartyA1(event: LiquidatePositionsPartyA1): void {
-    let handler = new LiquidatePositionsPartyAHandler<LiquidatePositionsPartyA1>()
-    handler.handle(event, Version.v_0_8_5)
-}
-
-
 export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyB): void {
     let handler = new LiquidatePositionsPartyBHandler<LiquidatePositionsPartyB>()
-    handler.handle(event, Version.v_0_8_5)
-}
-
-
-export function handleLiquidatePositionsPartyB1(event: LiquidatePositionsPartyB1): void {
-    let handler = new LiquidatePositionsPartyBHandler<LiquidatePositionsPartyB1>()
     handler.handle(event, Version.v_0_8_5)
 }
 
@@ -359,12 +329,6 @@ export function handleLockQuote(event: LockQuote): void {
 
 export function handleOpenPosition(event: OpenPosition): void {
     let handler = new OpenPositionHandler<OpenPosition>()
-    handler.handle(event, Version.v_0_8_5)
-}
-
-
-export function handleOpenPosition1(event: OpenPosition1): void {
-    let handler = new OpenPositionHandler<OpenPosition1>()
     handler.handle(event, Version.v_0_8_5)
 }
 
@@ -407,12 +371,6 @@ export function handleRoleRevoked(event: RoleRevoked): void {
 
 export function handleSendQuote(event: SendQuote): void {
     let handler = new SendQuoteHandler<SendQuote>()
-    handler.handle(event, Version.v_0_8_5)
-}
-
-
-export function handleSendQuote1(event: SendQuote1): void {
-    let handler = new SendQuoteHandler<SendQuote1>()
     handler.handle(event, Version.v_0_8_5)
 }
 

@@ -3,10 +3,11 @@ import { ADLCloseHandler as CommonADLCloseHandler } from "../../../common/handle
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, CloseHistory, DebugEntity, Quote } from "../../../../generated/schema"
+import { Account, DebugEntity, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
+import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 
 export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -25,28 +26,16 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 
 		const additionalVolume = event.params.amount.times(event.params.price).div(BigInt.fromString("10").pow(18))
 
-		let closeHistory = new CloseHistory(
-			quote.partyA.toHexString() +
-				"-" +
-				event.params.quoteId.toString() +
-				"-" +
-				event.address.toHexString() +
-				"-" +
-				event.block.timestamp.toString(),
+		createQuoteEvent(
+			_event,
+			event.params.quoteId,
+			"ADL_CLOSE",
+			new JSONBuilder()
+				.add("amount", event.params.amount.toString())
+				.add("closePrice", event.params.price.toString())
+				.add("volume", additionalVolume.toString())
+				.build(),
 		)
-		closeHistory.source = event.address
-		closeHistory.account = quote.partyA
-		closeHistory.amount = event.params.amount
-		closeHistory.closePrice = event.params.price
-		closeHistory.volume = additionalVolume
-		closeHistory.closeType = "ADL_CLOSE"
-		closeHistory.timestamp = event.block.timestamp
-		closeHistory.blockNumber = event.block.number
-		closeHistory.transaction = event.transaction.hash
-		closeHistory.quoteStatus = quote.quoteStatus
-		closeHistory.quoteId = event.params.quoteId
-		closeHistory.quote = event.params.quoteId.toString() + "-" + event.address.toHexString()
-		closeHistory.save()
 
 		let account = Account.load(quote.partyA.toHexString())
 		if (!account) return
