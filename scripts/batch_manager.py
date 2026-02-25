@@ -1,5 +1,19 @@
 import argparse
+import os
 import subprocess
+import sys
+
+
+# ANSI colors
+class Style:
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    RESET = "\033[0m"
+    GREEN = "\033[32m"
+    RED = "\033[31m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    CYAN = "\033[36m"
 
 
 def main():
@@ -11,14 +25,14 @@ def main():
         "./configs/perps/base.json",
         "./configs/perps/blast.json",
         "./configs/perps/mantle.json",
-        # "./configs/perps/mode.json",
         "./configs/perps/arbitrum.json",
-        # "./configs/perps/iota.json",
-        # "./configs/perps/polygon.json",
         "./configs/perps/bera.json",
         "./configs/perps/sonic.json",
-        "./configs/perps/base_lc.json",
+        "./configs/perps/base_lc_test.json",
         "./configs/perps/plasma.json",
+        # "./configs/perps/mode.json",
+        # "./configs/perps/polygon.json",
+        # "./configs/perps/iota.json",
 
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",
@@ -38,7 +52,7 @@ def main():
     parser.add_argument(
         "--action",
         required=True,
-        choices=["deploy", "delete", "add-latest-tag", "delete-latest-tag"],
+        choices=["deploy", "delete", "add-latest-tag", "delete-latest-tag", "add-stage-tag", "delete-stage-tag"],
         help="Action to perform",
     )
     parser.add_argument("--version", required=True, help="Version number to use")
@@ -46,7 +60,19 @@ def main():
 
     args = parser.parse_args()
 
-    for config in configs:
+    total = len(configs)
+    print(f"\n{Style.CYAN}{Style.BOLD}{'─' * 50}")
+    print(f"  Batch {args.action}  ·  {args.subgraph}  ·  {args.version}")
+    print(f"  {total} configs")
+    print(f"{'─' * 50}{Style.RESET}\n")
+
+    passed = []
+    failed = []
+
+    for i, config in enumerate(configs, 1):
+        chain = os.path.splitext(os.path.basename(config))[0]
+        print(f"{Style.BLUE}{Style.BOLD}[{i}/{total}]{Style.RESET} {chain}...")
+
         cmd = [
             "python3",
             "scripts/manager.py",
@@ -55,8 +81,26 @@ def main():
             args.version,
             f"--{args.action}",
         ]
-        print("Executing:", " ".join(cmd))
-        subprocess.run(cmd, check=True)
+        result = subprocess.run(cmd)
+        if result.returncode == 0:
+            passed.append(chain)
+            print(f"  {Style.GREEN}✓{Style.RESET} {chain}\n")
+        else:
+            failed.append(chain)
+            print(f"  {Style.RED}✗{Style.RESET} {chain}\n")
+
+    # Summary
+    print(f"{'─' * 50}")
+    if not failed:
+        print(f"{Style.GREEN}{Style.BOLD}✓ {len(passed)}/{total} configs completed successfully{Style.RESET}")
+    else:
+        print(f"{Style.RED}{Style.BOLD}✗ {len(failed)}/{total} failed:{Style.RESET} {', '.join(failed)}")
+        if passed:
+            print(f"{Style.GREEN}{Style.BOLD}✓ {len(passed)}/{total} succeeded:{Style.RESET} {', '.join(passed)}")
+    print()
+
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

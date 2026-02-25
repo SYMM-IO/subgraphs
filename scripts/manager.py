@@ -13,6 +13,40 @@ from typing import Any, Dict, List, Optional, Set
 import yaml
 
 
+# ANSI colors
+class Style:
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    RESET = "\033[0m"
+    GREEN = "\033[32m"
+    RED = "\033[31m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    CYAN = "\033[36m"
+
+
+def step(current, total, msg):
+    print(f"{Style.BLUE}{Style.BOLD}[{current}/{total}]{Style.RESET} {msg}")
+
+
+def success(msg):
+    print(f"  {Style.GREEN}✓{Style.RESET} {msg}")
+
+
+def warn(msg):
+    print(f"  {Style.YELLOW}⚠{Style.RESET} {msg}")
+
+
+def error(msg):
+    print(f"  {Style.RED}✗{Style.RESET} {msg}")
+
+
+def header(msg):
+    print(f"\n{Style.CYAN}{Style.BOLD}{'─' * 50}")
+    print(f"  {msg}")
+    print(f"{'─' * 50}{Style.RESET}\n")
+
+
 @dataclass
 class Event:
     source: str
@@ -244,7 +278,7 @@ def load_dependencies(file_path: str) -> Dict[str, List[str]]:
         with open(file_path, "r") as deps_file:
             return json.load(deps_file)
     except FileNotFoundError:
-        print(f"Dependencies file not found: {file_path}")
+        warn(f"Dependencies file not found: {file_path}")
         return {}
 
 
@@ -627,7 +661,7 @@ def generate_contract_utils(common_dir: str, version: str):
     out_path = os.path.join(common_dir, f"contract_utils_{v}.ts")
     with open(out_path, "w") as f:
         f.write("\n".join(lines) + "\n")
-    print(f"Generated {out_path}")
+    success(f"Generated {out_path}")
 
 
 def main():
@@ -646,15 +680,42 @@ def main():
         action="store_true",
         help="Delete 'latest' tag from the subgraph",
     )
+    parser.add_argument("--add-stage-tag", action="store_true", help="Add 'stage' tag to the subgraph")
+    parser.add_argument(
+        "--delete-stage-tag",
+        action="store_true",
+        help="Delete 'stage' tag from the subgraph",
+    )
     parser.add_argument("--generate-entities", action="store_true", help="Generate and print entities")  # New option
     parser.add_argument("--create-utils", action="store_true", help="Generate contract_utils files for symmio versions")
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
-        print(f"Configuration file {args.config_file} does not exist!")
+        error(f"Configuration file {args.config_file} does not exist!")
         sys.exit(1)
 
-    subprocess.run(["./scripts/clean.sh"], check=True)
+    is_tag_or_delete = args.add_latest_tag or args.delete_latest_tag or args.add_stage_tag or args.delete_stage_tag or args.delete
+    is_build = not is_tag_or_delete
+    config_name = os.path.splitext(os.path.basename(args.config_file))[0]
+
+    # Determine action label for header
+    if args.deploy:
+        action_label = f"Build & Deploy {args.version}"
+    elif args.delete:
+        action_label = f"Delete {args.version}"
+    elif args.add_latest_tag:
+        action_label = f"Tag {args.version} → latest"
+    elif args.delete_latest_tag:
+        action_label = f"Untag latest from {args.version}"
+    elif args.add_stage_tag:
+        action_label = f"Tag {args.version} → stage"
+    elif args.delete_stage_tag:
+        action_label = f"Untag stage from {args.version}"
+    else:
+        action_label = "Build"
+    header(f"{action_label}  ·  {config_name}  ·  {args.module_name}")
+
+    subprocess.run(["./scripts/clean.sh"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     with open(args.config_file, "r") as f:
         config_data = json.load(f)
@@ -665,32 +726,64 @@ def main():
         generate_and_print_entities(config)
         sys.exit(0)
 
-    if not args.add_latest_tag and not args.delete_latest_tag and not args.delete:
+    if is_build:
+        # Count total build steps
+        build_steps = 4  # clean, prepare, codegen, build
+        if args.create_utils:
+            build_steps += 1
+        if args.create_src:
+            build_steps += 1
+        if args.create_handlers:
+            build_steps += 1
+        current_step = 0
+
+        current_step += 1
+        step(current_step, build_steps, "Cleaning old artifacts...")
+        success("Clean")
+
+        current_step += 1
+        step(current_step, build_steps, "Preparing module...")
         prepare_module(config, args.module_name)
+        success("Module prepared")
 
-    if args.create_utils:
-        common_prefix, *_ = args.module_name.split("/")
-        common_dir = os.path.join(common_prefix, "common")
-        for version in abi_versions.get("symmio", []):
-            generate_contract_utils(common_dir, version)
+        if args.create_utils:
+            current_step += 1
+            step(current_step, build_steps, "Generating contract utils...")
+            common_prefix, *_ = args.module_name.split("/")
+            common_dir = os.path.join(common_prefix, "common")
+            for version in abi_versions.get("symmio", []):
+                generate_contract_utils(common_dir, version)
 
-    if args.create_src:
-        for contract in config.contracts:
-            if contract.events:
-                generate_src_ts(args.module_name, contract)
+        if args.create_src:
+            current_step += 1
+            step(current_step, build_steps, "Generating src entry files...")
+            for contract in config.contracts:
+                if contract.events:
+                    generate_src_ts(args.module_name, contract)
+            success("Src files generated")
 
-    if args.create_handlers:
-        for contract in config.contracts:
-            generate_handler_files(args.module_name, contract, args.simple_mapping)
+        if args.create_handlers:
+            current_step += 1
+            step(current_step, build_steps, "Generating handler files...")
+            for contract in config.contracts:
+                generate_handler_files(args.module_name, contract, args.simple_mapping)
+            success("Handler files generated")
 
-    if not args.add_latest_tag and not args.delete_latest_tag and not args.delete:
+        current_step += 1
+        step(current_step, build_steps, "Running codegen...")
         subprocess.run(["graph", "codegen"], check=True)
+        success("Codegen complete")
+
+        current_step += 1
+        step(current_step, build_steps, "Building subgraph...")
         subprocess.run(["graph", "build"], check=True)
+        success("Build complete")
 
     if args.deploy:
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
+        step(1, 1, f"Deploying to Goldsky as {Style.BOLD}{deploy_url}/{args.version}{Style.RESET}...")
         command = [
             "goldsky",
             "subgraph",
@@ -700,11 +793,13 @@ def main():
             "build",
         ]
         subprocess.run(command, check=True)
+        success(f"Deployed {args.version}")
 
     if args.delete:
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
+        step(1, 1, f"Deleting {Style.BOLD}{deploy_url}/{args.version}{Style.RESET}...")
         command = [
             "goldsky",
             "subgraph",
@@ -713,11 +808,13 @@ def main():
             f"{deploy_url}/{args.version}",
         ]
         subprocess.run(command, check=True)
+        success(f"Deleted {args.version}")
 
     if args.add_latest_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
+        step(1, 1, f"Adding {Style.BOLD}latest{Style.RESET} tag to {deploy_url}/{args.version}...")
         command = [
             "goldsky",
             "subgraph",
@@ -725,14 +822,33 @@ def main():
             "create",
             f"{deploy_url}/{args.version}",
             "--tag",
-            "latest",  # "multi_source",
+            "latest",
         ]
         subprocess.run(command, check=True)
+        success("Tagged as latest")
+
+    if args.add_stage_tag:
+        if args.version is None:
+            raise Exception("Version should be provided with --version")
+        deploy_url = config.deploy_urls[args.module_name]
+        step(1, 1, f"Adding {Style.BOLD}stage{Style.RESET} tag to {deploy_url}/{args.version}...")
+        command = [
+            "goldsky",
+            "subgraph",
+            "tag",
+            "create",
+            f"{deploy_url}/{args.version}",
+            "--tag",
+            "stage",
+        ]
+        subprocess.run(command, check=True)
+        success("Tagged as stage")
 
     if args.delete_latest_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
         deploy_url = config.deploy_urls[args.module_name]
+        step(1, 1, f"Deleting {Style.BOLD}latest{Style.RESET} tag from {deploy_url}/{args.version}...")
         command = [
             "goldsky",
             "subgraph",
@@ -744,6 +860,27 @@ def main():
             "latest",
         ]
         subprocess.run(command, check=True)
+        success("Deleted latest tag")
+
+    if args.delete_stage_tag:
+        if args.version is None:
+            raise Exception("Version should be provided with --version")
+        deploy_url = config.deploy_urls[args.module_name]
+        step(1, 1, f"Deleting {Style.BOLD}stage{Style.RESET} tag from {deploy_url}/{args.version}...")
+        command = [
+            "goldsky",
+            "subgraph",
+            "tag",
+            "delete",
+            f"{deploy_url}/{args.version}",
+            "-f",
+            "--tag",
+            "stage",
+        ]
+        subprocess.run(command, check=True)
+        success("Deleted stage tag")
+
+    print(f"\n{Style.GREEN}{Style.BOLD}✓ Done{Style.RESET}\n")
 
 
 if __name__ == "__main__":
