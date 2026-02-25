@@ -7,6 +7,7 @@ import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpe
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -59,5 +60,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 				.addNullable("partyBmm", quote.partyBmm ? quote.partyBmm!.toString() : null)
 				.build(),
 		)
+		updatePartyALatestBalance(_event, version, event.params.partyA)
+		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}
 }

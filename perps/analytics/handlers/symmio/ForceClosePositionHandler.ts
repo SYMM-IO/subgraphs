@@ -2,6 +2,7 @@ import { ForceClosePositionHandler as CommonForceClosePositionHandler } from "..
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { handleClose } from "../commonHandlers/close"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class ForceClosePositionHandler<T> extends CommonForceClosePositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -12,5 +13,7 @@ export class ForceClosePositionHandler<T> extends CommonForceClosePositionHandle
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 		handleClose<T>(_event, "ForceClosePosition", version, "FORCE_CLOSE")
+		updatePartyALatestBalance(_event, version, event.params.partyA)
+		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}
 }

@@ -4,6 +4,7 @@ import {
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { createQuoteEvent } from "../../utils/quoteEvent"
+import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
@@ -46,5 +47,6 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends CommonLiquidatePe
 		for (let i = 0, lenQ = quoteIds.length; i < lenQ; i++) {
 			createQuoteEvent(_event, quoteIds[i], "LIQUIDATE_PENDING", null)
 		}
+		updatePartyALatestBalance(_event, version, event.params.partyA)
 	}
 }

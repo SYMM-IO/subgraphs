@@ -1,10 +1,11 @@
 
 import { SettleUpnlUnifiedHandler as CommonSettleUpnlUnifiedHandler } from "../../../common/handlers/symmio/SettleUpnlUnifiedHandler"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { Address, ethereum } from "@graphprotocol/graph-ts"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { Quote } from "../../../../generated/schema"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -29,13 +30,17 @@ export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<
 			createQuoteEvent(
 				_event,
 				data.quoteId,
-				"SETTLE_UPNL_UNIFIED",
+				"SETTLE_UPNL",
 				new JSONBuilder()
 					.add("prevPrice", prevPrices[i].toString())
 					.add("newPrice", event.params.updatedPrices[i].toString())
 					.add("openQuantity", quote.quantity!.minus(quote.closedAmount!).toString())
 					.build(),
 			)
+		}
+		for (let i = 0; i < event.params.partyAs.length; i++) {
+			updatePartyALatestBalance(_event, version, event.params.partyAs[i])
+			updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyAs[i])
 		}
 	}
 }

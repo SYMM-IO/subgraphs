@@ -7,6 +7,7 @@ import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpe
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { catchUpHistories } from "../../utils/openInterestHelpers"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 
 export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -16,6 +17,7 @@ export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 		super.handleAccount(_event, version)
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
+		updatePartyALatestBalance(_event, version, event.params.partyA)
 
 		let account = Account.load(event.params.partyA.toHexString())
 		if (!account) return

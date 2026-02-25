@@ -175,5 +175,31 @@
 		"LiquidationDisputed",
 		"SettlePartyALiquidation",
 		"FullyLiquidatedPartyA"
+	],
+	"LatestAccountBalance": [
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"AllocateForPartyB",
+		"DeallocateForPartyB",
+		"SendQuote",
+		"OpenPosition",
+		"FillCloseRequest",
+		"EmergencyClosePosition",
+		"ForceClosePosition",
+		"AcceptCancelRequest",
+		"ExpireQuoteOpen",
+		"ForceCancelQuote",
+		"ChargeFundingRate",
+		"SettleUpnl",
+		"BalanceChangePartyA",
+		"BalanceChangePartyB",
+		"SettlePartyALiquidation",
+		"LiquidatePartyA",
+		"LiquidatePartyB",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"LiquidatePendingPositionsPartyA",
+		"RequestToCancelQuote",
+		"DeferredLiquidatePartyA"
 	]
 }

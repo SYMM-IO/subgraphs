@@ -367,3 +367,23 @@ type WithdrawRequest @entity(immutable: false) {
 	blockNumber: BigInt!
 	transaction: Bytes!
 }
+
+type LatestAccountBalance @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	account: Bytes!
+	counterParty: Bytes
+	accountType: String!
+	allocatedBalance: BigInt!
+	lockedCva: BigInt!
+	lockedLf: BigInt!
+	lockedPartyAmm: BigInt!
+	lockedPartyBmm: BigInt!
+	pendingLockedCva: BigInt!
+	pendingLockedLf: BigInt!
+	pendingLockedPartyAmm: BigInt!
+	pendingLockedPartyBmm: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}

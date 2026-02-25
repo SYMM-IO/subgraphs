@@ -1,5 +1,5 @@
 import { LiquidatePositionsPartyAHandler as CommonLiquidatePositionsPartyAHandler } from "../../../common/handlers/symmio/LiquidatePositionsPartyAHandler"
-import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { handleLiquidatePosition } from "../commonHandlers/liquidatePositions"
 import { Account, LiquidationDetail, Quote } from "../../../../generated/schema"
@@ -8,6 +8,7 @@ import { getLiquidationStateData } from "../../../common/VersionedQuoteLoader"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositionsPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,6 +21,17 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			handleLiquidatePosition<T>(_event, version, event.params.quoteIds[i], "LIQUIDATE_PARTY_A")
+		}
+
+		updatePartyALatestBalance(_event, version, event.params.partyA)
+		let seenPartyBs: Array<string> = []
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			let quote = Quote.load(event.params.quoteIds[i].toString() + "-" + event.address.toHexString())
+			if (!quote || !quote.partyB) continue
+			let partyBHex = quote.partyB!.toHexString()
+			if (seenPartyBs.includes(partyBHex)) continue
+			seenPartyBs.push(partyBHex)
+			updatePartyBLatestBalance(_event, version, changetype<Address>(quote.partyB!), event.params.partyA)
 		}
 
 		// Accumulate paidCva, paidLf, totalPnl on LiquidationDetail

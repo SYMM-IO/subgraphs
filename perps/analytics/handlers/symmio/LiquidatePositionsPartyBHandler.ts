@@ -2,6 +2,7 @@ import { LiquidatePositionsPartyBHandler as CommonLiquidatePositionsPartyBHandle
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { handleLiquidatePosition } from "../commonHandlers/liquidatePositions"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class LiquidatePositionsPartyBHandler<T> extends CommonLiquidatePositionsPartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -15,5 +16,7 @@ export class LiquidatePositionsPartyBHandler<T> extends CommonLiquidatePositions
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			handleLiquidatePosition<T>(_event, version, event.params.quoteIds[i], "LIQUIDATE_PARTY_B")
 		}
+		updatePartyALatestBalance(_event, version, event.params.partyA)
+		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}
 }

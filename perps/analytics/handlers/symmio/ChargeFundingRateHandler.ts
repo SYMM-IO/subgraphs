@@ -6,6 +6,7 @@ import { unDecimal } from "../../utils/common"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -74,5 +75,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 					.build(),
 			)
 		}
+		updatePartyALatestBalance(_event, version, event.params.partyA)
+		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}
 }

@@ -2,6 +2,7 @@ import { FillCloseRequestHandler as CommonFillCloseRequestHandler } from "../../
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { handleClose } from "../commonHandlers/close"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class FillCloseRequestHandler<T> extends CommonFillCloseRequestHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -12,5 +13,7 @@ export class FillCloseRequestHandler<T> extends CommonFillCloseRequestHandler<T>
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
 		handleClose<T>(_event, "FillCloseRequest", version, "FILL_CLOSE")
+		updatePartyALatestBalance(_event, version, event.params.partyA)
+		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}
 }

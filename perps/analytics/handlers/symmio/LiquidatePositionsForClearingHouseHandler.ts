@@ -1,6 +1,6 @@
 
 import { LiquidatePositionsForClearingHouseHandler as CommonLiquidatePositionsForClearingHouseHandler } from "../../../common/handlers/symmio/LiquidatePositionsForClearingHouseHandler"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { Address, ethereum } from "@graphprotocol/graph-ts"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { Account, Quote } from "../../../../generated/schema"
@@ -9,6 +9,7 @@ import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidatePositionsForClearingHouseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -74,6 +75,18 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidat
 				account.accountSource,
 				event.address,
 			)
+		}
+		let seenPairs: Array<string> = []
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			let q = Quote.load(event.params.quoteIds[i].toString() + "-" + event.address.toHexString())
+			if (!q || !q.partyB) continue
+			let partyAHex = q.partyA.toHexString()
+			let partyBHex = q.partyB!.toHexString()
+			let pairKey = partyAHex + "-" + partyBHex
+			if (seenPairs.includes(pairKey)) continue
+			seenPairs.push(pairKey)
+			updatePartyALatestBalance(_event, version, changetype<Address>(q.partyA))
+			updatePartyBLatestBalance(_event, version, changetype<Address>(q.partyB!), changetype<Address>(q.partyA))
 		}
 	}
 }

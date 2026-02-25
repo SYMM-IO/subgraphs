@@ -4,6 +4,7 @@ import { Version } from "../../../common/BaseHandler"
 import { BalanceChange } from "../../../../generated/schema"
 import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 import { getConfiguration } from "../../utils/builders"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class AllocateForPartyBHandler<T> extends CommonAllocateForPartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -28,5 +29,7 @@ export class AllocateForPartyBHandler<T> extends CommonAllocateForPartyBHandler<
 			allocate.collateral = getConfiguration(event).collateral
 			allocate.save()
 		}
+		updatePartyALatestBalance(_event, version, event.params.partyA)
+		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}
 }

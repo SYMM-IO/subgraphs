@@ -1,6 +1,6 @@
 
 import { ADLCloseHandler as CommonADLCloseHandler } from "../../../common/handlers/symmio/ADLCloseHandler"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { Address, ethereum } from "@graphprotocol/graph-ts"
 import { BigInt, log } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { Account, DebugEntity, Quote } from "../../../../generated/schema"
@@ -8,6 +8,7 @@ import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpe
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
 export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -35,6 +36,8 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 				.add("closePrice", event.params.price.toString())
 				.build(),
 		)
+		updatePartyALatestBalance(_event, version, changetype<Address>(quote.partyA))
+		if (quote.partyB) updatePartyBLatestBalance(_event, version, changetype<Address>(quote.partyB!), changetype<Address>(quote.partyA))
 
 		let account = Account.load(quote.partyA.toHexString())
 		if (!account) return
