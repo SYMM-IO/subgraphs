@@ -15,7 +15,8 @@ Usage:
         --rpc-url <url> \
         [--limit N] \
         [--type PartyA|PartyB] \
-        [--concurrency 10]
+        [--concurrency 10] \
+        [--latest]
 """
 
 import argparse
@@ -66,7 +67,7 @@ async def fetch_entities(session, subgraph_url, account_type=None, limit=None):
     """Paginate through all LatestAccountBalance entities."""
     entities = []
     last_id = ""
-    page_size = 100
+    page_size = 500
     page = 0
 
     while True:
@@ -135,15 +136,16 @@ def build_call_data(entity):
         return SELECTOR_B + encode(["address", "address"], [account, counter_party])
 
 
-async def rpc_call(session, rpc_url, contract_addr, call_data, block_number):
+async def rpc_call(session, rpc_url, contract_addr, call_data, block_number=None):
     """Make an eth_call via JSON-RPC with retry on 429."""
+    block_tag = "latest" if block_number is None else hex(block_number)
     payload = {
         "jsonrpc": "2.0",
         "id": 1,
         "method": "eth_call",
         "params": [
             {"to": contract_addr, "data": "0x" + call_data.hex()},
-            hex(block_number),
+            block_tag,
         ],
     }
 
@@ -167,7 +169,7 @@ async def rpc_call(session, rpc_url, contract_addr, call_data, block_number):
     return None, "max retries exceeded"
 
 
-async def verify_entity(session, rpc_url, entity, counter):
+async def verify_entity(session, rpc_url, entity, counter, use_latest=False):
     """Compare a single entity against on-chain state."""
     entity_id = entity["id"]
     contract_addr = Web3.to_checksum_address(entity["source"])
@@ -175,7 +177,7 @@ async def verify_entity(session, rpc_url, entity, counter):
     account_type = entity["accountType"]
     call_data = build_call_data(entity)
 
-    raw_result, err = await rpc_call(session, rpc_url, contract_addr, call_data, block_number)
+    raw_result, err = await rpc_call(session, rpc_url, contract_addr, call_data, block_number=None if use_latest else block_number)
     if err:
         return entity_id, False, [{"field": "rpc_call", "subgraph": "N/A", "onchain": f"ERROR: {err}"}], account_type, block_number
 
@@ -198,6 +200,7 @@ async def main():
     parser.add_argument("--limit", type=int, default=None, help="Only check first N entities")
     parser.add_argument("--type", dest="account_type", choices=["PartyA", "PartyB"], default=None, help="Only check PartyA or PartyB entities")
     parser.add_argument("--concurrency", type=int, default=10, help="Max concurrent RPC calls (default: 10)")
+    parser.add_argument("--latest", action="store_true", help="Query on-chain state at latest block instead of the entity's blockNumber (for synced subgraphs)")
     args = parser.parse_args()
 
     account_type_filter = None
@@ -215,6 +218,8 @@ async def main():
         print(f"  Limit:       {args.limit}")
     if args.account_type:
         print(f"  Filter:      {args.account_type} only")
+    if args.latest:
+        print(f"  Block:       {BOLD}latest{RESET} (ignoring stored blockNumber)")
     print()
 
     async with aiohttp.ClientSession() as session:
@@ -239,11 +244,19 @@ async def main():
 
         async def bounded_verify(entity):
             async with semaphore:
-                result = await verify_entity(session, args.rpc_url, entity, counter)
+                result = await verify_entity(session, args.rpc_url, entity, counter, use_latest=args.latest)
                 counter["done"] += 1
+                done = counter["done"]
+                total_count = counter["total"]
+                pct = done * 100 // total_count
+                bar_len = 30
+                filled = bar_len * done // total_count
+                bar = "█" * filled + "░" * (bar_len - filled)
+                print(f"\r  {DIM}[{bar}] {done}/{total_count} ({pct}%){RESET}", end="", flush=True)
                 return result
 
         results = await asyncio.gather(*(bounded_verify(e) for e in entities))
+        print()  # newline after progress bar
         verify_time = time.time() - t0
 
     print()
@@ -258,17 +271,18 @@ async def main():
         else:
             label = f"PartyB {short_addr(parts[0])} <> {short_addr(parts[1])} @ {short_addr(parts[2])}"
 
+        block_label = "latest" if args.latest else f"block {block_number}"
         if ok:
             passed += 1
-            print(f"  {GREEN}PASS{RESET}  {label}  {DIM}block {block_number}{RESET}")
+            print(f"  {GREEN}PASS{RESET}  {label}  {DIM}{block_label}{RESET}")
         else:
             failed += 1
             is_rpc_error = mismatches and mismatches[0]["field"] == "rpc_call"
             if is_rpc_error:
-                print(f"  {YELLOW}SKIP{RESET}  {label}  {DIM}block {block_number}{RESET}")
+                print(f"  {YELLOW}SKIP{RESET}  {label}  {DIM}{block_label}{RESET}")
                 print(f"        {YELLOW}{mismatches[0]['onchain']}{RESET}")
             else:
-                print(f"  {RED}FAIL{RESET}  {label}  {DIM}block {block_number}{RESET}")
+                print(f"  {RED}FAIL{RESET}  {label}  {DIM}{block_label}{RESET}")
                 for m in mismatches:
                     print(f"        {RED}{m['field']}{RESET}: subgraph={m['subgraph']}  on-chain={m['onchain']}")
 
