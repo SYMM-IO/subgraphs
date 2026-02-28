@@ -11,4 +11,5 @@ type SubAccount @entity(immutable: false) {
 	updateTimestamp: BigInt!
 	virtualAccounts: [VirtualAccount!]! @derivedFrom(field: "parent")
 	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "subAccount")
+	quotes: [Quote!]! @derivedFrom(field: "subAccount")
 }
