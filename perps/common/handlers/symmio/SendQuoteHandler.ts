@@ -139,6 +139,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 
 		quote.symbol = getSymbolName(version, symbolId, event.address)
 		quote.affiliate = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
+		quote.timestampSendQuote = event.block.timestamp
 		quote.timestamp = event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "SendQuote", event)

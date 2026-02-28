@@ -30,6 +30,7 @@ export class OpenPositionHandler<T> extends BaseHandler {
 			let db = new DebugEntity("OpenPosition-getQuote-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
 			db.message = `quoteId ${event.params.quoteId.toString()} getQuote problem`
 			db.save()
+			quote.timestampOpenPosition = _event.block.timestamp
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "OpenPosition", _event)
 			return
@@ -43,6 +44,7 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.initialPartyAmm = data.partyAmm
 		quote.initialPartyBmm = data.partyBmm
 		quote.initialLf = data.lf
+		quote.timestampOpenPosition = _event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "OpenPosition", _event)
 	}
