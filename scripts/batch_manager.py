@@ -29,16 +29,16 @@ def main():
         "./configs/perps/bera.json",
         "./configs/perps/sonic.json",
         "./configs/perps/base_lc_test.json",
+        "./configs/perps/base_test.json",
         "./configs/perps/plasma.json",
+        "./configs/perps/hyperevm.json",
         # "./configs/perps/mode.json",
         # "./configs/perps/polygon.json",
         # "./configs/perps/iota.json",
-
         # "./configs/vaults/base.json",
         # "./configs/vaults/blast.json",
         # "./configs/vaults/bnb.json",
         # "./configs/vaults/mantle.json",
-
         # "./configs/timelocks/base.json",
         # "./configs/timelocks/arbitrum.json",
         # "./configs/timelocks/bnb.json",
