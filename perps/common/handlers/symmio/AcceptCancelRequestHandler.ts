@@ -20,8 +20,6 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 			quote.quoteId = event.params.quoteId
 			quote.timestamp = event.block.timestamp
 			quote.timestampSendQuote = event.block.timestamp
-			quote.timestampLockQuote = event.block.timestamp
-			quote.timestampRequestToCancelQuote = event.block.timestamp
 
 			const q = getQuoteData(version, event.address, event.params.quoteId)
 			if (!q) {

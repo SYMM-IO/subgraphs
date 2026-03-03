@@ -65,51 +65,8 @@ type Quote @entity(immutable: false) {
 
     # timestamps
     timestamp: BigInt!
-    timestampLastFundingPayment: BigInt
-    timestampExpireQuote: BigInt
-    timestampAcceptCancelCloseRequest: BigInt
-    timestampAcceptCancelRequest: BigInt
-    timestampChargeFundingRate: BigInt
-    timestampEmergencyClosePosition: BigInt
-    timestampForceCancelCloseRequest: BigInt
-    timestampFillCloseRequest: BigInt
-    timestampForceCancelQuote: BigInt
-    timestampForceClosePosition: BigInt
-    timestampLockQuote: BigInt
-    timestampRequestToCancelCloseRequest: BigInt
-    timestampOpenPosition: BigInt
-    timestampRequestToCancelQuote: BigInt
     timestampSendQuote: BigInt
-    timestampRequestToLimitClosePosition: BigInt
-    timestampUnlockQuote: BigInt
-    timestampSettleUpnl: BigInt
-    timestampRequestToClosePosition: BigInt
-    timestampLiquidatePendingPositionsPartyA: BigInt
-    timestampLiquidatePositionsPartyA: BigInt
-    timestampLiquidatePositionsPartyB: BigInt
-
-    # transaction hashes
-    txHashExpireQuote: Bytes
-    txHashAcceptCancelCloseRequest: Bytes
-    txHashAcceptCancelRequest: Bytes
-    txHashChargeFundingRate: Bytes
-    txHashEmergencyClosePosition: Bytes
-    txHashForceCancelCloseRequest: Bytes
-    txHashFillCloseRequest: Bytes
-    txHashForceCancelQuote: Bytes
-    txHashForceClosePosition: Bytes
-    txHashLockQuote: Bytes
-    txHashRequestToCancelCloseRequest: Bytes
-    txHashOpenPosition: Bytes
-    txHashRequestToCancelQuote: Bytes
-    txHashSendQuote: Bytes
-    txHashRequestToLimitClosePosition: Bytes
-    txHashUnlockQuote: Bytes
-    txHashSettleUpnl: Bytes
-    txHashRequestToClosePosition: Bytes
-    txHashLiquidatePendingPositionsPartyA: Bytes
-    txHashLiquidatePositionsPartyA: Bytes
-    txHashLiquidatePositionsPartyB: Bytes
+    timestampOpenPosition: BigInt
 
     # derived
     quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")
