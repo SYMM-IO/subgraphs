@@ -40,5 +40,9 @@ export function setEventTimestampAndTransactionHashAndAction(quote: Quote, event
 	quote.action = eventName
 	quote.timestamp = _event.block.timestamp
 	quote.blockNumber = _event.block.number
+	// 7 = CLOSED, 8 = LIQUIDATED
+	if (!quote.timestampFullyClose && (quote.quoteStatus == 7 || quote.quoteStatus == 8)) {
+		quote.timestampFullyClose = _event.block.timestamp
+	}
 	quote.save()
 }

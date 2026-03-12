@@ -178,6 +178,7 @@ type TotalSolverHistory @entity(immutable: false) {
 type DailyUserHistory @entity(immutable: false) {
 	id: ID!
 	day: BigInt!
+	user: Bytes!
 	account: Bytes!
 	quotesCount: BigInt!
 	openTradeVolume: BigInt!

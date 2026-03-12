@@ -13,6 +13,22 @@ from typing import Any, Dict, List, Optional, Set
 import yaml
 
 
+def load_env_file():
+    """Load variables from .env file (does not override existing env vars)."""
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+    if not os.path.exists(env_path):
+        return
+    with open(env_path) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, value = line.partition("=")
+                key = key.strip()
+                value = value.strip().strip("'\"")
+                if key not in os.environ:
+                    os.environ[key] = value
+
+
 # ANSI colors
 class Style:
     BOLD = "\033[1m"
@@ -76,12 +92,23 @@ class Contract:
 class Config:
     network: str
     contracts: List[Contract]
-    deploy_urls: Dict[str, str]
+    deploy_urls: Dict[str, Any]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Config":
         contracts = [Contract(**c) for c in data["contracts"]]
         return cls(data["network"], contracts, data["deploy_urls"])
+
+    def get_deploy_url(self, module_name: str, provider: str = "goldsky") -> str:
+        url = self.deploy_urls.get(module_name)
+        if url is None:
+            raise KeyError(f"No deploy URL for module '{module_name}'")
+        if isinstance(url, dict):
+            if provider not in url:
+                raise KeyError(f"No deploy URL for provider '{provider}' in module '{module_name}'")
+            return url[provider]
+        # Plain string: use for any provider (same name across providers)
+        return url
 
 
 abi_versions = {
@@ -688,6 +715,7 @@ def main():
     )
     parser.add_argument("--generate-entities", action="store_true", help="Generate and print entities")  # New option
     parser.add_argument("--create-utils", action="store_true", help="Generate contract_utils files for symmio versions")
+    parser.add_argument("--provider", choices=["goldsky", "0xgraph"], default="goldsky", help="Deployment provider (default: goldsky)")
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
@@ -782,23 +810,51 @@ def main():
     if args.deploy:
         if args.version is None:
             raise Exception("Version should be provided with --version")
-        deploy_url = config.deploy_urls[args.module_name]
-        step(1, 1, f"Deploying to Goldsky as {Style.BOLD}{deploy_url}/{args.version}{Style.RESET}...")
-        command = [
-            "goldsky",
-            "subgraph",
-            "deploy",
-            f"{deploy_url}/{args.version}",
-            "--path",
-            "build",
-        ]
-        subprocess.run(command, check=True)
-        success(f"Deployed {args.version}")
+        deploy_url = config.get_deploy_url(args.module_name, args.provider)
+
+        if args.provider == "goldsky":
+            step(1, 1, f"Deploying to Goldsky as {Style.BOLD}{deploy_url}/{args.version}{Style.RESET}...")
+            command = [
+                "goldsky",
+                "subgraph",
+                "deploy",
+                f"{deploy_url}/{args.version}",
+                "--path",
+                "build",
+            ]
+            subprocess.run(command, check=True)
+            success(f"Deployed {args.version} to Goldsky")
+
+        elif args.provider == "0xgraph":
+            load_env_file()
+            deploy_key = os.environ.get("OXGRAPH_DEPLOY_KEY")
+            if not deploy_key:
+                error("OXGRAPH_DEPLOY_KEY not set. Add it to .env or export it as an environment variable.")
+                sys.exit(1)
+            step(1, 1, f"Deploying to 0xGraph as {Style.BOLD}{deploy_url}{Style.RESET} ({args.version})...")
+            command = [
+                "graph",
+                "deploy",
+                deploy_url,
+                "--version-label",
+                args.version,
+                "--node",
+                "https://api.subgraph.ormilabs.com/deploy",
+                "--ipfs",
+                "https://api.subgraph.ormilabs.com/ipfs",
+                "--deploy-key",
+                deploy_key,
+            ]
+            subprocess.run(command, check=True)
+            success(f"Deployed {args.version} to 0xGraph")
 
     if args.delete:
         if args.version is None:
             raise Exception("Version should be provided with --version")
-        deploy_url = config.deploy_urls[args.module_name]
+        if args.provider != "goldsky":
+            error(f"--delete is only supported for goldsky provider")
+            sys.exit(1)
+        deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Deleting {Style.BOLD}{deploy_url}/{args.version}{Style.RESET}...")
         command = [
             "goldsky",
@@ -813,7 +869,10 @@ def main():
     if args.add_latest_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
-        deploy_url = config.deploy_urls[args.module_name]
+        if args.provider != "goldsky":
+            error(f"--add-latest-tag is only supported for goldsky provider")
+            sys.exit(1)
+        deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Adding {Style.BOLD}latest{Style.RESET} tag to {deploy_url}/{args.version}...")
         command = [
             "goldsky",
@@ -830,7 +889,10 @@ def main():
     if args.add_stage_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
-        deploy_url = config.deploy_urls[args.module_name]
+        if args.provider != "goldsky":
+            error(f"--add-stage-tag is only supported for goldsky provider")
+            sys.exit(1)
+        deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Adding {Style.BOLD}stage{Style.RESET} tag to {deploy_url}/{args.version}...")
         command = [
             "goldsky",
@@ -847,7 +909,10 @@ def main():
     if args.delete_latest_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
-        deploy_url = config.deploy_urls[args.module_name]
+        if args.provider != "goldsky":
+            error(f"--delete-latest-tag is only supported for goldsky provider")
+            sys.exit(1)
+        deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Deleting {Style.BOLD}latest{Style.RESET} tag from {deploy_url}/{args.version}...")
         command = [
             "goldsky",
@@ -865,7 +930,10 @@ def main():
     if args.delete_stage_tag:
         if args.version is None:
             raise Exception("Version should be provided with --version")
-        deploy_url = config.deploy_urls[args.module_name]
+        if args.provider != "goldsky":
+            error(f"--delete-stage-tag is only supported for goldsky provider")
+            sys.exit(1)
+        deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Deleting {Style.BOLD}stage{Style.RESET} tag from {deploy_url}/{args.version}...")
         command = [
             "goldsky",

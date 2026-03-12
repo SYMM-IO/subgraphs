@@ -67,6 +67,7 @@ type Quote @entity(immutable: false) {
     timestamp: BigInt!
     timestampSendQuote: BigInt
     timestampOpenPosition: BigInt
+    timestampFullyClose: BigInt
 
     # derived
     quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")

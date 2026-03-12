@@ -315,6 +315,7 @@ export function getDailyUserHistoryForTimestamp(timestamp: BigInt, account: Acco
 		dh = new DailyUserHistory(id)
 		dh.day = getDayNumber(timestamp)
 		dh.updateTimestamp = timestamp
+		dh.user = account.user
 		dh.account = account.account
 		dh.timestamp = timestamp
 		dh.deposit = BigInt.zero()

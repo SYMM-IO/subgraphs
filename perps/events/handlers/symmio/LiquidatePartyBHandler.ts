@@ -5,6 +5,7 @@ import { getGlobalCounterAndInc } from "../../../common/utils"
 import { LiquidatePartyB as LiquidatePartyB_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePartyB as LiquidatePartyB_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePartyB as LiquidatePartyB_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { LiquidatePartyB as LiquidatePartyB_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class LiquidatePartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,6 +23,13 @@ export class LiquidatePartyBHandler<T> {
 		entity.blockHash = event.block.hash
 
 		switch (version) {
+			case Version.v_0_8_5: {
+				// @ts-ignore
+				const e = changetype<LiquidatePartyB_8_5>(_event)
+				entity.partyBAllocatedBalance = e.params.partyBAllocatedBalance
+				entity.upnl = e.params.upnl
+				break
+			}
 			case Version.v_0_8_4: {
 				// @ts-ignore
 				const e = changetype<LiquidatePartyB_8_4>(_event)

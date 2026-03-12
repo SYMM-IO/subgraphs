@@ -5,6 +5,7 @@ import { SetSymbolFundingState as SetSymbolFundingState_8_1 } from "../../../../
 import { SetSymbolFundingState as SetSymbolFundingState_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolFundingState as SetSymbolFundingState_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SetSymbolFundingState as SetSymbolFundingState_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { SetSymbolFundingState as SetSymbolFundingState_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
 export class SetSymbolFundingStateHandler<T> {
@@ -29,6 +30,11 @@ export class SetSymbolFundingStateHandler<T> {
 			case Version.v_0_8_3:
 				// @ts-ignore
 				const e = changetype<SetSymbolFundingState_8_3>(_event)
+				entity.symbolId = e.params.symbolId
+				break
+			case Version.v_0_8_5:
+				// @ts-ignore
+				const e = changetype<SetSymbolFundingState_8_5>(_event)
 				entity.symbolId = e.params.symbolId
 				break
 			case Version.v_0_8_4:

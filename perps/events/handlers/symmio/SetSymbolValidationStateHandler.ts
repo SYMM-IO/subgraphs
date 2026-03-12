@@ -6,6 +6,7 @@ import { SetSymbolValidationState as SetSymbolValidationState_8_1 } from "../../
 import { SetSymbolValidationState as SetSymbolValidationState_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { SetSymbolValidationState as SetSymbolValidationState_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SetSymbolValidationState as SetSymbolValidationState_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
+import { SetSymbolValidationState as SetSymbolValidationState_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
 export class SetSymbolValidationStateHandler<T> {
@@ -40,6 +41,11 @@ export class SetSymbolValidationStateHandler<T> {
 			case Version.v_0_8_4:
 				// @ts-ignore
 				const e = changetype<SetSymbolValidationState_8_4>(_event)
+				entity.symbolId = e.params.symbolId
+				break
+			case Version.v_0_8_5:
+				// @ts-ignore
+				const e = changetype<SetSymbolValidationState_8_5>(_event)
 				entity.symbolId = e.params.symbolId
 				break
 		}

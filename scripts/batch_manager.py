@@ -21,17 +21,17 @@ def main():
         # "./configs/perps/fantom_just_8_0.json",
         # "./configs/perps/base_just_8_0.json",
         # "./configs/perps/bnb_just_8_0.json",
-        "./configs/perps/bnb.json",
-        "./configs/perps/base.json",
-        "./configs/perps/blast.json",
-        "./configs/perps/mantle.json",
-        "./configs/perps/arbitrum.json",
-        "./configs/perps/bera.json",
-        "./configs/perps/sonic.json",
+        # "./configs/perps/bnb.json",
+        # "./configs/perps/base.json",
+        # "./configs/perps/blast.json",
+        # "./configs/perps/mantle.json",
+        # "./configs/perps/arbitrum.json",
+        # "./configs/perps/bera.json",
+        # "./configs/perps/sonic.json",
         "./configs/perps/base_lc_test.json",
-        "./configs/perps/base_test.json",
-        "./configs/perps/plasma.json",
-        "./configs/perps/hyperevm.json",
+        # "./configs/perps/base_test.json",
+        # "./configs/perps/plasma.json",
+        # "./configs/perps/hyperevm.json",
         # "./configs/perps/mode.json",
         # "./configs/perps/polygon.json",
         # "./configs/perps/iota.json",
@@ -57,12 +57,13 @@ def main():
     )
     parser.add_argument("--version", required=True, help="Version number to use")
     parser.add_argument("--subgraph", required=True, help="Subgraph name (e.g., analytics)")
+    parser.add_argument("--provider", choices=["goldsky", "0xgraph"], default="goldsky", help="Deployment provider (default: goldsky)")
 
     args = parser.parse_args()
 
     total = len(configs)
     print(f"\n{Style.CYAN}{Style.BOLD}{'─' * 50}")
-    print(f"  Batch {args.action}  ·  {args.subgraph}  ·  {args.version}")
+    print(f"  Batch {args.action}  ·  {args.subgraph}  ·  {args.version}  ·  {args.provider}")
     print(f"  {total} configs")
     print(f"{'─' * 50}{Style.RESET}\n")
 
@@ -80,6 +81,8 @@ def main():
             args.subgraph,
             args.version,
             f"--{args.action}",
+            "--provider",
+            args.provider,
         ]
         result = subprocess.run(cmd)
         if result.returncode == 0:
