@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts"
+import { Address, BigInt, ethereum, log, store } from "@graphprotocol/graph-ts"
 import { Version } from "../../common/BaseHandler"
 import { LatestAccountBalance } from "../../../generated/schema"
 import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0, getBalanceInfoOfPartyB as getBalanceInfoOfPartyB_0_8_0 } from "../../common/contract_utils_0_8_0"
@@ -10,8 +10,10 @@ import { getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_5, getBalanceInfoO
 
 export function updatePartyALatestBalance(event: ethereum.Event, version: Version, partyA: Address): void {
 	let id = partyA.toHexString() + "-" + event.address.toHexString()
+	let isNew = false
 	let entity = LatestAccountBalance.load(id)
 	if (!entity) {
+		isNew = true
 		entity = new LatestAccountBalance(id)
 		entity.source = event.address
 		entity.account = partyA
@@ -111,6 +113,21 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyBmm = info.value8
 	}
 
+	if (
+		entity.allocatedBalance.isZero() &&
+		entity.lockedCva.isZero() &&
+		entity.lockedLf.isZero() &&
+		entity.lockedPartyAmm.isZero() &&
+		entity.lockedPartyBmm.isZero() &&
+		entity.pendingLockedCva.isZero() &&
+		entity.pendingLockedLf.isZero() &&
+		entity.pendingLockedPartyAmm.isZero() &&
+		entity.pendingLockedPartyBmm.isZero()
+	) {
+		if (!isNew) store.remove("LatestAccountBalance", id)
+		return
+	}
+
 	entity.timestamp = event.block.timestamp
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash
@@ -119,8 +136,10 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 
 export function updatePartyBLatestBalance(event: ethereum.Event, version: Version, partyB: Address, partyA: Address): void {
 	let id = partyB.toHexString() + "-" + partyA.toHexString() + "-" + event.address.toHexString()
+	let isNew = false
 	let entity = LatestAccountBalance.load(id)
 	if (!entity) {
+		isNew = true
 		entity = new LatestAccountBalance(id)
 		entity.source = event.address
 		entity.account = partyB
@@ -218,6 +237,21 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedLf = info.value6
 		entity.pendingLockedPartyAmm = info.value7
 		entity.pendingLockedPartyBmm = info.value8
+	}
+
+	if (
+		entity.allocatedBalance.isZero() &&
+		entity.lockedCva.isZero() &&
+		entity.lockedLf.isZero() &&
+		entity.lockedPartyAmm.isZero() &&
+		entity.lockedPartyBmm.isZero() &&
+		entity.pendingLockedCva.isZero() &&
+		entity.pendingLockedLf.isZero() &&
+		entity.pendingLockedPartyAmm.isZero() &&
+		entity.pendingLockedPartyBmm.isZero()
+	) {
+		if (!isNew) store.remove("LatestAccountBalance", id)
+		return
 	}
 
 	entity.timestamp = event.block.timestamp
