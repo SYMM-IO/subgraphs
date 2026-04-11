@@ -1,6 +1,0 @@
-{
-	"PartyA": ["LiquidatePartyA"],
-	"PartyB": ["LiquidatePartyB"],
-	"Liquidator": ["LiquidatePartyA", "SettlePartyALiquidation"],
-	"PartyALiquidator": ["LiquidatePartyA", "SettlePartyALiquidation"]
-}

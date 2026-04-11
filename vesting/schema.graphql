@@ -1,4 +1,0 @@
-type User @entity(immutable: true) {
-	id: ID!
-	user: Bytes!
-}

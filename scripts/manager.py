@@ -114,12 +114,6 @@ class Config:
 abi_versions = {
     "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3", "0_8_4", "0_8_5"],
     "symmioMultiAccount": ["1", "2", "3"],
-    "timelock": ["1"],
-    "vault": ["1"],
-    "vault_token": ["1"],
-    "staking": ["1"],
-    "vesting": ["1"],
-    "symm_token": ["1"],
     "options": ["1"],
     "optionsMultiAccount": ["1"],
     "feeCollector": ["1"],
@@ -178,7 +172,7 @@ def generate_src_ts(target_module: str, contract: Contract):
     imports = set()
     handlers_code = []
 
-    # Determine import depth: multi-module (perps/events) = 2, single (vaults) = 1
+    # Determine import depth: multi-module (perps/events) = 2, single = 1
     depth = target_module.count("/") + 1
     generated_prefix = "../" * depth
 
