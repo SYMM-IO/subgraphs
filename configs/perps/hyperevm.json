@@ -2,20 +2,20 @@
 	"network": "hyperevm",
 	"contracts": [
 		{
-			"address": "0x99641E06d38F327166b3a48f86Ca2cbB3B4fB7EB",
+			"address": "0x57331038c21982116EE9b0906E4a5c5cB52dcE2e",
 			"abi": "symmio",
 			"version": "0_8_5",
-			"startBlock": "28307184"
+			"startBlock": "32012153"
 		},
 		{
-			"address": "0x812e98F31A4EfFC09dD82e6e87ff7456151a0dFB",
+			"address": "0x46493c376758Da47823D7E3Ae5d417eA6546eEB3",
 			"abi": "accountLayer",
 			"version": "1",
-			"startBlock": "28309746"
+			"startBlock": "32015874"
 		}
 	],
 	"deploy_urls": {
-		"perps/analytics": "hyperevm_analytics",
-		"perps/events": "hyperevm_events"
+		"perps/analytics": "hyperevm_mainnet_analytics",
+		"perps/events": "hyperevm_mainnet_events"
 	}
 }
