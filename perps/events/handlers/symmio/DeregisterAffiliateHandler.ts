@@ -12,6 +12,7 @@ export class DeregisterAffiliateHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.source = event.address
 		entity.affiliate = _event.parameters[0].value.toAddress()
+		entity.affilate = _event.parameters[0].value.toAddress()
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash
