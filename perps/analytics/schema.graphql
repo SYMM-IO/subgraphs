@@ -318,6 +318,7 @@ type FundingFeeState @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
 	symbolId: BigInt!
+	symbolName: String!
 	partyB: Bytes!
 	currentLongRate: BigInt
 	currentShortRate: BigInt
@@ -403,6 +404,7 @@ type AggregatedPosition @entity(immutable: false) {
 	partyA: Bytes!
 	partyB: Bytes!
 	symbolId: BigInt!
+	symbolName: String!
 	positionType: Int!
 	aggregatedAmount: BigInt!
 	aggregatedNotional: BigInt!

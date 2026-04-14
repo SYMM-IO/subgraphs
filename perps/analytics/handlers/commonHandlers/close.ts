@@ -24,6 +24,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 
 	onPositionClose(
 		_event,
+		version,
 		changetype<Address>(quote.partyA),
 		changetype<Address>(quote.partyB!),
 		quote.symbolId!,
@@ -33,7 +34,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
 		quote.closedAmount!.equals(quote.quantity!),
 	)
-	if (version == Version.v_0_8_5) syncFundingFeeState(_event, quote.symbolId!, changetype<Address>(quote.partyB!))
+	if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 	createQuoteEvent(
 		_event,

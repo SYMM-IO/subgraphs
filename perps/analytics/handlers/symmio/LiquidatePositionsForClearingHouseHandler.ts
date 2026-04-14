@@ -32,6 +32,7 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidat
 
 			onPositionClose(
 				_event,
+				version,
 				changetype<Address>(quote.partyA),
 				changetype<Address>(quote.partyB!),
 				quote.symbolId!,
@@ -41,7 +42,7 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidat
 				quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
 				true,
 			)
-			syncFundingFeeState(_event, quote.symbolId!, changetype<Address>(quote.partyB!))
+			syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 			createQuoteEvent(
 				_event,

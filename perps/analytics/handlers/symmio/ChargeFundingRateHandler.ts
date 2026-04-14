@@ -47,6 +47,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 
 			onPriceUpdate(
 				_event,
+				version,
 				event.params.partyA,
 				event.params.partyB,
 				quote.symbolId!,

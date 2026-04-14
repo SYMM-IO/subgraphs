@@ -1,5 +1,7 @@
 import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { AggregatedPosition } from "../../../generated/schema"
+import { Version } from "../../common/BaseHandler"
+import { resolveSymbolName } from "./symbol"
 
 const FACTOR: BigInt = BigInt.fromString("1000000000000000000")
 
@@ -19,6 +21,7 @@ function getEntityId(partyA: Address, partyB: Address, symbolId: BigInt, positio
 
 function getOrCreate(
 	event: ethereum.Event,
+	version: Version,
 	partyA: Address,
 	partyB: Address,
 	symbolId: BigInt,
@@ -32,12 +35,15 @@ function getOrCreate(
 		entity.partyA = partyA
 		entity.partyB = partyB
 		entity.symbolId = symbolId
+		entity.symbolName = resolveSymbolName(version, symbolId, event.address)
 		entity.positionType = positionType
 		entity.aggregatedAmount = BigInt.zero()
 		entity.aggregatedNotional = BigInt.zero()
 		entity.weightedPaidFunding = BigInt.zero()
 		entity.openPositionsCount = 0
 		entity.isActive = false
+	} else if (entity.symbolName.length == 0) {
+		entity.symbolName = resolveSymbolName(version, symbolId, event.address)
 	}
 	return entity
 }
@@ -52,6 +58,7 @@ function save(entity: AggregatedPosition): void {
 // Called when a new position opens
 export function onPositionOpen(
 	event: ethereum.Event,
+	version: Version,
 	partyA: Address,
 	partyB: Address,
 	symbolId: BigInt,
@@ -60,7 +67,7 @@ export function onPositionOpen(
 	openedPrice: BigInt,
 	accumulatedPaidFunding: BigInt,
 ): void {
-	let entity = getOrCreate(event, partyA, partyB, symbolId, positionType)
+	let entity = getOrCreate(event, version, partyA, partyB, symbolId, positionType)
 	entity.aggregatedAmount = entity.aggregatedAmount.plus(filledAmount)
 	entity.aggregatedNotional = entity.aggregatedNotional.plus(filledAmount.times(openedPrice))
 	entity.weightedPaidFunding = entity.weightedPaidFunding.plus(filledAmount.times(accumulatedPaidFunding).div(FACTOR))
@@ -78,6 +85,7 @@ export function onPositionOpen(
 // Called when a position is partially or fully closed / liquidated
 export function onPositionClose(
 	event: ethereum.Event,
+	version: Version,
 	partyA: Address,
 	partyB: Address,
 	symbolId: BigInt,
@@ -87,9 +95,8 @@ export function onPositionClose(
 	accumulatedPaidFunding: BigInt,
 	isFullyClose: boolean,
 ): void {
-	let id = getEntityId(partyA, partyB, symbolId, positionType, event.address)
-	let entity = AggregatedPosition.load(id)
-	if (!entity) return
+	let entity = getOrCreate(event, version, partyA, partyB, symbolId, positionType)
+	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) return
 	entity.aggregatedAmount = entity.aggregatedAmount.minus(closedAmount)
 	entity.aggregatedNotional = entity.aggregatedNotional.minus(closedAmount.times(openedPrice))
 	entity.weightedPaidFunding = entity.weightedPaidFunding.minus(closedAmount.times(accumulatedPaidFunding).div(FACTOR))
@@ -109,6 +116,7 @@ export function onPositionClose(
 // Called when openedPrice changes (settlement, ChargeFundingRate)
 export function onPriceUpdate(
 	event: ethereum.Event,
+	version: Version,
 	partyA: Address,
 	partyB: Address,
 	symbolId: BigInt,
@@ -118,9 +126,8 @@ export function onPriceUpdate(
 	newPrice: BigInt,
 ): void {
 	if (prevPrice.equals(newPrice)) return
-	let id = getEntityId(partyA, partyB, symbolId, positionType, event.address)
-	let entity = AggregatedPosition.load(id)
-	if (!entity) return
+	let entity = getOrCreate(event, version, partyA, partyB, symbolId, positionType)
+	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) return
 	// notional delta = openAmount * (newPrice - prevPrice)
 	let delta = openAmount.times(newPrice.minus(prevPrice))
 	entity.aggregatedNotional = entity.aggregatedNotional.plus(delta)
@@ -133,6 +140,7 @@ export function onPriceUpdate(
 // Called when accumulatedPaidFunding changes (ChargeAccumulatedFundingFee)
 export function onFundingUpdate(
 	event: ethereum.Event,
+	version: Version,
 	partyA: Address,
 	partyB: Address,
 	symbolId: BigInt,
@@ -142,9 +150,8 @@ export function onFundingUpdate(
 	newFunding: BigInt,
 ): void {
 	if (prevFunding.equals(newFunding)) return
-	let id = getEntityId(partyA, partyB, symbolId, positionType, event.address)
-	let entity = AggregatedPosition.load(id)
-	if (!entity) return
+	let entity = getOrCreate(event, version, partyA, partyB, symbolId, positionType)
+	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) return
 	// delta = openAmount * (newFunding - prevFunding) / 1e18
 	let oldContrib = openAmount.times(prevFunding).div(FACTOR)
 	let newContrib = openAmount.times(newFunding).div(FACTOR)

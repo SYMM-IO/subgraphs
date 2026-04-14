@@ -38,6 +38,7 @@ type AggregatedPosition @entity(immutable: false) {
   partyA: Bytes!
   partyB: Bytes!
   symbolId: BigInt!
+  symbolName: String!            # denormalized symbol name for price-service lookup
   positionType: Int!             # 0 = LONG, 1 = SHORT
   aggregatedAmount: BigInt!      # sum of open amounts (18 decimals)
   aggregatedNotional: BigInt!    # sum of (openAmount * openedPrice) (36 decimals)
@@ -77,6 +78,7 @@ type FundingFeeState @entity(immutable: false) {
   id: ID!                        # {symbolId}-{partyB}-{source}
   source: Bytes!
   symbolId: BigInt!
+  symbolName: String!            # denormalized symbol name for downstream caches
   partyB: Bytes!
   currentLongRate: BigInt        # current epoch rate for longs
   currentShortRate: BigInt       # current epoch rate for shorts
@@ -165,8 +167,10 @@ type LatestAccountBalance @entity(immutable: false) {
 
 ### 2. External Data
 
-- **Current prices per symbolId**: from oracle / price feed (not in subgraph)
+- **Current prices per symbolName**: from oracle / price feed (not in subgraph)
 - **Current timestamp / block time**: used to compute `epochsSinceLastUpdate` for exact funding debt
+
+`symbolId` remains the canonical onchain identity and should still be used to join `AggregatedPosition` to `FundingFeeState`. `symbolName` is denormalized into both models so the bot can map directly into its price service without an extra symbol table lookup.
 
 ### 3. Calculating uPNL for a partyA
 
@@ -175,7 +179,7 @@ def calculate_upnl(party_a, aggregated_positions, funding_states, current_prices
     """
     aggregated_positions: list of AggregatedPosition entities for this partyA
     funding_states: dict of (symbolId, partyB) -> FundingFeeState
-    current_prices: dict of symbolId -> current price (18 decimals)
+    current_prices: dict of symbolName -> current price (18 decimals)
     """
     total_upnl = 0
 
@@ -183,7 +187,7 @@ def calculate_upnl(party_a, aggregated_positions, funding_states, current_prices
         if pos.aggregatedAmount == 0:
             continue
 
-        current_price = current_prices[pos.symbolId]
+        current_price = current_prices[pos.symbolName]
         avg_open_price = pos.aggregatedNotional // pos.aggregatedAmount
 
         # Price component
@@ -343,6 +347,7 @@ def calculate_available_for_quote(party_a_balance, total_upnl):
     id
     partyB
     symbolId
+    symbolName
     positionType
     aggregatedAmount
     aggregatedNotional
@@ -374,6 +379,7 @@ def calculate_available_for_quote(party_a_balance, total_upnl):
 {
   fundingFeeStates(where: { partyB: "0x..." }) {
     symbolId
+    symbolName
     currentLongRate
     currentShortRate
     accumulatedLongRate
@@ -395,10 +401,16 @@ If the goal is a liquidator notifier, the bot should optimize for the liquidatio
 
 The minimum exact hot-path state is:
 
-- `AggregatedPosition`: `partyA`, `partyB`, `symbolId`, `positionType`, `aggregatedAmount`, `aggregatedNotional`, `weightedPaidFunding`, `isActive`
-- `FundingFeeState`: funding-rate and epoch fields for `(symbolId, partyB)`
+- `AggregatedPosition`: `partyA`, `partyB`, `symbolId`, `symbolName`, `positionType`, `aggregatedAmount`, `aggregatedNotional`, `weightedPaidFunding`, `isActive`
+- `FundingFeeState`: funding-rate and epoch fields for `(symbolId, partyB)`, plus `symbolName`
 - `LatestAccountBalance` for `accountType = PARTY_A`: `allocatedBalance`, `lockedCva`, `lockedLf`
-- offchain inputs: current prices and current timestamp
+- offchain inputs: current prices keyed by `symbolName` and current timestamp
+
+Recommended key usage in the bot:
+
+- Use `symbolId` to join `AggregatedPosition` with `FundingFeeState`
+- Use `symbolName` to fetch or cache market prices from external price services
+- Keep both in the local state so you preserve exact onchain identity while still matching offchain infra
 
 The bot does **not** need to pull the whole subgraph every 30ms. A better pattern is:
 
@@ -433,7 +445,9 @@ Goldsky's subgraph source deduplicates by entity ID by default, so the sink natu
 Recommended mirrored state:
 
 - `AggregatedPosition`: keep all rows, including `isActive = false`, so closures propagate as updates rather than relying on delete handling
+- `AggregatedPosition`: keep `symbol_name` in the mirrored state so the price loop does not need a separate symbol lookup table
 - `FundingFeeState`: keep the full exact funding state
+- `FundingFeeState`: mirror `symbol_name` as well so funding rows can be inspected and debugged without a join
 - `LatestAccountBalance`: mirror only `PARTY_A` rows and only the liquidation-relevant columns
 
 Important operational note:

@@ -31,6 +31,7 @@ export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<
 			let openAmount = quote.quantity!.minus(quote.closedAmount!)
 			onPriceUpdate(
 				_event,
+				version,
 				changetype<Address>(quote.partyA),
 				event.params.partyB,
 				quote.symbolId!,

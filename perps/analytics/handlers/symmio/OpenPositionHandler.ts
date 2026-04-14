@@ -64,6 +64,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		)
 		onPositionOpen(
 			_event,
+			version,
 			event.params.partyA,
 			event.params.partyB,
 			quote.symbolId!,
@@ -72,7 +73,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 			event.params.openedPrice,
 			quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
 		)
-		if (version == Version.v_0_8_5) syncFundingFeeState(_event, quote.symbolId!, event.params.partyB)
+		if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, event.params.partyB)
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}

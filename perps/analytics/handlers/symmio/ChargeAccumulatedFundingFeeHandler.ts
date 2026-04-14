@@ -49,6 +49,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 
 			onFundingUpdate(
 				_event,
+				version,
 				event.params.partyA,
 				event.params.partyB,
 				quote.symbolId!,
@@ -93,7 +94,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 			let fundingStateKey = quote.symbolId!.toString() + "-" + event.params.partyB.toHexString()
 			if (!seenFundingStates.includes(fundingStateKey)) {
 				seenFundingStates.push(fundingStateKey)
-				syncFundingFeeState(_event, quote.symbolId!, event.params.partyB)
+				syncFundingFeeState(_event, version, quote.symbolId!, event.params.partyB)
 			}
 		}
 		updatePartyALatestBalance(_event, version, event.params.partyA)

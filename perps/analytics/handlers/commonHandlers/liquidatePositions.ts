@@ -22,6 +22,7 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 
 	onPositionClose(
 		_event,
+		version,
 		changetype<Address>(quote.partyA),
 		changetype<Address>(quote.partyB!),
 		quote.symbolId!,
