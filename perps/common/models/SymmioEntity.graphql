@@ -3,4 +3,6 @@ type SymmioEntity @entity(immutable: false) {
 	address: Bytes!
 	type: String!
 	name: String
+	brandColor: String
+	metadata: String
 }

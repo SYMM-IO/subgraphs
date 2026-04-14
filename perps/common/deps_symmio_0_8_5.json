@@ -54,6 +54,7 @@
 	],
 	"SymmioEntity": [
 		"SendQuote",
-		"RegisterPartyB"
+		"RegisterPartyB",
+		"SetEntityMetadata"
 	]
 }
