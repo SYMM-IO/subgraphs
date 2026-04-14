@@ -201,5 +201,15 @@
 		"LiquidatePendingPositionsPartyA",
 		"RequestToCancelQuote",
 		"DeferredLiquidatePartyA"
+	],
+	"AggregatedPosition": [
+		"OpenPosition",
+		"FillCloseRequest",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"ChargeFundingRate",
+		"SettleUpnl"
 	]
 }

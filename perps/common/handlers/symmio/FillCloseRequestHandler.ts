@@ -29,6 +29,7 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 		quote.partyAmm = data.partyAmm
 		quote.partyBmm = data.partyBmm
 		quote.lf = data.lf
+		quote.accumulatedPaidFunding = data.accumulatedPaidFunding
 
 		quote.quoteId = event.params.quoteId
 		quote.fillAmount = event.params.filledAmount

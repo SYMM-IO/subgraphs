@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { DebugEntity, Quote } from "../../../../generated/schema"
+import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 
 export class ForceClosePositionHandler<T> extends BaseHandler {
@@ -16,6 +17,14 @@ export class ForceClosePositionHandler<T> extends BaseHandler {
 			return
 		}
 		quote.globalCounter = super.handleGlobalCounter()
+		let data = getQuoteData(version, event.address, event.params.quoteId)
+		if (data) {
+			quote.cva = data.cva
+			quote.partyAmm = data.partyAmm
+			quote.partyBmm = data.partyBmm
+			quote.lf = data.lf
+			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
+		}
 		quote.quoteId = event.params.quoteId
 		quote.fillAmount = event.params.filledAmount
 		quote.closedPrice = event.params.closedPrice

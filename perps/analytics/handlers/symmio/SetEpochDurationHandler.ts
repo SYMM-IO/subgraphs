@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { FundingFeeState } from "../../../../generated/schema"
+import { enrichFundingFeeState } from "../../utils/fundingFeeState"
 
 export class SetEpochDurationHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -24,6 +25,7 @@ export class SetEpochDurationHandler<T> extends BaseHandler {
 			}
 			state.epochDuration = duration
 			state.updateTimestamp = event.block.timestamp
+			enrichFundingFeeState(state, event.address)
 			state.save()
 		}
 	}

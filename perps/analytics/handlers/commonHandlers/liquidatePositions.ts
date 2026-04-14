@@ -1,11 +1,12 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Version } from "../../../common/BaseHandler"
-import { BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts"
 import { Account, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { onPositionClose } from "../../utils/aggregatedPosition"
 
 export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt, closeType: string): void {
 	// @ts-ignore
@@ -18,6 +19,18 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	let liquidAmount = quote.liquidateAmount!
 	let liquidPrice = quote.liquidatePrice!
 	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
+
+	onPositionClose(
+		_event,
+		changetype<Address>(quote.partyA),
+		changetype<Address>(quote.partyB!),
+		quote.symbolId!,
+		quote.positionType,
+		liquidAmount,
+		quote.openedPrice!,
+		quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
+		true,
+	)
 
 	createQuoteEvent(
 		_event,

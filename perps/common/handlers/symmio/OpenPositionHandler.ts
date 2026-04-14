@@ -40,6 +40,7 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.partyAmm = data.partyAmm
 		quote.partyBmm = data.partyBmm
 		quote.lf = data.lf
+		quote.accumulatedPaidFunding = data.accumulatedPaidFunding
 		quote.initialCva = data.cva
 		quote.initialPartyAmm = data.partyAmm
 		quote.initialPartyBmm = data.partyBmm

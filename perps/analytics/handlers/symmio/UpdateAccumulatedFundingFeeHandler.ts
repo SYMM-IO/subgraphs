@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { FundingFeeState, FundingRateSnapshot } from "../../../../generated/schema"
+import { enrichFundingFeeState } from "../../utils/fundingFeeState"
 
 export class UpdateAccumulatedFundingFeeHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -41,6 +42,7 @@ export class UpdateAccumulatedFundingFeeHandler<T> extends BaseHandler {
 			state.currentShortRate = shortRate
 			state.lastMarketPrice = marketPrice
 			state.updateTimestamp = event.block.timestamp
+			enrichFundingFeeState(state, event.address)
 			state.save()
 		}
 	}

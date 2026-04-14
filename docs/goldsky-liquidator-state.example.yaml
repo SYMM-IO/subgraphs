@@ -1,0 +1,118 @@
+name: symmio-liquidator-state
+apiVersion: 3
+resource_size: s
+
+# Replace these placeholders with your deployed subgraph name/version.
+# Goldsky often exposes subgraph entity and field names in snake_case.
+# Confirm the exact identifiers in your project before applying this file.
+sources:
+  aggregated_position:
+    type: subgraph_entity
+    subgraphs:
+      - name: your-analytics-subgraph
+        version: 1.0.0
+    name: aggregated_position
+
+  funding_fee_state:
+    type: subgraph_entity
+    subgraphs:
+      - name: your-analytics-subgraph
+        version: 1.0.0
+    name: funding_fee_state
+
+  latest_account_balance:
+    type: subgraph_entity
+    subgraphs:
+      - name: your-analytics-subgraph
+        version: 1.0.0
+    name: latest_account_balance
+
+transforms:
+  liquidator_position_state:
+    primary_key: id
+    sql: |
+      SELECT
+        id,
+        source,
+        party_a,
+        party_b,
+        symbol_id,
+        position_type,
+        aggregated_amount,
+        aggregated_notional,
+        weighted_paid_funding,
+        open_positions_count,
+        is_active,
+        closed_timestamp,
+        closed_block_number,
+        closed_transaction,
+        timestamp,
+        block_number,
+        transaction
+      FROM aggregated_position
+
+  liquidator_funding_state:
+    primary_key: id
+    sql: |
+      SELECT
+        id,
+        source,
+        symbol_id,
+        party_b,
+        current_long_rate,
+        current_short_rate,
+        accumulated_long_rate,
+        accumulated_short_rate,
+        epoch_duration,
+        last_updated_epoch,
+        start_epoch,
+        start_epoch_timestamp,
+        last_updated_timestamp,
+        snapshot_long_fee,
+        snapshot_short_fee,
+        update_timestamp
+      FROM funding_fee_state
+
+  liquidator_party_a_balance_state:
+    primary_key: id
+    sql: |
+      SELECT
+        id,
+        source,
+        account,
+        allocated_balance,
+        locked_cva,
+        locked_lf,
+        timestamp,
+        block_number,
+        transaction
+      FROM latest_account_balance
+      WHERE account_type = 'PARTY_A'
+
+sinks:
+  liquidator_position_state_pg:
+    type: postgres
+    table: liquidator_position_state
+    schema: symmio
+    secret_name: LIQUIDATOR_DB
+    from: liquidator_position_state
+
+  liquidator_funding_state_pg:
+    type: postgres
+    table: liquidator_funding_state
+    schema: symmio
+    secret_name: LIQUIDATOR_DB
+    from: liquidator_funding_state
+
+  liquidator_party_a_balance_state_pg:
+    type: postgres
+    table: liquidator_party_a_balance_state
+    schema: symmio
+    secret_name: LIQUIDATOR_DB
+    from: liquidator_party_a_balance_state
+
+  # Optional push sink for lower-latency consumers:
+  # liquidator_position_state_webhook:
+  #   type: webhook
+  #   from: liquidator_position_state
+  #   url: https://your-bot.example.com/goldsky/position-state

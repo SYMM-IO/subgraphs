@@ -1,11 +1,13 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Account, DebugEntity, Quote } from "../../../../generated/schema"
-import { BigInt, log } from "@graphprotocol/graph-ts"
+import { Address, BigInt, log } from "@graphprotocol/graph-ts"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { Version } from "../../../common/BaseHandler"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
+import { onPositionClose } from "../../utils/aggregatedPosition"
+import { syncFundingFeeState } from "../../utils/fundingFeeState"
 
 export function handleClose<T>(_event: ethereum.Event, name: string, version: Version, closeType: string): void {
 	// @ts-ignore
@@ -19,6 +21,19 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		return
 	}
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
+
+	onPositionClose(
+		_event,
+		changetype<Address>(quote.partyA),
+		changetype<Address>(quote.partyB!),
+		quote.symbolId!,
+		quote.positionType,
+		event.params.filledAmount,
+		quote.openedPrice!,
+		quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
+		quote.closedAmount!.equals(quote.quantity!),
+	)
+	if (version == Version.v_0_8_5) syncFundingFeeState(_event, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 	createQuoteEvent(
 		_event,

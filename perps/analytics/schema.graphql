@@ -321,7 +321,15 @@ type FundingFeeState @entity(immutable: false) {
 	partyB: Bytes!
 	currentLongRate: BigInt
 	currentShortRate: BigInt
+	accumulatedLongRate: BigInt
+	accumulatedShortRate: BigInt
 	epochDuration: BigInt
+	lastUpdatedEpoch: BigInt
+	startEpoch: BigInt
+	startEpochTimestamp: BigInt
+	lastUpdatedTimestamp: BigInt
+	snapshotLongFee: BigInt
+	snapshotShortFee: BigInt
 	lastMarketPrice: BigInt
 	updateTimestamp: BigInt!
 }
@@ -384,6 +392,26 @@ type LatestAccountBalance @entity(immutable: false) {
 	pendingLockedLf: BigInt!
 	pendingLockedPartyAmm: BigInt!
 	pendingLockedPartyBmm: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}
+
+type AggregatedPosition @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	partyA: Bytes!
+	partyB: Bytes!
+	symbolId: BigInt!
+	positionType: Int!
+	aggregatedAmount: BigInt!
+	aggregatedNotional: BigInt!
+	weightedPaidFunding: BigInt!
+	openPositionsCount: Int!
+	isActive: Boolean!
+	closedTimestamp: BigInt
+	closedBlockNumber: BigInt
+	closedTransaction: Bytes
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
