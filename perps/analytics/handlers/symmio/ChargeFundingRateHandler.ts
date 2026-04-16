@@ -7,6 +7,7 @@ import { unDecimal } from "../../utils/common"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { onPriceUpdate } from "../../utils/aggregatedPosition"
 
 export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -43,6 +44,18 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			let prevPrice = prevPrices[i]
 			let openAmount = openAmounts[i]
 			let funding = unDecimal(newPrice.minus(prevPrice).abs().times(openAmount))
+
+			onPriceUpdate(
+				_event,
+				version,
+				event.params.partyA,
+				event.params.partyB,
+				quote.symbolId!,
+				quote.positionType,
+				openAmount,
+				prevPrice,
+				newPrice,
+			)
 
 			let paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()

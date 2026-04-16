@@ -80,10 +80,14 @@ export const SOLVERS = new Map<string, string>()
 SOLVERS.set("0x00c069d68bc7420740460dbc3cc3fff9b3742421", "PerpsHub")
 SOLVERS.set("0x7d387771f6e23f353a4afce21af521875c0825d0", "PerpsHub")
 SOLVERS.set("0xdb91d232e93969130272de309d3d914547604426", "PerpsHub")
+SOLVERS.set("0xce932c61904a586c35ddff6e0403f848503bf2fa", "PerpsHub")
+SOLVERS.set("0xd600a4f314d3f1ee8869a340d298a69ff070e574", "Carbon")
+SOLVERS.set("0x223f0ef212c86b3dca3e8e6f9e85de7e3bcd3646", "Carbon")
 // mantle
 SOLVERS.set("0x12de0352dd4187af5797f5147c4179f9624346e2", "PerpsHub")
 SOLVERS.set("0x614bb1f3e0ae5a393979468ed89088f05277312c", "PerpsHub")
 SOLVERS.set("0xf9e39b4b30e26c18d2a725c0397ed5a925efe46b", "PerpsHub")
+SOLVERS.set("0x2deaf8e04c59a0ec5ac9685999826f320e98a778", "PerpsHub")
 SOLVERS.set("0x50e88c692b137b8a51b6017026ef414651e0d5ba", "Rasa")
 SOLVERS.set("0x8c6641e23143718419829e709f093ee6ec922537", "Zenith")
 // bnb
@@ -92,6 +96,7 @@ SOLVERS.set("0x62b0db9e73e17bc090d80c2c0a2414b9a42037f3", "Rasa")
 SOLVERS.set("0xd5a075c88a4188d666fa1e4051913be6782982da", "PerpsHub")
 SOLVERS.set("0xdf077f5f52bc41a9072f9d0e5fb281770bcd1142", "PerpsHub")
 SOLVERS.set("0xdfed11fe4af63b059edbbdf53e9c633b331ed432", "PerpsHub")
+SOLVERS.set("0x9bf1beb57c4489c95dac85120bebc4a200c95aa0", "PerpsHub")
 SOLVERS.set("0x9fa01a45e245015fa685f21763e60c60832ed2d6", "Rasa")
 SOLVERS.set("0x6d1d09586a274517c5a089364a93c02b6b261990", "Zenith")
 SOLVERS.set("0xd5e4b5928d99e7afbea497a301ca5fa2e752b101", "Zenith")
@@ -101,6 +106,7 @@ SOLVERS.set("0x12de0352dd4187af5797f5147c4179f9624346e2", "PerpsHub")
 SOLVERS.set("0x1ecabf0eba136920677c9575faccee36f30592cf", "PerpsHub")
 SOLVERS.set("0xfc4ac3af357ebe6d556dcd72453e9b30f6dc6873", "PerpsHub")
 SOLVERS.set("0xb6e3b44975f2966707a91747f89d2002ff8d62db", "PerpsHub")
+SOLVERS.set("0x6106d70228d8b1802aa6b5ea92366e5be09e634f", "PerpsHub")
 SOLVERS.set("0x9206d9d8f7f1b212a4183827d20de32af3a23c59", "Rasa")
 SOLVERS.set("0x5f3525db7589640dae87d6040a85c49fa43feb2f", "Zenith")
 SOLVERS.set("0x94d2c48821f7667923d7656acc3529b953b40d09", "Zenith")
@@ -108,9 +114,11 @@ SOLVERS.set("0xf49d008921de3cbe9eefb6c2f781cb804d7945f7", "Rasa")
 SOLVERS.set("0x15c544d6a630b88b45cb699522da20b7fda1ea89", "Superflow")
 SOLVERS.set("0xb49cae38c96f6425ce4a46e8220549c6a13362be", "Carbon")
 SOLVERS.set("0x9f20bad77cca97f2f96de88b146603ca3f65bad5", "Carbon")
+SOLVERS.set("0x767e88d36fd7879c35939e9622c9930a17f61e9d", "Carbon")
 SOLVERS.set("0xecd1d9dc751316831d893b1ab3ef0d36392b20db", "Superflow")
 SOLVERS.set("0x939ca7b7de3be50b537bfb59586c20cbe724570b", "PerpsHub")
 SOLVERS.set("0x81631953e0c093e72935c1caa4c7d519b2a0e407", "Rasa")
+SOLVERS.set("0x6015e7e006938911408345afdde43b7a5f3fb55c", "Archon")
 // bera
 SOLVERS.set("0xdfed11fe4af63b059edbbdf53e9c633b331ed432", "PerpsHub")
 SOLVERS.set("0x78b1b8134a4236e69ae3728691e90b31f02c3001", "PerpsHub")
@@ -119,6 +127,7 @@ SOLVERS.set("0x8141c1840f7d190cd24239c22b1e560e08999b12", "PerpsHub")
 SOLVERS.set("0x87fc464fa528260f1eeab94fa20f73fed8536eb7", "PerpsHub")
 SOLVERS.set("0x7d387771f6e23f353a4afce21af521875c0825d0", "PerpsHub")
 SOLVERS.set("0x78e76ac7fec050ca785c19ffaddf57137b890543", "PerpsHub")
+SOLVERS.set("0x3e09dbfe0f6e82b8448a11fb082d44cd575849d3", "PerpsHub")
 // sonic
 SOLVERS.set("0x7d387771f6e23f353a4afce21af521875c0825d0", "PerpsHub")
 SOLVERS.set("0xf25f5aab4e26e75c09ac665c66943ac11b48ae4c", "PerpsHub")
@@ -139,9 +148,17 @@ SOLVERS.set("0x880ed0d338793ca7595306491d665585c22659cf", "PerpsHub")
 // blast
 SOLVERS.set("0xecbd0788bb5a72f9dfdac1ffeaaf9b7c2b26e456", "Rasa")
 // plasma
-// SOLVERS.set("0x78e76ac7fec050ca785c19ffaddf57137b890543", "Orbs")
-// SOLVERS.set("0xdb91d232e93969130272de309d3d914547604426", "Orbs")
-// SOLVERS.set("0x7d387771f6e23f353a4afce21af521875c0825d0", "Orbs")
+SOLVERS.set("0x90c0dcaa8e8796904ea17633f58c9404378fbaa7", "Orbs")
+// monad
+SOLVERS.set("0xae11db902d162168854cbb4b116dc4a2aeee7286", "Orbs")
+SOLVERS.set("0x6b44c878f869cf742a6d4dd60180a19c3b09716e", "Orbs")
+// iota
+SOLVERS.set("0x10b682bf5b380c900bf4507c07e7365873a2293c", "Rasa")
+// coti
+SOLVERS.set("0x61109a6eb070a860b1da2a38f93ca2b884b54f90", "Privex")
+SOLVERS.set("0xbc6823bf53fca3ed2b22b2ba9ead339946031334", "Privex")
+// hyperevm
+SOLVERS.set("0x76bc5889c0cfcc20960b0d81f541595d81a95122", "Superflow")
 
 export const AFFILIATES = new Map<string, string>()
 AFFILIATES.set(ZERO_ADDRESS, "Unknown")
@@ -151,6 +168,7 @@ AFFILIATES.set("0x3334226b27fcdda639620ee10c4dfca30f084969", "Vibe")
 AFFILIATES.set("0x141269e29a770644c34e05b127ab621511f20109", "IntentX")
 AFFILIATES.set("0x263a8220e9351c5d0cc13567db4d7bf58e7470c6", "Xpanse")
 AFFILIATES.set("0xb27691603361c87af0f02dbd88ff569207810346", "Gryps")
+AFFILIATES.set("0xbc029264eb164f36d7dfefc46a607b66c2b4f379", "Carbon")
 // mantle
 AFFILIATES.set("0xecbd0788bb5a72f9dfdac1ffeaaf9b7c2b26e456", "IntentX")
 // bnb
@@ -208,9 +226,24 @@ AFFILIATES.set("0xc362b32af10b28ef775c429d26f6143d143a6e60", "Vibe")
 AFFILIATES.set("0x083267d20dbe6c2b0a83bd0e601dc2299ed99015", "IntentX")
 AFFILIATES.set("0xd6ee1fd75d11989e57b57aa6fd75f558fbf02a5e", "Core")
 // plasma
-// AFFILIATES.set("0x78B1b8134a4236e69aE3728691e90B31f02C3001", "Lonex")
+// AFFILIATES.set("0x78b1b8134a4236e69ae3728691e90b31f02c3001", "Lonex") // conflicts with Sei Gryps
+// monad
+AFFILIATES.set("0xdfed11fe4af63b059edbbdf53e9c633b331ed432", "Spooky")
+AFFILIATES.set("0xbb69a84beee560d29f46e27665087f3829921d47", "Atlantis")
+// sei
+AFFILIATES.set("0x78b1b8134a4236e69ae3728691e90b31f02c3001", "Gryps")
+// iota
+AFFILIATES.set("0xdfc2a55a44ad3d3aabfe8d1c498ea923c6d39526", "Peppy")
+AFFILIATES.set("0x5d51a2d77111f6a0aa1e0144f8025752cb1ceba4", "Cloverfield")
+// coti
+AFFILIATES.set("0xbf318724218ced9a3ff7cfc642c71a0ca1952b0f", "Privex")
 
 export const LIQUIDATORS = [
+	// arbitrum
+	"0x593a40f44638f57cf77571bfdcb3b74d10bd4862",
+	"0x5df743f2a8d6155d0497d434d1bb59f6f09e112a",
+	"0x18ad5aa8948f2b5a571a6f7096a41df68f1301ef",
+	"0xe7f100009a7f06aa08a9d956e9607b5d9481fac1",
 	// mantle
 	"0xacd9623cd291ee157db752a2f599ca7a0e3604e2",
 	"0xcfc8a928bec0950f0c56c6ff0b186d0d8afcf89b",
@@ -251,4 +284,9 @@ export const LIQUIDATORS = [
 	"0x88815411144855049dfd3fb3be88290576d5ad88",
 	"0x03b263078a47cb20beb46e2db41e3bc639d71e4f",
 	"0xd5f626ca164d248b3320ab98db0df8e1882f21ee",
+	// iota
+	"0x848736ed248ccbfa2580e374b53b474ceded85c8",
+	"0xb7975d66b9cb1041b80a4390c0620ec5d6ba7985",
+	"0x01b84d0621183ab04791938d604b89f9fda10d1a",
+	"0x3af2cafcea868ba3e6e2a6c60492d1e5f456cf47",
 ]

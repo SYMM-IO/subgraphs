@@ -5,8 +5,11 @@ import { Version } from "../../../common/BaseHandler"
 import { Account, Quote } from "../../../../generated/schema"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
+import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { onFundingUpdate } from "../../utils/aggregatedPosition"
+import { syncFundingFeeState } from "../../utils/fundingFeeState"
 
 export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulatedFundingFeeHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -33,6 +36,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 
 		super.handleQuote(_event, version)
 
+		let seenFundingStates: Array<string> = []
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
@@ -41,11 +45,24 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 			let newFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
 			let delta = newFunding.minus(prevFundings[i])
 			let openAmount = openAmounts[i]
+			let fundingAmount = unDecimal(delta.abs().times(openAmount))
+
+			onFundingUpdate(
+				_event,
+				version,
+				event.params.partyA,
+				event.params.partyB,
+				quote.symbolId!,
+				quote.positionType,
+				openAmount,
+				prevFundings[i],
+				newFunding,
+			)
 
 			let fundingPaid = BigInt.zero()
 			let fundingReceived = BigInt.zero()
-			if (delta.gt(BigInt.zero())) fundingPaid = delta
-			else if (delta.lt(BigInt.zero())) fundingReceived = delta.abs()
+			if (delta.gt(BigInt.zero())) fundingPaid = fundingAmount
+			else if (delta.lt(BigInt.zero())) fundingReceived = fundingAmount
 
 			let account = Account.load(quote.partyA.toHexString())
 			if (!account) continue
@@ -62,14 +79,23 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 				_event,
 				quoteId,
 				"CHARGE_ACCUMULATED_FUNDING_FEE",
-				new JSONBuilder()
-					.add("fundingPaid", fundingPaid.toString())
-					.add("fundingReceived", fundingReceived.toString())
-					.add("prevPrice", quote.openedPrice!.toString())
-					.add("newPrice", quote.openedPrice!.toString())
-					.add("openQuantity", openAmount.toString())
-					.build(),
+					new JSONBuilder()
+						.add("fundingPaid", fundingPaid.toString())
+						.add("fundingReceived", fundingReceived.toString())
+						.add("prevFunding", prevFundings[i].toString())
+						.add("newFunding", newFunding.toString())
+						.add("fundingDelta", delta.toString())
+						.add("prevPrice", quote.openedPrice!.toString())
+						.add("newPrice", quote.openedPrice!.toString())
+						.add("openQuantity", openAmount.toString())
+						.build(),
 			)
+
+			let fundingStateKey = quote.symbolId!.toString() + "-" + event.params.partyB.toHexString()
+			if (!seenFundingStates.includes(fundingStateKey)) {
+				seenFundingStates.push(fundingStateKey)
+				syncFundingFeeState(_event, version, quote.symbolId!, event.params.partyB)
+			}
 		}
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)

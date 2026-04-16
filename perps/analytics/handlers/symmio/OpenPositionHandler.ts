@@ -8,6 +8,8 @@ import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { onPositionOpen } from "../../utils/aggregatedPosition"
+import { syncFundingFeeState } from "../../utils/fundingFeeState"
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -60,6 +62,18 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 				.addNullable("partyBmm", quote.partyBmm ? quote.partyBmm!.toString() : null)
 				.build(),
 		)
+		onPositionOpen(
+			_event,
+			version,
+			event.params.partyA,
+			event.params.partyB,
+			quote.symbolId!,
+			quote.positionType,
+			event.params.filledAmount,
+			event.params.openedPrice,
+			quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
+		)
+		if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, event.params.partyB)
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}

@@ -6,6 +6,7 @@ import { Version } from "../../../common/BaseHandler"
 import { Quote } from "../../../../generated/schema"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { onPriceUpdate } from "../../utils/aggregatedPosition"
 
 export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,6 +28,19 @@ export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<
 			let quote = Quote.load(data.quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
 
+			let openAmount = quote.quantity!.minus(quote.closedAmount!)
+			onPriceUpdate(
+				_event,
+				version,
+				changetype<Address>(quote.partyA),
+				event.params.partyB,
+				quote.symbolId!,
+				quote.positionType,
+				openAmount,
+				prevPrices[i],
+				event.params.updatedPrices[i],
+			)
+
 			createQuoteEvent(
 				_event,
 				data.quoteId,
@@ -34,7 +48,7 @@ export class SettleUpnlUnifiedHandler<T> extends CommonSettleUpnlUnifiedHandler<
 				new JSONBuilder()
 					.add("prevPrice", prevPrices[i].toString())
 					.add("newPrice", event.params.updatedPrices[i].toString())
-					.add("openQuantity", quote.quantity!.minus(quote.closedAmount!).toString())
+					.add("openQuantity", openAmount.toString())
 					.build(),
 			)
 		}

@@ -229,10 +229,17 @@
 		"UpdateAccumulatedFundingFee"
 	],
 	"FundingFeeState": [
+		"OpenPosition",
+		"FillCloseRequest",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"ADLClose",
 		"SetLongFundingFee",
 		"SetShortFundingFee",
 		"UpdateAccumulatedFundingFee",
-		"SetEpochDuration"
+		"SetEpochDuration",
+		"ChargeAccumulatedFundingFee",
+		"LiquidatePositionsForClearingHouse"
 	],
 	"WithdrawRequest": [
 		"WithdrawInitiated",
@@ -274,5 +281,19 @@
 		"ForceClosePartyBInsolvent",
 		"RequestToCancelQuote",
 		"DeferredLiquidatePartyA"
+	],
+	"AggregatedPosition": [
+		"OpenPosition",
+		"FillCloseRequest",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"LiquidatePositionsForClearingHouse",
+		"ADLClose",
+		"ChargeFundingRate",
+		"ChargeAccumulatedFundingFee",
+		"SettleUpnl",
+		"SettleUpnlUnified"
 	]
 }

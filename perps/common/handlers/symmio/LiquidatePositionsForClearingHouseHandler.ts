@@ -19,6 +19,7 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 			let data = getQuoteData(version, event.address, quoteId)
 			if (!data) continue
 			let avgClosedPrice = data.avgClosedPrice
+			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
 
 			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)
 			if (quote.liquidateAmount!.gt(BigInt.zero())) {

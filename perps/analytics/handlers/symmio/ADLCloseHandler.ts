@@ -9,6 +9,8 @@ import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { onPositionClose } from "../../utils/aggregatedPosition"
+import { syncFundingFeeState } from "../../utils/fundingFeeState"
 
 export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -26,6 +28,20 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 		}
 
 		const additionalVolume = event.params.amount.times(event.params.price).div(BigInt.fromString("10").pow(18))
+
+		onPositionClose(
+			_event,
+			version,
+			changetype<Address>(quote.partyA),
+			changetype<Address>(quote.partyB!),
+			quote.symbolId!,
+			quote.positionType,
+			event.params.amount,
+			quote.openedPrice!,
+			quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
+			quote.closedAmount!.equals(quote.quantity!),
+		)
+		syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 		createQuoteEvent(
 			_event,

@@ -3,6 +3,7 @@ import {
 	symmio_0_8_5,
 	symmio_0_8_5__balanceInfoOfPartyAResult,
 	symmio_0_8_5__balanceInfoOfPartyBResult,
+	symmio_0_8_5__getFundingFeesOfPartyBResultValue0Struct,
 	symmio_0_8_5__getLiquidatedStateOfPartyAResultValue0Struct,
 	symmio_0_8_5__getQuoteResultValue0Struct,
 } from "../../generated/symmio_0_8_5/symmio_0_8_5"
@@ -34,6 +35,12 @@ export function getBalanceInfoOfPartyA(address: Address, partyA: Address): symmi
 export function getBalanceInfoOfPartyB(address: Address, partyA: Address, partyB: Address): symmio_0_8_5__balanceInfoOfPartyBResult | null {
 	const contract = symmio_0_8_5.bind(address)
 	let result = contract.try_balanceInfoOfPartyB(partyB, partyA)
+	return result.reverted ? null : result.value
+}
+
+export function getFundingFeesOfPartyB(address: Address, symbolId: BigInt, partyB: Address): symmio_0_8_5__getFundingFeesOfPartyBResultValue0Struct | null {
+	const contract = symmio_0_8_5.bind(address)
+	let result = contract.try_getFundingFeesOfPartyB(symbolId, partyB)
 	return result.reverted ? null : result.value
 }
 

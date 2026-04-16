@@ -10,6 +10,8 @@ import { unDecimal } from "../../utils/common"
 import { getQuoteData } from "../../../common/VersionedQuoteLoader"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { onPositionClose } from "../../utils/aggregatedPosition"
+import { syncFundingFeeState } from "../../utils/fundingFeeState"
 
 export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidatePositionsForClearingHouseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,6 +29,20 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends CommonLiquidat
 			let liquidAmount = quote.liquidateAmount!
 			let liquidPrice = quote.liquidatePrice!
 			const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
+
+			onPositionClose(
+				_event,
+				version,
+				changetype<Address>(quote.partyA),
+				changetype<Address>(quote.partyB!),
+				quote.symbolId!,
+				quote.positionType,
+				liquidAmount,
+				quote.openedPrice!,
+				quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
+				true,
+			)
+			syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 			createQuoteEvent(
 				_event,

@@ -80,6 +80,8 @@ import {SendQuoteHandler} from './handlers/symmio/SendQuoteHandler'
 import {SendQuote} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetCollateralHandler} from './handlers/symmio/SetCollateralHandler'
 import {SetCollateral} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {SetEntityMetadataHandler} from './handlers/symmio/SetEntityMetadataHandler'
+import {SetEntityMetadata} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetEpochDurationHandler} from './handlers/symmio/SetEpochDurationHandler'
 import {SetEpochDuration} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetFeeCollectorHandler} from './handlers/symmio/SetFeeCollectorHandler'
@@ -377,6 +379,12 @@ export function handleSendQuote(event: SendQuote): void {
 
 export function handleSetCollateral(event: SetCollateral): void {
     let handler = new SetCollateralHandler<SetCollateral>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleSetEntityMetadata(event: SetEntityMetadata): void {
+    let handler = new SetEntityMetadataHandler<SetEntityMetadata>()
     handler.handle(event, Version.v_0_8_5)
 }
 

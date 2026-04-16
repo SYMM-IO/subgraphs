@@ -40,6 +40,7 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 				continue
 			}
 			let avgClosedPrice = data.avgClosedPrice
+			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
 
 			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)
 			if (quote.liquidateAmount!.gt(BigInt.zero())) {

@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { Quote } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { QuoteStatus } from "../../../analytics/utils/constants"
 
@@ -11,6 +12,14 @@ export class ADLCloseHandler<T> extends BaseHandler {
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return
 		quote.globalCounter = super.handleGlobalCounter()
+		let data = getQuoteData(version, event.address, event.params.quoteId)
+		if (data) {
+			quote.cva = data.cva
+			quote.partyAmm = data.partyAmm
+			quote.partyBmm = data.partyBmm
+			quote.lf = data.lf
+			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
+		}
 		quote.closedPrice = event.params.price
 		let denominator = quote.closedAmount!.plus(event.params.amount)
 		if (denominator.gt(BigInt.zero())) {
