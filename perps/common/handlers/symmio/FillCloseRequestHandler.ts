@@ -5,6 +5,10 @@ import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { QuoteStatus } from "../../../analytics/utils/constants"
 
+function isClosePendingStatus(status: i32): boolean {
+	return status == QuoteStatus.CLOSE_PENDING || status == QuoteStatus.CANCEL_CLOSE_PENDING
+}
+
 export class FillCloseRequestHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
@@ -42,7 +46,13 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 				.div(denominator)
 		}
 		quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
-		if (quote.quantity! == quote.closedAmount!) quote.quoteStatus = QuoteStatus.CLOSED
+		quote.quoteStatus = event.params.quoteStatus
+		if (isClosePendingStatus(event.params.quoteStatus)) {
+			quote.quantityToClose = quote.quantityToClose!.minus(event.params.filledAmount)
+		} else {
+			quote.quantityToClose = BigInt.zero()
+			quote.closePrice = BigInt.zero()
+		}
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "FillCloseRequest", _event)
 	}

@@ -1,6 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { DebugEntity, Quote } from "../../../../generated/schema"
-import { ethereum, log } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 
 export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
@@ -17,6 +17,8 @@ export class AcceptCancelCloseRequestHandler<T> extends BaseHandler {
 		}
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteStatus = event.params.quoteStatus
+		quote.quantityToClose = BigInt.zero()
+		quote.closePrice = BigInt.zero()
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "AcceptCancelCloseRequest", _event)
 	}
