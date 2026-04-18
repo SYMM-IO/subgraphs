@@ -96,6 +96,8 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.marketPrice = marketPrice
 		quote.averageClosedPrice = BigInt.fromI32(0)
 		quote.closedAmount = BigInt.fromI32(0)
+		quote.quantityToClose = BigInt.zero()
+		quote.closePrice = BigInt.zero()
 		quote.userPaidFunding = BigInt.fromI32(0)
 		quote.userReceivedFunding = BigInt.fromI32(0)
 		quote.blockNumber = event.block.number

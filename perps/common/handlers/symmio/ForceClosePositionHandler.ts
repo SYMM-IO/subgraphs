@@ -34,6 +34,8 @@ export class ForceClosePositionHandler<T> extends BaseHandler {
 		}
 		quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
 		quote.quoteStatus = event.params.quoteStatus
+		quote.quantityToClose = BigInt.zero()
+		quote.closePrice = BigInt.zero()
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "ForceClosePosition", _event)
 	}

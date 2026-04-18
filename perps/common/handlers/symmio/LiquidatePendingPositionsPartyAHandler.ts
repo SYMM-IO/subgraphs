@@ -34,6 +34,10 @@ export class LiquidatePendingPositionsPartyAHandler<T> extends BaseHandler {
 				break
 			}
 			default: {
+				// v0.8.1/v0.8.2 emit LiquidatePendingPositionsPartyA without quoteIds or liquidationId
+				// on the event payload. The contract clears partyAPendingQuotes before emission,
+				// so there is no on-chain way to recover the set of affected quoteIds here.
+				// v0.8.0 does not emit this event. Leave quote state alone.
 				quoteIds = []
 				break
 			}

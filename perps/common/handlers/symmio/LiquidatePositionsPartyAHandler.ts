@@ -116,6 +116,8 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 			}
 			quote.averageClosedPrice = avgClosedPrice
 			quote.closedAmount = quote.quantity
+			quote.quantityToClose = BigInt.zero()
+			quote.closePrice = BigInt.zero()
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePositionsPartyA", _event)
 		}

@@ -43,6 +43,8 @@ export enum QuoteStatus {
 	LIQUIDATED_PENDING,
 }
 
+// Mirrors SharedEvents.BalanceChangeType in perps-core v0.8.5.
+// v0.8.0-v0.8.3 only emit values 0-9 (LF_OUT); v0.8.4 adds 10-11; v0.8.5 adds 12-13.
 export enum BalanceChangeType {
 	ALLOCATE,
 	DEALLOCATE,
@@ -54,9 +56,10 @@ export enum BalanceChangeType {
 	CVA_OUT,
 	LF_IN,
 	LF_OUT,
-	DEPOSIT,
-	WITHDRAW,
-	BRIDGE,
+	FUNDING_FEE_IN,
+	FUNDING_FEE_OUT,
+	DEFERRED_BALANCE_IN,
+	DEFERRED_BALANCE_OUT,
 }
 
 // @ts-ignore
@@ -71,9 +74,10 @@ balanceChangeTypes.set(BalanceChangeType.CVA_IN, "CVA_IN")
 balanceChangeTypes.set(BalanceChangeType.CVA_OUT, "CVA_OUT")
 balanceChangeTypes.set(BalanceChangeType.LF_IN, "LF_IN")
 balanceChangeTypes.set(BalanceChangeType.LF_OUT, "LF_OUT")
-balanceChangeTypes.set(BalanceChangeType.DEPOSIT, "DEPOSIT")
-balanceChangeTypes.set(BalanceChangeType.WITHDRAW, "WITHDRAW")
-balanceChangeTypes.set(BalanceChangeType.BRIDGE, "BRIDGE")
+balanceChangeTypes.set(BalanceChangeType.FUNDING_FEE_IN, "FUNDING_FEE_IN")
+balanceChangeTypes.set(BalanceChangeType.FUNDING_FEE_OUT, "FUNDING_FEE_OUT")
+balanceChangeTypes.set(BalanceChangeType.DEFERRED_BALANCE_IN, "DEFERRED_BALANCE_IN")
+balanceChangeTypes.set(BalanceChangeType.DEFERRED_BALANCE_OUT, "DEFERRED_BALANCE_OUT")
 
 export const SOLVERS = new Map<string, string>()
 // arbitrum

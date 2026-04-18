@@ -23,7 +23,7 @@ export class WithdrawInitiatedHandler<T> extends CommonWithdrawInitiatedHandler<
 		wr.amount = totalAmount
 		wr.speedUp = event.params.speedUp
 		wr.cooldownEndTime = event.params.cooldownEndTime
-		wr.status = "INITIATED"
+		wr.status = "PENDING"
 		wr.timestamp = _event.block.timestamp
 		wr.updateTimestamp = _event.block.timestamp
 		wr.blockNumber = _event.block.number

@@ -54,6 +54,8 @@ import {LiquidatePositionsPartyBHandler} from './handlers/symmio/LiquidatePositi
 import {LiquidatePositionsPartyB} from '../../generated/symmio_0_8_3/symmio_0_8_3'
 import {LiquidationDisputedHandler} from './handlers/symmio/LiquidationDisputedHandler'
 import {LiquidationDisputed} from '../../generated/symmio_0_8_3/symmio_0_8_3'
+import {ResolveLiquidationDisputeHandler} from './handlers/symmio/ResolveLiquidationDisputeHandler'
+import {ResolveLiquidationDispute} from '../../generated/symmio_0_8_3/symmio_0_8_3'
 import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
 import {LockQuote} from '../../generated/symmio_0_8_3/symmio_0_8_3'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
@@ -259,6 +261,12 @@ export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyB):
 
 export function handleLiquidationDisputed(event: LiquidationDisputed): void {
     let handler = new LiquidationDisputedHandler<LiquidationDisputed>()
+    handler.handle(event, Version.v_0_8_3)
+}
+
+
+export function handleResolveLiquidationDispute(event: ResolveLiquidationDispute): void {
+    let handler = new ResolveLiquidationDisputeHandler<ResolveLiquidationDispute>()
     handler.handle(event, Version.v_0_8_3)
 }
 

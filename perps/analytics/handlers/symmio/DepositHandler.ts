@@ -5,7 +5,6 @@ import { Version } from "../../../common/BaseHandler"
 import { getConfiguration } from "../../utils/builders"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
-import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 
 export class DepositHandler<T> extends CommonDepositHandler<T> {
@@ -22,7 +21,7 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 		updateActivityTimestamps(account, event.block.timestamp, event.address)
 		let deposit = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		deposit.source = event.address
-		deposit.type = balanceChangeTypes.get(BalanceChangeType.DEPOSIT)
+		deposit.type = "DEPOSIT"
 		deposit.timestamp = event.block.timestamp
 		deposit.blockNumber = event.block.number
 		deposit.transaction = event.transaction.hash

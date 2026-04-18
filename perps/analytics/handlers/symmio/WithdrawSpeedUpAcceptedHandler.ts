@@ -13,7 +13,7 @@ export class WithdrawSpeedUpAcceptedHandler<T> extends CommonWithdrawSpeedUpAcce
 		let id = event.params.requestId.toString() + "-" + _event.address.toHexString()
 		let wr = WithdrawRequest.load(id)
 		if (!wr) return
-		wr.cooldownEndTime = event.params.newCooldown
+		wr.cooldownEndTime = wr.timestamp.plus(event.params.newCooldown)
 		wr.updateTimestamp = _event.block.timestamp
 		wr.save()
 	}

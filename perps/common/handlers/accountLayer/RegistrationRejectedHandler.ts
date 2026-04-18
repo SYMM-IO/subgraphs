@@ -9,6 +9,12 @@ export class RegistrationRejectedHandler<T> extends BaseAccountLayerHandler {
 		let affiliate = Affiliate.load(event.params.affiliate.toHexString())
 		if (!affiliate) return
 		affiliate.status = "REJECTED"
+		affiliate.pendingAdmin = null
+		affiliate.feeDistributor = null
+		affiliate.symmioShare = null
+		affiliate.expressRate = null
+		affiliate.virtualProvider = null
+		affiliate.stakeholdersUpdatePending = false
 		affiliate.updateTimestamp = event.block.timestamp
 		affiliate.save()
 	}

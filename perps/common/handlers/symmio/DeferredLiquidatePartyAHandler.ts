@@ -15,7 +15,7 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.totalUnrealizedLoss = event.params.totalUnrealizedLoss
 		entity.deficit = BigInt.zero()
 		entity.liquidationFee = BigInt.zero()
-		// entity.timestamp = event.params.timestamp
+		entity.timestamp = _event.block.timestamp
 		entity.involvedPartyBCounts = BigInt.zero()
 		entity.partyAAccumulatedUpnl = BigInt.zero()
 		entity.disputed = false

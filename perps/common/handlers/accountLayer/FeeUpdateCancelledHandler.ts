@@ -8,6 +8,7 @@ export class FeeUpdateCancelledHandler<T> extends BaseAccountLayerHandler {
 		const event = changetype<T>(_event)
 		let affiliate = Affiliate.load(event.params.affiliate.toHexString())
 		if (!affiliate) return
+		affiliate.stakeholdersUpdatePending = false
 		affiliate.updateTimestamp = event.block.timestamp
 		affiliate.save()
 	}

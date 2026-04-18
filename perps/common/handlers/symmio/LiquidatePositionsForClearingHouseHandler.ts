@@ -13,7 +13,11 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
 			quote.globalCounter = super.handleGlobalCounter()
-			quote.liquidatedSide = 0
+			if (quote.partyB !== null && quote.partyB!.equals(event.params.subject)) {
+				quote.liquidatedSide = 1
+			} else {
+				quote.liquidatedSide = 0
+			}
 			quote.quoteStatus = 8
 
 			let data = getQuoteData(version, event.address, quoteId)
@@ -32,6 +36,8 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 			}
 			quote.averageClosedPrice = avgClosedPrice
 			quote.closedAmount = quote.quantity
+			quote.quantityToClose = BigInt.zero()
+			quote.closePrice = BigInt.zero()
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePositionsForClearingHouse", _event)
 		}

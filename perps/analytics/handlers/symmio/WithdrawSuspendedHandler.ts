@@ -1,8 +1,8 @@
-
 import { WithdrawSuspendedHandler as CommonWithdrawSuspendedHandler } from "../../../common/handlers/symmio/WithdrawSuspendedHandler"
 import { WithdrawRequest } from "../../../../generated/schema"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { Address, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
+import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 
 export class WithdrawSuspendedHandler<T> extends CommonWithdrawSuspendedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -16,5 +16,6 @@ export class WithdrawSuspendedHandler<T> extends CommonWithdrawSuspendedHandler<
 		wr.status = "SUSPENDED"
 		wr.updateTimestamp = _event.block.timestamp
 		wr.save()
+		updatePartyALatestBalance(_event, version, Address.fromBytes(wr.user))
 	}
 }

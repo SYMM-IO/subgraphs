@@ -3,6 +3,10 @@ import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { Account, SubAccount } from "../../../../generated/schema"
 
 export class EditAccountNameHandler<T> extends BaseAccountLayerHandler {
+	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
+		this.handleAccount(_event, version)
+	}
+
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)

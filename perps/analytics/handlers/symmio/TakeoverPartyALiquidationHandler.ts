@@ -8,6 +8,6 @@ export class TakeoverPartyALiquidationHandler<T> extends CommonTakeoverPartyALiq
         // @ts-ignore
         const event = changetype<T>(_event)
         super.handle(_event, version)
-
+        super.handleQuote(_event, version)
     }
 }

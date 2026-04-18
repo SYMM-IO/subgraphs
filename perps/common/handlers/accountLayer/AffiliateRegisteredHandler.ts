@@ -1,6 +1,7 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { Affiliate, SymmioEntity } from "../../../../generated/schema"
+import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
 
 export class AffiliateRegisteredHandler<T> extends BaseAccountLayerHandler {
 	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -9,7 +10,9 @@ export class AffiliateRegisteredHandler<T> extends BaseAccountLayerHandler {
 		let affiliate = new Affiliate(event.params.affiliate.toHexString())
 		affiliate.address = event.params.affiliate
 		affiliate.name = event.params.name
-		affiliate.admin = event.transaction.from
+		let contract = accountLayer_1.bind(_event.address)
+		let adminResult = contract.try_getAffiliateAdmin(event.params.affiliate)
+		affiliate.admin = adminResult.reverted ? event.transaction.from : adminResult.value
 		affiliate.status = "PENDING"
 		affiliate.stakeholdersUpdatePending = false
 		affiliate.source = event.address

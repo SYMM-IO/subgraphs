@@ -13,6 +13,7 @@ export class SettleUpnlUnifiedHandler<T> extends BaseHandler {
 
 			let quote = Quote.load(data.quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
+			quote.globalCounter = super.handleGlobalCounter()
 			quote.openedPrice = event.params.updatedPrices[i]
 			quote.save()
 

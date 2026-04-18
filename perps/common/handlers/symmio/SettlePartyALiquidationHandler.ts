@@ -1,5 +1,5 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { LiquidationDetail } from "../../../../generated/schema"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
@@ -58,20 +58,45 @@ export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 		let entity = LiquidationDetail.load(entityId)
 		if (!entity) return
 
-		entity.settled = true
-		entity.settledPartyBs = partyBs
+		let amounts: BigInt[] = []
 		if (version == Version.v_0_8_5) {
 			// @ts-ignore
-			entity.settledAmounts = changetype<SettlePartyALiquidation_0_8_5>(_event).params.amounts
+			let a = changetype<SettlePartyALiquidation_0_8_5>(_event).params.amounts
+			for (let i = 0; i < a.length; i++) amounts.push(a[i])
 		} else if (version == Version.v_0_8_4) {
 			// @ts-ignore
-			entity.settledAmounts = changetype<SettlePartyALiquidation_0_8_4>(_event).params.amounts
+			let a = changetype<SettlePartyALiquidation_0_8_4>(_event).params.amounts
+			for (let i = 0; i < a.length; i++) amounts.push(a[i])
 		} else if (version == Version.v_0_8_3) {
 			// @ts-ignore
-			entity.settledAmounts = changetype<SettlePartyALiquidation_0_8_3>(_event).params.amounts
+			let a = changetype<SettlePartyALiquidation_0_8_3>(_event).params.amounts
+			for (let i = 0; i < a.length; i++) amounts.push(a[i])
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
-			entity.settledAmounts = changetype<SettlePartyALiquidation_0_8_2>(_event).params.amounts
+			let a = changetype<SettlePartyALiquidation_0_8_2>(_event).params.amounts
+			for (let i = 0; i < a.length; i++) amounts.push(a[i])
+		}
+
+		let mergedPartyBs: Bytes[] = []
+		let existingPartyBs = entity.settledPartyBs
+		if (existingPartyBs !== null) {
+			for (let i = 0; i < existingPartyBs.length; i++) mergedPartyBs.push(existingPartyBs[i])
+		}
+		for (let i = 0; i < partyBs.length; i++) mergedPartyBs.push(partyBs[i])
+		entity.settledPartyBs = mergedPartyBs
+
+		let mergedAmounts: BigInt[] = []
+		let existingAmounts = entity.settledAmounts
+		if (existingAmounts !== null) {
+			for (let i = 0; i < existingAmounts.length; i++) mergedAmounts.push(existingAmounts[i])
+		}
+		for (let i = 0; i < amounts.length; i++) mergedAmounts.push(amounts[i])
+		entity.settledAmounts = mergedAmounts
+
+		// Only mark fully settled when the on-chain involvedPartyBCounts hits 0.
+		let liqState = getLiquidationStateData(version, event.address, event.params.partyA)
+		if (liqState && liqState.involvedPartyBCounts.equals(BigInt.zero())) {
+			entity.settled = true
 		}
 		entity.save()
 	}

@@ -14,8 +14,8 @@ export class SetFeeCollectorHandler<T> extends BaseHandler {
 		let feeColShare = FeeCollectorShare.load(event.params.newFeeCollector.toHexString())
 		if (!feeColShare) {
 			feeColShare = new FeeCollectorShare(event.params.newFeeCollector.toHexString())
-			feeColShare.symmioShare = getSymmioSharePercent(event.params.newFeeCollector)
-			feeColShare.save()
 		}
+		feeColShare.symmioShare = getSymmioSharePercent(event.params.newFeeCollector)
+		feeColShare.save()
 	}
 }

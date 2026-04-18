@@ -8,7 +8,7 @@ export class AffiliateApprovedHandler<T> extends BaseAccountLayerHandler {
 		const event = changetype<T>(_event)
 		let affiliate = Affiliate.load(event.params.affiliate.toHexString())
 		if (affiliate) {
-			affiliate.status = "APPROVED"
+			affiliate.status = "ACTIVE"
 			affiliate.feeDistributor = event.params.feeDistributor
 			affiliate.updateTimestamp = event.block.timestamp
 			affiliate.save()

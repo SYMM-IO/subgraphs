@@ -13,7 +13,7 @@ export class WithdrawAcceptedHandler<T> extends CommonWithdrawAcceptedHandler<T>
 		let id = event.params.requestId.toString() + "-" + _event.address.toHexString()
 		let wr = WithdrawRequest.load(id)
 		if (!wr) return
-		wr.status = "ACCEPTED"
+		wr.status = "PROVIDER_ACCEPTED"
 		wr.updateTimestamp = _event.block.timestamp
 		wr.save()
 	}

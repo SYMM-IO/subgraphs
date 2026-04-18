@@ -173,6 +173,7 @@
 		"SetSymbolsPrices",
 		"LiquidatePartyA",
 		"LiquidationDisputed",
+		"ResolveLiquidationDispute",
 		"SettlePartyALiquidation",
 		"FullyLiquidatedPartyA"
 	],
