@@ -15,6 +15,7 @@ Goldsky has no public management API, so every action still shells out to the
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import queue
 import re
@@ -22,6 +23,7 @@ import subprocess
 import threading
 import time
 import uuid
+from contextlib import asynccontextmanager
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -60,6 +62,33 @@ STAGE_CONFIGS = {
     "base_lc_test",
     "fantom_just_8_0",
 }
+
+# Chain config key → DefiLlama icon slug. Icons served from
+# https://icons.llamao.fi/icons/chains/rsz_<slug>. Chains not listed use
+# their own key as the slug (most match).
+CHAIN_LOGO_SLUG: dict[str, str] = {
+    "base": "base",
+    "base_lc": "base",
+    "base_lc_test": "base",
+    "arbitrum": "arbitrum",
+    "bnb": "bsc",
+    "blast": "blast",
+    "hyperevm": "hyperliquid",
+    "hyperevm_stage": "hyperliquid",
+    "mantle": "mantle",
+    "plasma": "plasma-2",
+    "sonic": "sonic",
+    "bera": "berachain",
+    "fantom_just_8_0": "fantom",
+    "mode": "mode",
+}
+
+
+def chain_logo_url(chain_key: str) -> str | None:
+    slug = CHAIN_LOGO_SLUG.get(chain_key)
+    if slug is None:
+        return None
+    return f"https://icons.llamao.fi/icons/chains/rsz_{slug}?w=48&h=48"
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -314,12 +343,17 @@ class FleetStore:
 
 
 class Job:
-    __slots__ = ("id", "label", "cmd", "status", "rc", "started", "ended", "lines", "_q", "_thread")
+    """Unified activity item — tracks both long-running subprocess jobs (deploys)
+    and short-lived operations (tag, delete, promote, refresh) so the user can
+    see every action the server is doing in one activity pane."""
 
-    def __init__(self, label: str, cmd: list[str]) -> None:
+    __slots__ = ("id", "label", "kind", "cmd", "status", "rc", "started", "ended", "lines", "_q", "_thread")
+
+    def __init__(self, label: str, cmd: list[str] | None = None, kind: str = "op") -> None:
         self.id = uuid.uuid4().hex[:12]
         self.label = label
-        self.cmd = cmd
+        self.kind = kind  # deploy|tag|untag|delete|promote|refresh|op
+        self.cmd = cmd or []
         self.status = "queued"  # queued|running|done|failed
         self.rc: int | None = None
         self.started: float = 0.0
@@ -335,6 +369,7 @@ class Job:
     def _run(self) -> None:
         self.status = "running"
         self.started = time.time()
+        broadcast_activity()
         try:
             proc = subprocess.Popen(
                 self.cmd,
@@ -361,19 +396,115 @@ class Job:
         finally:
             self.ended = time.time()
             self._q.put(None)  # sentinel for SSE consumers
+            broadcast_activity()
+
+    def begin(self) -> None:
+        """Mark a synchronous activity as started (no subprocess)."""
+        self.status = "running"
+        self.started = time.time()
+
+    def finish(self, ok: bool, detail: str = "") -> None:
+        """Mark a synchronous activity as done/failed."""
+        self.ended = time.time()
+        self.status = "done" if ok else "failed"
+        self.rc = 0 if ok else 1
+        if detail:
+            for line in detail.splitlines():
+                if line.strip():
+                    self.lines.append(line)
+        broadcast_activity()
+
+    def append(self, line: str) -> None:
+        self.lines.append(line)
 
     def tail(self) -> queue.Queue[str | None]:
         return self._q
 
 
 _JOBS: dict[str, Job] = {}
+_JOBS_LOCK = threading.Lock()
+_MAX_JOBS = 40
 
 
-def start_job(label: str, cmd: list[str]) -> Job:
-    job = Job(label=label, cmd=cmd)
-    _JOBS[job.id] = job
+def _prune_jobs() -> None:
+    """Keep the newest _MAX_JOBS items; drop oldest completed ones."""
+    if len(_JOBS) <= _MAX_JOBS:
+        return
+    # Sort by started time, keep running ones always, trim the rest
+    items = sorted(_JOBS.values(), key=lambda j: j.started or 0, reverse=True)
+    kept = []
+    for j in items:
+        if j.status == "running" or len(kept) < _MAX_JOBS:
+            kept.append(j)
+    kept_ids = {j.id for j in kept}
+    for k in list(_JOBS.keys()):
+        if k not in kept_ids:
+            del _JOBS[k]
+
+
+def start_job(label: str, cmd: list[str], kind: str = "deploy") -> Job:
+    """Launch a long-running subprocess job."""
+    with _JOBS_LOCK:
+        job = Job(label=label, cmd=cmd, kind=kind)
+        _JOBS[job.id] = job
+        _prune_jobs()
     job.start()
+    broadcast_activity()
     return job
+
+
+def register_activity(label: str, kind: str = "op") -> Job:
+    """Register a short-lived activity that the endpoint will complete synchronously."""
+    with _JOBS_LOCK:
+        job = Job(label=label, kind=kind)
+        _JOBS[job.id] = job
+        _prune_jobs()
+    job.begin()
+    broadcast_activity()
+    return job
+
+
+# ────────────────────────────────────────────────────────────────────
+# Server-Sent Events: push activity updates to connected clients
+# ────────────────────────────────────────────────────────────────────
+
+
+_event_loop: asyncio.AbstractEventLoop | None = None
+_sse_subscribers: set["asyncio.Queue[str]"] = set()
+_sse_lock = threading.Lock()
+
+
+def _sse_message(event: str, html: str) -> str:
+    """Format an SSE message with possibly multi-line HTML payload."""
+    lines = html.splitlines() or [""]
+    body = "\n".join(f"data: {line}" for line in lines)
+    return f"event: {event}\n{body}\n\n"
+
+
+def broadcast_activity() -> None:
+    """Push fresh activity-pane HTML to every connected SSE subscriber.
+    Safe to call from any thread — schedules the push on the event loop."""
+    if _event_loop is None:
+        return
+    try:
+        message = _sse_message("activity", render_jobs_panel())
+    except Exception:
+        return
+
+    def _push() -> None:
+        with _sse_lock:
+            subs = list(_sse_subscribers)
+        for q in subs:
+            try:
+                q.put_nowait(message)
+            except asyncio.QueueFull:
+                pass  # drop updates to slow subscribers rather than block
+
+    try:
+        _event_loop.call_soon_threadsafe(_push)
+    except RuntimeError:
+        # loop closed (e.g. during shutdown) — silent no-op
+        pass
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -431,6 +562,66 @@ BASE_HTML = r"""
   :root { color-scheme: dark; }
   body { background: #0b0d10; color: #e6e8eb; }
   .card { background: #14171c; border: 1px solid #242830; border-radius: 10px; }
+
+  /* Two-column page: main content left, sticky activity pane right */
+  .page-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px;
+               gap: 20px; max-width: 1680px; margin: 0 auto; padding: 20px 24px;
+               align-items: start; }
+  .page-grid > main { min-width: 0; }
+  .page-grid > aside#activity-pane { position: sticky; top: 20px;
+                max-height: calc(100vh - 40px); overflow-y: auto;
+                padding: 0; display: flex; flex-direction: column; }
+  @media (max-width: 1180px) {
+    .page-grid { grid-template-columns: 1fr; padding: 16px; }
+    .page-grid > aside#activity-pane { position: static; max-height: 60vh; }
+  }
+
+  /* Activity pane internals */
+  .activity-header { padding: 12px 14px; border-bottom: 1px solid #1e242d;
+                     display: flex; align-items: center; justify-content: space-between;
+                     position: sticky; top: 0; background: #14171c; z-index: 1; }
+  .activity-list { display: flex; flex-direction: column; padding: 6px; gap: 2px; }
+  .activity-empty { padding: 28px 20px; text-align: center; color: #6a7280; font-size: 12px; }
+  .act-item { padding: 8px 10px; border-radius: 7px; border: 1px solid transparent;
+              display: flex; gap: 10px; align-items: flex-start; transition: background .1s; }
+  .act-item:hover { background: rgba(255,255,255,.02); border-color: #1e242d; }
+  .act-icon { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 10px; font-weight: 600; }
+  .act-icon.running { background: rgba(210,153,34,.18); color: #e5c075;
+                       border: 1px solid rgba(210,153,34,.4); }
+  .act-icon.running::before { content: ''; width: 9px; height: 9px; border: 2px solid currentColor;
+                               border-right-color: transparent; border-radius: 50%;
+                               animation: spin .7s linear infinite; }
+  .act-icon.done { background: rgba(46,160,67,.18); color: #7ee195;
+                    border: 1px solid rgba(46,160,67,.4); }
+  .act-icon.done::before { content: '✓'; }
+  .act-icon.failed { background: rgba(248,81,73,.18); color: #ff9a93;
+                      border: 1px solid rgba(248,81,73,.4); }
+  .act-icon.failed::before { content: '✗'; }
+  .act-body { flex: 1; min-width: 0; }
+  .act-label { font-size: 12px; color: #cfd4db; font-weight: 500;
+               word-break: break-word; line-height: 1.35; }
+  .act-meta { display: flex; gap: 6px; align-items: center; margin-top: 2px;
+              font-size: 10px; color: #6a7280; }
+  .act-kind { padding: 1px 6px; border-radius: 999px; background: #1c2129;
+              color: #8a93a3; border: 1px solid #2a3240; text-transform: lowercase;
+              font-weight: 500; letter-spacing: 0.02em; }
+  .act-kind.deploy { color: #82b1ff; border-color: rgba(56,139,253,.3); }
+  .act-kind.promote, .act-kind.tag { color: #82b1ff; border-color: rgba(56,139,253,.3); }
+  .act-kind.delete, .act-kind.untag { color: #ff9a93; border-color: rgba(248,81,73,.3); }
+  .act-kind.refresh { color: #a9b0bb; }
+  .act-item.running { animation: act-pulse 1.6s ease-in-out infinite; }
+  @keyframes act-pulse { 0%, 100% { background: rgba(47,111,235,.02); } 50% { background: rgba(47,111,235,.08); } }
+  .act-log { margin-top: 6px; padding: 6px 8px; background: #070809;
+             border-radius: 5px; font-size: 10px; font-family: ui-monospace, monospace;
+             color: #8a93a3; max-height: 100px; overflow-y: auto; line-height: 1.4;
+             white-space: pre-wrap; word-break: break-word; }
+  details.act-details > summary { cursor: pointer; list-style: none; font-size: 10px;
+             color: #6a7280; margin-top: 4px; user-select: none; }
+  details.act-details > summary::-webkit-details-marker { display: none; }
+  details.act-details > summary::before { content: '▸ '; }
+  details.act-details[open] > summary::before { content: '▾ '; }
   .btn { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
          border: 1px solid #2a3240; background: #1c2129; color: #cfd4db;
          cursor: pointer; transition: all .12s ease; display: inline-flex; align-items: center; gap: 4px; }
@@ -552,6 +743,33 @@ BASE_HTML = r"""
   .chip-toggle.chip-orphan:has(input:checked) { background: rgba(225,188,66,.16);
                               border-color: rgba(225,188,66,.6); color: #e5c075; }
 
+  /* Row selection checkboxes */
+  .row-sel, .row-sel-all { appearance: none; width: 16px; height: 16px;
+           border: 1.5px solid #3a4250; border-radius: 4px; background: #0f1217;
+           cursor: pointer; position: relative; margin: 0; transition: all .1s; }
+  .row-sel:hover, .row-sel-all:hover { border-color: #5a6270; }
+  .row-sel:checked, .row-sel-all:checked { background: #2f6feb; border-color: #2f6feb; }
+  .row-sel:checked::after, .row-sel-all:checked::after {
+           content: ''; position: absolute; left: 4px; top: 1px;
+           width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0;
+           transform: rotate(45deg); }
+  tr.chain-row.sel-on { background: rgba(47,111,235,.06); }
+  tr.chain-row.sel-on:hover td { background: rgba(47,111,235,.09); }
+
+  /* Floating bulk action bar */
+  .bulk-bar { position: sticky; top: 10px; z-index: 20; margin-bottom: 14px;
+              animation: bulk-in .18s ease-out; }
+  .bulk-bar[hidden] { display: none; }
+  .bulk-bar-inner { background: rgba(20,23,28,.92); backdrop-filter: blur(8px);
+              border: 1px solid #2a3240; border-radius: 10px;
+              padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+              box-shadow: 0 8px 20px rgba(0,0,0,.3); }
+  .bulk-count { display: flex; align-items: baseline; gap: 6px; padding-right: 8px;
+              border-right: 1px solid #242830; margin-right: 4px; }
+  .bulk-count > span:first-child { font-size: 15px; font-weight: 600; color: #82b1ff; }
+  @keyframes bulk-in { from { opacity: 0; transform: translateY(-6px); }
+                        to { opacity: 1; transform: translateY(0); } }
+
   .pill { display:inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px;
           border: 1px solid #303844; line-height: 1.5; }
   .pill-green { background: rgba(46,160,67,.15); border-color: rgba(46,160,67,.4); color: #7ee195; }
@@ -559,6 +777,17 @@ BASE_HTML = r"""
   .pill-yellow { background: rgba(210,153,34,.15); border-color: rgba(210,153,34,.4); color: #e5c075; }
   .pill-blue { background: rgba(56,139,253,.15); border-color: rgba(56,139,253,.4); color: #82b1ff; }
   .pill-gray { background: rgba(125,133,144,.15); border-color: rgba(125,133,144,.4); color: #a9b0bb; }
+
+  /* Chain cell with logo */
+  .chain-cell { display: flex; align-items: flex-start; gap: 10px; }
+  .chain-cell-text { flex: 1; min-width: 0; }
+  .chain-logo { width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+                background: #0f1217; border: 1px solid #2a3240; flex-shrink: 0;
+                margin-top: 2px; }
+  .chain-logo-fallback { display: inline-flex; align-items: center; justify-content: center;
+                          font-size: 10px; font-weight: 600; color: #6a7280;
+                          letter-spacing: 0.02em; }
+
   table { width: 100%; border-collapse: collapse; }
   th, td { padding: 8px 12px; border-bottom: 1px solid #1e242d; font-size: 13px; vertical-align: top; }
   th { text-align: left; color: #8a93a3; font-weight: 500; font-size: 11px;
@@ -574,6 +803,60 @@ BASE_HTML = r"""
   @keyframes modal-bg-in { from { opacity: 0; } to { opacity: 1; } }
   @keyframes modal-in { from { opacity: 0; transform: translateY(-6px) scale(.98); }
                          to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  /* Polished bulk-action modal styling */
+  .bulk-modal { padding: 0; max-width: 540px; }
+  .bulk-modal .modal-head { padding: 18px 22px 14px; border-bottom: 1px solid #1e242d;
+                             position: sticky; top: 0; background: #14171c;
+                             border-radius: 12px 12px 0 0; z-index: 1; }
+  .bulk-modal .modal-title { display: flex; gap: 12px; align-items: center; }
+  .bulk-modal .modal-icon { width: 36px; height: 36px; border-radius: 10px;
+                             display: inline-flex; align-items: center; justify-content: center;
+                             font-size: 18px; border: 1px solid transparent; flex-shrink: 0; }
+  .bulk-modal .modal-title-text { font-size: 15px; font-weight: 600; color: #e6e8eb; }
+  .bulk-modal .modal-subtitle { font-size: 12px; color: #8a93a3; margin-top: 2px; }
+  .bulk-modal .modal-body { padding: 16px 22px; display: flex; flex-direction: column; gap: 18px; }
+  .bulk-modal .modal-foot { padding: 14px 22px; border-top: 1px solid #1e242d;
+                             display: flex; justify-content: flex-end; gap: 8px;
+                             position: sticky; bottom: 0; background: #14171c;
+                             border-radius: 0 0 12px 12px; }
+
+  .bulk-modal .form-group { display: flex; flex-direction: column; gap: 8px; }
+  .bulk-modal .form-label { font-size: 11px; font-weight: 600; color: #8a93a3;
+                             text-transform: uppercase; letter-spacing: 0.05em; }
+  .bulk-modal .form-input { background: #0f1217; border: 1px solid #2a3240; color: #e6e8eb;
+                             border-radius: 7px; padding: 9px 12px; font-size: 13px;
+                             transition: border-color .1s; font-family: inherit; }
+  .bulk-modal .form-input:focus { outline: none; border-color: #2f6feb; }
+  .bulk-modal .form-input:disabled { opacity: .4; }
+  .bulk-modal .form-hint { font-size: 11px; color: #6a7280; }
+
+  .bulk-modal .check-group { display: flex; flex-direction: column; gap: 8px; }
+  .bulk-modal .check-row { display: flex; align-items: center; gap: 10px;
+                            padding: 8px 10px; border: 1px solid #1e242d; border-radius: 7px;
+                            cursor: pointer; transition: border-color .1s; user-select: none; }
+  .bulk-modal .check-row:hover { border-color: #2a3240; }
+  .bulk-modal .check-row input[type=checkbox] { accent-color: #2f6feb; width: 14px; height: 14px; }
+
+  .bulk-modal .radio-group { display: flex; flex-direction: column; gap: 6px; }
+  .bulk-modal .radio-row { display: flex; align-items: flex-start; gap: 10px;
+                           padding: 10px 12px; border: 1px solid #1e242d; border-radius: 7px;
+                           cursor: pointer; transition: all .1s; font-size: 12px; }
+  .bulk-modal .radio-row:hover { border-color: #2a3240; }
+  .bulk-modal .radio-row:has(input:checked) { border-color: #2f6feb; background: rgba(47,111,235,.06); }
+  .bulk-modal .radio-row input[type=radio] { accent-color: #2f6feb; margin-top: 2px; }
+  .bulk-modal .radio-body { flex: 1; }
+  .bulk-modal .radio-body > div:first-child { font-weight: 500; color: #cfd4db; }
+
+  .bulk-modal .selection-preview { background: #0f1217; border: 1px solid #1e242d;
+                                    border-radius: 7px; padding: 4px; max-height: 180px;
+                                    overflow-y: auto; }
+  .bulk-modal .selection-row { display: flex; align-items: center; gap: 10px;
+                                padding: 5px 8px; font-size: 12px; border-radius: 4px; }
+  .bulk-modal .selection-row:hover { background: rgba(255,255,255,.02); }
+
+  /* Busy state — reuse the existing one */
+  #bulk-deploy-bg.busy .modal, #bulk-promote-bg.busy .modal { pointer-events: none; }
 
   /* Confirm modal (replacement for native confirm()) */
   #confirm-modal { display: none; }
@@ -627,12 +910,33 @@ BASE_HTML = r"""
       setTimeout(function() { el.remove(); }, 4000);
     });
   });
+
+  // Defensive cleanup: once in a while htmx's afterRequest cleanup misses
+  // the source element — usually when an SSE swap races with the request
+  // completion. Make absolutely sure the source button clears its
+  // htmx-request class and disabled attribute when its request ends.
+  function _clearHtmxRequestState(elt) {
+    if (!elt) return;
+    if (elt.classList) elt.classList.remove('htmx-request');
+    if (elt.hasAttribute && elt.hasAttribute('disabled')) elt.removeAttribute('disabled');
+  }
+  document.addEventListener('htmx:afterRequest', function(e) {
+    _clearHtmxRequestState(e.detail && e.detail.elt);
+    _clearHtmxRequestState(e.target);
+  });
+  document.addEventListener('htmx:responseError', function(e) {
+    _clearHtmxRequestState(e.detail && e.detail.elt);
+  });
+  document.addEventListener('htmx:sendError', function(e) {
+    _clearHtmxRequestState(e.detail && e.detail.elt);
+  });
 </script>
 </head>
 <body>
 <div id="top-bar"></div>
 
-<div class="max-w-7xl mx-auto p-6">
+<div class="page-grid">
+  <main>
   <header class="flex justify-between items-center mb-6">
     <div>
       <h1 class="text-xl font-bold">SYMMIO Subgraph Fleet</h1>
@@ -645,20 +949,20 @@ BASE_HTML = r"""
         <span class="label-normal">Refresh state</span>
         <span class="htmx-indicator"><span class="spin"></span> refreshing…</span>
       </button>
-      <button class="btn btn-primary"
-              hx-get="/promote" hx-target="body" hx-swap="beforeend"
-              hx-disabled-elt="this">
-        <span class="label-normal">Promote</span>
-        <span class="htmx-indicator"><span class="spin"></span> opening…</span>
-      </button>
-      <button class="btn"
-              hx-get="/deploy" hx-target="body" hx-swap="beforeend"
-              hx-disabled-elt="this">
-        <span class="label-normal">Deploy</span>
-        <span class="htmx-indicator"><span class="spin"></span> opening…</span>
-      </button>
     </div>
   </header>
+
+  <div id="bulk-bar" class="bulk-bar" hidden>
+    <div class="bulk-bar-inner">
+      <span class="bulk-count">
+        <span id="bulk-count">0</span>
+        <span class="text-xs text-gray-400">selected</span>
+      </span>
+      <button class="btn btn-primary" onclick="openBulkPromote()">⬆ Promote</button>
+      <button class="btn" onclick="openBulkDeploy()">⚡ Deploy</button>
+      <button class="btn btn-ghost" onclick="clearSelection()">Clear</button>
+    </div>
+  </div>
 
   {% if last_error %}
   <div class="card p-3 mb-4" style="border-color: #8a3232;" id="error-banner">
@@ -745,16 +1049,117 @@ BASE_HTML = r"""
       }
       applyFleetFilters();
     };
+
+    // ── Row selection + bulk bar ─────────────────────────────────
+    window._selectionState = {};  // keyed by chain|module_full
+    function _selKey(cb) { return cb.dataset.chain + '|' + cb.dataset.moduleFull; }
+
+    window.updateSelectionBar = function() {
+      // Collect selections from DOM; persist state keyed by chain|module in case
+      // the grid is swapped by an SSE/htmx update.
+      var checkedNow = document.querySelectorAll('.row-sel:checked');
+      checkedNow.forEach(function(cb) {
+        window._selectionState[_selKey(cb)] = {
+          chain: cb.dataset.chain,
+          module: cb.dataset.moduleFull,
+          module_short: cb.dataset.module,
+          base: cb.dataset.base,
+          orphan: cb.dataset.orphan === '1',
+        };
+        cb.closest('tr').classList.add('sel-on');
+      });
+      var unchecked = document.querySelectorAll('.row-sel:not(:checked)');
+      unchecked.forEach(function(cb) {
+        delete window._selectionState[_selKey(cb)];
+        cb.closest('tr').classList.remove('sel-on');
+      });
+      var count = Object.keys(window._selectionState).length;
+      var bar = document.getElementById('bulk-bar');
+      document.getElementById('bulk-count').textContent = count;
+      bar.hidden = count === 0;
+      // keep "select all" in tri-state
+      var allCb = document.querySelector('.row-sel-all');
+      if (allCb) {
+        var visible = Array.from(document.querySelectorAll('.row-sel'))
+                            .filter(function(cb) { return cb.closest('tr').style.display !== 'none'; });
+        var visibleChecked = visible.filter(function(cb) { return cb.checked; });
+        allCb.checked = visible.length > 0 && visible.length === visibleChecked.length;
+        allCb.indeterminate = visibleChecked.length > 0 && visibleChecked.length < visible.length;
+      }
+    };
+
+    window.toggleAllRows = function(checked) {
+      // Only toggle visible rows.
+      var rows = document.querySelectorAll('#grid tr.chain-row');
+      rows.forEach(function(r) {
+        if (r.style.display === 'none') return;
+        var cb = r.querySelector('.row-sel');
+        if (cb) cb.checked = checked;
+      });
+      updateSelectionBar();
+    };
+
+    window.clearSelection = function() {
+      window._selectionState = {};
+      document.querySelectorAll('.row-sel:checked').forEach(function(cb) { cb.checked = false; });
+      document.querySelectorAll('tr.chain-row.sel-on').forEach(function(r) { r.classList.remove('sel-on'); });
+      updateSelectionBar();
+    };
+
+    // Called by the grid's post-swap script to re-apply persisted selections
+    // after an SSE/htmx refresh re-renders the rows.
+    window.restoreSelection = function() {
+      document.querySelectorAll('.row-sel').forEach(function(cb) {
+        cb.checked = !!window._selectionState[_selKey(cb)];
+      });
+      updateSelectionBar();
+    };
+
+    function _selectionPayload() {
+      return Object.values(window._selectionState);
+    }
+
+    window.openBulkDeploy = function() {
+      var sel = _selectionPayload();
+      if (!sel.length) return;
+      fetch('/bulk-deploy-form', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selections: sel }),
+      }).then(function(r) { return r.text(); }).then(function(html) {
+        var wrap = document.createElement('div');
+        wrap.innerHTML = html;
+        document.body.appendChild(wrap.firstElementChild);
+        if (window.htmx) htmx.process(document.body);
+      });
+    };
+
+    window.openBulkPromote = function() {
+      var sel = _selectionPayload();
+      if (!sel.length) return;
+      fetch('/bulk-promote-form', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selections: sel }),
+      }).then(function(r) { return r.text(); }).then(function(html) {
+        var wrap = document.createElement('div');
+        wrap.innerHTML = html;
+        document.body.appendChild(wrap.firstElementChild);
+        if (window.htmx) htmx.process(document.body);
+      });
+    };
   </script>
 
   <div class="card p-0 overflow-hidden mb-6" id="grid"
        hx-get="/grid" hx-trigger="load" hx-swap="innerHTML">
     {{ initial_grid | safe }}
   </div>
+  </main>
 
-  <div class="card p-4" id="jobs">
+  <aside id="activity-pane" class="card"
+         hx-ext="sse" sse-connect="/events" sse-swap="activity">
     {{ jobs_panel | safe }}
-  </div>
+  </aside>
 </div>
 
 <div id="toast-container"></div>
@@ -874,6 +1279,10 @@ GRID_HTML = r"""
 <table data-active-chains='{{ active_chain_meta | tojson }}'>
   <thead>
     <tr>
+      <th style="width: 34px;">
+        <input type="checkbox" class="row-sel-all" onchange="toggleAllRows(this.checked)"
+               title="Select/deselect all visible rows" />
+      </th>
       <th style="width: 120px;">Chain</th>
       <th style="width: 110px;">Module</th>
       <th>Deployments</th>
@@ -885,20 +1294,42 @@ GRID_HTML = r"""
     {% for row in g.modules %}
     <tr class="chain-row" data-chain="{{ g.chain }}" data-prod="{{ '1' if g.is_prod else '0' }}"
         data-module="{{ row.module_short }}"
+        data-base="{{ row.base }}"
+        data-module-full="{{ row.module }}"
         data-version-count="{{ row.deployments|length }}"
+        data-orphan="{{ '1' if g.is_orphan else '0' }}"
         {% if loop.first %}style="border-top: 2px solid #2a3240;"{% endif %}>
+      <td class="align-top" style="padding-top: 10px;">
+        <input type="checkbox" class="row-sel"
+               data-chain="{{ g.chain }}"
+               data-module="{{ row.module_short }}"
+               data-module-full="{{ row.module }}"
+               data-base="{{ row.base }}"
+               data-orphan="{{ '1' if g.is_orphan else '0' }}"
+               onchange="updateSelectionBar()" />
+      </td>
       <td class="align-top">
         {% if loop.first %}
-          {% if g.is_orphan %}
-            <div class="font-semibold text-yellow-300 font-mono" style="font-size: 12px; word-break: break-all;">{{ g.chain }}</div>
-            <div class="text-xs text-yellow-500 mt-1">⚠ unmapped</div>
-            <div class="text-xs text-gray-500">{{ g.network }}</div>
-          {% else %}
-            <div class="font-semibold text-cyan-300">{{ g.chain }}</div>
-            <div class="text-xs text-gray-500">{{ g.network }}</div>
-            {% if g.is_prod %}<div class="pill pill-blue mt-1" style="font-size: 10px;">prod</div>
-            {% elif g.is_stage %}<div class="pill pill-yellow mt-1" style="font-size: 10px;">stage</div>{% endif %}
-          {% endif %}
+          <div class="chain-cell">
+            {% if g.logo_url %}
+              <img class="chain-logo" src="{{ g.logo_url }}" alt="" loading="lazy"
+                   onerror="this.style.display='none'" />
+            {% else %}
+              <div class="chain-logo chain-logo-fallback">{{ g.chain[:2]|upper }}</div>
+            {% endif %}
+            <div class="chain-cell-text">
+              {% if g.is_orphan %}
+                <div class="font-semibold text-yellow-300 font-mono" style="font-size: 12px; word-break: break-all;">{{ g.chain }}</div>
+                <div class="text-xs text-yellow-500">⚠ unmapped</div>
+                <div class="text-xs text-gray-500">{{ g.network }}</div>
+              {% else %}
+                <div class="font-semibold text-cyan-300">{{ g.chain }}</div>
+                <div class="text-xs text-gray-500">{{ g.network }}</div>
+                {% if g.is_prod %}<div class="pill pill-blue mt-1" style="font-size: 10px;">prod</div>
+                {% elif g.is_stage %}<div class="pill pill-yellow mt-1" style="font-size: 10px;">stage</div>{% endif %}
+              {% endif %}
+            </div>
+          </div>
         {% endif %}
       </td>
       <td class="align-top text-gray-400">{{ row.module_short }}
@@ -1025,18 +1456,16 @@ GRID_HTML = r"""
       container.innerHTML = html || '<span class="text-xs text-gray-600">no active chains</span>';
     }
     if (window.applyFleetFilters) window.applyFleetFilters();
+    if (window.restoreSelection) window.restoreSelection();
   })();
 </script>
 """
 
 ROW_PROMOTE_MODAL = r"""
-<div class="modal-bg" id="row-promote-bg" onclick="if(event.target.id==='row-promote-bg' && !event.currentTarget.classList.contains('busy'))this.remove()">
+<div class="modal-bg" id="row-promote-bg" onclick="if(event.target.id==='row-promote-bg')this.remove()">
   <form class="modal" style="max-width: 460px;"
         hx-post="/row-promote" hx-target="#grid" hx-swap="innerHTML"
-        hx-disabled-elt="find button, find input"
-        hx-on::before-request="document.getElementById('row-promote-bg').classList.add('busy')"
-        hx-on::after-settle="document.getElementById('row-promote-bg')?.remove()"
-        hx-on::response-error="document.getElementById('row-promote-bg')?.classList.remove('busy')">
+        hx-on::before-request="document.getElementById('row-promote-bg')?.remove()">
     <h2 class="text-lg font-semibold mb-1">Promote version</h2>
     <div class="text-xs text-gray-500 mb-4 font-mono">{{ base }}/{{ version }}</div>
 
@@ -1197,8 +1626,8 @@ PROMOTE_MODAL = r"""
 
 DEPLOY_MODAL = r"""
 <div class="modal-bg" id="deploy-bg" onclick="if(event.target.id==='deploy-bg')this.remove()">
-  <form class="modal" hx-post="/deploy" hx-target="#jobs" hx-swap="innerHTML"
-        hx-on::after-request="document.getElementById('deploy-bg').remove()">
+  <form class="modal" hx-post="/deploy" hx-swap="none"
+        hx-on::before-request="document.getElementById('deploy-bg')?.remove()">
     <h2 class="text-lg font-semibold mb-4">Deploy a new version</h2>
 
     <div class="mb-3">
@@ -1229,46 +1658,57 @@ DEPLOY_MODAL = r"""
 
     <div class="flex gap-2 justify-end">
       <button type="button" class="btn" onclick="document.getElementById('deploy-bg').remove()">Cancel</button>
-      <button type="submit" class="btn btn-primary">Deploy</button>
+      <button type="submit" class="btn btn-primary">
+        <span class="label-normal">Deploy</span>
+        <span class="htmx-indicator"><span class="spin"></span> starting…</span>
+      </button>
     </div>
   </form>
 </div>
 """
 
 JOBS_PANEL = r"""
-<div class="flex justify-between items-center mb-2">
-  <h3 class="text-sm font-semibold text-gray-300">Jobs</h3>
-  <span class="text-xs text-gray-500">{{ jobs|length }} total</span>
+<div class="activity-header">
+  <h3 class="text-sm font-semibold text-gray-300">⚡ Activity</h3>
+  <span class="text-xs text-gray-500">
+    {% set running = jobs|selectattr('status','equalto','running')|list|length %}
+    {% if running %}<span style="color:#e5c075;">{{ running }} running</span> · {% endif %}
+    {{ jobs|length }} total
+  </span>
 </div>
+<div class="activity-list">
 {% if not jobs %}
-  <p class="text-xs text-gray-600">No jobs yet. Kick off a deploy.</p>
+  <div class="activity-empty">No activity yet.<br><span style="color:#4a5160;">Tag/promote/delete operations appear here.</span></div>
 {% else %}
-  <div class="flex flex-col gap-3">
   {% for j in jobs %}
-    <div class="card p-3" id="job-{{ j.id }}">
-      <div class="flex justify-between items-center mb-2">
-        <div>
-          <strong class="text-sm">{{ j.label }}</strong>
+    <div class="act-item {{ j.status }}" id="job-{{ j.id }}">
+      <div class="act-icon {{ j.status }}"></div>
+      <div class="act-body">
+        <div class="act-label">{{ j.label }}</div>
+        <div class="act-meta">
+          <span class="act-kind {{ j.kind }}">{{ j.kind }}</span>
           {% if j.status == 'running' %}
-            <span class="pill pill-yellow ml-2">running</span>
+            <span>running · {{ j.elapsed }}</span>
           {% elif j.status == 'done' %}
-            <span class="pill pill-green ml-2">done</span>
+            <span style="color:#7ee195;">done</span>
+            <span>· {{ j.elapsed }}</span>
+            <span>· {{ j.ago }}</span>
           {% elif j.status == 'failed' %}
-            <span class="pill pill-red ml-2">failed (rc={{ j.rc }})</span>
-          {% else %}
-            <span class="pill pill-gray ml-2">{{ j.status }}</span>
+            <span style="color:#ff9a93;">failed{% if j.rc not in (None, 1) %} (rc={{ j.rc }}){% endif %}</span>
+            <span>· {{ j.ago }}</span>
           {% endif %}
         </div>
-        <button class="btn btn-ghost" style="font-size: 10px;"
-                hx-get="/job/{{ j.id }}" hx-target="#job-{{ j.id }}" hx-swap="outerHTML">
-          refresh
-        </button>
+        {% if j.tail_text %}
+          <details class="act-details">
+            <summary>log ({{ j.line_count }} line{{ 's' if j.line_count != 1 else '' }})</summary>
+            <pre class="act-log">{{ j.tail_text }}</pre>
+          </details>
+        {% endif %}
       </div>
-      <pre class="log">{{ j.tail_text }}</pre>
     </div>
   {% endfor %}
-  </div>
 {% endif %}
+</div>
 """
 
 PROMOTE_RESULT = r"""
@@ -1280,6 +1720,153 @@ PROMOTE_RESULT = r"""
   </div>
 </div>
 {{ grid | safe }}
+"""
+
+BULK_DEPLOY_MODAL = r"""
+<div class="modal-bg" id="bulk-deploy-bg" onclick="if(event.target.id==='bulk-deploy-bg')this.remove()">
+  <form class="modal bulk-modal"
+        hx-post="/bulk-deploy" hx-swap="none"
+        hx-on::before-request="document.getElementById('bulk-deploy-bg')?.remove(); window.clearSelection && window.clearSelection()">
+
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="modal-icon" style="background: rgba(47,111,235,.15); color: #82b1ff; border-color: rgba(47,111,235,.35);">⚡</span>
+        <div>
+          <div class="modal-title-text">Deploy a new version</div>
+          <div class="modal-subtitle">to {{ selections|length }} subgraph{{ 's' if selections|length != 1 else '' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Version label</label>
+        <input type="text" name="version" placeholder="v0.1.2" required
+               class="form-input" autofocus />
+        <div class="form-hint">Becomes the Goldsky version tag — alphanumeric / dot / dash only.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Targets</label>
+        <div class="selection-preview">
+          {% for s in selections %}
+            <div class="selection-row">
+              <span class="pill pill-gray" style="font-family: ui-monospace, monospace;">{{ s.base }}</span>
+              <span class="text-xs text-gray-500">{{ s.chain }} · {{ s.module }}</span>
+              <input type="hidden" name="selections" value="{{ s.chain }}|{{ s.module }}" />
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost"
+              onclick="document.getElementById('bulk-deploy-bg').remove()">Cancel</button>
+      <button type="submit" class="btn btn-primary">
+        <span class="label-normal">Deploy to {{ selections|length }}</span>
+        <span class="htmx-indicator"><span class="spin"></span> starting jobs…</span>
+      </button>
+    </div>
+  </form>
+</div>
+"""
+
+BULK_PROMOTE_MODAL = r"""
+<div class="modal-bg" id="bulk-promote-bg" onclick="if(event.target.id==='bulk-promote-bg')this.remove()">
+  <form class="modal bulk-modal"
+        hx-post="/bulk-promote" hx-swap="none"
+        hx-on::before-request="document.getElementById('bulk-promote-bg')?.remove(); window.clearSelection && window.clearSelection()">
+
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="modal-icon" style="background: rgba(47,111,235,.15); color: #82b1ff; border-color: rgba(47,111,235,.35);">⬆</span>
+        <div>
+          <div class="modal-title-text">Promote a version</div>
+          <div class="modal-subtitle">across {{ selections|length }} subgraph{{ 's' if selections|length != 1 else '' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tags to apply</label>
+        <div class="check-group">
+          <label class="check-row">
+            <input type="checkbox" name="tags" value="stage" checked />
+            <span class="pill pill-blue">stage</span>
+            <span class="form-hint">mark as staging</span>
+          </label>
+          <label class="check-row">
+            <input type="checkbox" name="tags" value="latest" />
+            <span class="pill pill-blue">latest</span>
+            <span class="form-hint">mark as production</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Version selection</label>
+        <div class="radio-group">
+          <label class="radio-row">
+            <input type="radio" name="mode" value="specific" checked
+                   onchange="document.getElementById('bulk-ver').disabled = false" />
+            <div class="radio-body">
+              <div>Specific version</div>
+              <div class="form-hint">apply the same version label to every selected subgraph</div>
+            </div>
+          </label>
+          <label class="radio-row">
+            <input type="radio" name="mode" value="auto"
+                   onchange="document.getElementById('bulk-ver').disabled = true" />
+            <div class="radio-body">
+              <div>Auto — newest 100% synced per subgraph</div>
+              <div class="form-hint">each subgraph gets its own highest fully-synced version</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Version (for "specific" mode)</label>
+        <input id="bulk-ver" type="text" name="version" placeholder="v0.1.2" class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label class="check-row" style="font-size: 12px;">
+          <input type="checkbox" name="require_synced" value="1" checked />
+          <span>Require 100% sync before tagging</span>
+        </label>
+        <label class="check-row" style="font-size: 12px;">
+          <input type="checkbox" name="delete_displaced" value="1" />
+          <span style="color: #ff9a93;">Also delete displaced versions (destructive)</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Targets</label>
+        <div class="selection-preview">
+          {% for s in selections %}
+            <div class="selection-row">
+              <span class="pill pill-gray" style="font-family: ui-monospace, monospace;">{{ s.base }}</span>
+              <span class="text-xs text-gray-500">{{ s.chain }} · {{ s.module }}</span>
+              <input type="hidden" name="selections" value="{{ s.chain }}|{{ s.module }}" />
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost"
+              onclick="document.getElementById('bulk-promote-bg').remove()">Cancel</button>
+      <button type="submit" class="btn btn-primary">
+        <span class="label-normal">Promote {{ selections|length }}</span>
+        <span class="htmx-indicator"><span class="spin"></span> promoting…</span>
+      </button>
+    </div>
+  </form>
+</div>
 """
 
 _env = Environment(
@@ -1295,6 +1882,8 @@ _env = Environment(
             "toast_oob": TOAST_OOB,
             "row_promote_modal": ROW_PROMOTE_MODAL,
             "post_promote_cleanup_oob": POST_PROMOTE_CLEANUP_OOB,
+            "bulk_deploy_modal": BULK_DEPLOY_MODAL,
+            "bulk_promote_modal": BULK_PROMOTE_MODAL,
         }
     ),
     autoescape=select_autoescape(default=True, default_for_string=True),
@@ -1352,6 +1941,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
                 "is_prod": c.key in PROD_CONFIGS,
                 "is_stage": c.key in STAGE_CONFIGS,
                 "is_orphan": False,
+                "logo_url": chain_logo_url(c.key),
                 "modules": module_rows,
             }
         )
@@ -1373,6 +1963,13 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
             if short in orphan_base:
                 guessed_module = short
                 break
+        # Try to pull a logo by detecting a known chain slug inside the base name
+        # (e.g. "base_dev_analytics" → base, "vibe-back-hyperevm-mainnet" → hyperevm).
+        guessed_logo: str | None = None
+        for key in CHAIN_LOGO_SLUG:
+            if key in orphan_base.lower():
+                guessed_logo = chain_logo_url(key)
+                break
         groups.append(
             {
                 "chain": orphan_base,
@@ -1380,6 +1977,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
                 "is_prod": False,
                 "is_stage": False,
                 "is_orphan": True,
+                "logo_url": guessed_logo,
                 "modules": [
                     {
                         "module": "orphan",
@@ -1400,11 +1998,51 @@ def render_grid(store: FleetStore) -> str:
     return _env.get_template("grid").render(groups=groups, active_chain_meta=active_chain_meta)
 
 
+def _format_duration(seconds: float) -> str:
+    if seconds < 1:
+        return f"{int(seconds * 1000)}ms"
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    if seconds < 3600:
+        return f"{int(seconds // 60)}m {int(seconds % 60)}s"
+    return f"{int(seconds // 3600)}h {int((seconds % 3600) // 60)}m"
+
+
+def _format_ago(ts: float) -> str:
+    if not ts:
+        return ""
+    delta = time.time() - ts
+    if delta < 60:
+        return f"{int(delta)}s ago"
+    if delta < 3600:
+        return f"{int(delta // 60)}m ago"
+    if delta < 86400:
+        return f"{int(delta // 3600)}h ago"
+    return f"{int(delta // 86400)}d ago"
+
+
 def render_jobs_panel() -> str:
     job_views: list[dict[str, Any]] = []
-    for j in sorted(_JOBS.values(), key=lambda j: j.started or 0, reverse=True)[:10]:
-        tail = "\n".join(j.lines[-200:]) or "(no output yet)"
-        job_views.append({"id": j.id, "label": j.label, "status": j.status, "rc": j.rc, "tail_text": tail})
+    now = time.time()
+    for j in sorted(_JOBS.values(), key=lambda j: j.started or 0, reverse=True)[:30]:
+        lines = j.lines
+        # Short ops don't need a log block unless they have multiple lines
+        tail = "\n".join(lines[-40:])
+        if j.status == "running":
+            elapsed = _format_duration(now - j.started) if j.started else "…"
+        else:
+            elapsed = _format_duration((j.ended - j.started) if j.ended and j.started else 0)
+        job_views.append({
+            "id": j.id,
+            "label": j.label,
+            "kind": j.kind or "op",
+            "status": j.status,
+            "rc": j.rc,
+            "elapsed": elapsed,
+            "ago": _format_ago(j.ended or j.started),
+            "line_count": len(lines),
+            "tail_text": tail,
+        })
     return _env.get_template("jobs_panel").render(jobs=job_views)
 
 
@@ -1413,7 +2051,17 @@ def render_jobs_panel() -> str:
 # ────────────────────────────────────────────────────────────────────
 
 
-app = FastAPI(title="Symmio Fleet Web")
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """Capture the running event loop so broadcast_activity (called from
+    worker threads) can schedule pushes via call_soon_threadsafe."""
+    global _event_loop
+    _event_loop = asyncio.get_running_loop()
+    yield
+    _event_loop = None
+
+
+app = FastAPI(title="Symmio Fleet Web", lifespan=_lifespan)
 _store = FleetStore()
 
 
@@ -1455,11 +2103,11 @@ def index() -> HTMLResponse:
 
 
 @app.get("/grid", response_class=HTMLResponse)
-def grid_fragment() -> HTMLResponse:
+async def grid_fragment() -> HTMLResponse:
     """Returned by the htmx `load` trigger on #grid. Triggers the initial
     Goldsky fetch if it hasn't run yet."""
     if not _store.last_fetched_at:
-        _store.fetch()
+        await asyncio.to_thread(_store.fetch)
     toast = ""
     if _store.last_error:
         toast = render_toast("err", "Goldsky fetch failed", _store.last_error)
@@ -1467,13 +2115,16 @@ def grid_fragment() -> HTMLResponse:
 
 
 @app.post("/refresh", response_class=HTMLResponse)
-def refresh() -> HTMLResponse:
-    ok, err = _store.fetch()
-    toast = (
-        render_toast("ok", "State refreshed", f"{len(_store.state.deployments)} deployments · {len(_store.state.tags)} subgraphs")
-        if ok
-        else render_toast("err", "Refresh failed", err)
-    )
+async def refresh() -> HTMLResponse:
+    act = register_activity("Fetch goldsky state", kind="refresh")
+    ok, err = await asyncio.to_thread(_store.fetch)
+    if ok:
+        detail = f"{len(_store.state.deployments)} deployments · {len(_store.state.tags)} subgraphs"
+        act.finish(True, detail)
+        toast = render_toast("ok", "State refreshed", detail)
+    else:
+        act.finish(False, err)
+        toast = render_toast("err", "Refresh failed", err)
     return HTMLResponse(render_grid(_store) + toast)
 
 
@@ -1547,14 +2198,14 @@ async def promote(request: Request) -> HTMLResponse:
                 log_lines.append(f"{c.key}: tag '{tag}' already on {ver_for_chain}")
                 continue
             if old and old != ver_for_chain:
-                ok_del, out_del = do_tag_delete(base, old, tag)
+                ok_del, out_del = await asyncio.to_thread(do_tag_delete, base, old, tag)
                 log_lines.append(
                     f"{c.key}: delete-old-tag {base}/{old} --tag {tag} → {'ok' if ok_del else 'fail'}"
                 )
                 if ok_del:
                     _store.apply_tag_remove(base, tag)
                     displaced_versions.add(old)
-            ok_add, out_add = do_tag_create(base, ver_for_chain, tag)
+            ok_add, out_add = await asyncio.to_thread(do_tag_create, base, ver_for_chain, tag)
             log_lines.append(
                 f"{c.key}: tag {base}/{ver_for_chain} --tag {tag} → {'ok' if ok_add else 'FAIL: ' + out_add}"
             )
@@ -1580,7 +2231,7 @@ async def promote(request: Request) -> HTMLResponse:
                         f"{c.key}: keep {base}/{old_ver} — still tagged as {', '.join(remaining)}"
                     )
                     continue
-                ok_d, out_d = do_subgraph_delete(base, old_ver)
+                ok_d, out_d = await asyncio.to_thread(do_subgraph_delete, base, old_ver)
                 log_lines.append(f"{c.key}: delete {base}/{old_ver} → {'ok' if ok_d else 'FAIL: ' + out_d}")
                 if ok_d:
                     _store.apply_deployment_remove(base, old_ver)
@@ -1636,6 +2287,50 @@ async def deploy(request: Request) -> HTMLResponse:
         start_job(label=f"{c.key} · {module} {version}", cmd=cmd)
 
     return HTMLResponse(render_jobs_panel())
+
+
+@app.get("/jobs", response_class=HTMLResponse)
+def jobs_fragment() -> HTMLResponse:
+    """Fallback fragment — also used on initial page load."""
+    return HTMLResponse(render_jobs_panel())
+
+
+@app.get("/events")
+async def sse_events() -> StreamingResponse:
+    """Server-sent events stream for activity pane updates.
+
+    Replaces the old 3s polling — the server pushes the pane HTML only when
+    job state actually changes. Sends a keepalive comment every ~25s to keep
+    proxies from closing idle connections."""
+    q: asyncio.Queue[str] = asyncio.Queue(maxsize=20)
+    with _sse_lock:
+        _sse_subscribers.add(q)
+
+    async def gen():
+        try:
+            # Send the current state immediately so reconnects re-sync.
+            yield _sse_message("activity", render_jobs_panel())
+            while True:
+                try:
+                    msg = await asyncio.wait_for(q.get(), timeout=25.0)
+                    yield msg
+                except asyncio.TimeoutError:
+                    yield ": keepalive\n\n"
+        except asyncio.CancelledError:  # pragma: no cover
+            pass
+        finally:
+            with _sse_lock:
+                _sse_subscribers.discard(q)
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.get("/job/{job_id}", response_class=HTMLResponse)
@@ -1703,11 +2398,14 @@ async def remove_tag(request: Request) -> HTMLResponse:
     tag = str(form.get("tag", ""))
     if not base or not version or not tag:
         raise HTTPException(400, "base, version, tag required")
-    ok, out = do_tag_delete(base, version, tag)
+    act = register_activity(f"Untag '{tag}' on {base}/{version}", kind="untag")
+    ok, out = await asyncio.to_thread(do_tag_delete, base, version, tag)
     if ok:
         _store.apply_tag_remove(base, tag)
+        act.finish(True, f"removed '{tag}' from {base}/{version}")
         toast = render_toast("ok", f"Removed '{tag}' tag", f"{base}/{version}")
     else:
+        act.finish(False, out)
         toast = render_toast("err", f"Failed to remove '{tag}'", out or f"{base}/{version}")
     return HTMLResponse(render_grid(_store) + toast)
 
@@ -1724,11 +2422,13 @@ async def move_tag(request: Request) -> HTMLResponse:
         raise HTTPException(400, "base, version, tag required")
 
     old = _store.state.tag_target(base, tag)
+    label = f"Move '{tag}' → {base}/{version}" + (f" (from {old})" if old else "")
+    act = register_activity(label, kind="tag")
     log_bits: list[str] = []
     ok_overall = True
 
     if old and old != version:
-        ok_del, out_del = do_tag_delete(base, old, tag)
+        ok_del, out_del = await asyncio.to_thread(do_tag_delete, base, old, tag)
         if ok_del:
             log_bits.append(f"removed old: {base}/{old}")
             _store.apply_tag_remove(base, tag)
@@ -1737,7 +2437,7 @@ async def move_tag(request: Request) -> HTMLResponse:
             ok_overall = False
 
     if ok_overall:
-        ok_add, out_add = do_tag_create(base, version, tag)
+        ok_add, out_add = await asyncio.to_thread(do_tag_create, base, version, tag)
         if ok_add:
             log_bits.append(f"tagged {base}/{version} as {tag}")
             _store.apply_tag_set(base, tag, version)
@@ -1745,6 +2445,7 @@ async def move_tag(request: Request) -> HTMLResponse:
             log_bits.append(f"tag create FAILED: {out_add}")
             ok_overall = False
 
+    act.finish(ok_overall, "\n".join(log_bits))
     if ok_overall:
         title = f"Moved '{tag}' → {version}" if old else f"Tagged '{tag}' on {version}"
         toast = render_toast("ok", title, f"{base}" + (f" (was on {old})" if old else ""))
@@ -1760,11 +2461,14 @@ async def delete_version(request: Request) -> HTMLResponse:
     version = str(form.get("version", ""))
     if not base or not version:
         raise HTTPException(400, "base, version required")
-    ok, out = do_subgraph_delete(base, version)
+    act = register_activity(f"Delete {base}/{version}", kind="delete")
+    ok, out = await asyncio.to_thread(do_subgraph_delete, base, version)
     if ok:
         _store.apply_deployment_remove(base, version)
+        act.finish(True, f"deleted {base}/{version}")
         toast = render_toast("ok", "Deleted deployment", f"{base}/{version}")
     else:
+        act.finish(False, out)
         toast = render_toast("err", "Delete failed", out or f"{base}/{version}")
     return HTMLResponse(render_grid(_store) + toast)
 
@@ -1793,6 +2497,7 @@ async def row_promote(request: Request) -> HTMLResponse:
         toast = render_toast("err", "No tags selected", "Pick at least one tag.")
         return HTMLResponse(render_grid(_store) + toast)
 
+    act = register_activity(f"Promote {base}/{version} → {'+'.join(tags)}", kind="promote")
     pre_tags = dict(_store.state.tags.get(base, {}))  # snapshot before mutations
     displaced: set[str] = set()
     log_bits: list[str] = []
@@ -1804,7 +2509,7 @@ async def row_promote(request: Request) -> HTMLResponse:
             log_bits.append(f"'{tag}' already on {version}")
             continue
         if old:
-            ok_del, out_del = do_tag_delete(base, old, tag)
+            ok_del, out_del = await asyncio.to_thread(do_tag_delete, base, old, tag)
             if ok_del:
                 _store.apply_tag_remove(base, tag)
                 displaced.add(old)
@@ -1813,7 +2518,7 @@ async def row_promote(request: Request) -> HTMLResponse:
                 log_bits.append(f"delete old FAILED: {out_del}")
                 ok_overall = False
                 continue
-        ok_add, out_add = do_tag_create(base, version, tag)
+        ok_add, out_add = await asyncio.to_thread(do_tag_create, base, version, tag)
         if ok_add:
             _store.apply_tag_set(base, tag, version)
             log_bits.append(f"tagged {base}/{version} as {tag}")
@@ -1825,6 +2530,7 @@ async def row_promote(request: Request) -> HTMLResponse:
     remaining_tags = _store.state.tags.get(base, {})
     orphaned = [v for v in sorted(displaced) if not any(rv == v for rv in remaining_tags.values())]
 
+    act.finish(ok_overall, "\n".join(log_bits))
     if ok_overall:
         toast = render_toast(
             "ok",
@@ -1838,6 +2544,244 @@ async def row_promote(request: Request) -> HTMLResponse:
         base=base, version=version, tags=tags, displaced=orphaned,
     )
     return HTMLResponse(render_grid(_store) + toast + cleanup)
+
+
+# ────────────────────────────────────────────────────────────────────
+# Bulk actions (selection-based)
+# ────────────────────────────────────────────────────────────────────
+
+
+def _chain_lookup() -> dict[str, ChainConfig]:
+    return {c.key: c for c in _store.chains}
+
+
+async def _read_selections(request: Request) -> list[dict[str, Any]]:
+    """Extract bulk-action selections from either JSON body (modal open) or
+    form-encoded body (modal submit)."""
+    ctype = request.headers.get("content-type", "")
+    if "application/json" in ctype:
+        data = await request.json()
+        raw = data.get("selections") or []
+        sels: list[dict[str, Any]] = []
+        for item in raw:
+            if isinstance(item, dict):
+                sels.append({
+                    "chain": str(item.get("chain", "")),
+                    "module": str(item.get("module", "")),
+                    "base": str(item.get("base", "")),
+                    "orphan": bool(item.get("orphan")),
+                })
+        return [s for s in sels if s["chain"] and s["module"]]
+    # form-encoded: selections=<chain>|<module> repeated
+    form = await request.form()
+    pairs = [str(p) for p in form.getlist("selections")]
+    chain_by_key = _chain_lookup()
+    sels = []
+    for p in pairs:
+        if "|" not in p:
+            continue
+        chain, module = p.split("|", 1)
+        c = chain_by_key.get(chain)
+        if c:
+            base = c.deploy_urls.get(module, "")
+            sels.append({"chain": chain, "module": module, "base": base, "orphan": False})
+        else:
+            # orphan — base name = chain key
+            sels.append({"chain": chain, "module": module, "base": chain, "orphan": True})
+    return sels
+
+
+def _enrich_selections(sels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Ensure selection dicts carry a 'base' resolved from the store if missing."""
+    chain_by_key = _chain_lookup()
+    out = []
+    for s in sels:
+        if not s.get("base"):
+            c = chain_by_key.get(s["chain"])
+            if c:
+                s["base"] = c.deploy_urls.get(s["module"], "")
+        out.append(s)
+    return out
+
+
+@app.post("/bulk-deploy-form", response_class=HTMLResponse)
+async def bulk_deploy_form(request: Request) -> HTMLResponse:
+    selections = _enrich_selections(await _read_selections(request))
+    if not selections:
+        raise HTTPException(400, "no selections")
+    html = _env.get_template("bulk_deploy_modal").render(selections=selections)
+    return HTMLResponse(html)
+
+
+@app.post("/bulk-promote-form", response_class=HTMLResponse)
+async def bulk_promote_form(request: Request) -> HTMLResponse:
+    selections = _enrich_selections(await _read_selections(request))
+    if not selections:
+        raise HTTPException(400, "no selections")
+    html = _env.get_template("bulk_promote_modal").render(selections=selections)
+    return HTMLResponse(html)
+
+
+@app.post("/bulk-deploy", response_class=HTMLResponse)
+async def bulk_deploy(request: Request) -> HTMLResponse:
+    selections = _enrich_selections(await _read_selections(request))
+    form = await request.form()  # second call on the same Request is fine with Starlette cache
+    version = str(form.get("version", "")).strip()
+    if not version:
+        raise HTTPException(400, "version required")
+    if not selections:
+        raise HTTPException(400, "no selections")
+
+    chain_by_key = _chain_lookup()
+    queued = 0
+    for s in selections:
+        if s.get("orphan"):
+            continue  # can't deploy to an unmapped subgraph
+        c = chain_by_key.get(s["chain"])
+        if not c or s["module"] not in c.deploy_urls:
+            continue
+        cmd = [
+            "python3",
+            "scripts/manager.py",
+            str(c.path.relative_to(REPO_ROOT)),
+            s["module"],
+            version,
+            "--deploy",
+        ]
+        start_job(label=f"{s['chain']} · {s['module']} {version}", cmd=cmd, kind="deploy")
+        queued += 1
+
+    if queued:
+        toast = render_toast(
+            "ok",
+            f"Queued {queued} deploy job{'s' if queued != 1 else ''}",
+            f"version {version} → {', '.join(s['chain'] for s in selections if not s.get('orphan'))}",
+        )
+    else:
+        toast = render_toast("err", "Nothing deployed", "No deployable selections (orphans are skipped)")
+    return HTMLResponse(toast)
+
+
+@app.post("/bulk-promote", response_class=HTMLResponse)
+async def bulk_promote(request: Request) -> HTMLResponse:
+    form = await request.form()
+    selections = _enrich_selections(await _read_selections(request))
+    tags = [str(t) for t in form.getlist("tags")]
+    mode = str(form.get("mode", "specific"))
+    version = str(form.get("version", "")).strip()
+    require_synced = form.get("require_synced") == "1"
+    delete_displaced = form.get("delete_displaced") == "1"
+
+    if not selections:
+        raise HTTPException(400, "no selections")
+    if not tags:
+        toast = render_toast("err", "No tags selected", "Pick at least one tag.")
+        return HTMLResponse(toast)
+    if mode == "specific" and not version:
+        toast = render_toast("err", "Missing version", "Enter a version label or switch to auto mode.")
+        return HTMLResponse(toast)
+
+    applied = 0
+    skipped = 0
+    failed = 0
+    log_lines: list[str] = []
+    state = _store.state
+
+    act = register_activity(
+        f"Bulk promote → {'+'.join(tags)} on {len(selections)} subgraph(s)",
+        kind="promote",
+    )
+
+    for s in selections:
+        base = s["base"]
+        if not base:
+            log_lines.append(f"{s['chain']}: skip — no base")
+            skipped += 1
+            continue
+
+        if mode == "auto":
+            synced = [d for d in state.for_base(base) if d.synced == "100%"]
+            if not synced:
+                log_lines.append(f"{s['chain']}: skip — no 100% synced deployment")
+                skipped += 1
+                continue
+            ver_for_chain = sorted(synced, key=lambda d: d.version)[-1].version
+        else:
+            ver_for_chain = version
+
+        dep = state.deployments.get(f"{base}/{ver_for_chain}")
+        if dep is None:
+            log_lines.append(f"{s['chain']}: skip — {base}/{ver_for_chain} not deployed")
+            skipped += 1
+            continue
+        if require_synced and dep.synced != "100%":
+            log_lines.append(f"{s['chain']}: skip — sync {dep.synced or '?'} < 100%")
+            skipped += 1
+            continue
+
+        displaced_versions: set[str] = set()
+        chain_ok = True
+        for tag in tags:
+            old = state.tag_target(base, tag)
+            if old == ver_for_chain:
+                log_lines.append(f"{s['chain']}: '{tag}' already on {ver_for_chain}")
+                continue
+            if old and old != ver_for_chain:
+                ok_del, out_del = await asyncio.to_thread(do_tag_delete, base, old, tag)
+                if ok_del:
+                    _store.apply_tag_remove(base, tag)
+                    displaced_versions.add(old)
+                    log_lines.append(f"{s['chain']}: removed old {base}/{old} (--tag {tag})")
+                else:
+                    log_lines.append(f"{s['chain']}: delete old FAILED: {out_del}")
+                    chain_ok = False
+                    break
+            ok_add, out_add = await asyncio.to_thread(do_tag_create, base, ver_for_chain, tag)
+            if ok_add:
+                _store.apply_tag_set(base, tag, ver_for_chain)
+                log_lines.append(f"{s['chain']}: tagged {base}/{ver_for_chain} as {tag}")
+            else:
+                log_lines.append(f"{s['chain']}: tag create FAILED: {out_add}")
+                chain_ok = False
+                break
+
+        if not chain_ok:
+            failed += 1
+            continue
+        applied += 1
+
+        if delete_displaced and displaced_versions:
+            original_tags = state.tags.get(base, {})
+            for old_ver in sorted(displaced_versions):
+                remaining = [t for t, v in original_tags.items() if v == old_ver and t not in tags]
+                if remaining:
+                    log_lines.append(f"{s['chain']}: keep {base}/{old_ver} — still tagged as {', '.join(remaining)}")
+                    continue
+                ok_d, out_d = await asyncio.to_thread(do_subgraph_delete, base, old_ver)
+                if ok_d:
+                    _store.apply_deployment_remove(base, old_ver)
+                    log_lines.append(f"{s['chain']}: deleted {base}/{old_ver}")
+                else:
+                    log_lines.append(f"{s['chain']}: delete FAILED: {out_d}")
+
+    overall_ok = failed == 0 and applied > 0
+    act.finish(overall_ok, "\n".join(log_lines))
+
+    if applied and not failed:
+        toast = render_toast(
+            "ok",
+            f"Promoted {applied} subgraph{'s' if applied != 1 else ''} → {'+'.join(tags)}",
+            f"skipped {skipped}" if skipped else "",
+        )
+    elif applied and failed:
+        toast = render_toast(
+            "err",
+            f"Partial success: {applied} ok, {failed} failed",
+            f"skipped {skipped}",
+        )
+    else:
+        toast = render_toast("err", "Nothing promoted", f"failed {failed} · skipped {skipped}")
+    return HTMLResponse(toast)
 
 
 @app.get("/state.json", response_class=JSONResponse)
