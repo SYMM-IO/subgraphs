@@ -17,6 +17,7 @@ UniConfig.json
 subgraph.yaml
 /schema.graphql
 perps/analytics/currentConfig.json
+.fleet_state.json
 
 .envrc
 .venv/
