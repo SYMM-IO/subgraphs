@@ -34,8 +34,8 @@ python3 scripts/manager.py configs/perps/base.json perps/events v1.0.0 --deploy
 python3 scripts/manager.py configs/perps/docker.json perps/events
 ./scripts/manage -d symmio-events
 
-# Batch deploy across multiple chain configs
-python3 scripts/batch_manager.py --action deploy --version v1.0.0 --subgraph perps/events
+# Batch deploy / manage multiple chains via the web dashboard
+uv run scripts/fleet_web.py  # http://127.0.0.1:8787
 
 # Clean generated files
 ./scripts/clean.sh
