@@ -8,6 +8,7 @@ type Quote @entity(immutable: false) {
     partyB: Bytes
     affiliate: Bytes
     subAccount: SubAccount
+    partyAAccount: Account
     action: String
     blockNumber: BigInt!
 

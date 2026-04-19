@@ -80,6 +80,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.quoteId = event.params.quoteId
 		quote.orderTypeOpen = orderType
 		quote.partyA = event.params.partyA
+		quote.partyAAccount = event.params.partyA.toHexString()
 		quote.symbolId = symbolId
 		quote.positionType = positionType
 		quote.requestedOpenPrice = price

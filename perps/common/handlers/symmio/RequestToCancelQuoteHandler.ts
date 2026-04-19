@@ -18,6 +18,7 @@ export class RequestToCancelQuoteHandler<T> extends BaseHandler {
 		quote.globalCounter = super.handleGlobalCounter()
 		quote.quoteId = event.params.quoteId
 		quote.partyA = event.params.partyA
+		quote.partyAAccount = event.params.partyA.toHexString()
 		quote.quoteStatus = event.params.quoteStatus
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "RequestToCancelQuote", _event)

@@ -182,6 +182,7 @@ type DailyUserHistory @entity(immutable: false) {
 	day: BigInt!
 	user: Bytes!
 	account: Bytes!
+	accountRef: Account
 	quotesCount: BigInt!
 	openTradeVolume: BigInt!
 	closeTradeVolume: BigInt!
@@ -209,6 +210,7 @@ type DailyUserHistory @entity(immutable: false) {
 type TotalUserHistory @entity(immutable: false) {
 	id: ID!
 	account: Bytes!
+	accountRef: Account
 	quotesCount: BigInt!
 	openTradeVolume: BigInt!
 	closeTradeVolume: BigInt!
@@ -341,6 +343,7 @@ type LiquidationDetail @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
 	partyA: Bytes!
+	partyAAccount: Account
 	liquidationId: Bytes!
 	liquidationType: Int!
 	upnl: BigInt!
@@ -398,6 +401,8 @@ type LatestAccountBalance @entity(immutable: false) {
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
+	accountRef: Account
+	counterPartyRef: Account
 }
 
 type AggregatedPosition @entity(immutable: false) {
@@ -419,4 +424,5 @@ type AggregatedPosition @entity(immutable: false) {
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
+	partyAAccount: Account
 }

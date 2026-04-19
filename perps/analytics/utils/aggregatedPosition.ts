@@ -33,6 +33,7 @@ function getOrCreate(
 		entity = new AggregatedPosition(id)
 		entity.source = event.address
 		entity.partyA = partyA
+		entity.partyAAccount = partyA.toHexString()
 		entity.partyB = partyB
 		entity.symbolId = symbolId
 		entity.symbolName = resolveSymbolName(version, symbolId, event.address)

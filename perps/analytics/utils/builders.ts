@@ -317,6 +317,7 @@ export function getDailyUserHistoryForTimestamp(timestamp: BigInt, account: Acco
 		dh.updateTimestamp = timestamp
 		dh.user = account.user
 		dh.account = account.account
+		dh.accountRef = account.id
 		dh.timestamp = timestamp
 		dh.deposit = BigInt.zero()
 		dh.withdraw = BigInt.zero()
@@ -366,6 +367,7 @@ export function getTotalUserHistory(timestamp: BigInt, account: Account): TotalU
 		th.loss = BigInt.zero()
 		th.profit = BigInt.zero()
 		th.account = account.account
+		th.accountRef = account.id
 		th.accountSource = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
 		th.save()
 	}

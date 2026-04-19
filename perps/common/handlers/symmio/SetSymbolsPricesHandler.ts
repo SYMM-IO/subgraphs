@@ -48,6 +48,7 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 		}
 		entity.source = event.address
 		entity.partyA = event.params.partyA
+		entity.partyAAccount = event.params.partyA.toHexString()
 		entity.liquidationId = liqState.liquidationId
 		entity.liquidationType = liqState.liquidationType
 		entity.upnl = liqState.upnl

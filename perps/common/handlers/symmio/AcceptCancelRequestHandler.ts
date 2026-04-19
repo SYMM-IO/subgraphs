@@ -26,6 +26,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 				quote.blockNumber = event.block.number
 				quote.quoteStatus = event.params.quoteStatus
 				quote.partyA = event.address
+				quote.partyAAccount = event.address.toHexString()
 				quote.tradingFee = BigInt.zero()
 				quote.initialCva = BigInt.zero()
 				quote.initialPartyBmm = BigInt.zero()
@@ -37,6 +38,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 
 			quote.orderTypeOpen = q.orderType
 			quote.partyA = q.partyA
+			quote.partyAAccount = q.partyA.toHexString()
 			quote.symbolId = q.symbolId
 			quote.positionType = q.positionType
 			quote.requestedOpenPrice = q.requestedOpenPrice

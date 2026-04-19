@@ -17,7 +17,9 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity = new LatestAccountBalance(id)
 		entity.source = event.address
 		entity.account = partyA
+		entity.accountRef = partyA.toHexString()
 		entity.counterParty = null
+		entity.counterPartyRef = null
 		entity.accountType = "PARTY_A"
 	}
 
@@ -143,7 +145,9 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 		entity = new LatestAccountBalance(id)
 		entity.source = event.address
 		entity.account = partyB
+		entity.accountRef = partyB.toHexString()
 		entity.counterParty = partyA
+		entity.counterPartyRef = partyA.toHexString()
 		entity.accountType = "PARTY_B"
 	}
 

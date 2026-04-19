@@ -9,6 +9,7 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		let entity = new LiquidationDetail(event.params.partyA.toHexString() + "-" + event.params.liquidationId.toHexString() + "-" + event.address.toHexString())
 		entity.source = event.address
 		entity.partyA = event.params.partyA
+		entity.partyAAccount = event.params.partyA.toHexString()
 		entity.liquidationId = event.params.liquidationId
 		entity.liquidationType = 0
 		entity.upnl = event.params.upnl
