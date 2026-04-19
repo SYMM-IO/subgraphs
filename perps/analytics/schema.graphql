@@ -17,6 +17,8 @@ type BalanceChange @entity(immutable: true) {
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
+	sender: Bytes
+	senderRef: Account
 }
 
 type QuoteEvent @entity(immutable: true) {

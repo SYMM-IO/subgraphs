@@ -3,6 +3,7 @@ import { Account, BalanceChange } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getConfiguration } from "../../utils/builders"
+import { AccountType, createNewAccountIfNotExists } from "../../../common/utils/builders"
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
@@ -34,6 +35,13 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 			deposit.amount = event.params.amount.div(BigInt.fromString("1000000000000"))
 		deposit.account = event.params.user
 		deposit.collateral = getConfiguration(event).collateral
+		// Upsert sender Account stub so senderRef resolves. If sender is a VA,
+		// VirtualAccountCreatedHandler / EmergencyMarginRecoveredHandler flip
+		// isVirtual=true (same tx or retroactively). Frontend filter `isVirtual_not: true`
+		// excludes VA senders — see docs/frontend-balance-change-filter.md.
+		createNewAccountIfNotExists(event.params.sender, event.params.sender, null, AccountType.UNKNOWN, event.block, event.transaction)
+		deposit.sender = event.params.sender
+		deposit.senderRef = event.params.sender.toHexString()
 		deposit.save()
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).deposit(deposit.amount))
 	}

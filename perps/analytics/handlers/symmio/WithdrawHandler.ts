@@ -33,6 +33,9 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		withdraw.amount = event.params.amount
 		withdraw.account = event.params.user
 		withdraw.collateral = getConfiguration(event).collateral
+		createNewAccountIfNotExists(event.params.sender, event.params.sender, null, AccountType.UNKNOWN, event.block, event.transaction)
+		withdraw.sender = event.params.sender
+		withdraw.senderRef = event.params.sender.toHexString()
 		withdraw.save()
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).withdraw(event.params.amount))
 	}
