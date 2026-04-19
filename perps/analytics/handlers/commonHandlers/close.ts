@@ -22,6 +22,45 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 	}
 	const additionalVolume = event.params.filledAmount.times(event.params.closedPrice).div(BigInt.fromString("10").pow(18))
 
+	createQuoteEvent(
+		_event,
+		event.params.quoteId,
+		closeType,
+		new JSONBuilder()
+			.add("amount", event.params.filledAmount.toString())
+			.add("closePrice", event.params.closedPrice.toString())
+			.add("quoteStatus", quote.quoteStatus.toString())
+			.build(),
+	)
+
+	if (
+		quote.openedPrice === null ||
+		quote.partyB === null ||
+		quote.symbolId === null ||
+		quote.closedAmount === null ||
+		quote.quantity === null ||
+		quote.initialOpenedPrice === null
+	) {
+		let db = new DebugEntity(
+			"handleClose-nullFields-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString(),
+		)
+		db.message =
+			`quoteId ${event.params.quoteId.toString()} has null fields — openedPrice=` +
+			(quote.openedPrice === null ? "null" : "set") +
+			", partyB=" +
+			(quote.partyB === null ? "null" : "set") +
+			", symbolId=" +
+			(quote.symbolId === null ? "null" : "set") +
+			", closedAmount=" +
+			(quote.closedAmount === null ? "null" : "set") +
+			", quantity=" +
+			(quote.quantity === null ? "null" : "set") +
+			", initialOpenedPrice=" +
+			(quote.initialOpenedPrice === null ? "null" : "set")
+		db.save()
+		return
+	}
+
 	onPositionClose(
 		_event,
 		version,
@@ -35,17 +74,6 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		quote.closedAmount!.equals(quote.quantity!),
 	)
 	if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
-
-	createQuoteEvent(
-		_event,
-		event.params.quoteId,
-		closeType,
-		new JSONBuilder()
-			.add("amount", event.params.filledAmount.toString())
-			.add("closePrice", event.params.closedPrice.toString())
-			.add("quoteStatus", quote.quoteStatus.toString())
-			.build(),
-	)
 
 	let account = Account.load(event.params.partyA.toHexString())
 	if (!account) return
@@ -76,14 +104,6 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 				.closeTradeVolume(additionalVolume)
 				.symbolId(quote.symbolId!),
 		)
-		// updateDailyOpenInterest(
-		// 	event.block.timestamp,
-		// 	unDecimal(event.params.filledAmount.times(quote.initialOpenedPrice!)),
-		// 	false,
-		// 	solverAccount,
-		// 	account.accountSource,
-		// 	event.address,
-		// )
 	}
 	updateDailyOpenInterest(
 		event.block.timestamp,
