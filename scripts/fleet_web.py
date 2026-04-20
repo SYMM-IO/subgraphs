@@ -42,6 +42,13 @@ CONFIGS_DIR = REPO_ROOT / "configs" / "perps"
 
 MODULES = ["perps/analytics", "perps/events"]
 
+# Goldsky public project ID — used to build GraphQL endpoint URLs in the UI.
+GOLDSKY_PROJECT_ID = "project_cm1hfr4527p0f01u85mz499u8"
+
+
+def goldsky_endpoint(base: str, ver_or_tag: str) -> str:
+    return f"https://api.goldsky.com/api/public/{GOLDSKY_PROJECT_ID}/subgraphs/{base}/{ver_or_tag}/gn"
+
 # Prod chain configs — "prod only" preset selects exactly these.
 PROD_CONFIGS = {
     "base",
@@ -644,6 +651,17 @@ BASE_HTML = r"""
   .tag-chip::before { content: ''; display: inline-block; width: 6px; height: 6px;
               background: #82b1ff; border-radius: 50%; }
 
+  /* GraphQL endpoint link cluster — copy + open-in-new-tab */
+  .ep-links { display: inline-flex; align-items: center; gap: 2px; opacity: .55;
+              transition: opacity .12s; }
+  .ep-links:hover, .v-row:hover .ep-links, .tag-row:hover .ep-links { opacity: 1; }
+  .ep-btn { display: inline-flex; align-items: center; justify-content: center;
+            width: 20px; height: 20px; padding: 0; background: transparent; border: none;
+            color: #6a7280; cursor: pointer; border-radius: 4px; font-size: 12px;
+            line-height: 1; text-decoration: none; transition: all .1s; }
+  .ep-btn:hover { background: rgba(47,111,235,.15); color: #82b1ff; }
+  .ep-btn.copied { background: rgba(46,160,67,.18); color: #7ee195; }
+
   /* Version row — single horizontal line */
   .v-row { display: flex; align-items: center; gap: 10px; padding: 4px 0;
            border-left: 1px dashed #2a3240; padding-left: 12px; margin-left: -2px; }
@@ -930,6 +948,58 @@ BASE_HTML = r"""
   document.addEventListener('htmx:sendError', function(e) {
     _clearHtmxRequestState(e.detail && e.detail.elt);
   });
+
+  // ── GraphQL endpoint helpers ─────────────────────────────────────
+  window.GOLDSKY_PROJECT_ID = "{{ goldsky_project }}";
+  window.gqlUrl = function(base, verOrTag) {
+    return 'https://api.goldsky.com/api/public/' + window.GOLDSKY_PROJECT_ID +
+           '/subgraphs/' + base + '/' + verOrTag + '/gn';
+  };
+  window.clientToast = function(kind, title, body) {
+    var c = document.getElementById('toast-container');
+    if (!c) return;
+    var el = document.createElement('div');
+    el.className = 'toast ' + (kind || 'ok');
+    var t = document.createElement('div'); t.className = 't-title'; t.textContent = title || '';
+    el.appendChild(t);
+    if (body) {
+      var b = document.createElement('div'); b.className = 't-body'; b.textContent = body;
+      el.appendChild(b);
+    }
+    c.appendChild(el);
+    el.setAttribute('data-dismissing', '1');
+    setTimeout(function() { el.classList.add('fading'); }, 2200);
+    setTimeout(function() { el.remove(); }, 2600);
+  };
+  window.copyEndpoint = function(btn, base, verOrTag) {
+    var url = window.gqlUrl(base, verOrTag);
+    var done = function() {
+      window.clientToast('ok', 'Endpoint copied', base + '/' + verOrTag);
+      if (btn) {
+        btn.classList.add('copied');
+        var orig = btn.textContent;
+        btn.textContent = '✓';
+        setTimeout(function() { btn.classList.remove('copied'); btn.textContent = orig; }, 900);
+      }
+    };
+    var fail = function(err) {
+      window.clientToast('err', 'Copy failed', (err && err.message) || String(err));
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(url).then(done).catch(function() {
+        // fall through to legacy
+        try { _legacyCopy(url); done(); } catch (e) { fail(e); }
+      });
+    } else {
+      try { _legacyCopy(url); done(); } catch (e) { fail(e); }
+    }
+  };
+  function _legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+  }
 </script>
 </head>
 <body>
@@ -1346,6 +1416,14 @@ GRID_HTML = r"""
           {% for d in row.deployments %}
             <div class="v-row">
               <span class="v-ver">{{ d.version }}</span>
+              <span class="ep-links" title="GraphQL endpoint">
+                <button type="button" class="ep-btn"
+                        onclick="copyEndpoint(this, '{{ row.base }}', '{{ d.version }}')"
+                        title="Copy GraphQL endpoint URL">📋</button>
+                <a class="ep-btn" target="_blank" rel="noopener"
+                   href="https://api.goldsky.com/api/public/{{ goldsky_project }}/subgraphs/{{ row.base }}/{{ d.version }}/gn"
+                   title="Open GraphQL endpoint in new tab">↗</a>
+              </span>
               <span class="v-meta">
                 {% if d.synced == '100%' %}
                   <span class="pill pill-green">{{ d.synced }}</span>
@@ -1409,9 +1487,17 @@ GRID_HTML = r"""
         {% if row.tags %}
           <div class="flex flex-col gap-2">
           {% for tag, ver in row.tags.items() %}
-            <div class="flex items-center gap-1.5 flex-wrap">
+            <div class="tag-row flex items-center gap-1.5 flex-wrap">
               <span class="pill pill-blue">{{ tag }}</span>
               <span class="text-gray-400 text-xs">→ {{ ver }}</span>
+              <span class="ep-links" title="GraphQL endpoint (tag)">
+                <button type="button" class="ep-btn"
+                        onclick="copyEndpoint(this, '{{ row.base }}', '{{ tag }}')"
+                        title="Copy GraphQL endpoint for {{ tag }}">📋</button>
+                <a class="ep-btn" target="_blank" rel="noopener"
+                   href="https://api.goldsky.com/api/public/{{ goldsky_project }}/subgraphs/{{ row.base }}/{{ tag }}/gn"
+                   title="Open {{ tag }} GraphQL endpoint in new tab">↗</a>
+              </span>
               <button class="btn btn-xs btn-ghost"
                       hx-post="/remove-tag"
                       hx-vals='{"base": "{{ row.base }}", "version": "{{ ver }}", "tag": "{{ tag }}"}'
@@ -1995,7 +2081,11 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
 def render_grid(store: FleetStore) -> str:
     groups = build_chain_groups(store.chains, store.state)
     active_chain_meta = [{"k": g["chain"], "o": bool(g.get("is_orphan"))} for g in groups]
-    return _env.get_template("grid").render(groups=groups, active_chain_meta=active_chain_meta)
+    return _env.get_template("grid").render(
+        groups=groups,
+        active_chain_meta=active_chain_meta,
+        goldsky_project=GOLDSKY_PROJECT_ID,
+    )
 
 
 def _format_duration(seconds: float) -> str:
@@ -2098,6 +2188,7 @@ def index() -> HTMLResponse:
         all_chains=initial_chain_chips,
         prod_chains=sorted(prod_chain_keys),
         stage_chains=sorted(stage_chain_keys),
+        goldsky_project=GOLDSKY_PROJECT_ID,
     )
     return HTMLResponse(html)
 
