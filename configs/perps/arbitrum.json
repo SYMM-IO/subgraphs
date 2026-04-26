@@ -76,6 +76,13 @@
 			"name": "multi_account_gryps"
 		},
 		{
+			"address": "0xbc029264eb164f36D7DfEfc46A607b66C2b4F379",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "428845332",
+			"name": "multi_account_carbon"
+		},
+		{
 			"address": "0x96AF9f2893F1fd79fa039ECb56c4B47425c8f74B",
 			"abi": "feeCollector",
 			"version": "1",
@@ -116,6 +123,13 @@
 			"version": "1",
 			"startBlock": "382142226",
 			"name": "gryps"
+		},
+		{
+			"address": "0x5B5CB258Ba979823081cF1A4e3376B17951Cc668",
+			"abi": "feeCollector",
+			"version": "1",
+			"startBlock": "429546794",
+			"name": "carbon"
 		}
 	],
 	"deploy_urls": {
