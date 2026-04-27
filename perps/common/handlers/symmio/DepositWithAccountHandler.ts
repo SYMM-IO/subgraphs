@@ -4,6 +4,7 @@ import { DepositHandler } from "./DepositHandler"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { Deposit as Deposit_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
+import { resolveAccountSourceFromAccountLayer } from "../../utils/account_layer_resolver"
 
 export class DepositWithAccountHandler<T> extends DepositHandler<T> {
 	handleAccount(_event: ethereum.Event, version: Version): void {
@@ -12,7 +13,8 @@ export class DepositWithAccountHandler<T> extends DepositHandler<T> {
 		const event = changetype<T>(_event)
 		const globalCounter = super.handleGlobalCounter()
 
-		let account = createNewAccountIfNotExists(event.params.user, event.params.user, null, AccountType.UNKNOWN, event.block, event.transaction)
+		let accountSource = resolveAccountSourceFromAccountLayer(event.address, event.params.user)
+		let account = createNewAccountIfNotExists(event.params.user, event.params.user, accountSource, AccountType.UNKNOWN, event.block, event.transaction)
 		account.source = event.address
 		// v0.8.5 adds an `isVirtual` flag on Deposit. Skip virtual deposits (virtualDepositFor) —
 		// no external tokens enter, the Deposit event is reused purely for bookkeeping.

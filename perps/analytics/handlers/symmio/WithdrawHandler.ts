@@ -7,6 +7,7 @@ import { getConfiguration } from "../../utils/builders"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { AccountType, createNewAccountIfNotExists } from "../../../common/utils/builders"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
+import { resolveAccountSourceFromAccountLayer } from "../../../common/utils/account_layer_resolver"
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -17,7 +18,8 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
 
-		let account = createNewAccountIfNotExists(event.params.user, event.params.user, null, AccountType.UNKNOWN, event.block, event.transaction)
+		let accountSource = resolveAccountSourceFromAccountLayer(event.address, event.params.user)
+		let account = createNewAccountIfNotExists(event.params.user, event.params.user, accountSource, AccountType.UNKNOWN, event.block, event.transaction)
 		account.globalCounter = globalCounter
 		account.source = event.address
 		account.withdraw = account.withdraw.plus(event.params.amount)

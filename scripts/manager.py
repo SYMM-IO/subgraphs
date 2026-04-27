@@ -485,6 +485,13 @@ def prepare_module(config: Config, target_module: str):
         if len(contract.dependencies) > 0:
             source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in contract.dependencies]
 
+        # symmio handlers (Allocate/Deposit/Withdraw) call accountLayer_1.bind() via the resolver
+        # to fix the activeUsers ordering bug. Every symmio data source on chains using accountLayer
+        # must declare accountLayer_1 in its abis so the binding can be resolved at runtime.
+        if contract.abi == "symmio" and "accountLayer" in unique_abis:
+            if not any(a["name"] == "accountLayer_1" for a in source_config["mapping"]["abis"]):
+                source_config["mapping"]["abis"].append({"name": "accountLayer_1", "file": "./abis/accountLayer_1.json"})
+
         # Auto-include ABIs that were detected from deps/src files but not in config
         existing_abi_names = set(a["name"] for a in source_config["mapping"]["abis"])
         for c in all_contracts:
