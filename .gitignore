@@ -24,3 +24,4 @@ perps/analytics/currentConfig.json
 .python-version
 uv.lock
 pyproject.toml
+__pycache__/
