@@ -4,8 +4,20 @@
 		{
 			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
 			"abi": "symmio",
+			"version": "0_8_5",
+			"startBlock": "454822977",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2",
+				"accountLayer_1"
+			]
+		},
+		{
+			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+			"abi": "symmio",
 			"version": "0_8_4",
 			"startBlock": "292927488",
+			"endBlock": "454822977",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
@@ -130,6 +142,12 @@
 			"version": "1",
 			"startBlock": "429546794",
 			"name": "carbon"
+		},
+		{
+			"address": "0xA60AC54e18739f1C4681409383DCF881De3eFAbE",
+			"abi": "accountLayer",
+			"version": "1",
+			"startBlock": "454822977"
 		}
 	],
 	"deploy_urls": {
