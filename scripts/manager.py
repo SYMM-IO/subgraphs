@@ -130,6 +130,23 @@ abi_version_enums: Dict[str, str] = {
     "optionsMultiAccount": "MultiAccountVersion",
 }
 
+SYNC_META_SCHEMA = """
+type SyncMeta @entity(immutable: false) {
+    id: ID!
+    globalVersion: String!
+    versionsHash: String!
+    deployedAt: BigInt!
+    versions: [EntityVersion!]! @derivedFrom(field: "meta")
+}
+
+type EntityVersion @entity(immutable: false) {
+    id: ID!
+    meta: SyncMeta!
+    version: String!
+    updatedAt: BigInt!
+}
+"""
+
 
 def json_to_yaml(json_data):
     return yaml.dump(json_data, default_flow_style=False)
@@ -164,8 +181,80 @@ def create_schema_file(target_module: str, target_config: Dict[str, Any]):
             if model_name in target_config["importModels"]:
                 with open(os.path.join(common_models_dir, model), "r") as model_file:
                     dest_file.write("\n" + model_file.read())
+        dest_file.write("\n" + SYNC_META_SCHEMA)
         dest_file.write("#=======================\n\n")
         dest_file.write(src_file.read())
+
+
+def load_sync_versions(target_module: str) -> Dict[str, Any]:
+    path = os.path.join(target_module, "sync_versions.json")
+    if not os.path.exists(path):
+        return {"global": "0", "entities": {}}
+    with open(path, "r") as f:
+        data = json.load(f)
+    if "global" not in data or "entities" not in data:
+        raise ValueError(f"{path} must contain 'global' and 'entities' keys")
+    return data
+
+
+def generate_sync_meta_ts(target_module: str):
+    versions = load_sync_versions(target_module)
+    global_version = versions["global"]
+    entity_versions = versions.get("entities", {})
+    entity_version_items = sorted(entity_versions.items())
+    versions_hash = "|".join([f"{entity}:{version}" for entity, version in entity_version_items])
+
+    depth = target_module.count("/") + 1
+    generated_prefix = "../" * depth
+
+    lines = [
+        'import { BigInt, ethereum } from "@graphprotocol/graph-ts"',
+        f'import {{ EntityVersion, SyncMeta }} from "{generated_prefix}generated/schema"',
+        "",
+        f"const GLOBAL_VERSION = {json.dumps(global_version)}",
+        f"const VERSIONS_HASH = {json.dumps(versions_hash)}",
+        "",
+        "function ensureEntityVersion(id: string, versionValue: string, timestamp: BigInt): void {",
+        "    let entityVersion = EntityVersion.load(id)",
+        "    let isNew = entityVersion == null",
+        "    if (entityVersion == null) {",
+        "        entityVersion = new EntityVersion(id)",
+        '        entityVersion.meta = "meta"',
+        "    }",
+        "    if (isNew || entityVersion.version != versionValue) {",
+        '        entityVersion.meta = "meta"',
+        "        entityVersion.version = versionValue",
+        "        entityVersion.updatedAt = timestamp",
+        "        entityVersion.save()",
+        "    }",
+        "}",
+        "",
+        "export function ensureSyncMeta(block: ethereum.Block): void {",
+        '    let meta = SyncMeta.load("meta")',
+        "    if (meta != null) {",
+        "        if (meta.globalVersion == GLOBAL_VERSION && meta.versionsHash == VERSIONS_HASH) {",
+        "            return",
+        "        }",
+        "    }",
+        "    if (meta == null) {",
+        '        meta = new SyncMeta("meta")',
+        "    }",
+        "    meta.globalVersion = GLOBAL_VERSION",
+        "    meta.versionsHash = VERSIONS_HASH",
+        "    meta.deployedAt = block.timestamp",
+        "    meta.save()",
+    ]
+
+    for entity, version in entity_version_items:
+        lines.append(f'    ensureEntityVersion("{entity}", "{version}", block.timestamp)')
+
+    lines += [
+        "}",
+        "",
+    ]
+
+    with open(os.path.join(target_module, "src_sync_meta.ts"), "w") as src_file:
+        src_file.write("\n".join(lines))
 
 
 def generate_src_ts(target_module: str, contract: Contract):
@@ -191,10 +280,12 @@ def generate_src_ts(target_module: str, contract: Contract):
     for event in sorted_events:
         imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
         imports.add(f"import {{{event.numbered_name}}} from '{generated_prefix}generated/{event.source}/{event.source}'")
+        imports.add("import {ensureSyncMeta} from './src_sync_meta'")
         handlers_code.append(
             textwrap.dedent(
                 f"""
                 export function {event.handler_name}(event: {event.numbered_name}): void {{
+                    ensureSyncMeta(event.block)
                     let handler = new {event.name}Handler<{event.numbered_name}>()
                     handler.handle(event, {version_enum}.v_{contract.version})
                 }}
@@ -773,6 +864,7 @@ def main():
         current_step += 1
         step(current_step, build_steps, "Preparing module...")
         prepare_module(config, args.module_name)
+        generate_sync_meta_ts(args.module_name)
         success("Module prepared")
 
         if args.create_utils:

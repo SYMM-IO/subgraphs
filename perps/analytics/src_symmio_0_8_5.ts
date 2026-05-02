@@ -137,417 +137,487 @@ import {WithdrawSpeedUpAccepted} from '../../generated/symmio_0_8_5/symmio_0_8_5
 import {WithdrawSuspendedHandler} from './handlers/symmio/WithdrawSuspendedHandler'
 import {WithdrawSuspended} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {Withdraw} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {ensureSyncMeta} from './src_sync_meta'
 
 
 export function handleADLClose(event: ADLClose): void {
+	ensureSyncMeta(event.block)
     let handler = new ADLCloseHandler<ADLClose>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleAcceptCancelCloseRequest(event: AcceptCancelCloseRequest): void {
+	ensureSyncMeta(event.block)
     let handler = new AcceptCancelCloseRequestHandler<AcceptCancelCloseRequest>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleAcceptCancelRequest(event: AcceptCancelRequest): void {
+	ensureSyncMeta(event.block)
     let handler = new AcceptCancelRequestHandler<AcceptCancelRequest>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleAddBridge(event: AddBridge): void {
+	ensureSyncMeta(event.block)
     let handler = new AddBridgeHandler<AddBridge>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleAddSymbol(event: AddSymbol): void {
+	ensureSyncMeta(event.block)
     let handler = new AddSymbolHandler<AddSymbol>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleAllocateForPartyB(event: AllocateForPartyB): void {
+	ensureSyncMeta(event.block)
     let handler = new AllocateForPartyBHandler<AllocateForPartyB>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleAllocatePartyA(event: AllocatePartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new AllocatePartyAHandler<AllocatePartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleBalanceChangePartyA(event: BalanceChangePartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new BalanceChangePartyAHandler<BalanceChangePartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleBalanceChangePartyB(event: BalanceChangePartyB): void {
+	ensureSyncMeta(event.block)
     let handler = new BalanceChangePartyBHandler<BalanceChangePartyB>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleChargeAccumulatedFundingFee(event: ChargeAccumulatedFundingFee): void {
+	ensureSyncMeta(event.block)
     let handler = new ChargeAccumulatedFundingFeeHandler<ChargeAccumulatedFundingFee>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleChargeFundingRate(event: ChargeFundingRate): void {
+	ensureSyncMeta(event.block)
     let handler = new ChargeFundingRateHandler<ChargeFundingRate>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleDeallocateForPartyB(event: DeallocateForPartyB): void {
+	ensureSyncMeta(event.block)
     let handler = new DeallocateForPartyBHandler<DeallocateForPartyB>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleDeallocatePartyA(event: DeallocatePartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new DeallocatePartyAHandler<DeallocatePartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleDeferredLiquidatePartyA(event: DeferredLiquidatePartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new DeferredLiquidatePartyAHandler<DeferredLiquidatePartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleDeposit(event: Deposit): void {
+	ensureSyncMeta(event.block)
     let handler = new DepositHandler<Deposit>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleEmergencyClosePosition(event: EmergencyClosePosition): void {
+	ensureSyncMeta(event.block)
     let handler = new EmergencyClosePositionHandler<EmergencyClosePosition>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleExpireQuoteClose(event: ExpireQuoteClose): void {
+	ensureSyncMeta(event.block)
     let handler = new ExpireQuoteCloseHandler<ExpireQuoteClose>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleExpireQuoteOpen(event: ExpireQuoteOpen): void {
+	ensureSyncMeta(event.block)
     let handler = new ExpireQuoteOpenHandler<ExpireQuoteOpen>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleFillCloseRequest(event: FillCloseRequest): void {
+	ensureSyncMeta(event.block)
     let handler = new FillCloseRequestHandler<FillCloseRequest>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleForceCancelCloseRequest(event: ForceCancelCloseRequest): void {
+	ensureSyncMeta(event.block)
     let handler = new ForceCancelCloseRequestHandler<ForceCancelCloseRequest>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleForceCancelQuote(event: ForceCancelQuote): void {
+	ensureSyncMeta(event.block)
     let handler = new ForceCancelQuoteHandler<ForceCancelQuote>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleForceClosePartyBInsolvent(event: ForceClosePartyBInsolvent): void {
+	ensureSyncMeta(event.block)
     let handler = new ForceClosePartyBInsolventHandler<ForceClosePartyBInsolvent>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleForceClosePosition(event: ForceClosePosition): void {
+	ensureSyncMeta(event.block)
     let handler = new ForceClosePositionHandler<ForceClosePosition>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleFullyLiquidatedPartyA(event: FullyLiquidatedPartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new FullyLiquidatedPartyAHandler<FullyLiquidatedPartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLiquidatePartyA(event: LiquidatePartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLiquidatePartyB(event: LiquidatePartyB): void {
+	ensureSyncMeta(event.block)
     let handler = new LiquidatePartyBHandler<LiquidatePartyB>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPositionsPartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new LiquidatePendingPositionsPartyAHandler<LiquidatePendingPositionsPartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLiquidatePositionsForClearingHouse(event: LiquidatePositionsForClearingHouse): void {
+	ensureSyncMeta(event.block)
     let handler = new LiquidatePositionsForClearingHouseHandler<LiquidatePositionsForClearingHouse>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLiquidatePositionsPartyA(event: LiquidatePositionsPartyA): void {
+	ensureSyncMeta(event.block)
     let handler = new LiquidatePositionsPartyAHandler<LiquidatePositionsPartyA>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLiquidatePositionsPartyB(event: LiquidatePositionsPartyB): void {
+	ensureSyncMeta(event.block)
     let handler = new LiquidatePositionsPartyBHandler<LiquidatePositionsPartyB>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLiquidationDisputed(event: LiquidationDisputed): void {
+	ensureSyncMeta(event.block)
     let handler = new LiquidationDisputedHandler<LiquidationDisputed>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleResolveLiquidationDispute(event: ResolveLiquidationDispute): void {
+	ensureSyncMeta(event.block)
     let handler = new ResolveLiquidationDisputeHandler<ResolveLiquidationDispute>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleLockQuote(event: LockQuote): void {
+	ensureSyncMeta(event.block)
     let handler = new LockQuoteHandler<LockQuote>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleOpenPosition(event: OpenPosition): void {
+	ensureSyncMeta(event.block)
     let handler = new OpenPositionHandler<OpenPosition>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleRegisterPartyB(event: RegisterPartyB): void {
+	ensureSyncMeta(event.block)
     let handler = new RegisterPartyBHandler<RegisterPartyB>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleRequestToCancelCloseRequest(event: RequestToCancelCloseRequest): void {
+	ensureSyncMeta(event.block)
     let handler = new RequestToCancelCloseRequestHandler<RequestToCancelCloseRequest>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleRequestToCancelQuote(event: RequestToCancelQuote): void {
+	ensureSyncMeta(event.block)
     let handler = new RequestToCancelQuoteHandler<RequestToCancelQuote>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleRequestToClosePosition(event: RequestToClosePosition): void {
+	ensureSyncMeta(event.block)
     let handler = new RequestToClosePositionHandler<RequestToClosePosition>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleRoleGranted(event: RoleGranted): void {
+	ensureSyncMeta(event.block)
     let handler = new RoleGrantedHandler<RoleGranted>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleRoleRevoked(event: RoleRevoked): void {
+	ensureSyncMeta(event.block)
     let handler = new RoleRevokedHandler<RoleRevoked>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSendQuote(event: SendQuote): void {
+	ensureSyncMeta(event.block)
     let handler = new SendQuoteHandler<SendQuote>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetCollateral(event: SetCollateral): void {
+	ensureSyncMeta(event.block)
     let handler = new SetCollateralHandler<SetCollateral>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetEntityMetadata(event: SetEntityMetadata): void {
+	ensureSyncMeta(event.block)
     let handler = new SetEntityMetadataHandler<SetEntityMetadata>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetEpochDuration(event: SetEpochDuration): void {
+	ensureSyncMeta(event.block)
     let handler = new SetEpochDurationHandler<SetEpochDuration>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetFeeCollector(event: SetFeeCollector): void {
+	ensureSyncMeta(event.block)
     let handler = new SetFeeCollectorHandler<SetFeeCollector>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetLongFundingFee(event: SetLongFundingFee): void {
+	ensureSyncMeta(event.block)
     let handler = new SetLongFundingFeeHandler<SetLongFundingFee>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetShortFundingFee(event: SetShortFundingFee): void {
+	ensureSyncMeta(event.block)
     let handler = new SetShortFundingFeeHandler<SetShortFundingFee>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetSymbolFundingState(event: SetSymbolFundingState): void {
+	ensureSyncMeta(event.block)
     let handler = new SetSymbolFundingStateHandler<SetSymbolFundingState>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetSymbolTradingFee(event: SetSymbolTradingFee): void {
+	ensureSyncMeta(event.block)
     let handler = new SetSymbolTradingFeeHandler<SetSymbolTradingFee>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetSymbolValidationState(event: SetSymbolValidationState): void {
+	ensureSyncMeta(event.block)
     let handler = new SetSymbolValidationStateHandler<SetSymbolValidationState>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
+	ensureSyncMeta(event.block)
     let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
+	ensureSyncMeta(event.block)
     let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSettleUpnl(event: SettleUpnl): void {
+	ensureSyncMeta(event.block)
     let handler = new SettleUpnlHandler<SettleUpnl>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSettleUpnlUnified(event: SettleUpnlUnified): void {
+	ensureSyncMeta(event.block)
     let handler = new SettleUpnlUnifiedHandler<SettleUpnlUnified>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleSoftPartyBLiquidation(event: SoftPartyBLiquidation): void {
+	ensureSyncMeta(event.block)
     let handler = new SoftPartyBLiquidationHandler<SoftPartyBLiquidation>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleTakeoverPartyALiquidation(event: TakeoverPartyALiquidation): void {
+	ensureSyncMeta(event.block)
     let handler = new TakeoverPartyALiquidationHandler<TakeoverPartyALiquidation>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleTradingFeeCharged(event: TradingFeeCharged): void {
+	ensureSyncMeta(event.block)
     let handler = new TradingFeeChargedHandler<TradingFeeCharged>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleTransferToBridge(event: TransferToBridge): void {
+	ensureSyncMeta(event.block)
     let handler = new TransferToBridgeHandler<TransferToBridge>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleUnlockQuote(event: UnlockQuote): void {
+	ensureSyncMeta(event.block)
     let handler = new UnlockQuoteHandler<UnlockQuote>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleUpdateAccumulatedFundingFee(event: UpdateAccumulatedFundingFee): void {
+	ensureSyncMeta(event.block)
     let handler = new UpdateAccumulatedFundingFeeHandler<UpdateAccumulatedFundingFee>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdraw(event: Withdraw): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawHandler<Withdraw>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawAccepted(event: WithdrawAccepted): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawAcceptedHandler<WithdrawAccepted>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawCancelRequested(event: WithdrawCancelRequested): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawCancelRequestedHandler<WithdrawCancelRequested>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawCancelled(event: WithdrawCancelled): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawCancelledHandler<WithdrawCancelled>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawFinalized(event: WithdrawFinalized): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawFinalizedHandler<WithdrawFinalized>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawInitiated(event: WithdrawInitiated): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawInitiatedHandler<WithdrawInitiated>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawRejected(event: WithdrawRejected): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawRejectedHandler<WithdrawRejected>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawSpeedUpAccepted(event: WithdrawSpeedUpAccepted): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawSpeedUpAcceptedHandler<WithdrawSpeedUpAccepted>()
     handler.handle(event, Version.v_0_8_5)
 }
 
 
 export function handleWithdrawSuspended(event: WithdrawSuspended): void {
+	ensureSyncMeta(event.block)
     let handler = new WithdrawSuspendedHandler<WithdrawSuspended>()
     handler.handle(event, Version.v_0_8_5)
 }

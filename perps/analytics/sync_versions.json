@@ -1,0 +1,17 @@
+{
+  "global": "2026-04-30-001",
+  "entities": {
+    "account": "v1",
+    "balance_change": "v1",
+    "daily_history": "v1",
+    "monthly_history": "v1",
+    "quote": "v1",
+    "quote_event": "v1",
+    "solver_daily_history": "v1",
+    "solver_only_daily_history": "v1",
+    "symbol": "v1",
+    "total_history": "v1",
+    "user": "v1",
+    "weekly_history": "v1"
+  }
+}
