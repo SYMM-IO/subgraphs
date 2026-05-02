@@ -2,11 +2,31 @@ import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Version } from "./BaseHandler"
 
 import { getQuote as getQuote_0_8_0, symbolIdToSymbolName as symbolIdToSymbolName_0_8_0 } from "./contract_utils_0_8_0"
-import { getQuote as getQuote_0_8_1, getLiquidatedStateOfPartyA as getLiqState_0_8_1, symbolIdToSymbolName as symbolIdToSymbolName_0_8_1 } from "./contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_2, getLiquidatedStateOfPartyA as getLiqState_0_8_2, symbolIdToSymbolName as symbolIdToSymbolName_0_8_2 } from "./contract_utils_0_8_2"
-import { getQuote as getQuote_0_8_3, getLiquidatedStateOfPartyA as getLiqState_0_8_3, symbolIdToSymbolName as symbolIdToSymbolName_0_8_3 } from "./contract_utils_0_8_3"
-import { getQuote as getQuote_0_8_4, getLiquidatedStateOfPartyA as getLiqState_0_8_4, symbolIdToSymbolName as symbolIdToSymbolName_0_8_4 } from "./contract_utils_0_8_4"
-import { getQuote as getQuote_0_8_5, getLiquidatedStateOfPartyA as getLiqState_0_8_5, symbolIdToSymbolName as symbolIdToSymbolName_0_8_5 } from "./contract_utils_0_8_5"
+import {
+	getQuote as getQuote_0_8_1,
+	getLiquidatedStateOfPartyA as getLiqState_0_8_1,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_1,
+} from "./contract_utils_0_8_1"
+import {
+	getQuote as getQuote_0_8_2,
+	getLiquidatedStateOfPartyA as getLiqState_0_8_2,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_2,
+} from "./contract_utils_0_8_2"
+import {
+	getQuote as getQuote_0_8_3,
+	getLiquidatedStateOfPartyA as getLiqState_0_8_3,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_3,
+} from "./contract_utils_0_8_3"
+import {
+	getQuote as getQuote_0_8_4,
+	getLiquidatedStateOfPartyA as getLiqState_0_8_4,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_4,
+} from "./contract_utils_0_8_4"
+import {
+	getQuote as getQuote_0_8_5,
+	getLiquidatedStateOfPartyA as getLiqState_0_8_5,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_5,
+} from "./contract_utils_0_8_5"
 
 /**
  * Normalized quote data that abstracts version-specific field name differences.
@@ -35,6 +55,7 @@ export class QuoteData {
 	affiliate: Bytes
 	partyBsWhiteList: Bytes[]
 	accumulatedPaidFunding: BigInt
+	lastFundingPaymentTimestamp: BigInt
 
 	constructor() {
 		this.cva = BigInt.zero()
@@ -57,6 +78,7 @@ export class QuoteData {
 		this.affiliate = Address.zero()
 		this.partyBsWhiteList = []
 		this.accumulatedPaidFunding = BigInt.zero()
+		this.lastFundingPaymentTimestamp = BigInt.zero()
 	}
 }
 
@@ -248,6 +270,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.marketPrice = q.marketPrice
 			data.affiliate = q.affiliate
 			data.accumulatedPaidFunding = q.accumulatedPaidFunding
+			data.lastFundingPaymentTimestamp = q.lastFundingPaymentTimestamp
 			if (q.partyBsWhiteList) data.partyBsWhiteList = convertAddressArrayToBytes(q.partyBsWhiteList)
 			break
 		}
@@ -261,13 +284,20 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
  */
 export function getSymbolName(version: Version, symbolId: BigInt, address: Address): string {
 	switch (version) {
-		case Version.v_0_8_0: return symbolIdToSymbolName_0_8_0(symbolId, address)
-		case Version.v_0_8_1: return symbolIdToSymbolName_0_8_1(symbolId, address)
-		case Version.v_0_8_2: return symbolIdToSymbolName_0_8_2(symbolId, address)
-		case Version.v_0_8_3: return symbolIdToSymbolName_0_8_3(symbolId, address)
-		case Version.v_0_8_4: return symbolIdToSymbolName_0_8_4(symbolId, address)
-		case Version.v_0_8_5: return symbolIdToSymbolName_0_8_5(symbolId, address)
-		default: return ""
+		case Version.v_0_8_0:
+			return symbolIdToSymbolName_0_8_0(symbolId, address)
+		case Version.v_0_8_1:
+			return symbolIdToSymbolName_0_8_1(symbolId, address)
+		case Version.v_0_8_2:
+			return symbolIdToSymbolName_0_8_2(symbolId, address)
+		case Version.v_0_8_3:
+			return symbolIdToSymbolName_0_8_3(symbolId, address)
+		case Version.v_0_8_4:
+			return symbolIdToSymbolName_0_8_4(symbolId, address)
+		case Version.v_0_8_5:
+			return symbolIdToSymbolName_0_8_5(symbolId, address)
+		default:
+			return ""
 	}
 }
 

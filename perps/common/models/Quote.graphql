@@ -1,105 +1,107 @@
 type Quote @entity(immutable: false) {
-    id: String!
+	id: String!
 	source: Bytes!
-    globalCounter: BigInt!
-    quoteId: BigInt!
-    quoteStatus: Int
-    partyA: Bytes!
-    partyB: Bytes
-    affiliate: Bytes
-    subAccount: SubAccount
-    partyAAccount: Account
-    action: String
-    blockNumber: BigInt!
+	globalCounter: BigInt!
+	quoteId: BigInt!
+	quoteStatus: Int
+	partyA: Bytes!
+	partyB: Bytes
+	affiliate: Bytes
+	subAccount: SubAccount
+	partyAAccount: Account
+	action: String
+	blockNumber: BigInt!
 
-    # open request
-    requestedOpenPrice: BigInt
-    marketPrice: BigInt
-    orderTypeOpen: Int
-    quantity: BigInt
-    cva: BigInt
-    lf: BigInt
-    partyBmm: BigInt
-    partyAmm: BigInt
-    symbolId: BigInt
-    symbol: String
-    positionType: Int
-    openDeadline: BigInt
-    partyBsWhiteList: [Bytes!]
-    maxFundingRate: BigInt
+	# open request
+	requestedOpenPrice: BigInt
+	marketPrice: BigInt
+	orderTypeOpen: Int
+	quantity: BigInt
+	cva: BigInt
+	lf: BigInt
+	partyBmm: BigInt
+	partyAmm: BigInt
+	symbolId: BigInt
+	symbol: String
+	positionType: Int
+	openDeadline: BigInt
+	partyBsWhiteList: [Bytes!]
+	maxFundingRate: BigInt
 
-    # open
-    fillAmount: BigInt
-    openedPrice: BigInt
-    tradingFee: BigInt!
+	# open
+	fillAmount: BigInt
+	openedPrice: BigInt
+	tradingFee: BigInt!
 
-    # initial
-    initialOpenedPrice: BigInt
-    initialCva: BigInt!
-    initialPartyAmm: BigInt
-    initialPartyBmm: BigInt!
-    initialLf: BigInt!
+	# initial
+	initialOpenedPrice: BigInt
+	initialCva: BigInt!
+	initialPartyAmm: BigInt
+	initialPartyBmm: BigInt!
+	initialLf: BigInt!
 
-    # close request
-    closePrice: BigInt # request
-    orderTypeClose: Int
-    closedPrice: BigInt # done
-    closeDeadline: BigInt
-    quantityToClose: BigInt
-    closeId: BigInt
+	# close request
+	closePrice: BigInt # request
+	orderTypeClose: Int
+	closedPrice: BigInt # done
+	closeDeadline: BigInt
+	quantityToClose: BigInt
+	closeId: BigInt
 
-    # closed
-    closedAmount: BigInt
-    leverage: BigInt
-    averageClosedPrice: BigInt
+	# closed
+	closedAmount: BigInt
+	leverage: BigInt
+	averageClosedPrice: BigInt
 
-    # liquidation
-    liquidatePrice: BigInt
-    liquidateAmount: BigInt
-    liquidatedSide: Int
-    liquidationId: Bytes
+	# liquidation
+	liquidatePrice: BigInt
+	liquidateAmount: BigInt
+	liquidatedSide: Int
+	liquidationId: Bytes
 
-    # funding rate
-    userPaidFunding: BigInt
-    userReceivedFunding: BigInt
-    accumulatedPaidFunding: BigInt
+	# funding rate
+	userPaidFunding: BigInt
+	userReceivedFunding: BigInt
+	accumulatedPaidFunding: BigInt
+	lastFundingPaymentTimestamp: BigInt
 
-    # timestamps
-    timestamp: BigInt!
-    timestampSendQuote: BigInt
-    timestampOpenPosition: BigInt
-    timestampFullyClose: BigInt
+	# timestamps
+	timestamp: BigInt!
+	timestampSendQuote: BigInt
+	timestampOpenPosition: BigInt
+	timestampFullyClose: BigInt
 
-    # derived
-    quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")
+	# derived
+	quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")
+	fundingSettlements: [QuoteFundingSettlement!]! @derivedFrom(field: "quote")
 }
 
 type PartyA @entity(immutable: false) {
-    id: String!
-    partyB: Bytes
-    quoteUntilLiquid: [BigInt!]
-    globalCounter: BigInt!
+	id: String!
+	partyB: Bytes
+	quoteUntilLiquid: [BigInt!]
+	globalCounter: BigInt!
 }
 
 type PartyBPartyA @entity(immutable: false) {
-    id: String!
-    partyB: Bytes
-    quoteUntilLiquid: [BigInt!]
-    globalCounter: BigInt!
+	id: String!
+	partyB: Bytes
+	quoteUntilLiquid: [BigInt!]
+	globalCounter: BigInt!
 }
 
 type PartyASymbolPrice @entity(immutable: false) {
-    id: String!
-    partyA: Bytes!
-    symbolId: BigInt!
-    requestedOpenPrice: BigInt!
-    timeStamp: BigInt!
-    trHash: Bytes!
-    GlobalCounter: BigInt!
+	id: String!
+	partyA: Bytes!
+	symbolId: BigInt!
+	requestedOpenPrice: BigInt!
+	timeStamp: BigInt!
+	trHash: Bytes!
+	GlobalCounter: BigInt!
 }
 
 type GlobalFee @entity(immutable: false) {
-    id: ID!
-    globalFee: BigInt!
-    latestTimestamp: BigInt!
+	id: ID!
+	globalFee: BigInt!
+	latestTimestamp: BigInt!
 }

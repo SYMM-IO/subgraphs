@@ -64,13 +64,13 @@ type DailyHistory @entity(immutable: false) {
 }
 
 type AffiliateFeeCollector @entity(immutable: false) {
-    id: ID!  # affiliate
-    feeCollector: Bytes!
+	id: ID! # affiliate
+	feeCollector: Bytes!
 }
 
 type FeeCollectorShare @entity(immutable: false) {
-    id: ID!  # feeCollector
-    symmioShare: BigInt
+	id: ID! # feeCollector
+	symmioShare: BigInt
 }
 
 type SolverDailyHistory @entity(immutable: false) {
@@ -318,6 +318,32 @@ type FundingRateSnapshot @entity(immutable: true) {
 	transaction: Bytes!
 }
 
+type FundingIndexCheckpoint @entity(immutable: true) {
+	id: ID!
+	source: Bytes!
+	symbolId: BigInt!
+	symbolName: String!
+	partyB: Bytes!
+	eventType: String!
+	rawLongRate: BigInt
+	rawShortRate: BigInt
+	marketPrice: BigInt
+	currentLongRate: BigInt
+	currentShortRate: BigInt
+	accumulatedLongRate: BigInt
+	accumulatedShortRate: BigInt
+	epochDuration: BigInt
+	lastUpdatedEpoch: BigInt
+	startEpoch: BigInt
+	startEpochTimestamp: BigInt
+	lastUpdatedTimestamp: BigInt
+	snapshotLongFee: BigInt
+	snapshotShortFee: BigInt
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
+}
+
 type FundingFeeState @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
@@ -425,4 +451,32 @@ type AggregatedPosition @entity(immutable: false) {
 	blockNumber: BigInt!
 	transaction: Bytes!
 	partyAAccount: Account
+}
+
+type QuoteFundingSettlement @entity(immutable: true) {
+	id: ID!
+	source: Bytes!
+	quoteId: BigInt!
+	quote: Quote!
+	partyA: Bytes!
+	partyB: Bytes!
+	symbolId: BigInt!
+	symbolName: String!
+	positionType: Int!
+	trigger: String!
+	openAmount: BigInt!
+	previousAccumulatedPaidFunding: BigInt!
+	newAccumulatedPaidFunding: BigInt!
+	fundingDeltaPerUnit: BigInt!
+	signedAmount: BigInt!
+	paidByPartyA: BigInt!
+	receivedByPartyA: BigInt!
+	previousLastFundingPaymentTimestamp: BigInt!
+	newLastFundingPaymentTimestamp: BigInt!
+	previousPaidThroughEpoch: BigInt
+	newPaidThroughEpoch: BigInt
+	balanceChanged: Boolean!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
 }

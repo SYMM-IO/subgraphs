@@ -10,13 +10,7 @@
 		"RequestToCancelCloseRequest",
 		"RequestToCancelQuote"
 	],
-	"BalanceChange": [
-		"Deposit",
-		"Withdraw",
-		"BalanceChangePartyA",
-		"BalanceChangePartyB",
-		"TransferToBridge"
-	],
+	"BalanceChange": ["Deposit", "Withdraw", "BalanceChangePartyA", "BalanceChangePartyB", "TransferToBridge"],
 	"QuoteEvent": [
 		"SendQuote",
 		"LockQuote",
@@ -178,17 +172,9 @@
 		"ChargeAccumulatedFundingFee",
 		"TradingFeeCharged"
 	],
-	"Configuration": [
-		"SetCollateral"
-	],
-	"GrantedRole": [
-		"RoleGranted",
-		"RoleRevoked"
-	],
-	"Account": [
-		"RequestToCancelCloseRequest",
-		"RequestToCancelQuote"
-	],
+	"Configuration": ["SetCollateral"],
+	"GrantedRole": ["RoleGranted", "RoleRevoked"],
+	"Account": ["RequestToCancelCloseRequest", "RequestToCancelQuote"],
 	"AffiliateFeeCollector": [
 		"SetFeeCollector",
 		"LiquidatePositionsPartyA",
@@ -209,10 +195,7 @@
 		"LiquidatePositionsForClearingHouse",
 		"TradingFeeCharged"
 	],
-	"CvaLf": [
-		"BalanceChangePartyA",
-		"SettlePartyALiquidation"
-	],
+	"CvaLf": ["BalanceChangePartyA", "SettlePartyALiquidation"],
 	"LiquidationDetail": [
 		"DeferredLiquidatePartyA",
 		"SetSymbolsPrices",
@@ -224,11 +207,8 @@
 		"SettlePartyALiquidation",
 		"FullyLiquidatedPartyA"
 	],
-	"FundingRateSnapshot": [
-		"SetLongFundingFee",
-		"SetShortFundingFee",
-		"UpdateAccumulatedFundingFee"
-	],
+	"FundingRateSnapshot": ["SetLongFundingFee", "SetShortFundingFee", "UpdateAccumulatedFundingFee"],
+	"FundingIndexCheckpoint": ["SetLongFundingFee", "SetShortFundingFee", "UpdateAccumulatedFundingFee", "SetEpochDuration"],
 	"FundingFeeState": [
 		"OpenPosition",
 		"FillCloseRequest",
@@ -296,5 +276,6 @@
 		"ChargeAccumulatedFundingFee",
 		"SettleUpnl",
 		"SettleUpnlUnified"
-	]
+	],
+	"QuoteFundingSettlement": ["ChargeAccumulatedFundingFee", "FillCloseRequest", "ForceClosePosition", "EmergencyClosePosition", "ADLClose"]
 }

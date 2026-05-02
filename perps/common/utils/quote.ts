@@ -1,11 +1,10 @@
-import {BigInt, ethereum} from "@graphprotocol/graph-ts"
-import {PartyA, PartyBPartyA, Quote} from "../../../generated/schema"
-import {getGlobalCounterAndInc} from "../utils"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { PartyA, PartyBPartyA, Quote } from "../../../generated/schema"
+import { getGlobalCounterAndInc, unDecimal } from "../utils"
 
 export function removeQuoteFromPendingList(quoteId: BigInt): void {
 	let quote = Quote.load(quoteId.toString())
 	if (quote) {
-
 		let partyAEntity = PartyA.load(quote.partyA.toHexString())
 		if (partyAEntity) {
 			partyAEntity.globalCounter = getGlobalCounterAndInc()
@@ -20,7 +19,7 @@ export function removeQuoteFromPendingList(quoteId: BigInt): void {
 		}
 		let partyB = quote.partyB
 		if (partyB) {
-			let partyAPartyBEntity = PartyBPartyA.load(quote.partyA.toHexString() + '-' + partyB.toHexString())
+			let partyAPartyBEntity = PartyBPartyA.load(quote.partyA.toHexString() + "-" + partyB.toHexString())
 			if (partyAPartyBEntity) {
 				partyAPartyBEntity.globalCounter = getGlobalCounterAndInc()
 				let qul = partyAPartyBEntity.quoteUntilLiquid
@@ -45,4 +44,17 @@ export function setEventTimestampAndTransactionHashAndAction(quote: Quote, event
 		quote.timestampFullyClose = _event.block.timestamp
 	}
 	quote.save()
+}
+
+export function applyFundingTotalsFromAccumulatedFundingChange(quote: Quote, newAccumulatedPaidFunding: BigInt, openAmount: BigInt): void {
+	let previousAccumulatedPaidFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
+	let delta = newAccumulatedPaidFunding.minus(previousAccumulatedPaidFunding)
+	if (delta.isZero()) return
+
+	let fundingAmount = unDecimal(delta.abs().times(openAmount))
+	if (delta.gt(BigInt.zero())) {
+		quote.userPaidFunding = (quote.userPaidFunding ? quote.userPaidFunding! : BigInt.zero()).plus(fundingAmount)
+	} else {
+		quote.userReceivedFunding = (quote.userReceivedFunding ? quote.userReceivedFunding! : BigInt.zero()).plus(fundingAmount)
+	}
 }

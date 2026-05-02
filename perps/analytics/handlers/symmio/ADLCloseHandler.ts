@@ -1,4 +1,3 @@
-
 import { ADLCloseHandler as CommonADLCloseHandler } from "../../../common/handlers/symmio/ADLCloseHandler"
 import { Address, ethereum } from "@graphprotocol/graph-ts"
 import { BigInt, log } from "@graphprotocol/graph-ts"
@@ -11,11 +10,13 @@ import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 import { onPositionClose } from "../../utils/aggregatedPosition"
 import { syncFundingFeeState } from "../../utils/fundingFeeState"
+import { captureQuoteFundingContext, recordQuoteFundingSettlement } from "../../utils/fundingHistory"
 
 export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
+		let fundingContext = captureQuoteFundingContext(_event, event.params.quoteId)
 		super.handle(_event, version)
 
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
@@ -41,16 +42,14 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 			quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
 			quote.closedAmount!.equals(quote.quantity!),
 		)
+		recordQuoteFundingSettlement(_event, version, event.params.quoteId, "ADL_CLOSE", fundingContext, true)
 		syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 		createQuoteEvent(
 			_event,
 			event.params.quoteId,
 			"ADL_CLOSE",
-			new JSONBuilder()
-				.add("amount", event.params.amount.toString())
-				.add("closePrice", event.params.price.toString())
-				.build(),
+			new JSONBuilder().add("amount", event.params.amount.toString()).add("closePrice", event.params.price.toString()).build(),
 		)
 		updatePartyALatestBalance(_event, version, changetype<Address>(quote.partyA))
 		if (quote.partyB) updatePartyBLatestBalance(_event, version, changetype<Address>(quote.partyB!), changetype<Address>(quote.partyA))

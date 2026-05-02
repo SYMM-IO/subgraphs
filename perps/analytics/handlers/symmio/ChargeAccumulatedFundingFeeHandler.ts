@@ -10,6 +10,7 @@ import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 import { onFundingUpdate } from "../../utils/aggregatedPosition"
 import { syncFundingFeeState } from "../../utils/fundingFeeState"
+import { captureQuoteFundingContext, FundingSettlementContext, recordQuoteFundingSettlement } from "../../utils/fundingHistory"
 
 export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulatedFundingFeeHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,8 +23,11 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 		// Capture pre-update state before common handler modifies Quote
 		let prevFundings: Array<BigInt> = []
 		let openAmounts: Array<BigInt> = []
+		let fundingContexts: Array<FundingSettlementContext> = []
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
+			let fundingContext = captureQuoteFundingContext(_event, quoteId)
+			fundingContexts.push(fundingContext)
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 			if (quote) {
 				prevFundings.push(quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero())
@@ -46,6 +50,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 			let delta = newFunding.minus(prevFundings[i])
 			let openAmount = openAmounts[i]
 			let fundingAmount = unDecimal(delta.abs().times(openAmount))
+			recordQuoteFundingSettlement(_event, version, quoteId, "EXPLICIT_CHARGE", fundingContexts[i], true)
 
 			onFundingUpdate(
 				_event,
@@ -79,16 +84,16 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 				_event,
 				quoteId,
 				"CHARGE_ACCUMULATED_FUNDING_FEE",
-					new JSONBuilder()
-						.add("fundingPaid", fundingPaid.toString())
-						.add("fundingReceived", fundingReceived.toString())
-						.add("prevFunding", prevFundings[i].toString())
-						.add("newFunding", newFunding.toString())
-						.add("fundingDelta", delta.toString())
-						.add("prevPrice", quote.openedPrice!.toString())
-						.add("newPrice", quote.openedPrice!.toString())
-						.add("openQuantity", openAmount.toString())
-						.build(),
+				new JSONBuilder()
+					.add("fundingPaid", fundingPaid.toString())
+					.add("fundingReceived", fundingReceived.toString())
+					.add("prevFunding", prevFundings[i].toString())
+					.add("newFunding", newFunding.toString())
+					.add("fundingDelta", delta.toString())
+					.add("prevPrice", quote.openedPrice!.toString())
+					.add("newPrice", quote.openedPrice!.toString())
+					.add("openQuantity", openAmount.toString())
+					.build(),
 			)
 
 			let fundingStateKey = quote.symbolId!.toString() + "-" + event.params.partyB.toHexString()

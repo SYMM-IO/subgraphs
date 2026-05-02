@@ -2,7 +2,7 @@ import { DebugEntity, Quote } from "../../../../generated/schema"
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { applyFundingTotalsFromAccumulatedFundingChange, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { QuoteStatus } from "../../../analytics/utils/constants"
 
 function isClosePendingStatus(status: i32): boolean {
@@ -33,7 +33,9 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 		quote.partyAmm = data.partyAmm
 		quote.partyBmm = data.partyBmm
 		quote.lf = data.lf
+		applyFundingTotalsFromAccumulatedFundingChange(quote, data.accumulatedPaidFunding, quote.quantity!.minus(quote.closedAmount!))
 		quote.accumulatedPaidFunding = data.accumulatedPaidFunding
+		quote.lastFundingPaymentTimestamp = data.lastFundingPaymentTimestamp
 
 		quote.quoteId = event.params.quoteId
 		quote.fillAmount = event.params.filledAmount

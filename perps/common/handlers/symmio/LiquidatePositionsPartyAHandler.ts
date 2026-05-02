@@ -51,6 +51,7 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 			}
 			let avgClosedPrice = data.avgClosedPrice
 			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
+			quote.lastFundingPaymentTimestamp = data.lastFundingPaymentTimestamp
 
 			if (version >= Version.v_0_8_1) {
 				let liqState = getLiquidationStateData(version, event.address, event.params.partyA)

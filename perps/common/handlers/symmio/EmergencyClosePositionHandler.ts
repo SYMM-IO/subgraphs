@@ -2,7 +2,7 @@ import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { DebugEntity, Quote } from "../../../../generated/schema"
 import { getQuoteData } from "../../VersionedQuoteLoader"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { applyFundingTotalsFromAccumulatedFundingChange, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 
 export class EmergencyClosePositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -23,7 +23,9 @@ export class EmergencyClosePositionHandler<T> extends BaseHandler {
 			quote.partyAmm = data.partyAmm
 			quote.partyBmm = data.partyBmm
 			quote.lf = data.lf
+			applyFundingTotalsFromAccumulatedFundingChange(quote, data.accumulatedPaidFunding, quote.quantity!.minus(quote.closedAmount!))
 			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
+			quote.lastFundingPaymentTimestamp = data.lastFundingPaymentTimestamp
 		}
 		quote.quoteId = event.params.quoteId
 		quote.fillAmount = event.params.filledAmount
@@ -31,7 +33,10 @@ export class EmergencyClosePositionHandler<T> extends BaseHandler {
 		quote.quoteStatus = event.params.quoteStatus
 		let denominator = quote.closedAmount!.plus(event.params.filledAmount)
 		if (denominator.gt(BigInt.zero())) {
-			quote.averageClosedPrice = quote.closedAmount!.times(quote.averageClosedPrice!).plus(event.params.filledAmount.times(event.params.closedPrice)).div(denominator)
+			quote.averageClosedPrice = quote
+				.closedAmount!.times(quote.averageClosedPrice!)
+				.plus(event.params.filledAmount.times(event.params.closedPrice))
+				.div(denominator)
 		}
 		quote.closedAmount = quote.closedAmount!.plus(event.params.filledAmount)
 		quote.quantityToClose = BigInt.zero()

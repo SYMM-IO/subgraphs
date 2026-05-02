@@ -1,6 +1,5 @@
-import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Account, DebugEntity, Quote } from "../../../../generated/schema"
-import { Address, BigInt, log } from "@graphprotocol/graph-ts"
+import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { Version } from "../../../common/BaseHandler"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
@@ -8,8 +7,15 @@ import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { onPositionClose } from "../../utils/aggregatedPosition"
 import { syncFundingFeeState } from "../../utils/fundingFeeState"
+import { FundingSettlementContext, recordQuoteFundingSettlement } from "../../utils/fundingHistory"
 
-export function handleClose<T>(_event: ethereum.Event, name: string, version: Version, closeType: string): void {
+export function handleClose<T>(
+	_event: ethereum.Event,
+	name: string,
+	version: Version,
+	closeType: string,
+	fundingContext: FundingSettlementContext | null,
+): void {
 	// @ts-ignore
 	const event = changetype<T>(_event) // FillClose, ForceClose, EmergencyClose all have the same event signature
 	let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
@@ -41,9 +47,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		quote.quantity === null ||
 		quote.initialOpenedPrice === null
 	) {
-		let db = new DebugEntity(
-			"handleClose-nullFields-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString(),
-		)
+		let db = new DebugEntity("handleClose-nullFields-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
 		db.message =
 			`quoteId ${event.params.quoteId.toString()} has null fields — openedPrice=` +
 			(quote.openedPrice === null ? "null" : "set") +
@@ -73,6 +77,7 @@ export function handleClose<T>(_event: ethereum.Event, name: string, version: Ve
 		quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
 		quote.closedAmount!.equals(quote.quantity!),
 	)
+	if (fundingContext) recordQuoteFundingSettlement(_event, version, event.params.quoteId, closeType, fundingContext, true)
 	if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 	let account = Account.load(event.params.partyA.toHexString())

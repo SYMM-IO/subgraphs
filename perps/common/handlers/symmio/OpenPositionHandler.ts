@@ -41,6 +41,7 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.partyBmm = data.partyBmm
 		quote.lf = data.lf
 		quote.accumulatedPaidFunding = data.accumulatedPaidFunding
+		quote.lastFundingPaymentTimestamp = data.lastFundingPaymentTimestamp
 		quote.timestampOpenPosition = _event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "OpenPosition", _event)

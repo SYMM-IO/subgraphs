@@ -4,13 +4,15 @@
 
 This document describes the subgraph entities added to support offchain uPNL calculation and exact PartyA solvency checks from the analytics subgraph. The main target reader is a liquidator bot or a backend that needs to identify liquidatable users without making contract view calls on every evaluation loop.
 
+Frontend funding-history entities such as `FundingIndexCheckpoint` and `QuoteFundingSettlement` are intentionally optional for this service flow. They support UI reconstruction of per-epoch rows, while this document's hot path remains `AggregatedPosition` + latest `FundingFeeState` + `LatestAccountBalance`.
+
 ## Background: How uPNL Works Onchain
 
 The SYMMIO contract maintains aggregated position data per `(partyA, partyB, symbolId, positionType)` bucket. Instead of iterating every open quote (O(quotes)), it tracks:
 
-- **aggregatedAmount**: sum of all open amounts (`quantity - closedAmount`) in the bucket
-- **aggregatedNotional**: sum of `(openAmount * openedPrice)` for each quote — used to derive `avgOpenPrice = aggregatedNotional / aggregatedAmount`
-- **weightedPaidFunding**: sum of `(openAmount * accumulatedPaidFunding / 1e18)` — tracks how much funding has been settled per position
+-   **aggregatedAmount**: sum of all open amounts (`quantity - closedAmount`) in the bucket
+-   **aggregatedNotional**: sum of `(openAmount * openedPrice)` for each quote — used to derive `avgOpenPrice = aggregatedNotional / aggregatedAmount`
+-   **weightedPaidFunding**: sum of `(openAmount * accumulatedPaidFunding / 1e18)` — tracks how much funding has been settled per position
 
 The uPNL formula for a single bucket is:
 
@@ -33,24 +35,24 @@ Mirrors the contract's per-bucket aggregation. One entity per unique `(partyA, p
 
 ```graphql
 type AggregatedPosition @entity(immutable: false) {
-  id: ID!                        # {partyA}-{partyB}-{symbolId}-{positionType}-{source}
-  source: Bytes!                 # contract address
-  partyA: Bytes!
-  partyB: Bytes!
-  symbolId: BigInt!
-  symbolName: String!            # denormalized symbol name for price-service lookup
-  positionType: Int!             # 0 = LONG, 1 = SHORT
-  aggregatedAmount: BigInt!      # sum of open amounts (18 decimals)
-  aggregatedNotional: BigInt!    # sum of (openAmount * openedPrice) (36 decimals)
-  weightedPaidFunding: BigInt!   # sum of (openAmount * accumulatedPaidFunding / 1e18) (signed, 18 decimals)
-  openPositionsCount: Int!       # number of open positions in this bucket
-  isActive: Boolean!             # true while the bucket still has open exposure
-  closedTimestamp: BigInt        # set when the bucket becomes inactive
-  closedBlockNumber: BigInt      # set when the bucket becomes inactive
-  closedTransaction: Bytes       # set when the bucket becomes inactive
-  timestamp: BigInt!
-  blockNumber: BigInt!
-  transaction: Bytes!
+	id: ID! # {partyA}-{partyB}-{symbolId}-{positionType}-{source}
+	source: Bytes! # contract address
+	partyA: Bytes!
+	partyB: Bytes!
+	symbolId: BigInt!
+	symbolName: String! # denormalized symbol name for price-service lookup
+	positionType: Int! # 0 = LONG, 1 = SHORT
+	aggregatedAmount: BigInt! # sum of open amounts (18 decimals)
+	aggregatedNotional: BigInt! # sum of (openAmount * openedPrice) (36 decimals)
+	weightedPaidFunding: BigInt! # sum of (openAmount * accumulatedPaidFunding / 1e18) (signed, 18 decimals)
+	openPositionsCount: Int! # number of open positions in this bucket
+	isActive: Boolean! # true while the bucket still has open exposure
+	closedTimestamp: BigInt # set when the bucket becomes inactive
+	closedBlockNumber: BigInt # set when the bucket becomes inactive
+	closedTransaction: Bytes # set when the bucket becomes inactive
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
 }
 ```
 
@@ -64,10 +66,10 @@ This is not stored directly because maintaining the two components separately av
 
 **Lifecycle:**
 
-- Created when the first position opens in a bucket
-- Updated on every position open, close, liquidation, price settlement, and funding charge
-- Soft-closed when `aggregatedAmount` reaches zero and `openPositionsCount` reaches zero
-- Stable IDs are preserved for downstream systems such as Goldsky pipelines; consumers should treat `isActive = false` as "remove from hot path"
+-   Created when the first position opens in a bucket
+-   Updated on every position open, close, liquidation, price settlement, and funding charge
+-   Soft-closed when `aggregatedAmount` reaches zero and `openPositionsCount` reaches zero
+-   Stable IDs are preserved for downstream systems such as Goldsky pipelines; consumers should treat `isActive = false` as "remove from hot path"
 
 ### FundingFeeState (expanded)
 
@@ -75,24 +77,24 @@ Already existed with basic rate info. Now includes additional fields read from t
 
 ```graphql
 type FundingFeeState @entity(immutable: false) {
-  id: ID!                        # {symbolId}-{partyB}-{source}
-  source: Bytes!
-  symbolId: BigInt!
-  symbolName: String!            # denormalized symbol name for downstream caches
-  partyB: Bytes!
-  currentLongRate: BigInt        # current epoch rate for longs
-  currentShortRate: BigInt       # current epoch rate for shorts
-  accumulatedLongRate: BigInt    # [NEW] historical weighted average rate for longs
-  accumulatedShortRate: BigInt   # [NEW] historical weighted average rate for shorts
-  epochDuration: BigInt          # seconds per funding epoch
-  lastUpdatedEpoch: BigInt       # [NEW] epoch number when rates were last updated
-  startEpoch: BigInt             # [NEW] epoch when funding tracking started
-  startEpochTimestamp: BigInt    # [NEW] timestamp of start epoch
-  lastUpdatedTimestamp: BigInt   # [NEW] timestamp of last rate update
-  snapshotLongFee: BigInt        # [NEW] frozen cumulative fee before the last epoch-duration change
-  snapshotShortFee: BigInt       # [NEW] frozen cumulative fee before the last epoch-duration change
-  lastMarketPrice: BigInt        # last known market price from funding event
-  updateTimestamp: BigInt!       # block timestamp of last update
+	id: ID! # {symbolId}-{partyB}-{source}
+	source: Bytes!
+	symbolId: BigInt!
+	symbolName: String! # denormalized symbol name for downstream caches
+	partyB: Bytes!
+	currentLongRate: BigInt # current epoch rate for longs
+	currentShortRate: BigInt # current epoch rate for shorts
+	accumulatedLongRate: BigInt # [NEW] historical weighted average rate for longs
+	accumulatedShortRate: BigInt # [NEW] historical weighted average rate for shorts
+	epochDuration: BigInt # seconds per funding epoch
+	lastUpdatedEpoch: BigInt # [NEW] epoch number when rates were last updated
+	startEpoch: BigInt # [NEW] epoch when funding tracking started
+	startEpochTimestamp: BigInt # [NEW] timestamp of start epoch
+	lastUpdatedTimestamp: BigInt # [NEW] timestamp of last rate update
+	snapshotLongFee: BigInt # [NEW] frozen cumulative fee before the last epoch-duration change
+	snapshotShortFee: BigInt # [NEW] frozen cumulative fee before the last epoch-duration change
+	lastMarketPrice: BigInt # last known market price from funding event
+	updateTimestamp: BigInt! # block timestamp of last update
 }
 ```
 
@@ -102,15 +104,15 @@ Between funding charges, funding debt still changes offchain as time advances, b
 
 ### Events That Update FundingFeeState
 
-| Event | What changes |
-|---|---|
-| `SetLongFundingFee` / `SetShortFundingFee` | current rate, historical accumulator, epoch metadata |
-| `UpdateAccumulatedFundingFee` | both current rates, historical accumulator, epoch metadata |
-| `SetEpochDuration` | epoch duration, epoch metadata, frozen snapshots |
-| `OpenPosition` | syncs epoch metadata because core updates accumulated funding state before opening |
-| `FillCloseRequest` / `ForceClosePosition` / `EmergencyClosePosition` / `ADLClose` | syncs epoch metadata because core may charge accumulated funding before closing |
-| `ChargeAccumulatedFundingFee` | syncs the funding accumulator after charging |
-| `LiquidatePositionsForClearingHouse` | syncs the funding accumulator before clearing-house close |
+| Event                                                                             | What changes                                                                       |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `SetLongFundingFee` / `SetShortFundingFee`                                        | current rate, historical accumulator, epoch metadata                               |
+| `UpdateAccumulatedFundingFee`                                                     | both current rates, historical accumulator, epoch metadata                         |
+| `SetEpochDuration`                                                                | epoch duration, epoch metadata, frozen snapshots                                   |
+| `OpenPosition`                                                                    | syncs epoch metadata because core updates accumulated funding state before opening |
+| `FillCloseRequest` / `ForceClosePosition` / `EmergencyClosePosition` / `ADLClose` | syncs epoch metadata because core may charge accumulated funding before closing    |
+| `ChargeAccumulatedFundingFee`                                                     | syncs the funding accumulator after charging                                       |
+| `LiquidatePositionsForClearingHouse`                                              | syncs the funding accumulator before clearing-house close                          |
 
 ### LatestAccountBalance (existing, unchanged)
 
@@ -118,57 +120,57 @@ Tracks the current balance state per account. One entity per `(account, source)`
 
 ```graphql
 type LatestAccountBalance @entity(immutable: false) {
-  id: ID!
-  source: Bytes!
-  account: Bytes!
-  counterParty: Bytes            # null for partyA, partyA address for partyB
-  accountType: String!           # "PARTY_A" or "PARTY_B"
-  allocatedBalance: BigInt!
-  lockedCva: BigInt!
-  lockedLf: BigInt!
-  lockedPartyAmm: BigInt!
-  lockedPartyBmm: BigInt!
-  pendingLockedCva: BigInt!
-  pendingLockedLf: BigInt!
-  pendingLockedPartyAmm: BigInt!
-  pendingLockedPartyBmm: BigInt!
-  timestamp: BigInt!
-  blockNumber: BigInt!
-  transaction: Bytes!
+	id: ID!
+	source: Bytes!
+	account: Bytes!
+	counterParty: Bytes # null for partyA, partyA address for partyB
+	accountType: String! # "PARTY_A" or "PARTY_B"
+	allocatedBalance: BigInt!
+	lockedCva: BigInt!
+	lockedLf: BigInt!
+	lockedPartyAmm: BigInt!
+	lockedPartyBmm: BigInt!
+	pendingLockedCva: BigInt!
+	pendingLockedLf: BigInt!
+	pendingLockedPartyAmm: BigInt!
+	pendingLockedPartyBmm: BigInt!
+	timestamp: BigInt!
+	blockNumber: BigInt!
+	transaction: Bytes!
 }
 ```
 
 ## Events That Update AggregatedPosition
 
-| Event | What changes |
-|---|---|
-| `OpenPosition` | amount++, notional += filledAmount * openedPrice, positionsCount++ |
-| `FillCloseRequest` | amount -= filledAmount, notional -= filledAmount * openedPrice, positionsCount-- if fully closed |
-| `ForceClosePosition` | same as FillCloseRequest |
-| `EmergencyClosePosition` | same as FillCloseRequest |
-| `ADLClose` | same as partial/full close |
-| `LiquidatePositionsPartyA` | amount -= liquidateAmount, notional -= liquidateAmount * openedPrice, positionsCount-- |
-| `LiquidatePositionsPartyB` | same as LiquidatePositionsPartyA |
-| `LiquidatePositionsForClearingHouse` | same as LiquidatePositionsPartyA |
-| `ChargeFundingRate` | notional += openAmount * (newPrice - prevPrice) (openedPrice changes) |
-| `ChargeAccumulatedFundingFee` | weightedPaidFunding += openAmount * (newFunding - prevFunding) / 1e18 |
-| `SettleUpnl` | notional += openAmount * (newPrice - prevPrice) (openedPrice changes) |
-| `SettleUpnlUnified` | same as SettleUpnl |
+| Event                                | What changes                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| `OpenPosition`                       | amount++, notional += filledAmount \* openedPrice, positionsCount++                               |
+| `FillCloseRequest`                   | amount -= filledAmount, notional -= filledAmount \* openedPrice, positionsCount-- if fully closed |
+| `ForceClosePosition`                 | same as FillCloseRequest                                                                          |
+| `EmergencyClosePosition`             | same as FillCloseRequest                                                                          |
+| `ADLClose`                           | same as partial/full close                                                                        |
+| `LiquidatePositionsPartyA`           | amount -= liquidateAmount, notional -= liquidateAmount \* openedPrice, positionsCount--           |
+| `LiquidatePositionsPartyB`           | same as LiquidatePositionsPartyA                                                                  |
+| `LiquidatePositionsForClearingHouse` | same as LiquidatePositionsPartyA                                                                  |
+| `ChargeFundingRate`                  | notional += openAmount \* (newPrice - prevPrice) (openedPrice changes)                            |
+| `ChargeAccumulatedFundingFee`        | weightedPaidFunding += openAmount \* (newFunding - prevFunding) / 1e18                            |
+| `SettleUpnl`                         | notional += openAmount \* (newPrice - prevPrice) (openedPrice changes)                            |
+| `SettleUpnlUnified`                  | same as SettleUpnl                                                                                |
 
 ## Bot Implementation Guide
 
 ### 1. Entities to Sync
 
-| Entity | Required? | Sync strategy |
-|---|---|---|
-| `AggregatedPosition` | Yes | Sync the full state table and use `isActive` to manage the hot cache |
-| `LatestAccountBalance` | Yes | Sync only `PARTY_A` rows for liquidation checks |
-| `FundingFeeState` | Yes | Required to compute exact unsettled funding debt between charge events |
+| Entity                 | Required? | Sync strategy                                                          |
+| ---------------------- | --------- | ---------------------------------------------------------------------- |
+| `AggregatedPosition`   | Yes       | Sync the full state table and use `isActive` to manage the hot cache   |
+| `LatestAccountBalance` | Yes       | Sync only `PARTY_A` rows for liquidation checks                        |
+| `FundingFeeState`      | Yes       | Required to compute exact unsettled funding debt between charge events |
 
 ### 2. External Data
 
-- **Current prices per symbolName**: from oracle / price feed (not in subgraph)
-- **Current timestamp / block time**: used to compute `epochsSinceLastUpdate` for exact funding debt
+-   **Current prices per symbolName**: from oracle / price feed (not in subgraph)
+-   **Current timestamp / block time**: used to compute `epochsSinceLastUpdate` for exact funding debt
 
 `symbolId` remains the canonical onchain identity and should still be used to join `AggregatedPosition` to `FundingFeeState`. `symbolName` is denormalized into both models so the bot can map directly into its price service without an extra symbol table lookup.
 
@@ -230,9 +232,12 @@ def calculate_funding_debt(pos, funding_states):
         accumulated_rate = state.accumulatedShortRate or 0
         current_rate = state.currentShortRate or 0
 
-    # Epochs calculation
+    # Epochs calculation. This mirrors LibFundingRate.getEpochsSinceLastUpdate():
+    # currentEpoch - lastUpdatedEpoch. Do not use elapsed seconds since
+    # lastUpdatedTimestamp; lastUpdatedTimestamp is not necessarily an epoch boundary.
     epochs_before_last_update = (state.lastUpdatedEpoch or 0) - (state.startEpoch or 0)
-    epochs_since_last_update = (now - (state.lastUpdatedTimestamp or now)) // state.epochDuration
+    current_epoch = now // state.epochDuration
+    epochs_since_last_update = current_epoch - (state.lastUpdatedEpoch or current_epoch)
 
     # Current fee = frozen snapshot + accumulated portion + current portion
     current_fee = snapshot_fee + (accumulated_rate * epochs_before_last_update) + (current_rate * epochs_since_last_update)
@@ -270,8 +275,8 @@ def is_party_a_liquidatable(party_a_balance, total_upnl):
 
 This is the exact pre-check used by the liquidation flow:
 
-- `liquidatable` if `allocatedBalance - lockedCva - lockedLf + upnl < 0`
-- `solvent` otherwise
+-   `liquidatable` if `allocatedBalance - lockedCva - lockedLf + upnl < 0`
+-   `solvent` otherwise
 
 ### 6. Exact PartyA Liquidation Type
 
@@ -297,8 +302,8 @@ This mirrors `LibLiquidation.determineLiquidationType()`.
 
 The subgraph-based solvency check should be treated as the exact **candidate detection** path for the bot. The eventual liquidation transaction still depends on fresh signed liquidation data on the contract side, including signed uPNL, signed prices, and timestamp-valid signatures. In other words:
 
-- subgraph + prices + current time => exact candidate detection
-- liquidation transaction => still needs fresh execution-time signed inputs
+-   subgraph + prices + current time => exact candidate detection
+-   liquidation transaction => still needs fresh execution-time signed inputs
 
 ### 7. PartyA Available-For-Quote Formula (Secondary)
 
@@ -343,19 +348,19 @@ def calculate_available_for_quote(party_a_balance, total_upnl):
 
 ```graphql
 {
-  aggregatedPositions(where: { partyA: "0x...", isActive: true }) {
-    id
-    partyB
-    symbolId
-    symbolName
-    positionType
-    aggregatedAmount
-    aggregatedNotional
-    weightedPaidFunding
-    openPositionsCount
-    isActive
-    timestamp
-  }
+	aggregatedPositions(where: { partyA: "0x...", isActive: true }) {
+		id
+		partyB
+		symbolId
+		symbolName
+		positionType
+		aggregatedAmount
+		aggregatedNotional
+		weightedPaidFunding
+		openPositionsCount
+		isActive
+		timestamp
+	}
 }
 ```
 
@@ -363,13 +368,13 @@ def calculate_available_for_quote(party_a_balance, total_upnl):
 
 ```graphql
 {
-  latestAccountBalances(where: { account: "0x...", accountType: "PARTY_A" }) {
-    account
-    allocatedBalance
-    lockedCva
-    lockedLf
-    timestamp
-  }
+	latestAccountBalances(where: { account: "0x...", accountType: "PARTY_A" }) {
+		account
+		allocatedBalance
+		lockedCva
+		lockedLf
+		timestamp
+	}
 }
 ```
 
@@ -377,21 +382,21 @@ def calculate_available_for_quote(party_a_balance, total_upnl):
 
 ```graphql
 {
-  fundingFeeStates(where: { partyB: "0x..." }) {
-    symbolId
-    symbolName
-    currentLongRate
-    currentShortRate
-    accumulatedLongRate
-    accumulatedShortRate
-    epochDuration
-    lastUpdatedEpoch
-    startEpoch
-    startEpochTimestamp
-    lastUpdatedTimestamp
-    snapshotLongFee
-    snapshotShortFee
-  }
+	fundingFeeStates(where: { partyB: "0x..." }) {
+		symbolId
+		symbolName
+		currentLongRate
+		currentShortRate
+		accumulatedLongRate
+		accumulatedShortRate
+		epochDuration
+		lastUpdatedEpoch
+		startEpoch
+		startEpochTimestamp
+		lastUpdatedTimestamp
+		snapshotLongFee
+		snapshotShortFee
+	}
 }
 ```
 
@@ -401,24 +406,24 @@ If the goal is a liquidator notifier, the bot should optimize for the liquidatio
 
 The minimum exact hot-path state is:
 
-- `AggregatedPosition`: `partyA`, `partyB`, `symbolId`, `symbolName`, `positionType`, `aggregatedAmount`, `aggregatedNotional`, `weightedPaidFunding`, `isActive`
-- `FundingFeeState`: funding-rate and epoch fields for `(symbolId, partyB)`, plus `symbolName`
-- `LatestAccountBalance` for `accountType = PARTY_A`: `allocatedBalance`, `lockedCva`, `lockedLf`
-- offchain inputs: current prices keyed by `symbolName` and current timestamp
+-   `AggregatedPosition`: `partyA`, `partyB`, `symbolId`, `symbolName`, `positionType`, `aggregatedAmount`, `aggregatedNotional`, `weightedPaidFunding`, `isActive`
+-   `FundingFeeState`: funding-rate and epoch fields for `(symbolId, partyB)`, plus `symbolName`
+-   `LatestAccountBalance` for `accountType = PARTY_A`: `allocatedBalance`, `lockedCva`, `lockedLf`
+-   offchain inputs: current prices keyed by `symbolName` and current timestamp
 
 Recommended key usage in the bot:
 
-- Use `symbolId` to join `AggregatedPosition` with `FundingFeeState`
-- Use `symbolName` to fetch or cache market prices from external price services
-- Keep both in the local state so you preserve exact onchain identity while still matching offchain infra
+-   Use `symbolId` to join `AggregatedPosition` with `FundingFeeState`
+-   Use `symbolName` to fetch or cache market prices from external price services
+-   Keep both in the local state so you preserve exact onchain identity while still matching offchain infra
 
 The bot does **not** need to pull the whole subgraph every 30ms. A better pattern is:
 
-- Load an initial snapshot into a local in-memory cache
-- Apply only incremental updates from your replication layer
-- Recompute price uPNL only for users touched by symbols whose prices changed
-- Recompute funding debt only for users touched by `(symbolId, partyB)` pairs whose funding epoch changed or whose `FundingFeeState` was updated onchain
-- Re-run the liquidation predicate only for users touched by one of those changes or by a balance update
+-   Load an initial snapshot into a local in-memory cache
+-   Apply only incremental updates from your replication layer
+-   Recompute price uPNL only for users touched by symbols whose prices changed
+-   Recompute funding debt only for users touched by `(symbolId, partyB)` pairs whose funding epoch changed or whose `FundingFeeState` was updated onchain
+-   Re-run the liquidation predicate only for users touched by one of those changes or by a balance update
 
 ### 10. Goldsky Pipeline Recommendation
 
@@ -431,29 +436,29 @@ For Goldsky users, the recommended architecture is:
 
 Relevant Goldsky docs:
 
-- Subgraph sources and automatic deduplication: https://docs.goldsky.com/mirror/sources/subgraphs
-- Pipeline config reference: https://docs.goldsky.com/mirror/reference/config-file/pipeline
-- Example multi-entity pipeline definitions: https://docs.goldsky.com/mirror/guides/merging-crosschain-subgraphs
+-   Subgraph sources and automatic deduplication: https://docs.goldsky.com/mirror/sources/subgraphs
+-   Pipeline config reference: https://docs.goldsky.com/mirror/reference/config-file/pipeline
+-   Example multi-entity pipeline definitions: https://docs.goldsky.com/mirror/guides/merging-crosschain-subgraphs
 
 Recommended sink strategy:
 
-- **PostgreSQL**: easiest operational model; good if the bot already has a DB-backed state service
-- **Kafka / Webhook**: better if the bot wants push-style updates and an in-memory stream processor
+-   **PostgreSQL**: easiest operational model; good if the bot already has a DB-backed state service
+-   **Kafka / Webhook**: better if the bot wants push-style updates and an in-memory stream processor
 
 Goldsky's subgraph source deduplicates by entity ID by default, so the sink naturally behaves like a latest-state mirror. That makes soft-closing a better fit than hard deletes for `AggregatedPosition`.
 
 Recommended mirrored state:
 
-- `AggregatedPosition`: keep all rows, including `isActive = false`, so closures propagate as updates rather than relying on delete handling
-- `AggregatedPosition`: keep `symbol_name` in the mirrored state so the price loop does not need a separate symbol lookup table
-- `FundingFeeState`: keep the full exact funding state
-- `FundingFeeState`: mirror `symbol_name` as well so funding rows can be inspected and debugged without a join
-- `LatestAccountBalance`: mirror only `PARTY_A` rows and only the liquidation-relevant columns
+-   `AggregatedPosition`: keep all rows, including `isActive = false`, so closures propagate as updates rather than relying on delete handling
+-   `AggregatedPosition`: keep `symbol_name` in the mirrored state so the price loop does not need a separate symbol lookup table
+-   `FundingFeeState`: keep the full exact funding state
+-   `FundingFeeState`: mirror `symbol_name` as well so funding rows can be inspected and debugged without a join
+-   `LatestAccountBalance`: mirror only `PARTY_A` rows and only the liquidation-relevant columns
 
 Important operational note:
 
-- Do **not** filter `AggregatedPosition` to only active rows inside the pipeline if that would hide the inactive update from the sink.
-- Instead, mirror the row with `isActive`, then remove it from the bot's hot cache when `isActive` flips to `false`.
+-   Do **not** filter `AggregatedPosition` to only active rows inside the pipeline if that would hide the inactive update from the sink.
+-   Instead, mirror the row with `isActive`, then remove it from the bot's hot cache when `isActive` flips to `false`.
 
 An example Goldsky pipeline definition is included in [goldsky-liquidator-state.example.yaml](./goldsky-liquidator-state.example.yaml).
 
@@ -461,25 +466,25 @@ An example Goldsky pipeline definition is included in [goldsky-liquidator-state.
 
 For direct subgraph consumers:
 
-- **By timestamp**: query entities where `timestamp > lastSyncTimestamp` to get only changed records
-- **By block**: query entities where `blockNumber > lastSyncBlock`
-- **Subscription**: use GraphQL subscriptions if supported by your Graph node
+-   **By timestamp**: query entities where `timestamp > lastSyncTimestamp` to get only changed records
+-   **By block**: query entities where `blockNumber > lastSyncBlock`
+-   **Subscription**: use GraphQL subscriptions if supported by your Graph node
 
 For `AggregatedPosition`, rows are now soft-closed instead of deleted. Consumers should:
 
-- keep the row in replicated storage
-- remove it from the hot path when `isActive = false`
-- optionally retain `closedTimestamp`, `closedBlockNumber`, and `closedTransaction` for audit/debugging
+-   keep the row in replicated storage
+-   remove it from the hot path when `isActive = false`
+-   optionally retain `closedTimestamp`, `closedBlockNumber`, and `closedTransaction` for audit/debugging
 
 ## Precision Notes
 
-- All BigInt values use 18-decimal fixed-point unless noted otherwise
-- `aggregatedNotional` is 36 decimals (amount * price, both 18 decimals) — divide by `aggregatedAmount` to get `avgOpenPrice` in 18 decimals
-- `weightedPaidFunding` is signed (can be negative if the position received funding)
-- Funding rates (`currentLongRate`, `accumulatedLongRate`, etc.) are signed and scaled by 1e18
-- Exact liquidation solvency for PartyA requires exact uPNL from `AggregatedPosition` + `FundingFeeState`
-- Exact liquidation solvency for PartyA also requires `allocatedBalance`, `lockedCva`, and `lockedLf` from `LatestAccountBalance`
-- Exact funding debt also requires using the current evaluation timestamp when computing `epochsSinceLastUpdate`
-- Funding debt only changes when the integer epoch count changes; it does not move every millisecond
-- Do not drop `FundingFeeState` even if charge events are frequent; doing so produces an approximation, not an exact value
-- `AggregatedPosition.isActive = false` is the soft-close signal for downstream systems
+-   All BigInt values use 18-decimal fixed-point unless noted otherwise
+-   `aggregatedNotional` is 36 decimals (amount \* price, both 18 decimals) — divide by `aggregatedAmount` to get `avgOpenPrice` in 18 decimals
+-   `weightedPaidFunding` is signed (can be negative if the position received funding)
+-   Funding rates (`currentLongRate`, `accumulatedLongRate`, etc.) are signed and scaled by 1e18
+-   Exact liquidation solvency for PartyA requires exact uPNL from `AggregatedPosition` + `FundingFeeState`
+-   Exact liquidation solvency for PartyA also requires `allocatedBalance`, `lockedCva`, and `lockedLf` from `LatestAccountBalance`
+-   Exact funding debt also requires using the current evaluation timestamp when computing `epochsSinceLastUpdate`
+-   Funding debt only changes when the integer epoch count changes; it does not move every millisecond
+-   Do not drop `FundingFeeState` even if charge events are frequent; doing so produces an approximation, not an exact value
+-   `AggregatedPosition.isActive = false` is the soft-close signal for downstream systems

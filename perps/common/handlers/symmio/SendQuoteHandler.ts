@@ -30,10 +30,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		if (_event.parameters.length <= 6) {
 			// New packed variant (SendQuote1): decode paramsData
 			let paramsData = _event.parameters[4].value.toBytes()
-			let decoded = ethereum.decode(
-				"(uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
-				paramsData,
-			)
+			let decoded = ethereum.decode("(uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)", paramsData)
 			if (decoded == null) return
 			let tuple = decoded.toTuple()
 			symbolId = tuple[0].toBigInt()
@@ -101,6 +98,8 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.closePrice = BigInt.zero()
 		quote.userPaidFunding = BigInt.fromI32(0)
 		quote.userReceivedFunding = BigInt.fromI32(0)
+		quote.accumulatedPaidFunding = BigInt.zero()
+		quote.lastFundingPaymentTimestamp = BigInt.zero()
 		quote.blockNumber = event.block.number
 		quote.initialCva = cva
 		quote.initialLf = lf
@@ -113,14 +112,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 
 		let account = Account.load(event.params.partyA.toHexString())
 		if (!account) {
-			account = createNewAccountIfNotExists(
-				event.params.partyA,
-				event.params.partyA,
-				null,
-				AccountType.UNKNOWN,
-				event.block,
-				event.transaction,
-			)
+			account = createNewAccountIfNotExists(event.params.partyA, event.params.partyA, null, AccountType.UNKNOWN, event.block, event.transaction)
 			account.source = event.address
 		}
 		if (version >= Version.v_0_8_3 && q) {

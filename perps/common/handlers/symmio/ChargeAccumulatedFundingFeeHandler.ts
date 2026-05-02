@@ -3,6 +3,7 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { Quote } from "../../../../generated/schema"
 import { getQuoteData } from "../../VersionedQuoteLoader"
+import { unDecimal } from "../../utils"
 
 export class ChargeAccumulatedFundingFeeHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -14,6 +15,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends BaseHandler {
 			if (!quote) continue
 
 			let prevFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
+			let openAmount = quote.quantity!.minus(quote.closedAmount!)
 
 			let chainQuote = getQuoteData(version, event.address, quote.quoteId)
 			if (!chainQuote) {
@@ -23,12 +25,14 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends BaseHandler {
 
 			let newFunding = chainQuote.accumulatedPaidFunding
 			let delta = newFunding.minus(prevFunding)
+			let fundingAmount = unDecimal(delta.abs().times(openAmount))
 			quote.accumulatedPaidFunding = newFunding
+			quote.lastFundingPaymentTimestamp = chainQuote.lastFundingPaymentTimestamp
 
 			if (delta.gt(BigInt.zero())) {
-				quote.userPaidFunding = (quote.userPaidFunding ? quote.userPaidFunding! : BigInt.zero()).plus(delta)
+				quote.userPaidFunding = (quote.userPaidFunding ? quote.userPaidFunding! : BigInt.zero()).plus(fundingAmount)
 			} else if (delta.lt(BigInt.zero())) {
-				quote.userReceivedFunding = (quote.userReceivedFunding ? quote.userReceivedFunding! : BigInt.zero()).plus(delta.abs())
+				quote.userReceivedFunding = (quote.userReceivedFunding ? quote.userReceivedFunding! : BigInt.zero()).plus(fundingAmount)
 			}
 
 			setEventTimestampAndTransactionHashAndAction(quote, "ChargeAccumulatedFundingFee", _event)

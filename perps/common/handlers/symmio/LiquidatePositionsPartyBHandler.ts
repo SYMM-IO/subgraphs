@@ -10,7 +10,14 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 		super.handleAccount(_event, version)
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let account = createNewAccountIfNotExists(event.params.liquidator, event.params.liquidator, null, AccountType.LIQUIDATOR, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(
+			event.params.liquidator,
+			event.params.liquidator,
+			null,
+			AccountType.LIQUIDATOR,
+			event.block,
+			event.transaction,
+		)
 		account.source = event.address
 		account.save()
 	}
@@ -41,6 +48,7 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 			}
 			let avgClosedPrice = data.avgClosedPrice
 			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
+			quote.lastFundingPaymentTimestamp = data.lastFundingPaymentTimestamp
 
 			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)
 			if (quote.liquidateAmount!.gt(BigInt.zero())) {
