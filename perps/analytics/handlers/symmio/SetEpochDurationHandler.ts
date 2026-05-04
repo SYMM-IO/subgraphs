@@ -15,9 +15,9 @@ export class SetEpochDurationHandler<T> extends BaseHandler {
 			let state = getOrCreateFundingFeeState(_event, version, symbolId, partyB)
 			state.epochDuration = duration
 			state.updateTimestamp = event.block.timestamp
-			let enriched = enrichFundingFeeState(state, event.address)
+			enrichFundingFeeState(state, event.address)
 			state.save()
-			if (enriched) createFundingIndexCheckpoint(_event, symbolId, partyB, "SET_EPOCH_DURATION", null, null, null, state, i)
+			createFundingIndexCheckpoint(_event, symbolId, partyB, "SET_EPOCH_DURATION", null, null, null, state, i)
 		}
 	}
 }

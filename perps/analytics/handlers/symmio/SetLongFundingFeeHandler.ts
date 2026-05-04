@@ -31,9 +31,9 @@ export class SetLongFundingFeeHandler<T> extends BaseHandler {
 			state.currentLongRate = fee
 			state.lastMarketPrice = marketPrice
 			state.updateTimestamp = event.block.timestamp
-			let enriched = enrichFundingFeeState(state, event.address)
+			enrichFundingFeeState(state, event.address)
 			state.save()
-			if (enriched) createFundingIndexCheckpoint(_event, symbolId, partyB, "SET_LONG", fee, null, marketPrice, state, i)
+			createFundingIndexCheckpoint(_event, symbolId, partyB, "SET_LONG", fee, null, marketPrice, state, i)
 		}
 	}
 }

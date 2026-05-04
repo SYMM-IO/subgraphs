@@ -1,0 +1,32 @@
+{
+	"network": "base",
+	"contracts": [
+		{
+			"address": "0xa805FE5baA301D4e72C789694F3967452c77D6fD",
+			"abi": "symmio",
+			"version": "0_8_5",
+			"startBlock": "41659544",
+			"dependencies": [
+				"accountLayer_1",
+				"symmioMultiAccount_2"
+			]
+		},
+		{
+			"address": "0xE566bcdC59a644A6D71564f4E941CF93b6A37846",
+			"abi": "accountLayer",
+			"version": "1",
+			"startBlock": "42302196"
+		},
+		{
+			"address": "0x41a496361df4554bbBB03450506010E5eF4a7a9d",
+			"abi": "symmioMultiAccount",
+			"version": "2",
+			"startBlock": "41659544",
+			"name": "volcano_multi_account"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "base_stage_analytics",
+		"perps/events": "base_stage_events"
+	}
+}

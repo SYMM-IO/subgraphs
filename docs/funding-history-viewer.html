@@ -490,9 +490,8 @@
 		</main>
 
 		<script>
-			const DEFAULT_ENDPOINT =
-				"https://api.goldsky.com/api/public/project_cm1hfr4527p0f01u85mz499u8/subgraphs/hyperevm_mainnet_analytics/latest/gn";
-			const DEFAULT_SYMMIO = "0x57331038c21982116ee9b0906e4a5c5cb52dce2e";
+			const DEFAULT_ENDPOINT = "https://api.goldsky.com/api/public/project_cm1hfr4527p0f01u85mz499u8/subgraphs/hyperevm_analytics/latest/gn";
+			const DEFAULT_SYMMIO = "0x99641E06d38F327166b3a48f86Ca2cbB3B4fB7EB";
 			const FACTOR = 10n ** 18n;
 			const CLOSE_EVENT_TYPES = new Set(["FILL_CLOSE", "FORCE_CLOSE", "EMERGENCY_CLOSE", "ADL_CLOSE"]);
 
@@ -810,7 +809,7 @@
 				const settlementRanges = buildSettlementRanges(settlements, epochDuration);
 				const largestPaidThrough = settlementRanges.reduce((max, item) => (item.toEpoch > max ? item.toEpoch : max), 0n);
 
-				if (quote.timestampFullyClose) {
+				if (quote.timestampFullyClose && quote.timestampFullyClose !== "0") {
 					const closeEpoch = toBigInt(quote.timestampFullyClose) / epochDuration;
 					stopEpoch = minBigInt(stopEpoch, largestPaidThrough > 0n ? largestPaidThrough : closeEpoch);
 				}
@@ -1026,7 +1025,11 @@
 					meta("Funding baseline", formatUnits(toBigInt(quote.accumulatedPaidFunding || "0")), quote.accumulatedPaidFunding),
 					meta("Last funding timestamp", formatTimestamp(quote.lastFundingPaymentTimestamp), quote.lastFundingPaymentTimestamp),
 					meta("Opened", formatTimestamp(quote.timestampOpenPosition), quote.timestampOpenPosition),
-					meta("Fully closed", quote.timestampFullyClose ? formatTimestamp(quote.timestampFullyClose) : "-", quote.timestampFullyClose),
+					meta(
+						"Fully closed",
+						quote.timestampFullyClose && quote.timestampFullyClose !== "0" ? formatTimestamp(quote.timestampFullyClose) : "-",
+						quote.timestampFullyClose,
+					),
 				].join("");
 			}
 

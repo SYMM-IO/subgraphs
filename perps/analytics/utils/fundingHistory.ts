@@ -65,7 +65,7 @@ export function recordQuoteFundingSettlement(
 	if (signedAmount.gt(BigInt.zero())) paidByPartyA = signedAmount
 	else if (signedAmount.lt(BigInt.zero())) receivedByPartyA = signedAmount.abs()
 
-	let partyB = changetype<Address>(quote.partyB!)
+	let partyB = Address.fromBytes(quote.partyB!)
 	let symbolId = quote.symbolId!
 	let entity = new QuoteFundingSettlement(event.transaction.hash.toHexString() + "-" + event.logIndex.toString() + "-" + quoteId.toString())
 	entity.source = event.address

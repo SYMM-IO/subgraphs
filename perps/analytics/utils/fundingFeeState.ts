@@ -24,7 +24,7 @@ export function getOrCreateFundingFeeState(event: ethereum.Event, version: Versi
 }
 
 export function enrichFundingFeeState(state: FundingFeeState, contractAddress: Address): boolean {
-	let info = getFundingFeesOfPartyB(contractAddress, state.symbolId, changetype<Address>(state.partyB))
+	let info = getFundingFeesOfPartyB(contractAddress, state.symbolId, Address.fromBytes(state.partyB))
 	if (!info) {
 		log.warning("Failed to get funding fees for symbol {} partyB {}", [state.symbolId.toString(), state.partyB.toHexString()])
 		return false
