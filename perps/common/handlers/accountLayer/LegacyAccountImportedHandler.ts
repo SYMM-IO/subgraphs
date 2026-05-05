@@ -48,6 +48,7 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 					sub.symmioCore = subAccountData.value.symmioCore
 					sub.isolationType = subAccountData.value.isolationType
 					sub.name = subAccountData.value.name
+					sub.singleVAMode = subAccountData.value.singleVAMode
 				}
 			}
 

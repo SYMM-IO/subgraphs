@@ -2,7 +2,7 @@ import { Address, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { MultiAccountVersion } from "../BaseHandler"
 import { symmioMultiAccount_2 } from "../../../generated/symmioMultiAccount_2/symmioMultiAccount_2"
 import { symmioMultiAccount_3 } from "../../../generated/symmioMultiAccount_3/symmioMultiAccount_3"
-import { ZERO_ADDRESS_BYTES } from "../../analytics/utils/constants";
+import { ZERO_ADDRESS_BYTES } from "../../analytics/utils/constants"
 
 let sourceMap = new Map<string, string>()
 
@@ -21,7 +21,8 @@ sourceMap.set("0x0937bc09b8d073e4f1abe85470969475f714ca6c", "0x762407bed807184f9
 
 export function getDiamond(address: Address): Bytes {
 	const contract = symmioMultiAccount_2.bind(address)
-	return contract.symmioAddress()
+	let result = contract.try_symmioAddress()
+	return result.reverted ? ZERO_ADDRESS_BYTES : result.value
 }
 
 export function getVibeDiamond<T>(_event: ethereum.Event): Bytes {

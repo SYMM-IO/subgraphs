@@ -29,6 +29,7 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		if (!sub) {
 			sub = new SubAccount(subId)
 			sub.timestamp = event.block.timestamp
+			sub.singleVAMode = false
 			sub.totalVirtualAccounts = BigInt.zero()
 			sub.activeVirtualAccounts = BigInt.zero()
 			sub.activePositions = BigInt.zero()
@@ -38,11 +39,13 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		sub.owner = event.params.owner
 		sub.affiliate = event.params.affiliate.toHexString()
 		sub.name = event.params.name
-		sub.singleVAMode = false
 		sub.isDeleted = false
 		sub.source = _event.address
 		sub.updateTimestamp = event.block.timestamp
 
+		// On v0.8.5+ the SubAccountDetail struct carries singleVAMode and the
+		// trio of metadata/symmioCore/isolationType. Read them once at create
+		// time so the redesigned profile UI can avoid an AccountLayer RPC.
 		if (version == AccountLayerVersion.v_1) {
 			let contract = accountLayer_1.bind(_event.address)
 			let subAccountData = contract.try_getSubAccount(event.params.account)
@@ -50,6 +53,7 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 				sub.metadata = subAccountData.value.metadata
 				sub.symmioCore = subAccountData.value.symmioCore
 				sub.isolationType = subAccountData.value.isolationType
+				sub.singleVAMode = subAccountData.value.singleVAMode
 			}
 		}
 
