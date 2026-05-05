@@ -1,0 +1,14 @@
+**/generated/**
+**/build/**
+node_modules/
+**/*.json
+**/subgraph.yaml
+**/schema.graphql
+**/abis/**
+__pycache__/
+
+# Generated entry-point files written by scripts/manager.py
+**/src_*.ts
+**/src_fake.ts
+**/src_sync_meta.ts
+**/contract_utils_*.ts
