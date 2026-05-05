@@ -1,5 +1,5 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { Quote } from "../../../../generated/schema"
+import { Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { applyFundingTotalsFromAccumulatedFundingChange, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
@@ -34,5 +34,22 @@ export class ADLCloseHandler<T> extends BaseHandler {
 		if (quote.quantity! == quote.closedAmount!) quote.quoteStatus = QuoteStatus.CLOSED
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "ADLClose", _event)
+
+		if (quote.closedAmount!.equals(quote.quantity!)) {
+			if (quote.subAccount) {
+				let sub = SubAccount.load(quote.subAccount!)
+				if (sub) {
+					sub.activePositions = sub.activePositions.minus(BigInt.fromI32(1))
+					sub.save()
+				}
+			}
+			if (quote.virtualAccount) {
+				let va = VirtualAccount.load(quote.virtualAccount!)
+				if (va) {
+					va.activePositions = va.activePositions.minus(BigInt.fromI32(1))
+					va.save()
+				}
+			}
+		}
 	}
 }

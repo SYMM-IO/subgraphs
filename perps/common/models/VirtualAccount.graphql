@@ -6,5 +6,10 @@ type VirtualAccount @entity(immutable: false) {
 	source: Bytes!
 	timestamp: BigInt!
 	updateTimestamp: BigInt!
+	metadata: Bytes
+	symbolId: BigInt
+	isolationType: Int
+	totalPositions: BigInt!
+	activePositions: BigInt!
 	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "virtualAccount")
 }

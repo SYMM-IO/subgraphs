@@ -1,6 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { DebugEntity, Quote } from "../../../../generated/schema"
-import { ethereum, log } from "@graphprotocol/graph-ts"
+import { DebugEntity, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
+import { ethereum, log, BigInt } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 
@@ -45,5 +45,22 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.timestampOpenPosition = _event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "OpenPosition", _event)
+
+		if (quote.subAccount) {
+			let sub = SubAccount.load(quote.subAccount!)
+			if (sub) {
+				sub.activePositions = sub.activePositions.plus(BigInt.fromI32(1))
+				sub.totalPositions = sub.totalPositions.plus(BigInt.fromI32(1))
+				sub.save()
+			}
+		}
+		if (quote.virtualAccount) {
+			let va = VirtualAccount.load(quote.virtualAccount!)
+			if (va) {
+				va.activePositions = va.activePositions.plus(BigInt.fromI32(1))
+				va.totalPositions = va.totalPositions.plus(BigInt.fromI32(1))
+				va.save()
+			}
+		}
 	}
 }

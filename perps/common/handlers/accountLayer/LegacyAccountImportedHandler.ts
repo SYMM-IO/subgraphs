@@ -1,7 +1,8 @@
-import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { createNewAccountIfNotExists, AccountType } from "../../utils/builders"
 import { SubAccount } from "../../../../generated/schema"
+import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
 
 export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -34,6 +35,22 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 			sub.source = _event.address
 			sub.timestamp = event.block.timestamp
 			sub.updateTimestamp = event.block.timestamp
+			sub.totalVirtualAccounts = BigInt.zero()
+			sub.activeVirtualAccounts = BigInt.zero()
+			sub.activePositions = BigInt.zero()
+			sub.totalPositions = BigInt.zero()
+
+			if (version == AccountLayerVersion.v_1) {
+				let contract = accountLayer_1.bind(_event.address)
+				let subAccountData = contract.try_getSubAccount(event.params.account)
+				if (!subAccountData.reverted) {
+					sub.metadata = subAccountData.value.metadata
+					sub.symmioCore = subAccountData.value.symmioCore
+					sub.isolationType = subAccountData.value.isolationType
+					sub.name = subAccountData.value.name
+				}
+			}
+
 			sub.save()
 		}
 	}

@@ -1,4 +1,4 @@
-import { DebugEntity, Quote } from "../../../../generated/schema"
+import { DebugEntity, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
@@ -57,5 +57,22 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 		}
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "FillCloseRequest", _event)
+
+		if (quote.closedAmount!.equals(quote.quantity!)) {
+			if (quote.subAccount) {
+				let sub = SubAccount.load(quote.subAccount!)
+				if (sub) {
+					sub.activePositions = sub.activePositions.minus(BigInt.fromI32(1))
+					sub.save()
+				}
+			}
+			if (quote.virtualAccount) {
+				let va = VirtualAccount.load(quote.virtualAccount!)
+				if (va) {
+					va.activePositions = va.activePositions.minus(BigInt.fromI32(1))
+					va.save()
+				}
+			}
+		}
 	}
 }

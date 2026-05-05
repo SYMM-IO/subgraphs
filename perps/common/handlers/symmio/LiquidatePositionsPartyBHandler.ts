@@ -1,5 +1,5 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { DebugEntity, Quote } from "../../../../generated/schema"
+import { DebugEntity, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
@@ -63,6 +63,21 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 			quote.closedAmount = quote.quantity
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePositionsPartyB", _event)
+
+			if (quote.subAccount) {
+				let sub = SubAccount.load(quote.subAccount!)
+				if (sub) {
+					sub.activePositions = sub.activePositions.minus(BigInt.fromI32(1))
+					sub.save()
+				}
+			}
+			if (quote.virtualAccount) {
+				let va = VirtualAccount.load(quote.virtualAccount!)
+				if (va) {
+					va.activePositions = va.activePositions.minus(BigInt.fromI32(1))
+					va.save()
+				}
+			}
 		}
 	}
 }

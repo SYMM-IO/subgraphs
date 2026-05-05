@@ -1,6 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
-import { DebugEntity, Quote } from "../../../../generated/schema"
+import { DebugEntity, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { applyFundingTotalsFromAccumulatedFundingChange, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 
@@ -43,5 +43,22 @@ export class ForceClosePositionHandler<T> extends BaseHandler {
 		quote.closePrice = BigInt.zero()
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "ForceClosePosition", _event)
+
+		if (quote.closedAmount!.equals(quote.quantity!)) {
+			if (quote.subAccount) {
+				let sub = SubAccount.load(quote.subAccount!)
+				if (sub) {
+					sub.activePositions = sub.activePositions.minus(BigInt.fromI32(1))
+					sub.save()
+				}
+			}
+			if (quote.virtualAccount) {
+				let va = VirtualAccount.load(quote.virtualAccount!)
+				if (va) {
+					va.activePositions = va.activePositions.minus(BigInt.fromI32(1))
+					va.save()
+				}
+			}
+		}
 	}
 }

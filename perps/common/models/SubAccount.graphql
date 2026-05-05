@@ -9,6 +9,13 @@ type SubAccount @entity(immutable: false) {
 	source: Bytes!
 	timestamp: BigInt!
 	updateTimestamp: BigInt!
+	metadata: Bytes
+	symmioCore: Bytes
+	isolationType: Int
+	totalVirtualAccounts: BigInt!
+	activeVirtualAccounts: BigInt!
+	activePositions: BigInt!
+	totalPositions: BigInt!
 	virtualAccounts: [VirtualAccount!]! @derivedFrom(field: "parent")
 	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "subAccount")
 	quotes: [Quote!]! @derivedFrom(field: "subAccount")

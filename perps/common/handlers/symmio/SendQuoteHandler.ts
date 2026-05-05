@@ -123,6 +123,9 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		if (account.subAccount) {
 			quote.subAccount = account.subAccount
 		}
+		if (account.virtualAccount) {
+			quote.virtualAccount = account.virtualAccount
+		}
 
 		if (event.params.partyBsWhiteList) {
 			let partyBsWhiteList: Bytes[] = []
