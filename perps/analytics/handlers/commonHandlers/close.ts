@@ -95,12 +95,24 @@ export function handleClose<T>(
 	if (pnl.gt(BigInt.zero())) profit = pnl
 	else loss = pnl
 
+	let fundingPaid = BigInt.zero()
+	let fundingReceived = BigInt.zero()
+	if (fundingContext !== null && fundingContext.found) {
+		let newAccumulatedPaidFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
+		let fundingDelta = newAccumulatedPaidFunding.minus(fundingContext.previousAccumulatedPaidFunding)
+		let fundingAmount = unDecimal(fundingDelta.abs().times(fundingContext.openAmount))
+		if (fundingDelta.gt(BigInt.zero())) fundingPaid = fundingAmount
+		else if (fundingDelta.lt(BigInt.zero())) fundingReceived = fundingAmount
+	}
+
 	updateHistories(
 		new UpdateHistoriesParams(version, account, solverAccount, event)
 			.closeTradeVolume(additionalVolume)
 			.symbolId(quote.symbolId!)
 			.loss(loss)
-			.profit(profit),
+			.profit(profit)
+			.fundingPaid(fundingPaid)
+			.fundingReceived(fundingReceived),
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
 		// From this timestamp we count partyB volumes in analytics as well

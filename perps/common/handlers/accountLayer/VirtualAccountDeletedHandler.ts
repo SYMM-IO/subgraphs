@@ -10,6 +10,7 @@ export class VirtualAccountDeletedHandler<T> extends BaseAccountLayerHandler {
 		if (va) {
 			va.isDeleted = true
 			va.updateTimestamp = event.block.timestamp
+			va.lastDeleteTimestamp = event.block.timestamp
 			va.save()
 
 			let sub = SubAccount.load(va.parent)

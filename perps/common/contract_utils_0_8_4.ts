@@ -31,6 +31,12 @@ export function getBalanceInfoOfPartyA(address: Address, partyA: Address): symmi
 	return result.reverted ? null : result.value
 }
 
+export function getBalanceOf(address: Address, account: Address): BigInt | null {
+	const contract = symmio_0_8_4.bind(address)
+	let result = contract.try_balanceOf(account)
+	return result.reverted ? null : result.value
+}
+
 export function getBalanceInfoOfPartyB(address: Address, partyA: Address, partyB: Address): symmio_0_8_4__balanceInfoOfPartyBResult | null {
 	const contract = symmio_0_8_4.bind(address)
 	let result = contract.try_balanceInfoOfPartyB(partyB, partyA)

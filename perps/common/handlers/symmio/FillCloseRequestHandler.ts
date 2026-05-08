@@ -4,6 +4,8 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { applyFundingTotalsFromAccumulatedFundingChange, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { QuoteStatus } from "../../../analytics/utils/constants"
+import { updateQuoteHierarchyCounters } from "../../utils/profile"
+import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 
 function isClosePendingStatus(status: i32): boolean {
 	return status == QuoteStatus.CLOSE_PENDING || status == QuoteStatus.CANCEL_CLOSE_PENDING
@@ -59,6 +61,28 @@ export class FillCloseRequestHandler<T> extends BaseHandler {
 		setEventTimestampAndTransactionHashAndAction(quote, "FillCloseRequest", _event)
 
 		if (quote.closedAmount!.equals(quote.quantity!)) {
+			updateQuoteHierarchyCounters(
+				quote,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				_event.block.timestamp,
+			)
+			updateQuoteBucketHierarchyHistoriesForQuote(
+				quote,
+				_event.block.timestamp,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+			)
 			if (quote.subAccount) {
 				let sub = SubAccount.load(quote.subAccount!)
 				if (sub) {

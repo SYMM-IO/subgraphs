@@ -7,6 +7,7 @@ import { AccountType, createNewAccountIfNotExists } from "../../../common/utils/
 
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
+import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 
 export class DepositHandler<T> extends CommonDepositHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -43,6 +44,7 @@ export class DepositHandler<T> extends CommonDepositHandler<T> {
 		deposit.sender = event.params.sender
 		deposit.senderRef = event.params.sender.toHexString()
 		deposit.save()
+		updatePartyALatestBalance(_event, version, event.params.user)
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).deposit(deposit.amount))
 	}
 }

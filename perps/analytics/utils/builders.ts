@@ -5,17 +5,23 @@ import {
 	Configuration,
 	DailyHistory,
 	DailySymbolTradesHistory,
+	DailySubAccountHistory,
 	DailyUserHistory,
+	DailyVirtualAccountHistory,
 	MonthlyHistory,
 	OpenInterest,
 	SolverDailyHistory,
 	SolverOnlyDailyHistory,
+	SubAccount,
 	SymbolTradeHistory,
 	TotalHistory,
 	TotalSolverHistory,
 	TotalSymbolTradesHistory,
+	TotalSubAccountHistory,
 	TotalUserHistory,
+	TotalVirtualAccountHistory,
 	UserActivity,
+	VirtualAccount,
 	WeeklyHistory,
 } from "../../../generated/schema"
 import { getDayNumber, startOfDay, startOfMonth, startOfWeek } from "./time"
@@ -369,6 +375,218 @@ export function getTotalUserHistory(timestamp: BigInt, account: Account): TotalU
 		th.account = account.account
 		th.accountRef = account.id
 		th.accountSource = account.accountSource === null ? ZERO_ADDRESS_BYTES : account.accountSource
+		th.save()
+	}
+	return th
+}
+
+function initSubAccountHistoryTotals(entity: TotalSubAccountHistory, sub: SubAccount, timestamp: BigInt): void {
+	entity.subAccount = sub.address
+	entity.subAccountRef = sub.id
+	entity.owner = sub.owner
+	entity.source = sub.source
+	entity.coreSource = sub.coreSource
+	entity.accountLayerSource = sub.accountLayerSource
+	entity.quotesCount = BigInt.zero()
+	entity.pendingQuotesCount = BigInt.zero()
+	entity.openPositionsCount = BigInt.zero()
+	entity.closedQuotesCount = BigInt.zero()
+	entity.liquidatedQuotesCount = BigInt.zero()
+	entity.cancelledQuotesCount = BigInt.zero()
+	entity.expiredQuotesCount = BigInt.zero()
+	entity.rejectedQuotesCount = BigInt.zero()
+	entity.liquidationsCount = BigInt.zero()
+	entity.withdrawRequestsCount = BigInt.zero()
+	entity.activeWithdrawRequestsCount = BigInt.zero()
+	entity.finalizedWithdrawRequestsCount = BigInt.zero()
+	entity.pendingWithdrawAmount = BigInt.zero()
+	entity.openTradeVolume = BigInt.zero()
+	entity.closeTradeVolume = BigInt.zero()
+	entity.liquidateTradeVolume = BigInt.zero()
+	entity.deposit = BigInt.zero()
+	entity.withdraw = BigInt.zero()
+	entity.allocate = BigInt.zero()
+	entity.deallocate = BigInt.zero()
+	entity.marginAdd = BigInt.zero()
+	entity.marginRemove = BigInt.zero()
+	entity.platformFeePaid = BigInt.zero()
+	entity.openFeePaid = BigInt.zero()
+	entity.closeFeePaid = BigInt.zero()
+	entity.fundingPaid = BigInt.zero()
+	entity.fundingReceived = BigInt.zero()
+	entity.loss = BigInt.zero()
+	entity.profit = BigInt.zero()
+	entity.activePositions = BigInt.zero()
+	entity.updateTimestamp = timestamp
+	entity.timestamp = timestamp
+}
+
+function initVirtualAccountHistoryTotals(entity: TotalVirtualAccountHistory, va: VirtualAccount, sub: SubAccount, timestamp: BigInt): void {
+	entity.virtualAccount = va.address
+	entity.virtualAccountRef = va.id
+	entity.subAccount = sub.address
+	entity.subAccountRef = sub.id
+	entity.owner = sub.owner
+	entity.source = va.source
+	entity.coreSource = va.coreSource
+	entity.accountLayerSource = va.accountLayerSource
+	entity.symbolId = va.symbolId
+	entity.isolationType = va.isolationType
+	entity.quotesCount = BigInt.zero()
+	entity.pendingQuotesCount = BigInt.zero()
+	entity.openPositionsCount = BigInt.zero()
+	entity.closedQuotesCount = BigInt.zero()
+	entity.liquidatedQuotesCount = BigInt.zero()
+	entity.cancelledQuotesCount = BigInt.zero()
+	entity.expiredQuotesCount = BigInt.zero()
+	entity.rejectedQuotesCount = BigInt.zero()
+	entity.liquidationsCount = BigInt.zero()
+	entity.withdrawRequestsCount = BigInt.zero()
+	entity.activeWithdrawRequestsCount = BigInt.zero()
+	entity.finalizedWithdrawRequestsCount = BigInt.zero()
+	entity.pendingWithdrawAmount = BigInt.zero()
+	entity.openTradeVolume = BigInt.zero()
+	entity.closeTradeVolume = BigInt.zero()
+	entity.liquidateTradeVolume = BigInt.zero()
+	entity.deposit = BigInt.zero()
+	entity.withdraw = BigInt.zero()
+	entity.allocate = BigInt.zero()
+	entity.deallocate = BigInt.zero()
+	entity.marginAdd = BigInt.zero()
+	entity.marginRemove = BigInt.zero()
+	entity.platformFeePaid = BigInt.zero()
+	entity.openFeePaid = BigInt.zero()
+	entity.closeFeePaid = BigInt.zero()
+	entity.fundingPaid = BigInt.zero()
+	entity.fundingReceived = BigInt.zero()
+	entity.loss = BigInt.zero()
+	entity.profit = BigInt.zero()
+	entity.activePositions = BigInt.zero()
+	entity.updateTimestamp = timestamp
+	entity.timestamp = timestamp
+}
+
+export function getDailySubAccountHistoryForTimestamp(timestamp: BigInt, sub: SubAccount): DailySubAccountHistory {
+	const dateStr = startOfDay(timestamp).getTime().toString()
+	const id = dateStr + "_" + sub.id
+	let dh = DailySubAccountHistory.load(id)
+	if (dh == null) {
+		dh = new DailySubAccountHistory(id)
+		let th = getTotalSubAccountHistory(timestamp, sub)
+		dh.day = getDayNumber(timestamp)
+		dh.subAccount = th.subAccount
+		dh.subAccountRef = th.subAccountRef
+		dh.owner = th.owner
+		dh.source = th.source
+		dh.coreSource = th.coreSource
+		dh.accountLayerSource = th.accountLayerSource
+		dh.quotesCount = BigInt.zero()
+		dh.pendingQuotesCount = BigInt.zero()
+		dh.openPositionsCount = BigInt.zero()
+		dh.closedQuotesCount = BigInt.zero()
+		dh.liquidatedQuotesCount = BigInt.zero()
+		dh.cancelledQuotesCount = BigInt.zero()
+		dh.expiredQuotesCount = BigInt.zero()
+		dh.rejectedQuotesCount = BigInt.zero()
+		dh.liquidationsCount = BigInt.zero()
+		dh.withdrawRequestsCount = BigInt.zero()
+		dh.activeWithdrawRequestsCount = th.activeWithdrawRequestsCount
+		dh.finalizedWithdrawRequestsCount = BigInt.zero()
+		dh.pendingWithdrawAmount = th.pendingWithdrawAmount
+		dh.openTradeVolume = BigInt.zero()
+		dh.closeTradeVolume = BigInt.zero()
+		dh.liquidateTradeVolume = BigInt.zero()
+		dh.deposit = BigInt.zero()
+		dh.withdraw = BigInt.zero()
+		dh.allocate = BigInt.zero()
+		dh.deallocate = BigInt.zero()
+		dh.marginAdd = BigInt.zero()
+		dh.marginRemove = BigInt.zero()
+		dh.platformFeePaid = BigInt.zero()
+		dh.openFeePaid = BigInt.zero()
+		dh.closeFeePaid = BigInt.zero()
+		dh.fundingPaid = BigInt.zero()
+		dh.fundingReceived = BigInt.zero()
+		dh.loss = BigInt.zero()
+		dh.profit = BigInt.zero()
+		dh.activePositions = th.activePositions
+		dh.updateTimestamp = timestamp
+		dh.timestamp = timestamp
+		dh.save()
+	}
+	return dh
+}
+
+export function getTotalSubAccountHistory(timestamp: BigInt, sub: SubAccount): TotalSubAccountHistory {
+	let th = TotalSubAccountHistory.load(sub.id)
+	if (th == null) {
+		th = new TotalSubAccountHistory(sub.id)
+		initSubAccountHistoryTotals(th, sub, timestamp)
+		th.save()
+	}
+	return th
+}
+
+export function getDailyVirtualAccountHistoryForTimestamp(timestamp: BigInt, va: VirtualAccount, sub: SubAccount): DailyVirtualAccountHistory {
+	const dateStr = startOfDay(timestamp).getTime().toString()
+	const id = dateStr + "_" + va.id
+	let dh = DailyVirtualAccountHistory.load(id)
+	if (dh == null) {
+		dh = new DailyVirtualAccountHistory(id)
+		let th = getTotalVirtualAccountHistory(timestamp, va, sub)
+		dh.day = getDayNumber(timestamp)
+		dh.virtualAccount = th.virtualAccount
+		dh.virtualAccountRef = th.virtualAccountRef
+		dh.subAccount = th.subAccount
+		dh.subAccountRef = th.subAccountRef
+		dh.owner = th.owner
+		dh.source = th.source
+		dh.coreSource = th.coreSource
+		dh.accountLayerSource = th.accountLayerSource
+		dh.symbolId = th.symbolId
+		dh.isolationType = th.isolationType
+		dh.quotesCount = BigInt.zero()
+		dh.pendingQuotesCount = BigInt.zero()
+		dh.openPositionsCount = BigInt.zero()
+		dh.closedQuotesCount = BigInt.zero()
+		dh.liquidatedQuotesCount = BigInt.zero()
+		dh.cancelledQuotesCount = BigInt.zero()
+		dh.expiredQuotesCount = BigInt.zero()
+		dh.rejectedQuotesCount = BigInt.zero()
+		dh.liquidationsCount = BigInt.zero()
+		dh.withdrawRequestsCount = BigInt.zero()
+		dh.activeWithdrawRequestsCount = th.activeWithdrawRequestsCount
+		dh.finalizedWithdrawRequestsCount = BigInt.zero()
+		dh.pendingWithdrawAmount = th.pendingWithdrawAmount
+		dh.openTradeVolume = BigInt.zero()
+		dh.closeTradeVolume = BigInt.zero()
+		dh.liquidateTradeVolume = BigInt.zero()
+		dh.deposit = BigInt.zero()
+		dh.withdraw = BigInt.zero()
+		dh.allocate = BigInt.zero()
+		dh.deallocate = BigInt.zero()
+		dh.marginAdd = BigInt.zero()
+		dh.marginRemove = BigInt.zero()
+		dh.platformFeePaid = BigInt.zero()
+		dh.openFeePaid = BigInt.zero()
+		dh.closeFeePaid = BigInt.zero()
+		dh.fundingPaid = BigInt.zero()
+		dh.fundingReceived = BigInt.zero()
+		dh.loss = BigInt.zero()
+		dh.profit = BigInt.zero()
+		dh.activePositions = th.activePositions
+		dh.updateTimestamp = timestamp
+		dh.timestamp = timestamp
+		dh.save()
+	}
+	return dh
+}
+
+export function getTotalVirtualAccountHistory(timestamp: BigInt, va: VirtualAccount, sub: SubAccount): TotalVirtualAccountHistory {
+	let th = TotalVirtualAccountHistory.load(va.id)
+	if (th == null) {
+		th = new TotalVirtualAccountHistory(va.id)
+		initVirtualAccountHistoryTotals(th, va, sub, timestamp)
 		th.save()
 	}
 	return th

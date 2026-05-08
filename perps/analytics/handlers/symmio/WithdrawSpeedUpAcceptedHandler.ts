@@ -1,8 +1,7 @@
-
 import { WithdrawSpeedUpAcceptedHandler as CommonWithdrawSpeedUpAcceptedHandler } from "../../../common/handlers/symmio/WithdrawSpeedUpAcceptedHandler"
-import { WithdrawRequest } from "../../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
+import { loadWithdrawRequest } from "../../utils/withdrawRequest"
 
 export class WithdrawSpeedUpAcceptedHandler<T> extends CommonWithdrawSpeedUpAcceptedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -10,8 +9,7 @@ export class WithdrawSpeedUpAcceptedHandler<T> extends CommonWithdrawSpeedUpAcce
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
 
-		let id = event.params.requestId.toString() + "-" + _event.address.toHexString()
-		let wr = WithdrawRequest.load(id)
+		let wr = loadWithdrawRequest(event.params.user, event.params.requestId, _event.address)
 		if (!wr) return
 		wr.cooldownEndTime = wr.timestamp.plus(event.params.newCooldown)
 		wr.updateTimestamp = _event.block.timestamp

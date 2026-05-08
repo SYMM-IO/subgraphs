@@ -3,6 +3,8 @@ import { Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { updateQuoteHierarchyCounters } from "../../utils/profile"
+import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 
 export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -41,6 +43,28 @@ export class LiquidatePositionsForClearingHouseHandler<T> extends BaseHandler {
 			quote.closePrice = BigInt.zero()
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePositionsForClearingHouse", _event)
+			updateQuoteHierarchyCounters(
+				quote,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.zero(),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				_event.block.timestamp,
+			)
+			updateQuoteBucketHierarchyHistoriesForQuote(
+				quote,
+				_event.block.timestamp,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.zero(),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+			)
 
 			if (quote.subAccount) {
 				let sub = SubAccount.load(quote.subAccount!)

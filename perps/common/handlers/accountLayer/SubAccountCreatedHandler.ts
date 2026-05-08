@@ -3,6 +3,13 @@ import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { createNewAccountIfNotExists, AccountType } from "../../utils/builders"
 import { SubAccount } from "../../../../generated/schema"
 import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
+import {
+	ACCOUNT_KIND_SUB_ACCOUNT,
+	coreSourceForAccountLayer,
+	initializeSubAccountCounters,
+	setAccountProfileSources,
+	setSubAccountProfileDefaults,
+} from "../../utils/profile"
 
 export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -19,9 +26,15 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 			true,
 		)
 		account.source = _event.address
+		account.accountKind = ACCOUNT_KIND_SUB_ACCOUNT
+		account.owner = event.params.owner
+		account.userRef = event.params.owner.toHexString()
+		account.lastLayerActivityTimestamp = event.block.timestamp
 		account.isVirtual = false
 		account.affiliate = event.params.affiliate
 		account.subAccount = event.params.account.toHexString()
+		let coreSource = coreSourceForAccountLayer(_event.address)
+		setAccountProfileSources(account, _event.address, coreSource, _event.address)
 		account.save()
 
 		let subId = event.params.account.toHexString()
@@ -34,6 +47,8 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 			sub.activeVirtualAccounts = BigInt.zero()
 			sub.activePositions = BigInt.zero()
 			sub.totalPositions = BigInt.zero()
+			sub.latestMarginBalance = BigInt.zero()
+			initializeSubAccountCounters(sub)
 		}
 		sub.address = event.params.account
 		sub.owner = event.params.owner
@@ -41,7 +56,10 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		sub.name = event.params.name
 		sub.isDeleted = false
 		sub.source = _event.address
+		sub.isLegacy = false
+		sub.legacyImported = false
 		sub.updateTimestamp = event.block.timestamp
+		sub.lastConfigTimestamp = event.block.timestamp
 
 		// On v0.8.5+ the SubAccountDetail struct carries singleVAMode and the
 		// trio of metadata/symmioCore/isolationType. Read them once at create
@@ -52,11 +70,13 @@ export class SubAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 			if (!subAccountData.reverted) {
 				sub.metadata = subAccountData.value.metadata
 				sub.symmioCore = subAccountData.value.symmioCore
+				coreSource = subAccountData.value.symmioCore
 				sub.isolationType = subAccountData.value.isolationType
 				sub.singleVAMode = subAccountData.value.singleVAMode
 			}
 		}
 
+		setSubAccountProfileDefaults(sub, event.params.owner, _event.address, coreSource, _event.address)
 		sub.save()
 	}
 }

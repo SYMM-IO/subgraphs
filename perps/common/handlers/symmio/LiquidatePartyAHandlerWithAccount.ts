@@ -7,6 +7,7 @@ import { LiquidatePartyA as LiquidatePartyA_0_8_2 } from "../../../../generated/
 import { LiquidatePartyA as LiquidatePartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePartyA as LiquidatePartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePartyA as LiquidatePartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
+import { setLiquidationDetailProfileRefs } from "../../utils/profile"
 
 export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -102,6 +103,7 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 		if (partyAAccount) {
 			entity.affiliate = partyAAccount.accountSource
 		}
+		setLiquidationDetailProfileRefs(entity, partyAAccount, event.address)
 		entity.save()
 	}
 

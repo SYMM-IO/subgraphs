@@ -44,6 +44,22 @@
 		"RemoveMargin",
 		"EmergencyMarginRecovered"
 	],
+	"DailySubAccountHistory": [
+		"AddMargin",
+		"RemoveMargin"
+	],
+	"TotalSubAccountHistory": [
+		"AddMargin",
+		"RemoveMargin"
+	],
+	"DailyVirtualAccountHistory": [
+		"AddMargin",
+		"RemoveMargin"
+	],
+	"TotalVirtualAccountHistory": [
+		"AddMargin",
+		"RemoveMargin"
+	],
 	"FeeClaim": [
 		"FeesClaimed"
 	],

@@ -2,6 +2,7 @@ import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Account as AccountModel, User as UserModel } from "../../../generated/schema"
 import { getGlobalCounterAndInc } from "../utils"
 import { store } from "@graphprotocol/graph-ts"
+import { ACCOUNT_KIND_BRIDGE, ACCOUNT_KIND_LEGACY_MULTIACCOUNT, ACCOUNT_KIND_LIQUIDATOR, ACCOUNT_KIND_SOLVER, ACCOUNT_KIND_UNKNOWN } from "./profile"
 export enum AccountType {
 	NORMAL,
 	SOLVER,
@@ -17,6 +18,14 @@ accountTypes.set(AccountType.SOLVER, "SOLVER")
 accountTypes.set(AccountType.LIQUIDATOR, "LIQUIDATOR")
 accountTypes.set(AccountType.BRIDGE, "BRIDGE")
 accountTypes.set(AccountType.UNKNOWN, "UNKNOWN")
+
+function accountKindForType(type: AccountType): string {
+	if (type == AccountType.SOLVER) return ACCOUNT_KIND_SOLVER
+	if (type == AccountType.LIQUIDATOR) return ACCOUNT_KIND_LIQUIDATOR
+	if (type == AccountType.BRIDGE) return ACCOUNT_KIND_BRIDGE
+	if (type == AccountType.UNKNOWN) return ACCOUNT_KIND_UNKNOWN
+	return ACCOUNT_KIND_LEGACY_MULTIACCOUNT
+}
 
 export function createNewAccountIfNotExists(
 	address: Bytes,
@@ -56,6 +65,9 @@ export function createNewAccountIfNotExists(
 			account.type = accountTypes.get(type)
 			account.lastActivityTimestamp = block.timestamp
 			account.user = user
+			account.userRef = user.toHexString()
+			account.owner = user
+			account.accountKind = accountKindForType(type)
 			account.updateTimestamp = block.timestamp
 			account.accountSource = accountSource
 			account.name = name
@@ -76,6 +88,9 @@ export function createNewAccountIfNotExists(
 	account.quotesCount = BigInt.zero()
 	account.positionsCount = BigInt.zero()
 	account.user = user
+	account.userRef = user.toHexString()
+	account.owner = user
+	account.accountKind = accountKindForType(type)
 	account.updateTimestamp = block.timestamp
 	account.accountSource = accountSource
 	account.name = name

@@ -3,6 +3,8 @@ import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { DebugEntity, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { applyFundingTotalsFromAccumulatedFundingChange, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { updateQuoteHierarchyCounters } from "../../utils/profile"
+import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 
 export class EmergencyClosePositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -45,6 +47,28 @@ export class EmergencyClosePositionHandler<T> extends BaseHandler {
 		setEventTimestampAndTransactionHashAndAction(quote, "EmergencyClosePosition", _event)
 
 		if (quote.closedAmount!.equals(quote.quantity!)) {
+			updateQuoteHierarchyCounters(
+				quote,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				_event.block.timestamp,
+			)
+			updateQuoteBucketHierarchyHistoriesForQuote(
+				quote,
+				_event.block.timestamp,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+			)
 			if (quote.subAccount) {
 				let sub = SubAccount.load(quote.subAccount!)
 				if (sub) {

@@ -2,14 +2,33 @@ type VirtualAccount @entity(immutable: false) {
 	id: ID!
 	address: Bytes!
 	parent: SubAccount!
+	parentAddress: Bytes
+	owner: Bytes
+	ownerRef: User
 	isDeleted: Boolean!
 	source: Bytes!
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	timestamp: BigInt!
 	updateTimestamp: BigInt!
 	metadata: Bytes
 	symbolId: BigInt
 	isolationType: Int
+	latestMarginBalance: BigInt
+	lastTradeTimestamp: BigInt
+	lastMarginTransferTimestamp: BigInt
+	reuseCount: BigInt
+	lastReuseTimestamp: BigInt
+	lastDeleteTimestamp: BigInt
 	totalPositions: BigInt!
 	activePositions: BigInt!
+	pendingQuotesCount: BigInt!
+	openPositionsCount: BigInt!
+	closedQuotesCount: BigInt!
+	liquidatedQuotesCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
 	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "virtualAccount")
 }

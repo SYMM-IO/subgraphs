@@ -2,6 +2,7 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { Account, VirtualAccount, SubAccount } from "../../../../generated/schema"
 import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
+import { coreSourceForAccountLayer, setAccountProfileSources, setVirtualAccountProfileDefaults } from "../../utils/profile"
 
 export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -16,6 +17,8 @@ export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 			va.isDeleted = false
 			va.parent = newParent
 			va.updateTimestamp = event.block.timestamp
+			va.lastReuseTimestamp = event.block.timestamp
+			va.reuseCount = (va.reuseCount === null ? BigInt.zero() : va.reuseCount!).plus(BigInt.fromI32(1))
 
 			if (version == AccountLayerVersion.v_1) {
 				let contract = accountLayer_1.bind(_event.address)
@@ -27,6 +30,9 @@ export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 				}
 			}
 
+			let newSub = SubAccount.load(newParent)
+			let coreSource = coreSourceForAccountLayer(_event.address)
+			setVirtualAccountProfileDefaults(va, newSub, _event.address, coreSource, _event.address)
 			va.save()
 
 			// If the VA wasn't deleted but parent changed, decrement old parent's active count first.
@@ -42,16 +48,17 @@ export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 			// or moved from a different parent. A spurious reuse on an already-active VA
 			// pointing at the same parent is a no-op for counters.
 			if (wasDeleted || oldParent != newParent) {
-				let sub = SubAccount.load(newParent)
-				if (sub) {
-					sub.activeVirtualAccounts = sub.activeVirtualAccounts.plus(BigInt.fromI32(1))
-					sub.save()
+				if (newSub) {
+					newSub.activeVirtualAccounts = newSub.activeVirtualAccounts.plus(BigInt.fromI32(1))
+					newSub.save()
 				}
 			}
 		}
 		let account = Account.load(event.params.account.toHexString())
 		if (account) {
 			account.updateTimestamp = event.block.timestamp
+			account.lastLayerActivityTimestamp = event.block.timestamp
+			setAccountProfileSources(account, _event.address, coreSourceForAccountLayer(_event.address), _event.address)
 			account.save()
 		}
 		let parentAccount = Account.load(event.params.parent.toHexString())

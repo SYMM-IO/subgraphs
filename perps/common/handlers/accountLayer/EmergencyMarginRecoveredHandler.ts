@@ -1,6 +1,13 @@
-import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
-import { Account, MarginTransfer, VirtualAccount } from "../../../../generated/schema"
+import { Account, MarginTransfer, SubAccount, VirtualAccount } from "../../../../generated/schema"
+import {
+	coreSourceForAccountLayer,
+	initializeVirtualAccountCounters,
+	setAccountProfileSources,
+	setMarginTransferProfileSources,
+	setVirtualAccountProfileDefaults,
+} from "../../utils/profile"
 
 export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler {
 	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -18,6 +25,16 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 			va.source = event.address
 			va.timestamp = event.block.timestamp
 			va.updateTimestamp = event.block.timestamp
+			va.latestMarginBalance = BigInt.zero()
+			va.reuseCount = BigInt.zero()
+			initializeVirtualAccountCounters(va)
+			setVirtualAccountProfileDefaults(
+				va,
+				SubAccount.load(event.params.subAccount.toHexString()),
+				event.address,
+				coreSourceForAccountLayer(event.address),
+				event.address,
+			)
 			va.save()
 		}
 		// Retroactively tag the lost VA's Account as virtual so query-time filters
@@ -29,6 +46,7 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 			lost.parentAddress = event.params.subAccount
 			lost.subAccount = event.params.subAccount.toHexString()
 			lost.virtualAccount = vaId
+			setAccountProfileSources(lost, event.address, coreSourceForAccountLayer(event.address), event.address)
 			lost.save()
 		}
 		let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
@@ -38,9 +56,16 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 		mt.subAccount = event.params.subAccount.toHexString()
 		mt.amount = event.params.amount
 		mt.source = event.address
+		setMarginTransferProfileSources(mt, event.address, coreSourceForAccountLayer(event.address), event.address)
 		mt.timestamp = event.block.timestamp
 		mt.blockNumber = event.block.number
 		mt.transaction = event.transaction.hash
 		mt.save()
+		let sub = SubAccount.load(mt.subAccount)
+		if (sub) {
+			sub.lastMarginTransferTimestamp = event.block.timestamp
+			sub.latestMarginBalance = (sub.latestMarginBalance === null ? BigInt.zero() : sub.latestMarginBalance!).minus(event.params.amount)
+			sub.save()
+		}
 	}
 }

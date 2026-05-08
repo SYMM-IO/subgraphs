@@ -1,6 +1,9 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
-import { MarginTransfer } from "../../../../generated/schema"
+import { MarginTransfer, SubAccount, VirtualAccount } from "../../../../generated/schema"
+import { coreSourceForAccountLayer, setMarginTransferProfileSources } from "../../utils/profile"
+import { BigInt } from "@graphprotocol/graph-ts"
+import { updateMarginHierarchyHistories } from "../../../analytics/utils/historyHelpers"
 
 export class RemoveMarginHandler<T> extends BaseAccountLayerHandler {
 	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -13,9 +16,25 @@ export class RemoveMarginHandler<T> extends BaseAccountLayerHandler {
 		mt.subAccount = event.params.subAccount.toHexString()
 		mt.amount = event.params.amount
 		mt.source = event.address
+		setMarginTransferProfileSources(mt, event.address, coreSourceForAccountLayer(event.address), event.address)
 		mt.timestamp = event.block.timestamp
 		mt.blockNumber = event.block.number
 		mt.transaction = event.transaction.hash
 		mt.save()
+		let sub = SubAccount.load(mt.subAccount)
+		if (sub) {
+			sub.lastMarginTransferTimestamp = event.block.timestamp
+			sub.latestMarginBalance = (sub.latestMarginBalance === null ? BigInt.zero() : sub.latestMarginBalance!).minus(event.params.amount)
+			sub.save()
+		}
+		let va = VirtualAccount.load(mt.virtualAccount)
+		if (va) {
+			va.lastMarginTransferTimestamp = event.block.timestamp
+			va.latestMarginBalance = (va.latestMarginBalance === null ? BigInt.zero() : va.latestMarginBalance!).minus(event.params.amount)
+			va.save()
+		}
+		if (sub) {
+			updateMarginHierarchyHistories(sub, va, event.block.timestamp, BigInt.zero(), event.params.amount)
+		}
 	}
 }

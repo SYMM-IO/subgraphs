@@ -4,6 +4,8 @@ import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { getQuoteData, getLiquidationStateData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
+import { setLiquidationDetailProfileRefs, updateQuoteHierarchyCounters } from "../../utils/profile"
+import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
@@ -103,6 +105,7 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 					entity.partyAAccumulatedUpnl = liqState.partyAAccumulatedUpnl
 					entity.disputed = liqState.disputed
 					entity.liquidationTimestamp = liqState.liquidationTimestamp
+					setLiquidationDetailProfileRefs(entity, Account.load(event.params.partyA.toHexString()), event.address)
 					entity.save()
 				}
 			}
@@ -122,6 +125,28 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 			quote.closePrice = BigInt.zero()
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePositionsPartyA", _event)
+			updateQuoteHierarchyCounters(
+				quote,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.zero(),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				_event.block.timestamp,
+			)
+			updateQuoteBucketHierarchyHistoriesForQuote(
+				quote,
+				_event.block.timestamp,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.zero(),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+			)
 
 			if (quote.subAccount) {
 				let sub = SubAccount.load(quote.subAccount!)

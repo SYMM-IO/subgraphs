@@ -3,6 +3,8 @@ import { DebugEntity, Quote, SubAccount, VirtualAccount } from "../../../../gene
 import { ethereum, log, BigInt } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { updateQuoteHierarchyCounters } from "../../utils/profile"
+import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 
 export class OpenPositionHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -45,6 +47,28 @@ export class OpenPositionHandler<T> extends BaseHandler {
 		quote.timestampOpenPosition = _event.block.timestamp
 		quote.save()
 		setEventTimestampAndTransactionHashAndAction(quote, "OpenPosition", _event)
+		updateQuoteHierarchyCounters(
+			quote,
+			BigInt.fromI32(-1),
+			BigInt.fromI32(1),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			_event.block.timestamp,
+		)
+		updateQuoteBucketHierarchyHistoriesForQuote(
+			quote,
+			_event.block.timestamp,
+			BigInt.fromI32(-1),
+			BigInt.fromI32(1),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+		)
 
 		if (quote.subAccount) {
 			let sub = SubAccount.load(quote.subAccount!)

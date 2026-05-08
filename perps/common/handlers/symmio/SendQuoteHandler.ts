@@ -2,9 +2,11 @@ import { Account, Quote } from "../../../../generated/schema"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { BaseHandler, Version } from "../../BaseHandler"
 import { getQuoteData, getSymbolName } from "../../VersionedQuoteLoader"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { addQuoteToPendingList, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { ZERO_ADDRESS_BYTES } from "../../../analytics/utils/constants"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
+import { updateQuoteHierarchyCounters } from "../../utils/profile"
+import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 
 export class SendQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -140,6 +142,29 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.timestampSendQuote = event.block.timestamp
 		quote.timestamp = event.block.timestamp
 		quote.save()
+		addQuoteToPendingList(quote)
+		updateQuoteHierarchyCounters(
+			quote,
+			BigInt.fromI32(1),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			event.block.timestamp,
+		)
+		updateQuoteBucketHierarchyHistoriesForQuote(
+			quote,
+			event.block.timestamp,
+			BigInt.fromI32(1),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+			BigInt.zero(),
+		)
 		setEventTimestampAndTransactionHashAndAction(quote, "SendQuote", event)
 	}
 }

@@ -8,6 +8,8 @@ import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpe
 import { AccountType, createNewAccountIfNotExists } from "../../../common/utils/builders"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { resolveAccountSourceFromAccountLayer } from "../../../common/utils/account_layer_resolver"
+import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
+import { recordWithdrawFinalizationHint } from "../../utils/withdrawRequest"
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -19,7 +21,14 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		super.handleSymbol(_event, version)
 
 		let accountSource = resolveAccountSourceFromAccountLayer(event.address, event.params.user)
-		let account = createNewAccountIfNotExists(event.params.user, event.params.user, accountSource, AccountType.UNKNOWN, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(
+			event.params.user,
+			event.params.user,
+			accountSource,
+			AccountType.UNKNOWN,
+			event.block,
+			event.transaction,
+		)
 		account.globalCounter = globalCounter
 		account.source = event.address
 		account.withdraw = account.withdraw.plus(event.params.amount)
@@ -39,6 +48,16 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		withdraw.sender = event.params.sender
 		withdraw.senderRef = event.params.sender.toHexString()
 		withdraw.save()
+		recordWithdrawFinalizationHint(
+			_event.address,
+			_event.transaction.hash,
+			event.params.sender,
+			event.params.user,
+			event.params.amount,
+			_event.logIndex,
+			_event.block.timestamp,
+		)
+		updatePartyALatestBalance(_event, version, event.params.user)
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).withdraw(event.params.amount))
 	}
 }

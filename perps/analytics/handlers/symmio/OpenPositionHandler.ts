@@ -29,7 +29,10 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 		const symbol = Symbol.load(quote.symbolId!.toString() + "-" + event.address.toHexString())
 		if (!symbol) return
 
-		let tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
+		let tradingFee = BigInt.zero()
+		if (version != Version.v_0_8_5) {
+			tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
+		}
 
 		let solverAccount = Account.load(event.params.partyB.toHexString())
 		if (!solverAccount) return

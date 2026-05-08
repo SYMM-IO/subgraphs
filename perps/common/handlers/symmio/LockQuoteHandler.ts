@@ -1,7 +1,7 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Quote } from "../../../../generated/schema"
 import { BaseHandler, Version } from "../../BaseHandler"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { addQuoteToPendingList, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 
 export class LockQuoteHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -14,6 +14,7 @@ export class LockQuoteHandler<T> extends BaseHandler {
 		quote.partyB = event.params.partyB
 		quote.quoteStatus = 1
 		quote.save()
+		addQuoteToPendingList(quote)
 		setEventTimestampAndTransactionHashAndAction(quote, "LockQuote", _event)
 	}
 }

@@ -231,6 +231,184 @@ type TotalUserHistory @entity(immutable: false) {
 	timestamp: BigInt!
 }
 
+type DailySubAccountHistory @entity(immutable: false) {
+	id: ID!
+	day: BigInt!
+	subAccount: Bytes!
+	subAccountRef: SubAccount
+	owner: Bytes!
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	quotesCount: BigInt!
+	pendingQuotesCount: BigInt!
+	openPositionsCount: BigInt!
+	closedQuotesCount: BigInt!
+	liquidatedQuotesCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
+	liquidationsCount: BigInt!
+	withdrawRequestsCount: BigInt!
+	activeWithdrawRequestsCount: BigInt!
+	finalizedWithdrawRequestsCount: BigInt!
+	pendingWithdrawAmount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	marginAdd: BigInt!
+	marginRemove: BigInt!
+	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	activePositions: BigInt!
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
+type TotalSubAccountHistory @entity(immutable: false) {
+	id: ID!
+	subAccount: Bytes!
+	subAccountRef: SubAccount
+	owner: Bytes!
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	quotesCount: BigInt!
+	pendingQuotesCount: BigInt!
+	openPositionsCount: BigInt!
+	closedQuotesCount: BigInt!
+	liquidatedQuotesCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
+	liquidationsCount: BigInt!
+	withdrawRequestsCount: BigInt!
+	activeWithdrawRequestsCount: BigInt!
+	finalizedWithdrawRequestsCount: BigInt!
+	pendingWithdrawAmount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	marginAdd: BigInt!
+	marginRemove: BigInt!
+	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	activePositions: BigInt!
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
+type DailyVirtualAccountHistory @entity(immutable: false) {
+	id: ID!
+	day: BigInt!
+	virtualAccount: Bytes!
+	virtualAccountRef: VirtualAccount
+	subAccount: Bytes!
+	subAccountRef: SubAccount
+	owner: Bytes!
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	symbolId: BigInt
+	isolationType: Int
+	quotesCount: BigInt!
+	pendingQuotesCount: BigInt!
+	openPositionsCount: BigInt!
+	closedQuotesCount: BigInt!
+	liquidatedQuotesCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
+	liquidationsCount: BigInt!
+	withdrawRequestsCount: BigInt!
+	activeWithdrawRequestsCount: BigInt!
+	finalizedWithdrawRequestsCount: BigInt!
+	pendingWithdrawAmount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	marginAdd: BigInt!
+	marginRemove: BigInt!
+	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	activePositions: BigInt!
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
+type TotalVirtualAccountHistory @entity(immutable: false) {
+	id: ID!
+	virtualAccount: Bytes!
+	virtualAccountRef: VirtualAccount
+	subAccount: Bytes!
+	subAccountRef: SubAccount
+	owner: Bytes!
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	symbolId: BigInt
+	isolationType: Int
+	quotesCount: BigInt!
+	pendingQuotesCount: BigInt!
+	openPositionsCount: BigInt!
+	closedQuotesCount: BigInt!
+	liquidatedQuotesCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
+	liquidationsCount: BigInt!
+	withdrawRequestsCount: BigInt!
+	activeWithdrawRequestsCount: BigInt!
+	finalizedWithdrawRequestsCount: BigInt!
+	pendingWithdrawAmount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	marginAdd: BigInt!
+	marginRemove: BigInt!
+	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	activePositions: BigInt!
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
 type SymbolTradeHistory @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
@@ -368,8 +546,14 @@ type FundingFeeState @entity(immutable: false) {
 type LiquidationDetail @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	partyA: Bytes!
 	partyAAccount: Account
+	owner: Bytes
+	subAccountRef: SubAccount
+	virtualAccountRef: VirtualAccount
 	liquidationId: Bytes!
 	liquidationType: Int!
 	upnl: BigInt!
@@ -397,16 +581,41 @@ type LiquidationDetail @entity(immutable: false) {
 type WithdrawRequest @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	requestId: BigInt!
 	user: Bytes!
+	owner: Bytes
+	subAccountRef: SubAccount
+	virtualAccountRef: VirtualAccount
 	amount: BigInt!
 	speedUp: Boolean!
+	isPureVirtual: Boolean!
 	cooldownEndTime: BigInt!
 	status: String!
 	timestamp: BigInt!
 	updateTimestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
+}
+
+type WithdrawRequestLookup @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	requestId: BigInt!
+	activeRequestIds: [String!]!
+}
+
+type WithdrawFinalizationHint @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	transaction: Bytes!
+	sender: Bytes!
+	user: Bytes!
+	amount: BigInt!
+	logIndex: BigInt!
+	timestamp: BigInt!
 }
 
 type LatestAccountBalance @entity(immutable: false) {
@@ -424,6 +633,8 @@ type LatestAccountBalance @entity(immutable: false) {
 	pendingLockedLf: BigInt!
 	pendingLockedPartyAmm: BigInt!
 	pendingLockedPartyBmm: BigInt!
+	freeBalance: BigInt!
+	totalBalance: BigInt!
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
@@ -434,7 +645,13 @@ type LatestAccountBalance @entity(immutable: false) {
 type AggregatedPosition @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	partyA: Bytes!
+	owner: Bytes
+	subAccountRef: SubAccount
+	virtualAccountRef: VirtualAccount
 	partyB: Bytes!
 	symbolId: BigInt!
 	symbolName: String!

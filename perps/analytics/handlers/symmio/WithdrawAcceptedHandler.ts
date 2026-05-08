@@ -1,8 +1,7 @@
-
 import { WithdrawAcceptedHandler as CommonWithdrawAcceptedHandler } from "../../../common/handlers/symmio/WithdrawAcceptedHandler"
-import { WithdrawRequest } from "../../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
+import { loadWithdrawRequest } from "../../utils/withdrawRequest"
 
 export class WithdrawAcceptedHandler<T> extends CommonWithdrawAcceptedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -10,8 +9,7 @@ export class WithdrawAcceptedHandler<T> extends CommonWithdrawAcceptedHandler<T>
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
 
-		let id = event.params.requestId.toString() + "-" + _event.address.toHexString()
-		let wr = WithdrawRequest.load(id)
+		let wr = loadWithdrawRequest(event.params.user, event.params.requestId, _event.address)
 		if (!wr) return
 		wr.status = "PROVIDER_ACCEPTED"
 		wr.updateTimestamp = _event.block.timestamp

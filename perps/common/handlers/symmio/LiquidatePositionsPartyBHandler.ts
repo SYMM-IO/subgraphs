@@ -4,6 +4,8 @@ import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
+import { updateQuoteHierarchyCounters } from "../../utils/profile"
+import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 
 export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 	handleAccount(_event: ethereum.Event, version: Version): void {
@@ -63,6 +65,28 @@ export class LiquidatePositionsPartyBHandler<T> extends BaseHandler {
 			quote.closedAmount = quote.quantity
 			quote.save()
 			setEventTimestampAndTransactionHashAndAction(quote, "LiquidatePositionsPartyB", _event)
+			updateQuoteHierarchyCounters(
+				quote,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.zero(),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+				_event.block.timestamp,
+			)
+			updateQuoteBucketHierarchyHistoriesForQuote(
+				quote,
+				_event.block.timestamp,
+				BigInt.zero(),
+				BigInt.fromI32(-1),
+				BigInt.zero(),
+				BigInt.fromI32(1),
+				BigInt.zero(),
+				BigInt.zero(),
+				BigInt.zero(),
+			)
 
 			if (quote.subAccount) {
 				let sub = SubAccount.load(quote.subAccount!)

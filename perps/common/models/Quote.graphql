@@ -91,6 +91,14 @@ type PartyBPartyA @entity(immutable: false) {
 	globalCounter: BigInt!
 }
 
+type PendingQuoteIndex @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	partyA: Bytes!
+	partyB: Bytes
+	quoteIds: [BigInt!]!
+}
+
 type PartyASymbolPrice @entity(immutable: false) {
 	id: String!
 	partyA: Bytes!

@@ -5,7 +5,12 @@ type MarginTransfer @entity(immutable: true) {
 	subAccount: SubAccount!
 	amount: BigInt!
 	source: Bytes!
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!
+	virtualAccountRef: VirtualAccount
+	subAccountRef: SubAccount
 }

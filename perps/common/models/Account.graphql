@@ -1,9 +1,15 @@
 type Account @entity(immutable: false) {
 	id: ID!
 	source: Bytes
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	account: Bytes!
+	accountKind: String
 	globalCounter: BigInt!
 	user: Bytes!
+	userRef: User
+	owner: Bytes
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	name: String
@@ -12,6 +18,7 @@ type Account @entity(immutable: false) {
 	transaction: Bytes!
 	updateTimestamp: BigInt!
 	accountSource: Bytes
+	affiliateRef: Affiliate
 	quotesCount: BigInt!
 	positionsCount: BigInt!
 	deposit: BigInt!
@@ -23,4 +30,8 @@ type Account @entity(immutable: false) {
 	affiliate: Bytes
 	subAccount: SubAccount
 	virtualAccount: VirtualAccount
+	lastCoreActivityTimestamp: BigInt
+	lastLayerActivityTimestamp: BigInt
+	lastBalanceActivityTimestamp: BigInt
+	isDeleted: Boolean
 }

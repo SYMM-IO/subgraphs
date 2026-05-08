@@ -2,20 +2,41 @@ type SubAccount @entity(immutable: false) {
 	id: ID!
 	address: Bytes!
 	owner: Bytes!
+	ownerRef: User
 	affiliate: Affiliate!
+	affiliateAddress: Bytes
 	name: String
 	singleVAMode: Boolean!
 	isDeleted: Boolean!
 	source: Bytes!
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	timestamp: BigInt!
 	updateTimestamp: BigInt!
 	metadata: Bytes
 	symmioCore: Bytes
 	isolationType: Int
+	routingMode: String
+	isLegacy: Boolean
+	legacyContract: Bytes
+	legacyImported: Boolean
+	legacyImportedTimestamp: BigInt
+	latestMarginBalance: BigInt
+	lastTradeTimestamp: BigInt
+	lastMarginTransferTimestamp: BigInt
+	lastConfigTimestamp: BigInt
 	totalVirtualAccounts: BigInt!
 	activeVirtualAccounts: BigInt!
 	activePositions: BigInt!
 	totalPositions: BigInt!
+	pendingQuotesCount: BigInt!
+	openPositionsCount: BigInt!
+	closedQuotesCount: BigInt!
+	liquidatedQuotesCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
 	virtualAccounts: [VirtualAccount!]! @derivedFrom(field: "parent")
 	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "subAccount")
 	quotes: [Quote!]! @derivedFrom(field: "subAccount")

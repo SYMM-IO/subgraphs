@@ -19,8 +19,10 @@
 		"SettleUpnl",
 		"ADLClose",
 		"SettleUpnlUnified",
+		"SettlePartyBUpnlForLiquidation",
 		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
+		"LiquidatePendingPositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee"
 	],
 	"User": [

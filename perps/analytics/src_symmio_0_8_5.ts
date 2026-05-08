@@ -52,6 +52,8 @@ import {LiquidatePartyBHandler} from './handlers/symmio/LiquidatePartyBHandler'
 import {LiquidatePartyB} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePendingPositionsPartyAHandler} from './handlers/symmio/LiquidatePendingPositionsPartyAHandler'
 import {LiquidatePendingPositionsPartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {LiquidatePendingPositionsForClearingHouseHandler} from './handlers/symmio/LiquidatePendingPositionsForClearingHouseHandler'
+import {LiquidatePendingPositionsForClearingHouse} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePositionsForClearingHouseHandler} from './handlers/symmio/LiquidatePositionsForClearingHouseHandler'
 import {LiquidatePositionsForClearingHouse} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePositionsPartyAHandler} from './handlers/symmio/LiquidatePositionsPartyAHandler'
@@ -102,6 +104,8 @@ import {SetSymbolsPricesHandler} from './handlers/symmio/SetSymbolsPricesHandler
 import {SetSymbolsPrices} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SettlePartyALiquidationHandler} from './handlers/symmio/SettlePartyALiquidationHandler'
 import {SettlePartyALiquidation} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {SettlePartyBUpnlForLiquidationHandler} from './handlers/symmio/SettlePartyBUpnlForLiquidationHandler'
+import {SettlePartyBUpnlForLiquidation} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SettleUpnlHandler} from './handlers/symmio/SettleUpnlHandler'
 import {SettleUpnlUnifiedHandler} from './handlers/symmio/SettleUpnlUnifiedHandler'
 import {SettleUpnlUnified} from '../../generated/symmio_0_8_5/symmio_0_8_5'
@@ -329,6 +333,13 @@ export function handleLiquidatePendingPositionsPartyA(event: LiquidatePendingPos
 }
 
 
+export function handleLiquidatePendingPositionsForClearingHouse(event: LiquidatePendingPositionsForClearingHouse): void {
+	ensureSyncMeta(event.block)
+    let handler = new LiquidatePendingPositionsForClearingHouseHandler<LiquidatePendingPositionsForClearingHouse>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
 export function handleLiquidatePositionsForClearingHouse(event: LiquidatePositionsForClearingHouse): void {
 	ensureSyncMeta(event.block)
     let handler = new LiquidatePositionsForClearingHouseHandler<LiquidatePositionsForClearingHouse>()
@@ -500,6 +511,13 @@ export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
 export function handleSettlePartyALiquidation(event: SettlePartyALiquidation): void {
 	ensureSyncMeta(event.block)
     let handler = new SettlePartyALiquidationHandler<SettlePartyALiquidation>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleSettlePartyBUpnlForLiquidation(event: SettlePartyBUpnlForLiquidation): void {
+	ensureSyncMeta(event.block)
+    let handler = new SettlePartyBUpnlForLiquidationHandler<SettlePartyBUpnlForLiquidation>()
     handler.handle(event, Version.v_0_8_5)
 }
 

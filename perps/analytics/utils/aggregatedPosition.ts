@@ -1,22 +1,13 @@
 import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { AggregatedPosition } from "../../../generated/schema"
+import { Account, AggregatedPosition } from "../../../generated/schema"
 import { Version } from "../../common/BaseHandler"
 import { resolveSymbolName } from "./symbol"
+import { setAggregatedPositionProfileRefs } from "../../common/utils/profile"
 
 const FACTOR: BigInt = BigInt.fromString("1000000000000000000")
 
 function getEntityId(partyA: Address, partyB: Address, symbolId: BigInt, positionType: i32, source: Address): string {
-	return (
-		partyA.toHexString() +
-		"-" +
-		partyB.toHexString() +
-		"-" +
-		symbolId.toString() +
-		"-" +
-		positionType.toString() +
-		"-" +
-		source.toHexString()
-	)
+	return partyA.toHexString() + "-" + partyB.toHexString() + "-" + symbolId.toString() + "-" + positionType.toString() + "-" + source.toHexString()
 }
 
 function getOrCreate(
@@ -46,6 +37,8 @@ function getOrCreate(
 	} else if (entity.symbolName.length == 0) {
 		entity.symbolName = resolveSymbolName(version, symbolId, event.address)
 	}
+	let account = Account.load(partyA.toHexString())
+	setAggregatedPositionProfileRefs(entity, account, event.address)
 	return entity
 }
 

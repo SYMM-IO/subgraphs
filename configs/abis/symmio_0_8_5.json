@@ -2021,6 +2021,78 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "liquidatedPartyA",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "partyB",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes",
+                "name": "settlementId",
+                "type": "bytes"
+            },
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "quoteId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "currentPrice",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint8",
+                        "name": "partyAIndex",
+                        "type": "uint8"
+                    }
+                ],
+                "indexed": false,
+                "internalType": "struct UnifiedQuoteSettlementData[]",
+                "name": "settlementData",
+                "type": "tuple[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "updatedPrices",
+                "type": "uint256[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "address[]",
+                "name": "partyAs",
+                "type": "address[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[]",
+                "name": "newPartyAsAllocatedBalances",
+                "type": "uint256[]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "newPartyBAllocatedBalance",
+                "type": "uint256"
+            }
+        ],
+        "name": "SettlePartyBUpnlForLiquidation",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "internalType": "uint256",

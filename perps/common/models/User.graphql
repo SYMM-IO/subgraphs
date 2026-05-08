@@ -1,7 +1,10 @@
 type User @entity(immutable: false) {
-    id: ID!
-    globalCounter: BigInt!
-    address: Bytes!
-    timestamp: BigInt!
-    transaction: Bytes!
+	id: ID!
+	globalCounter: BigInt!
+	address: Bytes!
+	timestamp: BigInt!
+	transaction: Bytes!
+	accounts: [Account!]! @derivedFrom(field: "userRef")
+	subAccounts: [SubAccount!]! @derivedFrom(field: "ownerRef")
+	virtualAccounts: [VirtualAccount!]! @derivedFrom(field: "ownerRef")
 }

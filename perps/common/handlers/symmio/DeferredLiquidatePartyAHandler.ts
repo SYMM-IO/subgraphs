@@ -1,12 +1,15 @@
-import { BaseHandler, Version } from "../../BaseHandler";
-import { BigInt, ethereum } from "@graphprotocol/graph-ts";
-import { Account, LiquidationDetail } from "../../../../generated/schema";
+import { BaseHandler, Version } from "../../BaseHandler"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { Account, LiquidationDetail } from "../../../../generated/schema"
+import { setLiquidationDetailProfileRefs } from "../../utils/profile"
 
 export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let entity = new LiquidationDetail(event.params.partyA.toHexString() + "-" + event.params.liquidationId.toHexString() + "-" + event.address.toHexString())
+		let entity = new LiquidationDetail(
+			event.params.partyA.toHexString() + "-" + event.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
+		)
 		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.partyAAccount = event.params.partyA.toHexString()
@@ -32,6 +35,7 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		if (partyAAccount) {
 			entity.affiliate = partyAAccount.accountSource
 		}
+		setLiquidationDetailProfileRefs(entity, partyAAccount, event.address)
 		entity.save()
 	}
 }
