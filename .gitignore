@@ -4,6 +4,9 @@ generated/
 node_modules/
 */tests
 package-lock.json
+!fleet-ui/package-lock.json
+fleet-ui/dist/
+fleet-ui/tsconfig.tsbuildinfo
 
 */subgraph.yaml
 .idea/
@@ -25,3 +28,4 @@ perps/analytics/currentConfig.json
 uv.lock
 pyproject.toml
 __pycache__/
+.superpowers/

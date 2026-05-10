@@ -29,7 +29,8 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from jinja2 import DictLoader, Environment, select_autoescape
 
 
@@ -39,6 +40,8 @@ from jinja2 import DictLoader, Environment, select_autoescape
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONFIGS_DIR = REPO_ROOT / "configs" / "perps"
+FLEET_UI_DIST = REPO_ROOT / "fleet-ui" / "dist"
+FLEET_UI_INDEX = FLEET_UI_DIST / "index.html"
 
 MODULES = ["perps/analytics", "perps/events"]
 
@@ -76,6 +79,7 @@ STAGE_CONFIGS = {
 CHAIN_LOGO_SLUG: dict[str, str] = {
     "base": "base",
     "base_lc": "base",
+    "base_stage": "base",
     "base_lc_test": "base",
     "arbitrum": "arbitrum",
     "bnb": "bsc",
@@ -354,13 +358,34 @@ class Job:
     and short-lived operations (tag, delete, promote, refresh) so the user can
     see every action the server is doing in one activity pane."""
 
-    __slots__ = ("id", "label", "kind", "cmd", "status", "rc", "started", "ended", "lines", "_q", "_thread")
+    __slots__ = (
+        "id",
+        "label",
+        "kind",
+        "cmd",
+        "steps",
+        "current_step_index",
+        "current_step_label",
+        "completed_steps",
+        "status",
+        "rc",
+        "started",
+        "ended",
+        "lines",
+        "_q",
+        "_thread",
+        "_last_broadcast",
+    )
 
-    def __init__(self, label: str, cmd: list[str] | None = None, kind: str = "op") -> None:
+    def __init__(self, label: str, cmd: list[str] | None = None, kind: str = "op", steps: list[tuple[str, list[str]]] | None = None) -> None:
         self.id = uuid.uuid4().hex[:12]
         self.label = label
         self.kind = kind  # deploy|tag|untag|delete|promote|refresh|op
         self.cmd = cmd or []
+        self.steps = steps or []
+        self.current_step_index = 0
+        self.current_step_label = ""
+        self.completed_steps = 0
         self.status = "queued"  # queued|running|done|failed
         self.rc: int | None = None
         self.started: float = 0.0
@@ -368,6 +393,7 @@ class Job:
         self.lines: list[str] = []
         self._q: queue.Queue[str | None] = queue.Queue()
         self._thread: threading.Thread | None = None
+        self._last_broadcast: float = 0.0
 
     def start(self) -> None:
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -378,32 +404,59 @@ class Job:
         self.started = time.time()
         broadcast_activity()
         try:
-            proc = subprocess.Popen(
-                self.cmd,
-                cwd=REPO_ROOT,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1,
-            )
-            assert proc.stdout is not None
-            for line in proc.stdout:
-                line = line.rstrip("\n")
-                self.lines.append(line)
-                self._q.put(line)
-                if len(self.lines) > 5000:
-                    self.lines = self.lines[-5000:]
-            proc.wait()
-            self.rc = proc.returncode
-            self.status = "done" if proc.returncode == 0 else "failed"
+            if self.steps:
+                failed = False
+                for i, (step_label, cmd) in enumerate(self.steps, start=1):
+                    self.current_step_index = i
+                    self.current_step_label = step_label
+                    broadcast_activity()
+                    self._append_line(f"[{i}/{len(self.steps)}] {step_label}")
+                    rc = self._run_command(cmd)
+                    if rc != 0:
+                        failed = True
+                        self._append_line(f"[{i}/{len(self.steps)}] failed with rc={rc}")
+                    else:
+                        self._append_line(f"[{i}/{len(self.steps)}] finished")
+                    self.completed_steps = i
+                    broadcast_activity()
+                self.rc = 1 if failed else 0
+                self.status = "failed" if failed else "done"
+            else:
+                self.rc = self._run_command(self.cmd)
+                self.status = "done" if self.rc == 0 else "failed"
         except Exception as e:  # pragma: no cover
             self.rc = -1
             self.status = "failed"
-            self.lines.append(f"[job error] {e}")
+            self._append_line(f"[job error] {e}")
         finally:
             self.ended = time.time()
             self._q.put(None)  # sentinel for SSE consumers
             broadcast_activity()
+
+    def _append_line(self, line: str) -> None:
+        self.lines.append(line)
+        self._q.put(line)
+        if len(self.lines) > 5000:
+            self.lines = self.lines[-5000:]
+        now = time.time()
+        if now - self._last_broadcast > 0.75:
+            self._last_broadcast = now
+            broadcast_activity()
+
+    def _run_command(self, cmd: list[str]) -> int:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=REPO_ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            self._append_line(line.rstrip("\n"))
+        proc.wait()
+        return proc.returncode
 
     def begin(self) -> None:
         """Mark a synchronous activity as started (no subprocess)."""
@@ -453,6 +506,17 @@ def start_job(label: str, cmd: list[str], kind: str = "deploy") -> Job:
     """Launch a long-running subprocess job."""
     with _JOBS_LOCK:
         job = Job(label=label, cmd=cmd, kind=kind)
+        _JOBS[job.id] = job
+        _prune_jobs()
+    job.start()
+    broadcast_activity()
+    return job
+
+
+def start_job_sequence(label: str, steps: list[tuple[str, list[str]]], kind: str = "deploy") -> Job:
+    """Launch one job that runs multiple commands sequentially in one thread."""
+    with _JOBS_LOCK:
+        job = Job(label=label, steps=steps, kind=kind)
         _JOBS[job.id] = job
         _prune_jobs()
     job.start()
@@ -566,13 +630,50 @@ BASE_HTML = r"""
 <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/sse.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root { color-scheme: dark; }
-  body { background: #0b0d10; color: #e6e8eb; }
-  .card { background: #14171c; border: 1px solid #242830; border-radius: 10px; }
+  :root {
+    color-scheme: dark;
+    --bg: #090b0e;
+    --panel: rgba(18, 22, 28, .94);
+    --line: #232a35;
+    --line-strong: #303947;
+    --text: #edf1f5;
+    --muted: #8d98a8;
+    --faint: #647083;
+    --blue: #4f8cff;
+    --green: #58d17b;
+    --red: #ff6b66;
+  }
+  * { box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background:
+      linear-gradient(180deg, rgba(79,140,255,.09), transparent 320px),
+      linear-gradient(135deg, rgba(88,209,123,.045), transparent 34%),
+      var(--bg);
+    color: var(--text);
+    font-feature-settings: "tnum";
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,.45), transparent 62%);
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 18px 48px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.025);
+  }
 
   /* Two-column page: main content left, sticky activity pane right */
-  .page-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px;
-               gap: 20px; max-width: 1680px; margin: 0 auto; padding: 20px 24px;
+  .page-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px;
+               gap: 18px; max-width: 1720px; margin: 0 auto; padding: 22px 24px;
                align-items: start; }
   .page-grid > main { min-width: 0; }
   .page-grid > aside#activity-pane { position: sticky; top: 20px;
@@ -581,17 +682,35 @@ BASE_HTML = r"""
   @media (max-width: 1180px) {
     .page-grid { grid-template-columns: 1fr; padding: 16px; }
     .page-grid > aside#activity-pane { position: static; max-height: 60vh; }
+    .app-header { align-items: stretch; }
+    .app-actions { flex-shrink: 0; }
+    #filter-count { flex: 1 0 100%; margin-left: 0 !important; text-align: right; }
+    .filter-search { max-width: none; }
+    .filter-bar .filter-row:first-child { align-items: stretch; }
   }
 
+  .app-header { display: flex; align-items: flex-start; justify-content: space-between;
+                gap: 16px; margin-bottom: 16px; padding: 2px 2px 0; }
+  .app-title-row { display: flex; align-items: center; gap: 10px; }
+  .app-mark { width: 34px; height: 34px; border-radius: 8px;
+              display: inline-flex; align-items: center; justify-content: center;
+              background: linear-gradient(135deg, rgba(79,140,255,.22), rgba(56,199,216,.12));
+              border: 1px solid rgba(79,140,255,.32); color: #b8d3ff;
+              box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+  .app-title { font-size: 19px; line-height: 1.15; font-weight: 700; letter-spacing: 0; }
+  .app-subtitle { margin-top: 3px; color: var(--faint); font-size: 12px; }
+  .app-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
   /* Activity pane internals */
-  .activity-header { padding: 12px 14px; border-bottom: 1px solid #1e242d;
+  .activity-header { padding: 13px 14px; border-bottom: 1px solid var(--line);
                      display: flex; align-items: center; justify-content: space-between;
-                     position: sticky; top: 0; background: #14171c; z-index: 1; }
+                     position: sticky; top: 0; background: rgba(18,22,28,.96);
+                     backdrop-filter: blur(10px); z-index: 1; }
   .activity-list { display: flex; flex-direction: column; padding: 6px; gap: 2px; }
   .activity-empty { padding: 28px 20px; text-align: center; color: #6a7280; font-size: 12px; }
   .act-item { padding: 8px 10px; border-radius: 7px; border: 1px solid transparent;
               display: flex; gap: 10px; align-items: flex-start; transition: background .1s; }
-  .act-item:hover { background: rgba(255,255,255,.02); border-color: #1e242d; }
+  .act-item:hover { background: rgba(255,255,255,.025); border-color: var(--line); }
   .act-icon { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
               display: flex; align-items: center; justify-content: center;
               font-size: 10px; font-weight: 600; }
@@ -618,6 +737,18 @@ BASE_HTML = r"""
   .act-kind.promote, .act-kind.tag { color: #82b1ff; border-color: rgba(56,139,253,.3); }
   .act-kind.delete, .act-kind.untag { color: #ff9a93; border-color: rgba(248,81,73,.3); }
   .act-kind.refresh { color: #a9b0bb; }
+  .act-progress { margin-top: 7px; padding: 8px 9px; border: 1px solid rgba(79,140,255,.18);
+                  background: rgba(79,140,255,.055); border-radius: 7px; }
+  .act-progress-head { display: flex; justify-content: space-between; align-items: baseline;
+                       gap: 10px; font-size: 10px; color: #8d98a8; }
+  .act-progress-step { color: #b8d3ff; font-weight: 700; }
+  .act-progress-target { margin-top: 3px; color: #d6dde7; font-size: 11px;
+                         line-height: 1.35; word-break: break-word; }
+  .act-progress-bar { margin-top: 7px; height: 5px; overflow: hidden; border-radius: 999px;
+                      background: #111720; }
+  .act-progress-fill { height: 100%; min-width: 5px; border-radius: inherit;
+                       background: linear-gradient(90deg, var(--blue), #38c7d8);
+                       transition: width .22s ease; }
   .act-item.running { animation: act-pulse 1.6s ease-in-out infinite; }
   @keyframes act-pulse { 0%, 100% { background: rgba(47,111,235,.02); } 50% { background: rgba(47,111,235,.08); } }
   .act-log { margin-top: 6px; padding: 6px 8px; background: #070809;
@@ -629,13 +760,15 @@ BASE_HTML = r"""
   details.act-details > summary::-webkit-details-marker { display: none; }
   details.act-details > summary::before { content: '▸ '; }
   details.act-details[open] > summary::before { content: '▾ '; }
-  .btn { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
-         border: 1px solid #2a3240; background: #1c2129; color: #cfd4db;
-         cursor: pointer; transition: all .12s ease; display: inline-flex; align-items: center; gap: 4px; }
-  .btn:hover { background: #242a34; color: #fff; }
+  .btn { min-height: 30px; padding: 5px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+         border: 1px solid var(--line-strong); background: #1a2029; color: #d6dde7;
+         cursor: pointer; transition: background .12s ease, border-color .12s ease, color .12s ease, transform .12s ease;
+         display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .btn:hover { background: #242c38; border-color: #3b4657; color: #fff; }
+  .btn:active { transform: translateY(1px); }
   .btn:disabled, .btn.htmx-request { opacity: .55; pointer-events: none; cursor: wait; }
-  .btn-primary { background: #2f6feb; border-color: #2f6feb; color: #fff; }
-  .btn-primary:hover { background: #2459c4; }
+  .btn-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #3978ef; border-color: #3978ef; }
   .btn-danger { background: #742a2a; border-color: #8a3232; color: #ffe3e3; }
   .btn-danger:hover { background: #8a3232; color: #fff; }
   .btn-ghost { background: transparent; border-color: #2a3240; }
@@ -644,10 +777,30 @@ BASE_HTML = r"""
   .btn-icon { padding: 3px 7px; font-size: 12px; line-height: 1; background: transparent;
               border-color: transparent; color: #6a7280; }
   .btn-icon:hover { background: rgba(248,81,73,.1); color: #ff9a93; border-color: rgba(248,81,73,.3); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+             overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+  .ui-icon { display: inline-block; position: relative; width: 14px; height: 14px; flex: 0 0 14px; }
+  .icon-copy::before, .icon-copy::after {
+    content: ''; position: absolute; width: 8px; height: 10px; border: 1.5px solid currentColor;
+    border-radius: 2px; background: transparent;
+  }
+  .icon-copy::before { left: 2px; top: 3px; opacity: .55; }
+  .icon-copy::after { left: 5px; top: 0; background: rgba(18,22,28,.98); }
+  .icon-trash::before { content: ''; position: absolute; left: 3px; top: 4px; width: 8px; height: 8px;
+                        border: 1.5px solid currentColor; border-top: 0; border-radius: 1px 1px 2px 2px; }
+  .icon-trash::after { content: ''; position: absolute; left: 2px; top: 2px; width: 10px; height: 1.5px;
+                       background: currentColor; border-radius: 999px; box-shadow: 3px -2px 0 -1px currentColor; }
+  .icon-promote::before { content: ''; position: absolute; left: 6px; top: 3px; width: 2px; height: 8px;
+                          background: currentColor; border-radius: 999px; }
+  .icon-promote::after { content: ''; position: absolute; left: 4px; top: 2px; width: 6px; height: 6px;
+                         border-left: 2px solid currentColor; border-top: 2px solid currentColor;
+                         transform: rotate(45deg); }
+  .icon-deploy::before { content: ''; position: absolute; left: 5px; top: 1px; width: 5px; height: 12px;
+                         background: currentColor; clip-path: polygon(55% 0, 100% 0, 68% 43%, 100% 43%, 25% 100%, 45% 54%, 8% 54%); }
 
   /* Inline tag indicator — subtle, not a loud pill */
   .tag-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
-              color: #82b1ff; font-weight: 500; letter-spacing: 0.01em; }
+              color: #9ec1ff; font-weight: 600; letter-spacing: 0.01em; }
   .tag-chip::before { content: ''; display: inline-block; width: 6px; height: 6px;
               background: #82b1ff; border-radius: 50%; }
 
@@ -661,11 +814,12 @@ BASE_HTML = r"""
             line-height: 1; text-decoration: none; transition: all .1s; }
   .ep-btn:hover { background: rgba(47,111,235,.15); color: #82b1ff; }
   .ep-btn.copied { background: rgba(46,160,67,.18); color: #7ee195; }
+  .ep-btn.copied .icon-copy::before, .ep-btn.copied .icon-copy::after { border-color: #7ee195; }
 
   /* Version row — single horizontal line */
-  .v-row { display: flex; align-items: center; gap: 10px; padding: 4px 0;
-           border-left: 1px dashed #2a3240; padding-left: 12px; margin-left: -2px; }
-  .v-row:hover { border-left-color: #3a4250; }
+  .v-row { display: flex; align-items: center; gap: 10px; min-height: 30px; padding: 4px 8px 4px 12px;
+           border-left: 1px dashed #2a3240; margin-left: -2px; border-radius: 0 7px 7px 0; }
+  .v-row:hover { border-left-color: #536173; background: rgba(255,255,255,.025); }
   .v-row .v-ver { font-family: ui-monospace, monospace; font-weight: 600; font-size: 12px;
                   color: #cfd4db; min-width: 60px; }
   .v-row .v-meta { display: inline-flex; gap: 6px; align-items: center; }
@@ -679,7 +833,7 @@ BASE_HTML = r"""
   .modal-bg.busy .modal { pointer-events: none; }
   .modal-bg.busy .modal::before { content: ''; position: absolute; inset: 0;
               background: rgba(20,23,28,.55); backdrop-filter: blur(1px);
-              border-radius: 12px; z-index: 1; pointer-events: none; }
+              border-radius: 8px; z-index: 1; pointer-events: none; }
   .modal-bg.busy .modal { position: relative; }
   .modal-bg.busy .modal > * { position: relative; z-index: 0; }
   .modal-bg.busy .modal::after { content: ''; position: absolute; top: 50%; left: 50%;
@@ -693,6 +847,7 @@ BASE_HTML = r"""
   .htmx-indicator { display: none; }
   .htmx-request .htmx-indicator { display: inline-block; }
   .htmx-request .label-normal { display: none; }
+  .label-normal { display: inline-flex; align-items: center; gap: 5px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Top loading bar — shows on any in-flight htmx request */
@@ -721,15 +876,23 @@ BASE_HTML = r"""
   .filter-bar .filter-row + .filter-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid #1e242d; }
   .filter-bar .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
                        color: #6a7280; font-weight: 500; }
+  .filter-search { position: relative; flex: 1 1 260px; min-width: 220px; }
+  .filter-search input { width: 100%; height: 31px; padding-left: 30px; border-radius: 7px;
+                         background: rgba(15,19,25,.88); border-color: var(--line);
+                         color: #dbe2ea; }
+  .filter-search::before { content: '⌕'; position: absolute; left: 11px; top: 5px;
+                           color: #647083; font-size: 15px; pointer-events: none; }
+  .filter-search input:focus { outline: none; border-color: rgba(79,140,255,.62);
+                               box-shadow: 0 0 0 2px rgba(79,140,255,.13); }
   /* Segmented control */
-  .segmented { display: inline-flex; background: #0f1217; border: 1px solid #242830;
+  .segmented { display: inline-flex; background: #0f1319; border: 1px solid var(--line);
                border-radius: 7px; padding: 2px; gap: 1px; }
   .segmented button { padding: 4px 11px; font-size: 11px; font-weight: 500; background: transparent;
                        border: none; color: #8a93a3; border-radius: 5px; cursor: pointer;
                        transition: all .1s; }
   .segmented button:hover { color: #cfd4db; background: rgba(255,255,255,.03); }
-  .segmented button.active { background: #2f6feb; color: #fff; }
-  .segmented button.active:hover { background: #2459c4; }
+  .segmented button.active { background: var(--blue); color: #fff; box-shadow: 0 1px 8px rgba(79,140,255,.25); }
+  .segmented button.active:hover { background: #3978ef; }
 
   /* Toggle switch for boolean filters like "2+ versions" */
   .filter-toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 12px;
@@ -746,9 +909,9 @@ BASE_HTML = r"""
   .filter-toggle input:checked::after { background: #2f6feb; left: 14px; }
 
   /* Chain chips — click the pill itself, no visible checkbox */
-  .chip-toggle { display: inline-flex; align-items: center; padding: 3px 11px;
-                  border-radius: 999px; border: 1px solid #303844;
-                  background: rgba(125,133,144,.08); color: #a9b0bb;
+  .chip-toggle { display: inline-flex; align-items: center; padding: 4px 11px;
+                  border-radius: 999px; border: 1px solid #303a48;
+                  background: rgba(141,152,168,.08); color: #adb7c6;
                   font-size: 11px; font-weight: 500; cursor: pointer; user-select: none;
                   transition: all .1s; }
   .chip-toggle:hover { border-color: #4a5160; color: #cfd4db; }
@@ -778,10 +941,10 @@ BASE_HTML = r"""
   .bulk-bar { position: sticky; top: 10px; z-index: 20; margin-bottom: 14px;
               animation: bulk-in .18s ease-out; }
   .bulk-bar[hidden] { display: none; }
-  .bulk-bar-inner { background: rgba(20,23,28,.92); backdrop-filter: blur(8px);
-              border: 1px solid #2a3240; border-radius: 10px;
+  .bulk-bar-inner { background: rgba(18,22,28,.94); backdrop-filter: blur(10px);
+              border: 1px solid #334056; border-radius: 8px;
               padding: 10px 14px; display: flex; align-items: center; gap: 10px;
-              box-shadow: 0 8px 20px rgba(0,0,0,.3); }
+              box-shadow: 0 14px 28px rgba(0,0,0,.32); }
   .bulk-count { display: flex; align-items: baseline; gap: 6px; padding-right: 8px;
               border-right: 1px solid #242830; margin-right: 4px; }
   .bulk-count > span:first-child { font-size: 15px; font-weight: 600; color: #82b1ff; }
@@ -799,23 +962,39 @@ BASE_HTML = r"""
   /* Chain cell with logo */
   .chain-cell { display: flex; align-items: flex-start; gap: 10px; }
   .chain-cell-text { flex: 1; min-width: 0; }
-  .chain-logo { width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+  .chain-logo { width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
                 background: #0f1217; border: 1px solid #2a3240; flex-shrink: 0;
-                margin-top: 2px; }
+                margin-top: 2px; box-shadow: 0 0 0 2px rgba(255,255,255,.02); }
   .chain-logo-fallback { display: inline-flex; align-items: center; justify-content: center;
                           font-size: 10px; font-weight: 600; color: #6a7280;
                           letter-spacing: 0.02em; }
 
+  .grid-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+                  gap: 1px; border-bottom: 1px solid var(--line);
+                  background: var(--line); }
+  .grid-metric { background: rgba(18,22,28,.96); padding: 13px 16px; min-width: 0; }
+  .grid-metric-label { color: #718096; font-size: 10px; font-weight: 700;
+                       text-transform: uppercase; letter-spacing: .06em; }
+  .grid-metric-value { margin-top: 3px; color: #eef3f8; font-size: 18px; font-weight: 800; line-height: 1; }
+  .grid-metric-note { margin-top: 3px; color: #69768a; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fleet-table-wrap { overflow-x: auto; }
+  .no-results { margin: 14px; padding: 18px; border: 1px dashed #303947; border-radius: 8px;
+                color: #8d98a8; background: rgba(15,19,25,.62); text-align: center;
+                font-size: 13px; }
+  .no-results strong { display: block; color: #d6dde7; margin-bottom: 3px; font-size: 14px; }
   table { width: 100%; border-collapse: collapse; }
-  th, td { padding: 8px 12px; border-bottom: 1px solid #1e242d; font-size: 13px; vertical-align: top; }
-  th { text-align: left; color: #8a93a3; font-weight: 500; font-size: 11px;
-       text-transform: uppercase; letter-spacing: 0.04em; position: sticky; top: 0; background: #14171c; }
-  tr:hover td { background: #161a21; }
+  #grid table { min-width: 980px; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid rgba(35,42,53,.86); font-size: 13px; vertical-align: top; }
+  th { text-align: left; color: #92a0b2; font-weight: 700; font-size: 10px;
+       text-transform: uppercase; letter-spacing: 0.06em; position: sticky; top: 0;
+       background: rgba(18,22,28,.98); backdrop-filter: blur(10px); z-index: 2; }
+  tbody tr:hover td { background: rgba(255,255,255,.025); }
+  td[data-label]::before { display: none; }
 
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(2px);
               display: flex; align-items: center; justify-content: center; z-index: 50;
               animation: modal-bg-in .12s ease-out; }
-  .modal { background: #14171c; border: 1px solid #242830; border-radius: 12px;
+  .modal { background: #14171c; border: 1px solid #242830; border-radius: 8px;
            padding: 20px; max-width: 600px; width: 90%; max-height: 85vh; overflow: auto;
            box-shadow: 0 20px 40px rgba(0,0,0,.5); animation: modal-in .16s ease-out; }
   @keyframes modal-bg-in { from { opacity: 0; } to { opacity: 1; } }
@@ -826,7 +1005,7 @@ BASE_HTML = r"""
   .bulk-modal { padding: 0; max-width: 540px; }
   .bulk-modal .modal-head { padding: 18px 22px 14px; border-bottom: 1px solid #1e242d;
                              position: sticky; top: 0; background: #14171c;
-                             border-radius: 12px 12px 0 0; z-index: 1; }
+                             border-radius: 8px 8px 0 0; z-index: 1; }
   .bulk-modal .modal-title { display: flex; gap: 12px; align-items: center; }
   .bulk-modal .modal-icon { width: 36px; height: 36px; border-radius: 10px;
                              display: inline-flex; align-items: center; justify-content: center;
@@ -837,7 +1016,7 @@ BASE_HTML = r"""
   .bulk-modal .modal-foot { padding: 14px 22px; border-top: 1px solid #1e242d;
                              display: flex; justify-content: flex-end; gap: 8px;
                              position: sticky; bottom: 0; background: #14171c;
-                             border-radius: 0 0 12px 12px; }
+                             border-radius: 0 0 8px 8px; }
 
   .bulk-modal .form-group { display: flex; flex-direction: column; gap: 8px; }
   .bulk-modal .form-label { font-size: 11px; font-weight: 600; color: #8a93a3;
@@ -907,27 +1086,126 @@ BASE_HTML = r"""
 
   /* Toasts */
   #toast-container { position: fixed; top: 16px; right: 16px; z-index: 70;
-                     display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-  .toast { background: #14171c; border: 1px solid #242830; border-left: 3px solid #2f6feb;
-           border-radius: 6px; padding: 10px 14px; min-width: 260px; max-width: 420px;
-           box-shadow: 0 6px 20px rgba(0,0,0,.4); pointer-events: auto;
-           animation: toast-in .18s ease-out; font-size: 13px; }
-  .toast.ok { border-left-color: #2ea043; }
-  .toast.err { border-left-color: #f85149; }
-  .toast .t-title { font-weight: 600; margin-bottom: 2px; }
+                     display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+  .toast { position: relative; overflow: hidden; background: rgba(18,22,28,.98);
+           border: 1px solid #2b3442; border-left: 3px solid var(--blue);
+           border-radius: 8px; padding: 11px 38px 12px 14px; min-width: 280px; max-width: 430px;
+           box-shadow: 0 16px 38px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.035);
+           pointer-events: auto; animation: toast-in .18s ease-out; font-size: 13px; }
+  .toast.ok { border-left-color: var(--green); }
+  .toast.err { border-left-color: var(--red); }
+  .toast .t-title { font-weight: 700; margin-bottom: 2px; color: #eef3f8; }
   .toast .t-body { color: #a9b0bb; font-size: 12px; word-break: break-word; }
-  .toast.fading { opacity: 0; transform: translateY(-6px); transition: all .35s ease; }
+  .toast-close { position: absolute; top: 7px; right: 8px; width: 22px; height: 22px;
+                 border: 0; border-radius: 6px; background: transparent; color: #7b8796;
+                 cursor: pointer; font-size: 15px; line-height: 20px; }
+  .toast-close:hover { background: rgba(255,255,255,.06); color: #e6e8eb; }
+  .toast::after { content: ''; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+                  background: currentColor; opacity: .45; transform-origin: left;
+                  animation: toast-life 4s linear forwards; }
+  .toast.ok::after { color: var(--green); }
+  .toast.err::after { color: var(--red); }
+  .toast.fading { opacity: 0; transform: translateY(-6px) scale(.98); transition: opacity .28s ease, transform .28s ease; }
   @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toast-life { to { transform: scaleX(0); } }
+  @media (max-width: 720px) {
+    .app-header { flex-direction: column; }
+    .app-actions { width: 100%; justify-content: stretch; }
+    .app-actions .btn { flex: 1; justify-content: center; }
+    #toast-container { left: 12px; right: 12px; top: 12px; }
+    .toast { min-width: 0; max-width: none; width: 100%; }
+    .filter-bar .filter-row { align-items: stretch; }
+    .segmented { overflow-x: auto; max-width: 100%; }
+  }
+  @media (max-width: 760px) {
+    body::before { display: none; }
+    .page-grid { padding: 12px; gap: 12px; }
+    .page-grid > aside#activity-pane { max-height: 44vh; }
+    .filter-bar { padding: 12px; }
+    .filter-bar .filter-row { gap: 8px; }
+    .filter-bar .filter-row:first-child > .segmented { width: 100%; }
+    .filter-bar .filter-row:first-child > .segmented button { flex: 1; }
+    #filter-count { width: 100%; margin-left: 0 !important; }
+    #chain-chips { max-height: 116px; overflow: auto; padding-right: 2px; }
+    .bulk-bar { top: 6px; }
+    .bulk-bar-inner { align-items: stretch; flex-wrap: wrap; padding: 10px; }
+    .bulk-count { width: 100%; border-right: 0; border-bottom: 1px solid #242830;
+                  padding: 0 0 8px; margin: 0 0 2px; }
+    .bulk-bar-inner .btn { flex: 1; justify-content: center; }
+
+    .filter-search { flex-basis: 100%; min-width: 0; }
+    .grid-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid var(--line);
+                    border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+    .grid-metric { padding: 11px 12px; }
+    .grid-metric-value { font-size: 16px; }
+    #grid { overflow: visible; background: transparent; border: 0; box-shadow: none; }
+    .fleet-table-wrap { overflow: visible; }
+    #grid table { min-width: 0; display: block; }
+    #grid thead { display: none; }
+    #grid tbody { display: flex; flex-direction: column; gap: 10px; }
+    #grid tr.chain-row { display: grid; grid-template-columns: minmax(0, 1fr);
+                         border: 1px solid var(--line); border-radius: 8px;
+                         background: var(--panel); overflow: hidden; }
+    #grid tr.chain-row[style] { border-top: 1px solid var(--line) !important; }
+    #grid tr.chain-row.sel-on { border-color: rgba(79,140,255,.48); }
+    #grid td { display: grid; grid-template-columns: 92px minmax(0, 1fr);
+               gap: 10px; padding: 10px 12px; border-bottom: 1px solid rgba(35,42,53,.72); }
+    #grid td:last-child { border-bottom: 0; }
+    #grid td[data-label]::before { display: block; content: attr(data-label);
+                                   color: #748195; font-size: 10px; font-weight: 700;
+                                   text-transform: uppercase; letter-spacing: .06em; padding-top: 2px; }
+    #grid td[data-label="Select"] { display: flex; justify-content: flex-end; padding: 8px 10px;
+                                    background: rgba(255,255,255,.018); }
+    #grid td[data-label="Select"]::before { content: 'Select row'; margin-right: auto; }
+    .chain-cell { align-items: center; }
+    .v-row { display: grid; grid-template-columns: minmax(64px, auto) 1fr;
+             gap: 6px 8px; padding: 8px; }
+    .v-row .ep-links, .v-row .v-meta, .v-row .v-tags, .v-row .v-actions { margin-left: 0; }
+    .v-row .v-meta, .v-row .v-tags, .v-row .v-actions { grid-column: 1 / -1; }
+    .v-row .v-actions { opacity: 1; justify-content: flex-start; flex-wrap: wrap; }
+    .tag-row { align-items: center; }
+    .modal { width: calc(100vw - 24px); max-height: calc(100vh - 24px); padding: 16px; }
+    .bulk-modal { max-width: none; padding: 0; }
+    .bulk-modal .modal-head, .bulk-modal .modal-body, .bulk-modal .modal-foot { padding-left: 14px; padding-right: 14px; }
+    .bulk-modal .selection-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+    .bulk-modal .modal-foot { flex-wrap: wrap; }
+    .bulk-modal .modal-foot .btn { flex: 1; justify-content: center; }
+  }
 </style>
 <script>
-  // Auto-dismiss toasts after 4s, with fade
-  document.addEventListener('htmx:afterSwap', function(e) {
-    document.querySelectorAll('#toast-container .toast:not([data-dismissing])').forEach(function(el) {
-      el.setAttribute('data-dismissing', '1');
-      setTimeout(function() { el.classList.add('fading'); }, 3600);
-      setTimeout(function() { el.remove(); }, 4000);
-    });
+  // Auto-dismiss toasts after 4s, including htmx out-of-band swaps.
+  function dismissToast(el) {
+    if (!el || el.dataset.removed === '1') return;
+    el.dataset.removed = '1';
+    el.classList.add('fading');
+    setTimeout(function() { el.remove(); }, 320);
+  }
+  function armToast(el) {
+    if (!el || el.dataset.dismissing === '1') return;
+    el.dataset.dismissing = '1';
+    var close = el.querySelector('.toast-close');
+    if (close) close.addEventListener('click', function() { dismissToast(el); });
+    setTimeout(function() { dismissToast(el); }, 4000);
+  }
+  function armToasts(root) {
+    (root || document).querySelectorAll('#toast-container .toast').forEach(armToast);
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    armToasts(document);
+    var c = document.getElementById('toast-container');
+    if (!c) return;
+    new MutationObserver(function(records) {
+      records.forEach(function(record) {
+        record.addedNodes.forEach(function(node) {
+          if (node.nodeType !== 1) return;
+          if (node.classList && node.classList.contains('toast')) armToast(node);
+          else armToasts(node);
+        });
+      });
+    }).observe(c, { childList: true, subtree: true });
   });
+  document.addEventListener('htmx:afterSwap', function() { armToasts(document); });
+  document.addEventListener('htmx:afterSettle', function() { armToasts(document); });
 
   // Defensive cleanup: once in a while htmx's afterRequest cleanup misses
   // the source element — usually when an SSE swap races with the request
@@ -966,10 +1244,14 @@ BASE_HTML = r"""
       var b = document.createElement('div'); b.className = 't-body'; b.textContent = body;
       el.appendChild(b);
     }
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'toast-close';
+    close.setAttribute('aria-label', 'Dismiss notification');
+    close.textContent = '×';
+    el.appendChild(close);
     c.appendChild(el);
-    el.setAttribute('data-dismissing', '1');
-    setTimeout(function() { el.classList.add('fading'); }, 2200);
-    setTimeout(function() { el.remove(); }, 2600);
+    armToast(el);
   };
   window.copyEndpoint = function(btn, base, verOrTag) {
     var url = window.gqlUrl(base, verOrTag);
@@ -977,9 +1259,7 @@ BASE_HTML = r"""
       window.clientToast('ok', 'Endpoint copied', base + '/' + verOrTag);
       if (btn) {
         btn.classList.add('copied');
-        var orig = btn.textContent;
-        btn.textContent = '✓';
-        setTimeout(function() { btn.classList.remove('copied'); btn.textContent = orig; }, 900);
+        setTimeout(function() { btn.classList.remove('copied'); }, 900);
       }
     };
     var fail = function(err) {
@@ -1007,12 +1287,15 @@ BASE_HTML = r"""
 
 <div class="page-grid">
   <main>
-  <header class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-xl font-bold">SYMMIO Subgraph Fleet</h1>
-      <p class="text-xs text-gray-500" id="last-fetched-label">{{ last_fetched_label }}</p>
+  <header class="app-header">
+    <div class="app-title-row">
+      <div class="app-mark">S</div>
+      <div>
+        <h1 class="app-title">SYMMIO Subgraph Fleet</h1>
+        <p class="app-subtitle" id="last-fetched-label">{{ last_fetched_label }}</p>
+      </div>
     </div>
-    <div class="flex gap-2">
+    <div class="app-actions">
       <button class="btn"
               hx-post="/refresh" hx-target="#grid" hx-swap="innerHTML"
               hx-disabled-elt="this">
@@ -1028,8 +1311,8 @@ BASE_HTML = r"""
         <span id="bulk-count">0</span>
         <span class="text-xs text-gray-400">selected</span>
       </span>
-      <button class="btn btn-primary" onclick="openBulkPromote()">⬆ Promote</button>
-      <button class="btn" onclick="openBulkDeploy()">⚡ Deploy</button>
+      <button class="btn btn-primary" onclick="openBulkPromote()"><span class="ui-icon icon-promote" aria-hidden="true"></span> Promote</button>
+      <button class="btn" onclick="openBulkDeploy()"><span class="ui-icon icon-deploy" aria-hidden="true"></span> Deploy</button>
       <button class="btn btn-ghost" onclick="clearSelection()">Clear</button>
     </div>
   </div>
@@ -1050,14 +1333,18 @@ BASE_HTML = r"""
       </div>
 
       <div class="segmented" role="group" aria-label="Chain preset">
-        <button onclick="setPresetFilter('all')">show all</button>
-        <button onclick="setPresetFilter('prod')">prod only</button>
-        <button onclick="setPresetFilter('stage')">stage only</button>
+        <button class="preset-filter active" data-preset="all" onclick="setPresetFilter('all')">show all</button>
+        <button class="preset-filter" data-preset="prod" onclick="setPresetFilter('prod')">prod only</button>
+        <button class="preset-filter" data-preset="stage" onclick="setPresetFilter('stage')">stage only</button>
       </div>
 
       <label class="filter-toggle">
         <input type="checkbox" id="filter-multi-version" onchange="applyFleetFilters()" />
         <span>2+ versions</span>
+      </label>
+
+      <label class="filter-search">
+        <input type="text" id="fleet-search" placeholder="Search chain, module, version…" oninput="applyFleetFilters()" />
       </label>
 
       <span class="text-xs text-gray-500 ml-auto" id="filter-count"></span>
@@ -1089,6 +1376,8 @@ BASE_HTML = r"""
     window.applyFleetFilters = function() {
       var chips = Array.from(document.querySelectorAll('.chain-chip:checked')).map(function(el) { return el.dataset.chain; });
       var multiOnly = document.getElementById('filter-multi-version').checked;
+      var searchEl = document.getElementById('fleet-search');
+      var query = searchEl ? searchEl.value.trim().toLowerCase() : '';
       var moduleFilter = window.currentModuleFilter || '';
       var rows = document.querySelectorAll('#grid tr.chain-row');
       var visible = 0;
@@ -1096,17 +1385,32 @@ BASE_HTML = r"""
         var chain = r.dataset.chain || '';
         var mod = r.dataset.module || '';
         var vcount = parseInt(r.dataset.versionCount || '0', 10);
+        var searchText = (r.dataset.search || '').toLowerCase();
         var match = true;
         if (chips.length > 0 && chips.indexOf(chain) === -1) match = false;
         if (multiOnly && vcount < 2) match = false;
         if (moduleFilter && mod !== moduleFilter) match = false;
+        if (query && searchText.indexOf(query) === -1) match = false;
         r.style.display = match ? '' : 'none';
         if (match) visible++;
       });
       var total = rows.length;
       document.getElementById('filter-count').textContent = visible + ' / ' + total + ' rows';
+      var empty = document.getElementById('no-filter-results');
+      if (empty) empty.hidden = visible !== 0;
+      var allCb = document.querySelector('.row-sel-all');
+      if (allCb) {
+        var visibleSelectors = Array.from(document.querySelectorAll('.row-sel'))
+          .filter(function(cb) { return cb.closest('tr').style.display !== 'none'; });
+        var visibleChecked = visibleSelectors.filter(function(cb) { return cb.checked; });
+        allCb.checked = visibleSelectors.length > 0 && visibleSelectors.length === visibleChecked.length;
+        allCb.indeterminate = visibleChecked.length > 0 && visibleChecked.length < visibleSelectors.length;
+      }
     };
     window.setPresetFilter = function(mode) {
+      document.querySelectorAll('.preset-filter').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.preset === mode);
+      });
       var chips = document.querySelectorAll('.chain-chip');
       if (mode === 'all') {
         chips.forEach(function(c) { c.checked = false; });
@@ -1341,11 +1645,39 @@ TOAST_OOB = r"""
   <div class="toast {{ kind }}">
     <div class="t-title">{{ title }}</div>
     {% if body %}<div class="t-body">{{ body }}</div>{% endif %}
+    <button type="button" class="toast-close" aria-label="Dismiss notification">×</button>
   </div>
 </div>
 """
 
+LAST_FETCHED_OOB = r"""
+<p class="app-subtitle" id="last-fetched-label" hx-swap-oob="innerHTML">{{ label }}</p>
+"""
+
 GRID_HTML = r"""
+<div class="grid-summary">
+  <div class="grid-metric">
+    <div class="grid-metric-label">Active rows</div>
+    <div class="grid-metric-value">{{ summary.rows }}</div>
+    <div class="grid-metric-note">{{ summary.chains }} chain{{ 's' if summary.chains != 1 else '' }}</div>
+  </div>
+  <div class="grid-metric">
+    <div class="grid-metric-label">Deployments</div>
+    <div class="grid-metric-value">{{ summary.deployments }}</div>
+    <div class="grid-metric-note">{{ summary.tags }} tag pointer{{ 's' if summary.tags != 1 else '' }}</div>
+  </div>
+  <div class="grid-metric">
+    <div class="grid-metric-label">Multi-version</div>
+    <div class="grid-metric-value">{{ summary.multi_version }}</div>
+    <div class="grid-metric-note">rows needing review</div>
+  </div>
+  <div class="grid-metric">
+    <div class="grid-metric-label">Attention</div>
+    <div class="grid-metric-value">{{ summary.attention }}</div>
+    <div class="grid-metric-note">non-healthy or unsynced</div>
+  </div>
+</div>
+<div class="fleet-table-wrap">
 <table data-active-chains='{{ active_chain_meta | tojson }}'>
   <thead>
     <tr>
@@ -1367,9 +1699,10 @@ GRID_HTML = r"""
         data-base="{{ row.base }}"
         data-module-full="{{ row.module }}"
         data-version-count="{{ row.deployments|length }}"
+        data-search="{{ g.chain }} {{ g.network }} {{ row.module_short }} {{ row.module }} {{ row.base }}{% for d in row.deployments %} {{ d.version }} {{ d.status }} {{ d.synced }}{% endfor %}{% for tag, ver in row.tags.items() %} {{ tag }} {{ ver }}{% endfor %}"
         data-orphan="{{ '1' if g.is_orphan else '0' }}"
         {% if loop.first %}style="border-top: 2px solid #2a3240;"{% endif %}>
-      <td class="align-top" style="padding-top: 10px;">
+      <td class="align-top" data-label="Select" style="padding-top: 10px;">
         <input type="checkbox" class="row-sel"
                data-chain="{{ g.chain }}"
                data-module="{{ row.module_short }}"
@@ -1378,7 +1711,7 @@ GRID_HTML = r"""
                data-orphan="{{ '1' if g.is_orphan else '0' }}"
                onchange="updateSelectionBar()" />
       </td>
-      <td class="align-top">
+      <td class="align-top" data-label="Chain">
         {% if loop.first %}
           <div class="chain-cell">
             {% if g.logo_url %}
@@ -1402,10 +1735,10 @@ GRID_HTML = r"""
           </div>
         {% endif %}
       </td>
-      <td class="align-top text-gray-400">{{ row.module_short }}
+      <td class="align-top text-gray-400" data-label="Module">{{ row.module_short }}
         <div class="text-xs text-gray-600 mt-1 font-mono" style="font-size: 10px;">{{ row.base }}</div>
       </td>
-      <td class="align-top">
+      <td class="align-top" data-label="Deployments">
         {% if row.deployments %}
           <details class="versions-details" open>
             <summary class="version-summary">
@@ -1419,7 +1752,10 @@ GRID_HTML = r"""
               <span class="ep-links" title="GraphQL endpoint">
                 <button type="button" class="ep-btn"
                         onclick="copyEndpoint(this, '{{ row.base }}', '{{ d.version }}')"
-                        title="Copy GraphQL endpoint URL">📋</button>
+                        title="Copy GraphQL endpoint URL">
+                  <span class="ui-icon icon-copy" aria-hidden="true"></span>
+                  <span class="sr-only">Copy GraphQL endpoint URL</span>
+                </button>
                 <a class="ep-btn" target="_blank" rel="noopener"
                    href="https://api.goldsky.com/api/public/{{ goldsky_project }}/subgraphs/{{ row.base }}/{{ d.version }}/gn"
                    title="Open GraphQL endpoint in new tab">↗</a>
@@ -1460,7 +1796,7 @@ GRID_HTML = r"""
                           hx-target="body" hx-swap="beforeend"
                           hx-disabled-elt="this"
                           title="Move stage/latest tag(s) to this version">
-                    <span class="label-normal">⬆ promote</span>
+                    <span class="label-normal"><span class="ui-icon icon-promote" aria-hidden="true"></span> promote</span>
                     <span class="htmx-indicator"><span class="spin"></span></span>
                   </button>
                 {% endif %}
@@ -1471,7 +1807,8 @@ GRID_HTML = r"""
                         hx-target="#grid" hx-swap="innerHTML"
                         hx-disabled-elt="this"
                         title="Delete this versioned deployment">
-                  <span class="label-normal">🗑</span>
+                  <span class="label-normal"><span class="ui-icon icon-trash" aria-hidden="true"></span></span>
+                  <span class="sr-only">Delete deployment</span>
                   <span class="htmx-indicator"><span class="spin"></span></span>
                 </button>
               </span>
@@ -1483,7 +1820,7 @@ GRID_HTML = r"""
           <span class="text-gray-600 text-xs">no deployments</span>
         {% endif %}
       </td>
-      <td class="align-top">
+      <td class="align-top" data-label="Tags">
         {% if row.tags %}
           <div class="flex flex-col gap-2">
           {% for tag, ver in row.tags.items() %}
@@ -1493,7 +1830,10 @@ GRID_HTML = r"""
               <span class="ep-links" title="GraphQL endpoint (tag)">
                 <button type="button" class="ep-btn"
                         onclick="copyEndpoint(this, '{{ row.base }}', '{{ tag }}')"
-                        title="Copy GraphQL endpoint for {{ tag }}">📋</button>
+                        title="Copy GraphQL endpoint for {{ tag }}">
+                  <span class="ui-icon icon-copy" aria-hidden="true"></span>
+                  <span class="sr-only">Copy GraphQL endpoint for {{ tag }}</span>
+                </button>
                 <a class="ep-btn" target="_blank" rel="noopener"
                    href="https://api.goldsky.com/api/public/{{ goldsky_project }}/subgraphs/{{ row.base }}/{{ tag }}/gn"
                    title="Open {{ tag }} GraphQL endpoint in new tab">↗</a>
@@ -1519,6 +1859,11 @@ GRID_HTML = r"""
   {% endfor %}
   </tbody>
 </table>
+</div>
+<div id="no-filter-results" class="no-results" hidden>
+  <strong>No rows match the current filters</strong>
+  Clear search or widen the chain/module filters.
+</div>
 <script>
   (function() {
     // Rebuild chain chips from the active-chains list embedded in the table,
@@ -1600,7 +1945,7 @@ POST_PROMOTE_CLEANUP_OOB = r"""
   {% if displaced %}
   <div class="modal-bg" id="cleanup-bg" onclick="if(event.target.id==='cleanup-bg')this.remove()">
     <div class="modal" style="max-width: 480px;">
-      <div class="c-icon" style="background: rgba(248,81,73,.12); color: #ff9a93; border-color: rgba(248,81,73,.35); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; border: 1px solid;">🗑</div>
+      <div class="c-icon" style="background: rgba(248,81,73,.12); color: #ff9a93; border-color: rgba(248,81,73,.35); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; border: 1px solid;"><span class="ui-icon icon-trash" aria-hidden="true"></span></div>
       <div class="c-title" style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">Remove displaced version{{ 's' if displaced|length != 1 else '' }}?</div>
       <div class="c-body" style="font-size: 13px; color: #a9b0bb; margin-bottom: 16px; line-height: 1.5;">
         Promoted <strong class="text-gray-200">{{ base }}/{{ version }}</strong> as <strong>{{ tags|join(', ') }}</strong>.
@@ -1616,7 +1961,7 @@ POST_PROMOTE_CLEANUP_OOB = r"""
                     hx-target="#grid" hx-swap="innerHTML"
                     hx-disabled-elt="this"
                     hx-on::after-request="this.closest('li').remove()">
-              <span class="label-normal">🗑 delete</span>
+              <span class="label-normal"><span class="ui-icon icon-trash" aria-hidden="true"></span> delete</span>
               <span class="htmx-indicator"><span class="spin"></span> deleting…</span>
             </button>
           </li>
@@ -1755,7 +2100,7 @@ DEPLOY_MODAL = r"""
 
 JOBS_PANEL = r"""
 <div class="activity-header">
-  <h3 class="text-sm font-semibold text-gray-300">⚡ Activity</h3>
+  <h3 class="text-sm font-semibold text-gray-300">Activity</h3>
   <span class="text-xs text-gray-500">
     {% set running = jobs|selectattr('status','equalto','running')|list|length %}
     {% if running %}<span style="color:#e5c075;">{{ running }} running</span> · {% endif %}
@@ -1764,7 +2109,7 @@ JOBS_PANEL = r"""
 </div>
 <div class="activity-list">
 {% if not jobs %}
-  <div class="activity-empty">No activity yet.<br><span style="color:#4a5160;">Tag/promote/delete operations appear here.</span></div>
+  <div class="activity-empty">No activity yet.<br><span style="color:#4a5160;">Batch deploy, tag, promote, and delete progress appears here.</span></div>
 {% else %}
   {% for j in jobs %}
     <div class="act-item {{ j.status }}" id="job-{{ j.id }}">
@@ -1784,6 +2129,26 @@ JOBS_PANEL = r"""
             <span>· {{ j.ago }}</span>
           {% endif %}
         </div>
+        {% if j.step_total %}
+          <div class="act-progress">
+            <div class="act-progress-head">
+              <span class="act-progress-step">
+                {% if j.status == 'queued' %}
+                  Queued {{ j.step_total }} steps
+                {% else %}
+                  Step {{ j.step_current }} of {{ j.step_total }}
+                {% endif %}
+              </span>
+              <span>{{ j.completed_steps }}/{{ j.step_total }} complete</span>
+            </div>
+            {% if j.current_step_label %}
+              <div class="act-progress-target">{{ j.current_step_label }}</div>
+            {% endif %}
+            <div class="act-progress-bar">
+              <div class="act-progress-fill" style="width: {{ j.progress_percent }}%;"></div>
+            </div>
+          </div>
+        {% endif %}
         {% if j.tail_text %}
           <details class="act-details">
             <summary>log ({{ j.line_count }} line{{ 's' if j.line_count != 1 else '' }})</summary>
@@ -1816,7 +2181,7 @@ BULK_DEPLOY_MODAL = r"""
 
     <div class="modal-head">
       <div class="modal-title">
-        <span class="modal-icon" style="background: rgba(47,111,235,.15); color: #82b1ff; border-color: rgba(47,111,235,.35);">⚡</span>
+        <span class="modal-icon" style="background: rgba(47,111,235,.15); color: #82b1ff; border-color: rgba(47,111,235,.35);"><span class="ui-icon icon-deploy" aria-hidden="true"></span></span>
         <div>
           <div class="modal-title-text">Deploy a new version</div>
           <div class="modal-subtitle">to {{ selections|length }} subgraph{{ 's' if selections|length != 1 else '' }}</div>
@@ -1866,7 +2231,7 @@ BULK_PROMOTE_MODAL = r"""
 
     <div class="modal-head">
       <div class="modal-title">
-        <span class="modal-icon" style="background: rgba(47,111,235,.15); color: #82b1ff; border-color: rgba(47,111,235,.35);">⬆</span>
+        <span class="modal-icon" style="background: rgba(47,111,235,.15); color: #82b1ff; border-color: rgba(47,111,235,.35);"><span class="ui-icon icon-promote" aria-hidden="true"></span></span>
         <div>
           <div class="modal-title-text">Promote a version</div>
           <div class="modal-subtitle">across {{ selections|length }} subgraph{{ 's' if selections|length != 1 else '' }}</div>
@@ -1966,6 +2331,7 @@ _env = Environment(
             "promote_result": PROMOTE_RESULT,
             "skeleton_grid": SKELETON_GRID,
             "toast_oob": TOAST_OOB,
+            "last_fetched_oob": LAST_FETCHED_OOB,
             "row_promote_modal": ROW_PROMOTE_MODAL,
             "post_promote_cleanup_oob": POST_PROMOTE_CLEANUP_OOB,
             "bulk_deploy_modal": BULK_DEPLOY_MODAL,
@@ -1978,6 +2344,10 @@ _env = Environment(
 
 def render_toast(kind: str, title: str, body: str = "") -> str:
     return _env.get_template("toast_oob").render(kind=kind, title=title, body=body)
+
+
+def render_last_fetched_oob() -> str:
+    return _env.get_template("last_fetched_oob").render(label=_last_fetched_label())
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -2081,11 +2451,61 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
 def render_grid(store: FleetStore) -> str:
     groups = build_chain_groups(store.chains, store.state)
     active_chain_meta = [{"k": g["chain"], "o": bool(g.get("is_orphan"))} for g in groups]
+    rows = [row for g in groups for row in g["modules"]]
+    deployments = [d for row in rows for d in row["deployments"]]
+    summary = {
+        "chains": len(groups),
+        "rows": len(rows),
+        "deployments": len(deployments),
+        "tags": sum(len(row["tags"]) for row in rows),
+        "multi_version": sum(1 for row in rows if len(row["deployments"]) > 1),
+        "attention": sum(1 for d in deployments if d.synced != "100%" or ("healthy" not in d.status.lower() if d.status else False)),
+    }
     return _env.get_template("grid").render(
         groups=groups,
         active_chain_meta=active_chain_meta,
+        summary=summary,
         goldsky_project=GOLDSKY_PROJECT_ID,
     )
+
+
+def build_summary(groups: list[dict[str, Any]]) -> dict[str, int]:
+    rows = [row for g in groups for row in g["modules"]]
+    deployments = [d for row in rows for d in row["deployments"]]
+    return {
+        "chains": len(groups),
+        "rows": len(rows),
+        "deployments": len(deployments),
+        "tags": sum(len(row["tags"]) for row in rows),
+        "multi_version": sum(1 for row in rows if len(row["deployments"]) > 1),
+        "attention": sum(1 for d in deployments if d.synced != "100%" or ("healthy" not in d.status.lower() if d.status else False)),
+    }
+
+
+def build_fleet_payload(store: FleetStore) -> dict[str, Any]:
+    groups = build_chain_groups(store.chains, store.state)
+    serial_groups: list[dict[str, Any]] = []
+    for g in groups:
+        modules = []
+        for row in g["modules"]:
+            modules.append({
+                **row,
+                "deployments": [asdict(d) for d in row["deployments"]],
+            })
+        serial_groups.append({**g, "modules": modules})
+
+    return {
+        "groups": serial_groups,
+        "summary": build_summary(groups),
+        "modules": MODULES,
+        "prodChains": sorted(PROD_CONFIGS),
+        "stageChains": sorted(STAGE_CONFIGS),
+        "goldskyProject": GOLDSKY_PROJECT_ID,
+        "lastFetchedAt": store.last_fetched_at,
+        "lastFetchedLabel": _last_fetched_label(),
+        "lastError": store.last_error,
+        "jobs": build_job_views(),
+    }
 
 
 def _format_duration(seconds: float) -> str:
@@ -2111,7 +2531,7 @@ def _format_ago(ts: float) -> str:
     return f"{int(delta // 86400)}d ago"
 
 
-def render_jobs_panel() -> str:
+def build_job_views() -> list[dict[str, Any]]:
     job_views: list[dict[str, Any]] = []
     now = time.time()
     for j in sorted(_JOBS.values(), key=lambda j: j.started or 0, reverse=True)[:30]:
@@ -2122,6 +2542,9 @@ def render_jobs_panel() -> str:
             elapsed = _format_duration(now - j.started) if j.started else "…"
         else:
             elapsed = _format_duration((j.ended - j.started) if j.ended and j.started else 0)
+        step_total = len(j.steps)
+        step_current = j.current_step_index or (step_total if j.status in {"done", "failed"} and step_total else 0)
+        progress_percent = int((step_current / step_total) * 100) if step_total else 0
         job_views.append({
             "id": j.id,
             "label": j.label,
@@ -2130,9 +2553,19 @@ def render_jobs_panel() -> str:
             "rc": j.rc,
             "elapsed": elapsed,
             "ago": _format_ago(j.ended or j.started),
+            "step_current": step_current,
+            "step_total": step_total,
+            "current_step_label": j.current_step_label,
+            "completed_steps": j.completed_steps,
+            "progress_percent": progress_percent,
             "line_count": len(lines),
             "tail_text": tail,
         })
+    return job_views
+
+
+def render_jobs_panel() -> str:
+    job_views = build_job_views()
     return _env.get_template("jobs_panel").render(jobs=job_views)
 
 
@@ -2152,6 +2585,8 @@ async def _lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Symmio Fleet Web", lifespan=_lifespan)
+if (FLEET_UI_DIST / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=FLEET_UI_DIST / "assets"), name="fleet-ui-assets")
 _store = FleetStore()
 
 
@@ -2163,7 +2598,9 @@ def _last_fetched_label() -> str:
 
 
 @app.get("/", response_class=HTMLResponse)
-def index() -> HTMLResponse:
+def index():
+    if FLEET_UI_INDEX.exists():
+        return FileResponse(FLEET_UI_INDEX)
     """Render the shell immediately — grid lazy-loads via htmx so the browser
     paints before the Goldsky fetch completes."""
     initial_chain_chips: list[dict[str, Any]] = []
@@ -2202,7 +2639,7 @@ async def grid_fragment() -> HTMLResponse:
     toast = ""
     if _store.last_error:
         toast = render_toast("err", "Goldsky fetch failed", _store.last_error)
-    return HTMLResponse(render_grid(_store) + toast)
+    return HTMLResponse(render_grid(_store) + render_last_fetched_oob() + toast)
 
 
 @app.post("/refresh", response_class=HTMLResponse)
@@ -2216,7 +2653,7 @@ async def refresh() -> HTMLResponse:
     else:
         act.finish(False, err)
         toast = render_toast("err", "Refresh failed", err)
-    return HTMLResponse(render_grid(_store) + toast)
+    return HTMLResponse(render_grid(_store) + render_last_fetched_oob() + toast)
 
 
 @app.get("/promote", response_class=HTMLResponse)
@@ -2362,20 +2799,7 @@ async def deploy(request: Request) -> HTMLResponse:
     if module not in MODULES or not version or not chains_sel:
         raise HTTPException(400, "module, version, and at least one chain required")
 
-    for c in _store.chains:
-        if c.key not in chains_sel:
-            continue
-        if module not in c.deploy_urls:
-            continue
-        cmd = [
-            "python3",
-            "scripts/manager.py",
-            str(c.path.relative_to(REPO_ROOT)),
-            module,
-            version,
-            "--deploy",
-        ]
-        start_job(label=f"{c.key} · {module} {version}", cmd=cmd)
+    queue_chain_deploy_jobs(module, chains_sel, version)
 
     return HTMLResponse(render_jobs_panel())
 
@@ -2695,6 +3119,72 @@ def _enrich_selections(sels: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+def _config_path_arg(c: ChainConfig) -> str:
+    if c.path.is_absolute():
+        return str(c.path.relative_to(REPO_ROOT))
+    return str(c.path)
+
+
+def queue_chain_deploy_jobs(module: str, chains_sel: list[str], version: str) -> tuple[int, list[str]]:
+    steps: list[tuple[str, list[str]]] = []
+    deployable_chains: list[str] = []
+    for c in _store.chains:
+        if c.key not in chains_sel:
+            continue
+        if module not in c.deploy_urls:
+            continue
+        step_label = f"{c.key} · {module} {version}"
+        cmd = [
+            "python3",
+            "scripts/manager.py",
+            _config_path_arg(c),
+            module,
+            version,
+            "--deploy",
+        ]
+        steps.append((step_label, cmd))
+        deployable_chains.append(c.key)
+
+    if steps:
+        start_job_sequence(
+            label=f"Deploy {module} {version} · {len(steps)} chain{'s' if len(steps) != 1 else ''}",
+            steps=steps,
+            kind="deploy",
+        )
+    return len(steps), deployable_chains
+
+
+def queue_bulk_deploy_jobs(selections: list[dict[str, Any]], version: str) -> tuple[int, list[str]]:
+    chain_by_key = _chain_lookup()
+    steps: list[tuple[str, list[str]]] = []
+    deployable_chains: list[str] = []
+    for s in selections:
+        if s.get("orphan"):
+            continue  # can't deploy to an unmapped subgraph
+        c = chain_by_key.get(s["chain"])
+        if not c or s["module"] not in c.deploy_urls:
+            continue
+        step_label = f"{s['chain']} · {s['module']} {version}"
+        cmd = [
+            "python3",
+            "scripts/manager.py",
+            _config_path_arg(c),
+            s["module"],
+            version,
+            "--deploy",
+        ]
+        steps.append((step_label, cmd))
+        deployable_chains.append(s["chain"])
+
+    if steps:
+        start_job_sequence(
+            label=f"Batch deploy {version} · {len(steps)} subgraph{'s' if len(steps) != 1 else ''}",
+            steps=steps,
+            kind="deploy",
+        )
+    return len(steps), deployable_chains
+
+
 @app.post("/bulk-deploy-form", response_class=HTMLResponse)
 async def bulk_deploy_form(request: Request) -> HTMLResponse:
     selections = _enrich_selections(await _read_selections(request))
@@ -2723,30 +3213,13 @@ async def bulk_deploy(request: Request) -> HTMLResponse:
     if not selections:
         raise HTTPException(400, "no selections")
 
-    chain_by_key = _chain_lookup()
-    queued = 0
-    for s in selections:
-        if s.get("orphan"):
-            continue  # can't deploy to an unmapped subgraph
-        c = chain_by_key.get(s["chain"])
-        if not c or s["module"] not in c.deploy_urls:
-            continue
-        cmd = [
-            "python3",
-            "scripts/manager.py",
-            str(c.path.relative_to(REPO_ROOT)),
-            s["module"],
-            version,
-            "--deploy",
-        ]
-        start_job(label=f"{s['chain']} · {s['module']} {version}", cmd=cmd, kind="deploy")
-        queued += 1
+    queued, deployable_chains = queue_bulk_deploy_jobs(selections, version)
 
     if queued:
         toast = render_toast(
             "ok",
-            f"Queued {queued} deploy job{'s' if queued != 1 else ''}",
-            f"version {version} → {', '.join(s['chain'] for s in selections if not s.get('orphan'))}",
+            f"Queued sequential deploy for {queued} subgraph{'s' if queued != 1 else ''}",
+            f"version {version} → {', '.join(deployable_chains)}",
         )
     else:
         toast = render_toast("err", "Nothing deployed", "No deployable selections (orphans are skipped)")
@@ -2875,6 +3348,338 @@ async def bulk_promote(request: Request) -> HTMLResponse:
     return HTMLResponse(toast)
 
 
+async def _json_body(request: Request) -> dict[str, Any]:
+    try:
+        data = await request.json()
+    except json.JSONDecodeError:
+        raise HTTPException(400, "invalid JSON") from None
+    if not isinstance(data, dict):
+        raise HTTPException(400, "JSON object required")
+    return data
+
+
+def _api_response(kind: str, title: str, body: str = "", status_code: int = 200) -> JSONResponse:
+    return JSONResponse(
+        {
+            "toast": {"kind": kind, "title": title, "body": body},
+            "fleet": build_fleet_payload(_store),
+            "jobs": build_job_views(),
+        },
+        status_code=status_code,
+    )
+
+
+def _api_selections(raw: Any) -> list[dict[str, Any]]:
+    if not isinstance(raw, list):
+        return []
+    selections: list[dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        selection = {
+            "chain": str(item.get("chain", "")),
+            "module": str(item.get("module", "")),
+            "base": str(item.get("base", "")),
+            "orphan": bool(item.get("orphan")),
+        }
+        if selection["chain"] and selection["module"]:
+            selections.append(selection)
+    return _enrich_selections(selections)
+
+
+@app.get("/api/fleet", response_class=JSONResponse)
+async def api_fleet() -> JSONResponse:
+    if not _store.last_fetched_at:
+        await asyncio.to_thread(_store.fetch)
+    return JSONResponse(build_fleet_payload(_store))
+
+
+@app.post("/api/refresh", response_class=JSONResponse)
+async def api_refresh() -> JSONResponse:
+    act = register_activity("Fetch goldsky state", kind="refresh")
+    ok, err = await asyncio.to_thread(_store.fetch)
+    if ok:
+        detail = f"{len(_store.state.deployments)} deployments · {len(_store.state.tags)} subgraphs"
+        act.finish(True, detail)
+        return _api_response("ok", "State refreshed", detail)
+    act.finish(False, err)
+    return _api_response("err", "Refresh failed", err, status_code=500)
+
+
+@app.get("/api/jobs", response_class=JSONResponse)
+def api_jobs() -> JSONResponse:
+    return JSONResponse({"jobs": build_job_views()})
+
+
+@app.post("/api/deploy", response_class=JSONResponse)
+async def api_deploy(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    module = str(data.get("module", ""))
+    version = str(data.get("version", "")).strip()
+    chains_sel = [str(k) for k in data.get("chains", []) if str(k)]
+    if module not in MODULES or not version or not chains_sel:
+        raise HTTPException(400, "module, version, and at least one chain required")
+    queued, deployable_chains = queue_chain_deploy_jobs(module, chains_sel, version)
+    if queued:
+        return _api_response(
+            "ok",
+            f"Queued sequential deploy for {queued} chain{'s' if queued != 1 else ''}",
+            f"version {version} → {', '.join(deployable_chains)}",
+        )
+    return _api_response("err", "Nothing deployed", "No selected chain has that module", status_code=400)
+
+
+@app.post("/api/bulk-deploy", response_class=JSONResponse)
+async def api_bulk_deploy(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    version = str(data.get("version", "")).strip()
+    selections = _api_selections(data.get("selections", []))
+    if not version:
+        raise HTTPException(400, "version required")
+    if not selections:
+        raise HTTPException(400, "no selections")
+    queued, deployable_chains = queue_bulk_deploy_jobs(selections, version)
+    if queued:
+        return _api_response(
+            "ok",
+            f"Queued sequential deploy for {queued} subgraph{'s' if queued != 1 else ''}",
+            f"version {version} → {', '.join(deployable_chains)}",
+        )
+    return _api_response("err", "Nothing deployed", "No deployable selections (orphans are skipped)", status_code=400)
+
+
+@app.post("/api/remove-tag", response_class=JSONResponse)
+async def api_remove_tag(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    base = str(data.get("base", ""))
+    version = str(data.get("version", ""))
+    tag = str(data.get("tag", ""))
+    if not base or not version or not tag:
+        raise HTTPException(400, "base, version, tag required")
+    act = register_activity(f"Untag '{tag}' on {base}/{version}", kind="untag")
+    ok, out = await asyncio.to_thread(do_tag_delete, base, version, tag)
+    if ok:
+        _store.apply_tag_remove(base, tag)
+        act.finish(True, f"removed '{tag}' from {base}/{version}")
+        return _api_response("ok", f"Removed '{tag}' tag", f"{base}/{version}")
+    act.finish(False, out)
+    return _api_response("err", f"Failed to remove '{tag}'", out or f"{base}/{version}", status_code=500)
+
+
+@app.post("/api/delete-version", response_class=JSONResponse)
+async def api_delete_version(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    base = str(data.get("base", ""))
+    version = str(data.get("version", ""))
+    if not base or not version:
+        raise HTTPException(400, "base, version required")
+    act = register_activity(f"Delete {base}/{version}", kind="delete")
+    ok, out = await asyncio.to_thread(do_subgraph_delete, base, version)
+    if ok:
+        _store.apply_deployment_remove(base, version)
+        act.finish(True, f"deleted {base}/{version}")
+        return _api_response("ok", "Deleted deployment", f"{base}/{version}")
+    act.finish(False, out)
+    return _api_response("err", "Delete failed", out or f"{base}/{version}", status_code=500)
+
+
+@app.post("/api/move-tag", response_class=JSONResponse)
+async def api_move_tag(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    base = str(data.get("base", ""))
+    version = str(data.get("version", ""))
+    tag = str(data.get("tag", ""))
+    if not base or not version or not tag:
+        raise HTTPException(400, "base, version, tag required")
+
+    old = _store.state.tag_target(base, tag)
+    act = register_activity(f"Move '{tag}' → {base}/{version}" + (f" (from {old})" if old else ""), kind="tag")
+    log_bits: list[str] = []
+    ok_overall = True
+
+    if old and old != version:
+        ok_del, out_del = await asyncio.to_thread(do_tag_delete, base, old, tag)
+        if ok_del:
+            log_bits.append(f"removed old: {base}/{old}")
+            _store.apply_tag_remove(base, tag)
+        else:
+            log_bits.append(f"old removal FAILED: {out_del}")
+            ok_overall = False
+
+    if ok_overall:
+        ok_add, out_add = await asyncio.to_thread(do_tag_create, base, version, tag)
+        if ok_add:
+            log_bits.append(f"tagged {base}/{version} as {tag}")
+            _store.apply_tag_set(base, tag, version)
+        else:
+            log_bits.append(f"tag create FAILED: {out_add}")
+            ok_overall = False
+
+    act.finish(ok_overall, "\n".join(log_bits))
+    if ok_overall:
+        title = f"Moved '{tag}' → {version}" if old else f"Tagged '{tag}' on {version}"
+        return _api_response("ok", title, f"{base}" + (f" (was on {old})" if old else ""))
+    return _api_response("err", f"Failed to set '{tag}'", "; ".join(log_bits), status_code=500)
+
+
+@app.post("/api/row-promote", response_class=JSONResponse)
+async def api_row_promote(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    base = str(data.get("base", ""))
+    version = str(data.get("version", ""))
+    tags = [str(t) for t in data.get("tags", []) if str(t)]
+    if not base or not version:
+        raise HTTPException(400, "base and version required")
+    if not tags:
+        return _api_response("err", "No tags selected", "Pick at least one tag.", status_code=400)
+
+    act = register_activity(f"Promote {base}/{version} → {'+'.join(tags)}", kind="promote")
+    pre_tags = dict(_store.state.tags.get(base, {}))
+    displaced: set[str] = set()
+    log_bits: list[str] = []
+    ok_overall = True
+    for tag in tags:
+        old = pre_tags.get(tag)
+        if old == version:
+            log_bits.append(f"'{tag}' already on {version}")
+            continue
+        if old:
+            ok_del, out_del = await asyncio.to_thread(do_tag_delete, base, old, tag)
+            if ok_del:
+                _store.apply_tag_remove(base, tag)
+                displaced.add(old)
+                log_bits.append(f"removed old: {base}/{old} (--tag {tag})")
+            else:
+                log_bits.append(f"delete old FAILED: {out_del}")
+                ok_overall = False
+                continue
+        ok_add, out_add = await asyncio.to_thread(do_tag_create, base, version, tag)
+        if ok_add:
+            _store.apply_tag_set(base, tag, version)
+            log_bits.append(f"tagged {base}/{version} as {tag}")
+        else:
+            log_bits.append(f"tag create FAILED for '{tag}': {out_add}")
+            ok_overall = False
+
+    remaining_tags = _store.state.tags.get(base, {})
+    orphaned = [v for v in sorted(displaced) if not any(rv == v for rv in remaining_tags.values())]
+    act.finish(ok_overall, "\n".join(log_bits))
+    if ok_overall:
+        return _api_response(
+            "ok",
+            f"Promoted to {'+'.join(tags)}",
+            f"{base}/{version}" + (f" · displaced {', '.join(orphaned)}" if orphaned else ""),
+        )
+    return _api_response("err", "Promote had failures", "; ".join(log_bits), status_code=500)
+
+
+@app.post("/api/bulk-promote", response_class=JSONResponse)
+async def api_bulk_promote(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    selections = _api_selections(data.get("selections", []))
+    tags = [str(t) for t in data.get("tags", []) if str(t)]
+    mode = str(data.get("mode", "specific"))
+    version = str(data.get("version", "")).strip()
+    require_synced = bool(data.get("requireSynced", True))
+    delete_displaced = bool(data.get("deleteDisplaced", False))
+    if not selections:
+        raise HTTPException(400, "no selections")
+    if not tags:
+        return _api_response("err", "No tags selected", "Pick at least one tag.", status_code=400)
+    if mode == "specific" and not version:
+        return _api_response("err", "Missing version", "Enter a version label or switch to auto mode.", status_code=400)
+
+    applied = 0
+    skipped = 0
+    failed = 0
+    log_lines: list[str] = []
+    state = _store.state
+    act = register_activity(f"Bulk promote → {'+'.join(tags)} on {len(selections)} subgraph(s)", kind="promote")
+
+    for s in selections:
+        base = s["base"]
+        if not base:
+            log_lines.append(f"{s['chain']}: skip — no base")
+            skipped += 1
+            continue
+        if mode == "auto":
+            synced = [d for d in state.for_base(base) if d.synced == "100%"]
+            if not synced:
+                log_lines.append(f"{s['chain']}: skip — no 100% synced deployment")
+                skipped += 1
+                continue
+            ver_for_chain = sorted(synced, key=lambda d: d.version)[-1].version
+        else:
+            ver_for_chain = version
+
+        dep = state.deployments.get(f"{base}/{ver_for_chain}")
+        if dep is None:
+            log_lines.append(f"{s['chain']}: skip — {base}/{ver_for_chain} not deployed")
+            skipped += 1
+            continue
+        if require_synced and dep.synced != "100%":
+            log_lines.append(f"{s['chain']}: skip — sync {dep.synced or '?'} < 100%")
+            skipped += 1
+            continue
+
+        displaced_versions: set[str] = set()
+        chain_ok = True
+        for tag in tags:
+            old = state.tag_target(base, tag)
+            if old == ver_for_chain:
+                log_lines.append(f"{s['chain']}: '{tag}' already on {ver_for_chain}")
+                continue
+            if old and old != ver_for_chain:
+                ok_del, out_del = await asyncio.to_thread(do_tag_delete, base, old, tag)
+                if ok_del:
+                    _store.apply_tag_remove(base, tag)
+                    displaced_versions.add(old)
+                    log_lines.append(f"{s['chain']}: removed old {base}/{old} (--tag {tag})")
+                else:
+                    log_lines.append(f"{s['chain']}: delete old FAILED: {out_del}")
+                    chain_ok = False
+                    break
+            ok_add, out_add = await asyncio.to_thread(do_tag_create, base, ver_for_chain, tag)
+            if ok_add:
+                _store.apply_tag_set(base, tag, ver_for_chain)
+                log_lines.append(f"{s['chain']}: tagged {base}/{ver_for_chain} as {tag}")
+            else:
+                log_lines.append(f"{s['chain']}: tag create FAILED: {out_add}")
+                chain_ok = False
+                break
+
+        if not chain_ok:
+            failed += 1
+            continue
+        applied += 1
+
+        if delete_displaced and displaced_versions:
+            original_tags = state.tags.get(base, {})
+            for old_ver in sorted(displaced_versions):
+                remaining = [t for t, v in original_tags.items() if v == old_ver and t not in tags]
+                if remaining:
+                    log_lines.append(f"{s['chain']}: keep {base}/{old_ver} — still tagged as {', '.join(remaining)}")
+                    continue
+                ok_d, out_d = await asyncio.to_thread(do_subgraph_delete, base, old_ver)
+                if ok_d:
+                    _store.apply_deployment_remove(base, old_ver)
+                    log_lines.append(f"{s['chain']}: deleted {base}/{old_ver}")
+                else:
+                    log_lines.append(f"{s['chain']}: delete FAILED: {out_d}")
+
+    overall_ok = failed == 0 and applied > 0
+    act.finish(overall_ok, "\n".join(log_lines))
+    if applied and not failed:
+        return _api_response(
+            "ok",
+            f"Promoted {applied} subgraph{'s' if applied != 1 else ''} → {'+'.join(tags)}",
+            f"skipped {skipped}" if skipped else "",
+        )
+    if applied and failed:
+        return _api_response("err", f"Partial success: {applied} ok, {failed} failed", f"skipped {skipped}", status_code=500)
+    return _api_response("err", "Nothing promoted", f"failed {failed} · skipped {skipped}", status_code=400)
+
+
 @app.get("/state.json", response_class=JSONResponse)
 def state_json() -> JSONResponse:
     return JSONResponse(
@@ -2886,6 +3691,13 @@ def state_json() -> JSONResponse:
             "last_error": _store.last_error,
         }
     )
+
+
+@app.get("/{path:path}", include_in_schema=False)
+def react_app_fallback(path: str) -> FileResponse:
+    if FLEET_UI_INDEX.exists() and "." not in path:
+        return FileResponse(FLEET_UI_INDEX)
+    raise HTTPException(404, "not found")
 
 
 # ────────────────────────────────────────────────────────────────────
