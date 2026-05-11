@@ -1,6 +1,8 @@
 import { Address, BigInt, Bytes, store } from "@graphprotocol/graph-ts"
 import { WithdrawFinalizationHint, WithdrawRequest, WithdrawRequestLookup } from "../../../generated/schema"
 
+const FINALIZE_WITHDRAW_REQUEST_SELECTOR = "0x1531b3c8"
+
 export function withdrawRequestId(user: Address, requestId: BigInt, source: Address): string {
 	return user.toHexString() + "-" + requestId.toString() + "-" + source.toHexString()
 }
@@ -38,6 +40,10 @@ function isCompletableWithdrawRequest(wr: WithdrawRequest): boolean {
 	return wr.status == "PENDING" || wr.status == "PROVIDER_ACCEPTED" || wr.status == "CANCEL_REQUESTED"
 }
 
+export function isFinalizeWithdrawRequestCall(input: Bytes): boolean {
+	return input.toHexString().startsWith(FINALIZE_WITHDRAW_REQUEST_SELECTOR)
+}
+
 export function loadWithdrawRequest(user: Address, requestId: BigInt, source: Address): WithdrawRequest | null {
 	let wr = WithdrawRequest.load(withdrawRequestId(user, requestId, source))
 	if (wr) return wr
@@ -64,12 +70,20 @@ export function removeWithdrawRequestFromLookup(wr: WithdrawRequest): void {
 	let lookup = WithdrawRequestLookup.load(id)
 	if (!lookup) return
 	lookup.activeRequestIds = removeString(lookup.activeRequestIds, wr.id)
+	if (lookup.activeRequestIds.length == 0) {
+		store.remove("WithdrawRequestLookup", id)
+		return
+	}
 	lookup.save()
 }
 
 function loadSingleCompletableWithdrawRequest(requestId: BigInt, source: Address): WithdrawRequest | null {
 	let lookup = WithdrawRequestLookup.load(withdrawRequestLookupId(requestId, source))
 	if (!lookup) return null
+	if (lookup.activeRequestIds.length == 0) {
+		store.remove("WithdrawRequestLookup", lookup.id)
+		return null
+	}
 	let matched: WithdrawRequest | null = null
 	for (let i = 0; i < lookup.activeRequestIds.length; i++) {
 		let wr = WithdrawRequest.load(lookup.activeRequestIds[i])

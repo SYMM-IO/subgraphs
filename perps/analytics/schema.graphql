@@ -231,6 +231,79 @@ type TotalUserHistory @entity(immutable: false) {
 	timestamp: BigInt!
 }
 
+type DailyAccountOwnerHistory @entity(immutable: false) {
+	id: ID!
+	day: BigInt!
+	owner: Bytes!
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	pendingQuotesCount: BigInt!
+	openedPositionsCount: BigInt!
+	openPositionsCount: BigInt!
+	closedPositionsCount: BigInt!
+	liquidatedPositionsCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
+	withdrawRequestsCount: BigInt!
+	activeWithdrawRequestsCount: BigInt!
+	finalizedWithdrawRequestsCount: BigInt!
+	pendingWithdrawAmount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
+type TotalAccountOwnerHistory @entity(immutable: false) {
+	id: ID!
+	owner: Bytes!
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	pendingQuotesCount: BigInt!
+	openedPositionsCount: BigInt!
+	openPositionsCount: BigInt!
+	closedPositionsCount: BigInt!
+	liquidatedPositionsCount: BigInt!
+	cancelledQuotesCount: BigInt!
+	expiredQuotesCount: BigInt!
+	rejectedQuotesCount: BigInt!
+	withdrawRequestsCount: BigInt!
+	activeWithdrawRequestsCount: BigInt!
+	finalizedWithdrawRequestsCount: BigInt!
+	pendingWithdrawAmount: BigInt!
+	openTradeVolume: BigInt!
+	closeTradeVolume: BigInt!
+	liquidateTradeVolume: BigInt!
+	deposit: BigInt!
+	withdraw: BigInt!
+	allocate: BigInt!
+	deallocate: BigInt!
+	platformFeePaid: BigInt!
+	openFeePaid: BigInt!
+	closeFeePaid: BigInt!
+	fundingPaid: BigInt!
+	fundingReceived: BigInt!
+	loss: BigInt!
+	profit: BigInt!
+	updateTimestamp: BigInt!
+	timestamp: BigInt!
+}
+
 type DailySubAccountHistory @entity(immutable: false) {
 	id: ID!
 	day: BigInt!
@@ -569,6 +642,11 @@ type LiquidationDetail @entity(immutable: false) {
 	allocatedBalance: BigInt
 	settled: Boolean!
 	fullyLiquidated: Boolean!
+	takeover: Boolean!
+	autoTakeover: Boolean!
+	takeoverTimestamp: BigInt
+	takeoverSettled: Boolean!
+	takeoverSettledTimestamp: BigInt
 	settledAmounts: [BigInt!]
 	settledPartyBs: [Bytes!]
 	affiliate: Bytes

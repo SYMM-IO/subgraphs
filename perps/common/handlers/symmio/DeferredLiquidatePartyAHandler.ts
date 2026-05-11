@@ -28,6 +28,9 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.allocatedBalance = event.params.allocatedBalance
 		entity.settled = false
 		entity.fullyLiquidated = false
+		entity.takeover = false
+		entity.autoTakeover = false
+		entity.takeoverSettled = false
 		entity.totalPnl = BigInt.zero()
 		entity.paidCva = BigInt.zero()
 		entity.paidLf = BigInt.zero()

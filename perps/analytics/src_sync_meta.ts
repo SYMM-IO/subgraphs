@@ -1,8 +1,8 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { EntityVersion, SyncMeta } from "../../generated/schema"
 
-const GLOBAL_VERSION = "2026-04-30-001"
-const VERSIONS_HASH = "account:v1|balance_change:v1|daily_history:v1|monthly_history:v1|quote:v1|quote_event:v1|solver_daily_history:v1|solver_only_daily_history:v1|symbol:v1|total_history:v1|user:v1|weekly_history:v1"
+const GLOBAL_VERSION = "2026-05-09-001"
+const VERSIONS_HASH = "account:v1|balance_change:v1|daily_account_owner_history:v1|daily_history:v1|monthly_history:v1|quote:v1|quote_event:v1|solver_daily_history:v1|solver_only_daily_history:v1|symbol:v1|total_account_owner_history:v1|total_history:v1|user:v1|weekly_history:v1"
 
 function ensureEntityVersion(id: string, versionValue: string, timestamp: BigInt): void {
     let entityVersion = EntityVersion.load(id)
@@ -35,6 +35,7 @@ export function ensureSyncMeta(block: ethereum.Block): void {
     meta.save()
     ensureEntityVersion("account", "v1", block.timestamp)
     ensureEntityVersion("balance_change", "v1", block.timestamp)
+    ensureEntityVersion("daily_account_owner_history", "v1", block.timestamp)
     ensureEntityVersion("daily_history", "v1", block.timestamp)
     ensureEntityVersion("monthly_history", "v1", block.timestamp)
     ensureEntityVersion("quote", "v1", block.timestamp)
@@ -42,6 +43,7 @@ export function ensureSyncMeta(block: ethereum.Block): void {
     ensureEntityVersion("solver_daily_history", "v1", block.timestamp)
     ensureEntityVersion("solver_only_daily_history", "v1", block.timestamp)
     ensureEntityVersion("symbol", "v1", block.timestamp)
+    ensureEntityVersion("total_account_owner_history", "v1", block.timestamp)
     ensureEntityVersion("total_history", "v1", block.timestamp)
     ensureEntityVersion("user", "v1", block.timestamp)
     ensureEntityVersion("weekly_history", "v1", block.timestamp)

@@ -1,16 +1,19 @@
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import {
 	Account,
+	DailyAccountOwnerHistory,
 	DailySubAccountHistory,
 	DailyVirtualAccountHistory,
 	Quote,
 	SubAccount,
+	TotalAccountOwnerHistory,
 	TotalSubAccountHistory,
 	TotalVirtualAccountHistory,
 	VirtualAccount,
 } from "../../../generated/schema"
 import {
 	getAlreadyCreatedConfiguration,
+	getDailyAccountOwnerHistoryForTimestamp,
 	getDailyHistoryForTimestamp,
 	getDailySubAccountHistoryForTimestamp,
 	getDailySymbolTradesHistory,
@@ -19,6 +22,7 @@ import {
 	getSolverDailyHistoryForTimestamp,
 	getSolverOnlyDailyHistoryForTimestamp,
 	getSymbolTradeHistory,
+	getTotalAccountOwnerHistory,
 	getTotalHistory,
 	getTotalSolverHistory,
 	getTotalSubAccountHistory,
@@ -451,6 +455,54 @@ function updateVirtualAccountHistories(
 	th.save()
 }
 
+function updateAccountOwnerHistories(
+	params: UpdateHistoriesParams,
+	sub: SubAccount,
+	openTradeVolume: BigInt,
+	closeTradeVolume: BigInt,
+	liquidateTradeVolume: BigInt,
+	totalFee: BigInt,
+): void {
+	const dh = getDailyAccountOwnerHistoryForTimestamp(params.timestamp, sub)
+	const th = getTotalAccountOwnerHistory(params.timestamp, sub)
+
+	dh.openTradeVolume = dh.openTradeVolume.plus(openTradeVolume)
+	dh.closeTradeVolume = dh.closeTradeVolume.plus(closeTradeVolume)
+	dh.liquidateTradeVolume = dh.liquidateTradeVolume.plus(liquidateTradeVolume)
+	dh.platformFeePaid = dh.platformFeePaid.plus(totalFee)
+	dh.openFeePaid = dh.openFeePaid.plus(params._openFee)
+	dh.closeFeePaid = dh.closeFeePaid.plus(params._closeFee)
+	dh.deposit = dh.deposit.plus(params._deposit)
+	dh.withdraw = dh.withdraw.plus(params._withdraw)
+	dh.allocate = dh.allocate.plus(params._allocate)
+	dh.deallocate = dh.deallocate.plus(params._deallocate)
+	dh.openedPositionsCount = dh.openedPositionsCount.plus(params._positionsCount)
+	dh.fundingPaid = dh.fundingPaid.plus(params._fundingPaid)
+	dh.fundingReceived = dh.fundingReceived.plus(params._fundingReceived)
+	dh.loss = dh.loss.plus(params._loss)
+	dh.profit = dh.profit.plus(params._profit)
+	dh.updateTimestamp = params.timestamp
+	dh.save()
+
+	th.openTradeVolume = th.openTradeVolume.plus(openTradeVolume)
+	th.closeTradeVolume = th.closeTradeVolume.plus(closeTradeVolume)
+	th.liquidateTradeVolume = th.liquidateTradeVolume.plus(liquidateTradeVolume)
+	th.platformFeePaid = th.platformFeePaid.plus(totalFee)
+	th.openFeePaid = th.openFeePaid.plus(params._openFee)
+	th.closeFeePaid = th.closeFeePaid.plus(params._closeFee)
+	th.deposit = th.deposit.plus(params._deposit)
+	th.withdraw = th.withdraw.plus(params._withdraw)
+	th.allocate = th.allocate.plus(params._allocate)
+	th.deallocate = th.deallocate.plus(params._deallocate)
+	th.openedPositionsCount = th.openedPositionsCount.plus(params._positionsCount)
+	th.fundingPaid = th.fundingPaid.plus(params._fundingPaid)
+	th.fundingReceived = th.fundingReceived.plus(params._fundingReceived)
+	th.loss = th.loss.plus(params._loss)
+	th.profit = th.profit.plus(params._profit)
+	th.updateTimestamp = params.timestamp
+	th.save()
+}
+
 function updateHierarchyHistories(
 	params: UpdateHistoriesParams,
 	tradeVolume: BigInt,
@@ -463,6 +515,7 @@ function updateHierarchyHistories(
 	const sub = SubAccount.load(params.account.subAccount!)
 	if (!sub) return
 	updateSubAccountHistories(params, sub, tradeVolume, openTradeVolume, closeTradeVolume, liquidateTradeVolume, totalFee)
+	updateAccountOwnerHistories(params, sub, openTradeVolume, closeTradeVolume, liquidateTradeVolume, totalFee)
 
 	if (!params.account.virtualAccount) return
 	const va = VirtualAccount.load(params.account.virtualAccount!)
@@ -501,6 +554,21 @@ export function updateWithdrawHierarchyHistories(
 	sth.pendingWithdrawAmount = addNonNegative(sth.pendingWithdrawAmount, pendingWithdrawAmountDelta)
 	sth.updateTimestamp = timestamp
 	sth.save()
+
+	const odh = getDailyAccountOwnerHistoryForTimestamp(timestamp, sub)
+	const oth = getTotalAccountOwnerHistory(timestamp, sub)
+	odh.withdrawRequestsCount = odh.withdrawRequestsCount.plus(withdrawRequestsDelta)
+	odh.activeWithdrawRequestsCount = addNonNegative(odh.activeWithdrawRequestsCount, activeWithdrawRequestsDelta)
+	odh.finalizedWithdrawRequestsCount = odh.finalizedWithdrawRequestsCount.plus(finalizedWithdrawRequestsDelta)
+	odh.pendingWithdrawAmount = addNonNegative(odh.pendingWithdrawAmount, pendingWithdrawAmountDelta)
+	odh.updateTimestamp = timestamp
+	odh.save()
+	oth.withdrawRequestsCount = oth.withdrawRequestsCount.plus(withdrawRequestsDelta)
+	oth.activeWithdrawRequestsCount = addNonNegative(oth.activeWithdrawRequestsCount, activeWithdrawRequestsDelta)
+	oth.finalizedWithdrawRequestsCount = oth.finalizedWithdrawRequestsCount.plus(finalizedWithdrawRequestsDelta)
+	oth.pendingWithdrawAmount = addNonNegative(oth.pendingWithdrawAmount, pendingWithdrawAmountDelta)
+	oth.updateTimestamp = timestamp
+	oth.save()
 
 	if (!account.virtualAccount) return
 	const va = VirtualAccount.load(account.virtualAccount!)
@@ -550,6 +618,38 @@ export function updateMarginHierarchyHistories(
 	vth.marginRemove = vth.marginRemove.plus(marginRemove)
 	vth.updateTimestamp = timestamp
 	vth.save()
+}
+
+function applyQuoteBucketDeltasToOwnerHistory(
+	dh: DailyAccountOwnerHistory,
+	th: TotalAccountOwnerHistory,
+	pendingDelta: BigInt,
+	openDelta: BigInt,
+	closedDelta: BigInt,
+	liquidatedDelta: BigInt,
+	cancelledDelta: BigInt,
+	expiredDelta: BigInt,
+	rejectedDelta: BigInt,
+	timestamp: BigInt,
+): void {
+	dh.pendingQuotesCount = addNonNegative(dh.pendingQuotesCount, pendingDelta)
+	dh.openPositionsCount = addNonNegative(dh.openPositionsCount, openDelta)
+	dh.closedPositionsCount = dh.closedPositionsCount.plus(closedDelta)
+	dh.liquidatedPositionsCount = dh.liquidatedPositionsCount.plus(liquidatedDelta)
+	dh.cancelledQuotesCount = dh.cancelledQuotesCount.plus(cancelledDelta)
+	dh.expiredQuotesCount = dh.expiredQuotesCount.plus(expiredDelta)
+	dh.rejectedQuotesCount = dh.rejectedQuotesCount.plus(rejectedDelta)
+	dh.updateTimestamp = timestamp
+	dh.save()
+	th.pendingQuotesCount = addNonNegative(th.pendingQuotesCount, pendingDelta)
+	th.openPositionsCount = addNonNegative(th.openPositionsCount, openDelta)
+	th.closedPositionsCount = th.closedPositionsCount.plus(closedDelta)
+	th.liquidatedPositionsCount = th.liquidatedPositionsCount.plus(liquidatedDelta)
+	th.cancelledQuotesCount = th.cancelledQuotesCount.plus(cancelledDelta)
+	th.expiredQuotesCount = th.expiredQuotesCount.plus(expiredDelta)
+	th.rejectedQuotesCount = th.rejectedQuotesCount.plus(rejectedDelta)
+	th.updateTimestamp = timestamp
+	th.save()
 }
 
 function applyQuoteBucketDeltasToSubHistory(
@@ -631,6 +731,18 @@ export function updateQuoteBucketHierarchyHistories(
 	applyQuoteBucketDeltasToSubHistory(
 		getDailySubAccountHistoryForTimestamp(timestamp, sub),
 		getTotalSubAccountHistory(timestamp, sub),
+		pendingDelta,
+		openDelta,
+		closedDelta,
+		liquidatedDelta,
+		cancelledDelta,
+		expiredDelta,
+		rejectedDelta,
+		timestamp,
+	)
+	applyQuoteBucketDeltasToOwnerHistory(
+		getDailyAccountOwnerHistoryForTimestamp(timestamp, sub),
+		getTotalAccountOwnerHistory(timestamp, sub),
 		pendingDelta,
 		openDelta,
 		closedDelta,

@@ -3,6 +3,7 @@ import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import {
 	Account,
 	Configuration,
+	DailyAccountOwnerHistory,
 	DailyHistory,
 	DailySymbolTradesHistory,
 	DailySubAccountHistory,
@@ -15,6 +16,7 @@ import {
 	SubAccount,
 	SymbolTradeHistory,
 	TotalHistory,
+	TotalAccountOwnerHistory,
 	TotalSolverHistory,
 	TotalSymbolTradesHistory,
 	TotalSubAccountHistory,
@@ -421,6 +423,46 @@ function initSubAccountHistoryTotals(entity: TotalSubAccountHistory, sub: SubAcc
 	entity.timestamp = timestamp
 }
 
+function initAccountOwnerHistoryTotals(entity: TotalAccountOwnerHistory, sub: SubAccount, timestamp: BigInt): void {
+	entity.owner = sub.owner
+	entity.source = sub.source
+	entity.coreSource = sub.coreSource
+	entity.accountLayerSource = sub.accountLayerSource
+	entity.pendingQuotesCount = BigInt.zero()
+	entity.openedPositionsCount = BigInt.zero()
+	entity.openPositionsCount = BigInt.zero()
+	entity.closedPositionsCount = BigInt.zero()
+	entity.liquidatedPositionsCount = BigInt.zero()
+	entity.cancelledQuotesCount = BigInt.zero()
+	entity.expiredQuotesCount = BigInt.zero()
+	entity.rejectedQuotesCount = BigInt.zero()
+	entity.withdrawRequestsCount = BigInt.zero()
+	entity.activeWithdrawRequestsCount = BigInt.zero()
+	entity.finalizedWithdrawRequestsCount = BigInt.zero()
+	entity.pendingWithdrawAmount = BigInt.zero()
+	entity.openTradeVolume = BigInt.zero()
+	entity.closeTradeVolume = BigInt.zero()
+	entity.liquidateTradeVolume = BigInt.zero()
+	entity.deposit = BigInt.zero()
+	entity.withdraw = BigInt.zero()
+	entity.allocate = BigInt.zero()
+	entity.deallocate = BigInt.zero()
+	entity.platformFeePaid = BigInt.zero()
+	entity.openFeePaid = BigInt.zero()
+	entity.closeFeePaid = BigInt.zero()
+	entity.fundingPaid = BigInt.zero()
+	entity.fundingReceived = BigInt.zero()
+	entity.loss = BigInt.zero()
+	entity.profit = BigInt.zero()
+	entity.updateTimestamp = timestamp
+	entity.timestamp = timestamp
+}
+
+function getAccountOwnerHistoryId(sub: SubAccount): string {
+	if (sub.coreSource === null) return sub.source.toHexString() + "_" + sub.owner.toHexString()
+	return sub.source.toHexString() + "_" + sub.coreSource!.toHexString() + "_" + sub.owner.toHexString()
+}
+
 function initVirtualAccountHistoryTotals(entity: TotalVirtualAccountHistory, va: VirtualAccount, sub: SubAccount, timestamp: BigInt): void {
 	entity.virtualAccount = va.address
 	entity.virtualAccountRef = va.id
@@ -522,6 +564,62 @@ export function getTotalSubAccountHistory(timestamp: BigInt, sub: SubAccount): T
 	if (th == null) {
 		th = new TotalSubAccountHistory(sub.id)
 		initSubAccountHistoryTotals(th, sub, timestamp)
+		th.save()
+	}
+	return th
+}
+
+export function getDailyAccountOwnerHistoryForTimestamp(timestamp: BigInt, sub: SubAccount): DailyAccountOwnerHistory {
+	const dateStr = startOfDay(timestamp).getTime().toString()
+	const id = dateStr + "_" + getAccountOwnerHistoryId(sub)
+	let dh = DailyAccountOwnerHistory.load(id)
+	if (dh == null) {
+		dh = new DailyAccountOwnerHistory(id)
+		let th = getTotalAccountOwnerHistory(timestamp, sub)
+		dh.day = getDayNumber(timestamp)
+		dh.owner = th.owner
+		dh.source = th.source
+		dh.coreSource = th.coreSource
+		dh.accountLayerSource = th.accountLayerSource
+		dh.pendingQuotesCount = th.pendingQuotesCount
+		dh.openedPositionsCount = BigInt.zero()
+		dh.openPositionsCount = th.openPositionsCount
+		dh.closedPositionsCount = BigInt.zero()
+		dh.liquidatedPositionsCount = BigInt.zero()
+		dh.cancelledQuotesCount = BigInt.zero()
+		dh.expiredQuotesCount = BigInt.zero()
+		dh.rejectedQuotesCount = BigInt.zero()
+		dh.withdrawRequestsCount = BigInt.zero()
+		dh.activeWithdrawRequestsCount = th.activeWithdrawRequestsCount
+		dh.finalizedWithdrawRequestsCount = BigInt.zero()
+		dh.pendingWithdrawAmount = th.pendingWithdrawAmount
+		dh.openTradeVolume = BigInt.zero()
+		dh.closeTradeVolume = BigInt.zero()
+		dh.liquidateTradeVolume = BigInt.zero()
+		dh.deposit = BigInt.zero()
+		dh.withdraw = BigInt.zero()
+		dh.allocate = BigInt.zero()
+		dh.deallocate = BigInt.zero()
+		dh.platformFeePaid = BigInt.zero()
+		dh.openFeePaid = BigInt.zero()
+		dh.closeFeePaid = BigInt.zero()
+		dh.fundingPaid = BigInt.zero()
+		dh.fundingReceived = BigInt.zero()
+		dh.loss = BigInt.zero()
+		dh.profit = BigInt.zero()
+		dh.updateTimestamp = timestamp
+		dh.timestamp = timestamp
+		dh.save()
+	}
+	return dh
+}
+
+export function getTotalAccountOwnerHistory(timestamp: BigInt, sub: SubAccount): TotalAccountOwnerHistory {
+	const id = getAccountOwnerHistoryId(sub)
+	let th = TotalAccountOwnerHistory.load(id)
+	if (th == null) {
+		th = new TotalAccountOwnerHistory(id)
+		initAccountOwnerHistoryTotals(th, sub, timestamp)
 		th.save()
 	}
 	return th

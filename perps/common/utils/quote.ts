@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { Address, BigInt, ethereum, store } from "@graphprotocol/graph-ts"
 import { PendingQuoteIndex, Quote } from "../../../generated/schema"
 import { unDecimal } from "../utils"
 import { QuoteStatus } from "../../analytics/utils/constants"
@@ -70,6 +70,10 @@ function removeQuoteFromIndex(id: string, quoteId: BigInt): void {
 	let index = PendingQuoteIndex.load(id)
 	if (!index) return
 	index.quoteIds = removeQuoteId(index.quoteIds, quoteId)
+	if (index.quoteIds.length == 0) {
+		store.remove("PendingQuoteIndex", id)
+		return
+	}
 	index.save()
 }
 
@@ -85,6 +89,10 @@ export function removeQuoteFromPendingList(quoteId: BigInt, source: Address): vo
 function collectLiquidatableQuoteIdsFromIndex(id: string, source: Address): Array<BigInt> {
 	let index = PendingQuoteIndex.load(id)
 	if (!index) return []
+	if (index.quoteIds.length == 0) {
+		store.remove("PendingQuoteIndex", id)
+		return []
+	}
 	let quoteIds: Array<BigInt> = []
 	let retained: Array<BigInt> = []
 	let dirty = false
@@ -100,6 +108,10 @@ function collectLiquidatableQuoteIdsFromIndex(id: string, source: Address): Arra
 	}
 	if (dirty) {
 		index.quoteIds = retained
+		if (index.quoteIds.length == 0) {
+			store.remove("PendingQuoteIndex", id)
+			return quoteIds
+		}
 		index.save()
 	}
 	return quoteIds

@@ -819,6 +819,9 @@ td > span,
   background: rgba(10,14,18,.9);
 }
 .deployment-subrow:hover { background: rgba(17,22,27,.98); }
+.deployment-subrow > :nth-child(4) {
+  min-width: 150px;
+}
 .tag-subrow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -845,7 +848,7 @@ td > span,
 .deployment-version { display: flex; align-items: center; gap: 7px; min-width: 0; }
 .deployment-status { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .deployment-tags { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; min-height: 24px; }
-.deployment-actions { display: flex; justify-content: flex-end; align-items: center; gap: 5px; }
+.deployment-actions { display: flex; justify-content: flex-start; align-items: center; gap: 5px; }
 .endpoint-actions { display: inline-flex; align-items: center; gap: 2px; opacity: .7; }
 .deployment-subrow:hover .endpoint-actions { opacity: 1; }
 .empty-subrow { display: block; }

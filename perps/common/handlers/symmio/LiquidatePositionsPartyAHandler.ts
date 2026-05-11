@@ -83,6 +83,9 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 						entity = new LiquidationDetail(entityId)
 						entity.settled = false
 						entity.fullyLiquidated = false
+						entity.takeover = false
+						entity.autoTakeover = false
+						entity.takeoverSettled = false
 						entity.totalPnl = BigInt.zero()
 						entity.paidCva = BigInt.zero()
 						entity.paidLf = BigInt.zero()

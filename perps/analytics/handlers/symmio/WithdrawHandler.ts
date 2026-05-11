@@ -9,7 +9,7 @@ import { AccountType, createNewAccountIfNotExists } from "../../../common/utils/
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { resolveAccountSourceFromAccountLayer } from "../../../common/utils/account_layer_resolver"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
-import { recordWithdrawFinalizationHint } from "../../utils/withdrawRequest"
+import { isFinalizeWithdrawRequestCall, recordWithdrawFinalizationHint } from "../../utils/withdrawRequest"
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -48,15 +48,17 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		withdraw.sender = event.params.sender
 		withdraw.senderRef = event.params.sender.toHexString()
 		withdraw.save()
-		recordWithdrawFinalizationHint(
-			_event.address,
-			_event.transaction.hash,
-			event.params.sender,
-			event.params.user,
-			event.params.amount,
-			_event.logIndex,
-			_event.block.timestamp,
-		)
+		if (isFinalizeWithdrawRequestCall(_event.transaction.input)) {
+			recordWithdrawFinalizationHint(
+				_event.address,
+				_event.transaction.hash,
+				event.params.sender,
+				event.params.user,
+				event.params.amount,
+				_event.logIndex,
+				_event.block.timestamp,
+			)
+		}
 		updatePartyALatestBalance(_event, version, event.params.user)
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).withdraw(event.params.amount))
 	}
