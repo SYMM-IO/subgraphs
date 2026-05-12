@@ -8,6 +8,7 @@ import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpe
 import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
+import { setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -31,6 +32,7 @@ export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T>
 			deallocate.amount = event.params.amount
 			deallocate.account = event.params.user
 			deallocate.collateral = getConfiguration(event).collateral
+			setBalanceChangeContext(deallocate, account, event.address, _event.transaction.input)
 			deallocate.save()
 		}
 

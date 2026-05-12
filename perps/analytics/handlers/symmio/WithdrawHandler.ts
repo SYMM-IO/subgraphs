@@ -10,6 +10,7 @@ import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { resolveAccountSourceFromAccountLayer } from "../../../common/utils/account_layer_resolver"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { isFinalizeWithdrawRequestCall, recordWithdrawFinalizationHint } from "../../utils/withdrawRequest"
+import { setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -47,6 +48,7 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		createNewAccountIfNotExists(event.params.sender, event.params.sender, null, AccountType.UNKNOWN, event.block, event.transaction)
 		withdraw.sender = event.params.sender
 		withdraw.senderRef = event.params.sender.toHexString()
+		setBalanceChangeContext(withdraw, account, event.address, _event.transaction.input)
 		withdraw.save()
 		if (isFinalizeWithdrawRequestCall(_event.transaction.input)) {
 			recordWithdrawFinalizationHint(

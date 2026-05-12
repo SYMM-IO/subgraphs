@@ -1,10 +1,11 @@
 import { AllocateForPartyBHandler as CommonAllocateForPartyBHandler } from "../../../common/handlers/symmio/AllocateForPartyBWithAccountHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { BalanceChange } from "../../../../generated/schema"
+import { Account, BalanceChange } from "../../../../generated/schema"
 import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 import { getConfiguration } from "../../utils/builders"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class AllocateForPartyBHandler<T> extends CommonAllocateForPartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,6 +28,7 @@ export class AllocateForPartyBHandler<T> extends CommonAllocateForPartyBHandler<
 			allocate.account = event.params.partyB
 			allocate.sideAccount = event.params.partyA
 			allocate.collateral = getConfiguration(event).collateral
+			setBalanceChangeContext(allocate, Account.load(event.params.partyB.toHexString()), event.address, _event.transaction.input)
 			allocate.save()
 		}
 		updatePartyALatestBalance(_event, version, event.params.partyA)

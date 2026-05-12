@@ -9,11 +9,20 @@ type UserActivity @entity(immutable: false) {
 type BalanceChange @entity(immutable: true) {
 	id: ID!
 	source: Bytes!
+	deploymentId: String
+	coreSource: Bytes
+	accountLayerSource: Bytes
 	type: String!
 	account: Bytes!
 	sideAccount: Bytes
 	amount: BigInt!
 	collateral: Bytes!
+	owner: Bytes
+	subAccountRef: SubAccount
+	virtualAccountRef: VirtualAccount
+	accountKind: String
+	isMarginTransferSideEffect: Boolean!
+	marginTransferType: String
 	timestamp: BigInt!
 	blockNumber: BigInt!
 	transaction: Bytes!

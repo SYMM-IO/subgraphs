@@ -8,6 +8,7 @@ import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpe
 import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
+import { setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class AllocatePartyAHandler<T> extends CommonAllocatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -30,6 +31,7 @@ export class AllocatePartyAHandler<T> extends CommonAllocatePartyAHandler<T> {
 			allocate.amount = event.params.amount
 			allocate.account = event.params.user
 			allocate.collateral = getConfiguration(event).collateral
+			setBalanceChangeContext(allocate, account, event.address, _event.transaction.input)
 			allocate.save()
 		}
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).allocate(event.params.amount))
