@@ -1,4 +1,4 @@
-import { Bytes } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Account, BalanceChange } from "../../../generated/schema"
 import { setCoreEntityProfileSources } from "../../common/utils/profile"
 
@@ -20,12 +20,37 @@ function addressParam(inputHex: string, selectorIndex: i32, paramIndex: i32): st
 	return "0x" + inputHex.substring(start + 24, end)
 }
 
+function stripLeadingZeroes(value: string): string {
+	let index: i32 = 0
+	while (index < value.length - 1 && value.charAt(index) == "0") {
+		index++
+	}
+	return value.substring(index)
+}
+
+function uintParamMatches(inputHex: string, selectorIndex: i32, paramIndex: i32, value: BigInt): boolean {
+	let start = selectorIndex + 8 + paramIndex * 64
+	let end = start + 64
+	if (end > inputHex.length) return false
+
+	let paramValue = stripLeadingZeroes(inputHex.substring(start, end).toLowerCase())
+	let actualValue = value.toHexString().toLowerCase()
+	if (actualValue.startsWith("0x")) actualValue = actualValue.substring(2)
+	return paramValue == stripLeadingZeroes(actualValue)
+}
+
 function senderHex(entity: BalanceChange): string | null {
 	if (entity.sender === null) return null
 	return entity.sender!.toHexString()
 }
 
-function isAddMarginSideEffect(entity: BalanceChange, account: Account | null, subAccount: string | null, virtualAccount: string | null): boolean {
+function isAddMarginSideEffect(
+	entity: BalanceChange,
+	account: Account | null,
+	subAccount: string | null,
+	virtualAccount: string | null,
+	amountMatches: boolean = false,
+): boolean {
 	if (entity.type != "ALLOCATE" && entity.type != "WITHDRAW") return false
 
 	let accountId = entity.account.toHexString()
@@ -40,8 +65,8 @@ function isAddMarginSideEffect(entity: BalanceChange, account: Account | null, s
 
 	if (subAccount === null) return false
 	if (entity.type == "WITHDRAW") return sender == subAccount
-	if (account === null || account.subAccount === null) return false
-	return account.subAccount == subAccount
+	if (account !== null && account.subAccount !== null) return account.subAccount == subAccount
+	return amountMatches && accountId != subAccount
 }
 
 function isRemoveMarginSideEffect(entity: BalanceChange, virtualAccount: string | null): boolean {
@@ -79,7 +104,8 @@ function marginTransferTypeFromInput(entity: BalanceChange, account: Account | n
 	let addToNextIndex = findSelector(inputHex, ADD_MARGIN_TO_NEXT_VA_SELECTOR)
 	while (addToNextIndex >= 0) {
 		let subAccount = addressParam(inputHex, addToNextIndex, 0)
-		if (isAddMarginSideEffect(entity, account, subAccount, null)) return "ADD"
+		let amountMatches = uintParamMatches(inputHex, addToNextIndex, 3, entity.amount)
+		if (isAddMarginSideEffect(entity, account, subAccount, null, amountMatches)) return "ADD"
 		addToNextIndex = findSelector(inputHex, ADD_MARGIN_TO_NEXT_VA_SELECTOR, addToNextIndex + 8)
 	}
 
