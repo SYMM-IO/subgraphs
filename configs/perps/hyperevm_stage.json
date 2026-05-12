@@ -8,6 +8,14 @@
 			"startBlock": "28307184"
 		},
 		{
+			"address": "0x99641E06d38F327166b3a48f86Ca2cbB3B4fB7EB",
+			"abi": "symmioLegacyOpen",
+			"version": "0_8_5",
+			"startBlock": "28307184",
+			"endBlock": "30584859",
+			"dependencies": ["symmio_0_8_5"]
+		},
+		{
 			"address": "0x812e98F31A4EfFC09dD82e6e87ff7456151a0dFB",
 			"abi": "accountLayer",
 			"version": "1",

@@ -113,6 +113,7 @@ class Config:
 
 abi_versions = {
     "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3", "0_8_4", "0_8_5"],
+    "symmioLegacyOpen": ["0_8_5"],
     "symmioMultiAccount": ["1", "2", "3"],
     "options": ["1"],
     "optionsMultiAccount": ["1"],
