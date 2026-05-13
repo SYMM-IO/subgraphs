@@ -215,6 +215,18 @@
 				grid-template-columns: repeat(6, minmax(0, 1fr));
 			}
 
+			.upnl-grid {
+				display: grid;
+				grid-template-columns: minmax(220px, 0.8fr) minmax(0, 2fr);
+				gap: 12px;
+				margin-top: 14px;
+				align-items: start;
+			}
+
+			.upnl-results {
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+			}
+
 			.metric,
 			.meta-item {
 				background: #fbfdfd;
@@ -451,6 +463,20 @@
 
 			<section id="summary" class="summary-grid hidden"></section>
 
+			<section id="upnl-calculator" class="panel quote-panel hidden">
+				<div class="panel-head">
+					<h2>uPNL Calculator</h2>
+					<div id="upnl-subtitle" class="mono"></div>
+				</div>
+				<div class="upnl-grid">
+					<label>
+						Symbol price
+						<input id="symbol-price" autocomplete="off" inputmode="decimal" placeholder="0.00" />
+					</label>
+					<div id="upnl-results" class="summary-grid upnl-results"></div>
+				</div>
+			</section>
+
 			<section class="panel table-section">
 				<div class="table-header row-between">
 					<h2>Funding Accruals</h2>
@@ -581,6 +607,9 @@
 					) {
 						id
 						eventType
+						rawLongRate
+						rawShortRate
+						marketPrice
 						currentLongRate
 						currentShortRate
 						accumulatedLongRate
@@ -607,6 +636,9 @@
 					) {
 						id
 						eventType
+						rawLongRate
+						rawShortRate
+						marketPrice
 						currentLongRate
 						currentShortRate
 						accumulatedLongRate
@@ -635,10 +667,16 @@
 			const quoteSubtitle = document.getElementById("quote-subtitle");
 			const quoteMeta = document.getElementById("quote-meta");
 			const summaryEl = document.getElementById("summary");
+			const upnlCalculator = document.getElementById("upnl-calculator");
+			const upnlSubtitle = document.getElementById("upnl-subtitle");
+			const symbolPriceInput = document.getElementById("symbol-price");
+			const upnlResults = document.getElementById("upnl-results");
 			const tableCaption = document.getElementById("table-caption");
 			const rowsBody = document.getElementById("rows-body");
 			const details = document.getElementById("details");
 			const detailsContent = document.getElementById("details-content");
+			let activeQuote = null;
+			let activeBuild = null;
 
 			endpointInput.value = DEFAULT_ENDPOINT;
 			sourceInput.value = DEFAULT_SYMMIO;
@@ -647,6 +685,7 @@
 				event.preventDefault();
 				await loadFundingHistory();
 			});
+			symbolPriceInput.addEventListener("input", updateUpnlCalculator);
 
 			async function loadFundingHistory() {
 				clearMessage();
@@ -694,6 +733,7 @@
 
 					renderQuote(quote, input.entityId);
 					renderSummary(build);
+					renderUpnlCalculator(quote, build);
 					renderRows(build.rows);
 					renderDetails({
 						settlements: quotePayload.quoteFundingSettlements || [],
@@ -836,6 +876,12 @@
 				if (checkpoints.length >= 1001) {
 					warnings.push("The checkpoint query hit its limit. Very long histories may need pagination.");
 				}
+				const adjustedRateCorrections = sortedCheckpoints.filter(checkpoint => usesDerivedPriceAdjustedRate(quote, checkpoint)).length;
+				if (adjustedRateCorrections > 0) {
+					warnings.push(
+						`Derived price-adjusted funding rates from raw rate and market price for ${adjustedRateCorrections} checkpoint(s) where the checkpoint current rate was not price-adjusted.`,
+					);
+				}
 
 				const closeEvents = parseCloseEvents(quoteEvents, epochDuration);
 				const parsedClosed = closeEvents.reduce((sum, item) => sum + item.amount, 0n);
@@ -968,9 +1014,34 @@
 			}
 
 			function rateForQuoteSide(quote, checkpoint) {
-				if (Number(quote.positionType) === 0) return toBigInt(checkpoint.currentLongRate || "0");
-				if (Number(quote.positionType) === 1) return toBigInt(checkpoint.currentShortRate || "0");
+				if (Number(quote.positionType) === 0) {
+					return effectiveFundingRate(checkpoint.rawLongRate, checkpoint.currentLongRate, checkpoint.marketPrice);
+				}
+				if (Number(quote.positionType) === 1) {
+					return effectiveFundingRate(checkpoint.rawShortRate, checkpoint.currentShortRate, checkpoint.marketPrice);
+				}
 				return 0n;
+			}
+
+			function effectiveFundingRate(rawRate, currentRate, marketPrice) {
+				if (hasValue(rawRate) && hasValue(marketPrice)) {
+					return (toBigInt(rawRate) * toBigInt(marketPrice)) / FACTOR;
+				}
+				return toBigInt(currentRate || "0");
+			}
+
+			function usesDerivedPriceAdjustedRate(quote, checkpoint) {
+				let rawRate = null;
+				let currentRate = null;
+				if (Number(quote.positionType) === 0) {
+					rawRate = checkpoint.rawLongRate;
+					currentRate = checkpoint.currentLongRate;
+				} else if (Number(quote.positionType) === 1) {
+					rawRate = checkpoint.rawShortRate;
+					currentRate = checkpoint.currentShortRate;
+				}
+				if (!hasValue(rawRate) || !hasValue(checkpoint.marketPrice) || !hasValue(currentRate)) return false;
+				return effectiveFundingRate(rawRate, currentRate, checkpoint.marketPrice) !== toBigInt(currentRate);
 			}
 
 			function checkpointEpoch(checkpoint, epochDuration) {
@@ -1046,6 +1117,52 @@
 					metric("Unpaid receivable", formatUnits(build.totals.unpaidReceivable), build.totals.unpaidReceivable.toString()),
 				];
 				summaryEl.innerHTML = items.join("");
+			}
+
+			function renderUpnlCalculator(quote, build) {
+				activeQuote = quote;
+				activeBuild = build;
+				upnlCalculator.classList.remove("hidden");
+				upnlSubtitle.textContent = `${quote.symbol || "Symbol"} / ${sideName(quote.positionType)}`;
+				symbolPriceInput.placeholder = quote.openedPrice ? formatUnits(toBigInt(quote.openedPrice), 18, 8) : "0.00";
+				updateUpnlCalculator();
+			}
+
+			function updateUpnlCalculator() {
+				if (!activeQuote || !activeBuild) return;
+
+				const openAmount = quoteOpenAmount(activeQuote);
+				const openedPrice = toBigInt(activeQuote.openedPrice || "0");
+				const fundingAdjustment = activeBuild.totals.unpaidReceivable - activeBuild.totals.unpaidDebt;
+				const priceText = symbolPriceInput.value.trim();
+
+				if (!priceText) {
+					upnlResults.innerHTML = [
+						metric("Open amount", formatUnits(openAmount), openAmount.toString()),
+						metric("Opened price", formatUnits(openedPrice, 18, 8), openedPrice.toString()),
+						metricAmount("Funding adjustment", fundingAdjustment),
+						metric("Net uPNL", "-", "Enter a symbol price to calculate uPNL"),
+					].join("");
+					return;
+				}
+
+				try {
+					const markPrice = parseDecimalUnits(priceText);
+					const result = calculateQuoteUpnl(activeQuote, activeBuild.totals, markPrice);
+					upnlResults.innerHTML = [
+						metric("Open amount", formatUnits(result.openAmount), result.openAmount.toString()),
+						metricAmount("Price PnL", result.pricePnl),
+						metricAmount("Funding adjustment", result.fundingAdjustment),
+						metricAmount("Net uPNL", result.netUpnl),
+					].join("");
+				} catch (error) {
+					upnlResults.innerHTML = [
+						metric("Open amount", formatUnits(openAmount), openAmount.toString()),
+						metric("Opened price", formatUnits(openedPrice, 18, 8), openedPrice.toString()),
+						metricAmount("Funding adjustment", fundingAdjustment),
+						metric("Net uPNL", "Invalid price", error.message || "Invalid price"),
+					].join("");
+				}
 			}
 
 			function renderRows(rows) {
@@ -1140,7 +1257,7 @@
 			function renderCheckpointTable(checkpoints) {
 				const rows =
 					checkpoints.length === 0
-						? `<tr><td colspan="8" class="empty-state">No FundingIndexCheckpoint rows.</td></tr>`
+						? `<tr><td colspan="11" class="empty-state">No FundingIndexCheckpoint rows.</td></tr>`
 						: checkpoints
 								.slice()
 								.sort(sortByChainPosition)
@@ -1150,6 +1267,9 @@
 											<td>${escapeHtml(item.eventType || "-")}</td>
 											<td class="mono">${escapeHtml(valueOrDash(item.lastUpdatedEpoch))}</td>
 											<td>${escapeHtml(valueOrDash(item.epochDuration))}</td>
+											<td title="${escapeHtml(item.rawLongRate || "")}">${escapeHtml(formatUnits(toBigInt(item.rawLongRate || "0"), 18, 10))}</td>
+											<td title="${escapeHtml(item.rawShortRate || "")}">${escapeHtml(formatUnits(toBigInt(item.rawShortRate || "0"), 18, 10))}</td>
+											<td title="${escapeHtml(item.marketPrice || "")}">${escapeHtml(formatUnits(toBigInt(item.marketPrice || "0"), 18, 10))}</td>
 											<td title="${escapeHtml(item.currentLongRate || "")}">${escapeHtml(formatUnits(toBigInt(item.currentLongRate || "0"), 18, 10))}</td>
 											<td title="${escapeHtml(item.currentShortRate || "")}">${escapeHtml(formatUnits(toBigInt(item.currentShortRate || "0"), 18, 10))}</td>
 											<td>${escapeHtml(formatTimestamp(item.timestamp))}</td>
@@ -1168,6 +1288,9 @@
 									<th>Event</th>
 									<th>Last updated epoch</th>
 									<th>Epoch duration</th>
+									<th>Raw long</th>
+									<th>Raw short</th>
+									<th>Market price</th>
 									<th>Long rate</th>
 									<th>Short rate</th>
 									<th>Timestamp</th>
@@ -1220,6 +1343,9 @@
 			function renderEmpty(message) {
 				quotePanel.classList.add("hidden");
 				summaryEl.classList.add("hidden");
+				upnlCalculator.classList.add("hidden");
+				activeQuote = null;
+				activeBuild = null;
 				details.classList.add("hidden");
 				tableCaption.textContent = "";
 				rowsBody.innerHTML = `<tr><td class="empty-state" colspan="10">${escapeHtml(message)}</td></tr>`;
@@ -1239,6 +1365,15 @@
 					<div class="metric" title="${escapeHtml(title || value || "")}">
 						<span>${escapeHtml(label)}</span>
 						<strong>${escapeHtml(value)}</strong>
+					</div>
+				`;
+			}
+
+			function metricAmount(label, value) {
+				return `
+					<div class="metric" title="${escapeHtml(value.toString())}">
+						<span>${escapeHtml(label)}</span>
+						<strong class="${amountClass(value)}">${escapeHtml(formatUnits(value))}</strong>
 					</div>
 				`;
 			}
@@ -1302,6 +1437,55 @@
 					if (value !== null && value !== undefined && value !== "") return toBigInt(value);
 				}
 				return 0n;
+			}
+
+			function hasValue(value) {
+				return value !== null && value !== undefined && value !== "";
+			}
+
+			function parseDecimalUnits(value, decimals = 18) {
+				const text = String(value).trim().replace(/,/g, "");
+				if (!/^(?:\d+|\d*\.\d+)$/.test(text)) {
+					throw new Error("Price must be a positive decimal number.");
+				}
+
+				const pieces = text.split(".");
+				const whole = pieces[0] || "0";
+				const fraction = pieces[1] || "";
+				if (fraction.length > decimals) {
+					throw new Error(`Price can have at most ${decimals} decimal places.`);
+				}
+
+				const factor = 10n ** BigInt(decimals);
+				const fractionText = fraction.padEnd(decimals, "0");
+				return BigInt(whole) * factor + BigInt(fractionText || "0");
+			}
+
+			function calculateQuoteUpnl(quote, totals, markPrice) {
+				const openAmount = quoteOpenAmount(quote);
+				const openedPrice = toBigInt(quote.openedPrice || "0");
+				let priceDelta = markPrice - openedPrice;
+				if (Number(quote.positionType) === 1) priceDelta = openedPrice - markPrice;
+				if (Number(quote.positionType) !== 0 && Number(quote.positionType) !== 1) priceDelta = 0n;
+
+				const pricePnl = (openAmount * priceDelta) / FACTOR;
+				const fundingAdjustment = toBigInt(totals.unpaidReceivable || "0") - toBigInt(totals.unpaidDebt || "0");
+
+				return {
+					openAmount,
+					openedPrice,
+					markPrice,
+					pricePnl,
+					fundingAdjustment,
+					netUpnl: pricePnl + fundingAdjustment,
+				};
+			}
+
+			function quoteOpenAmount(quote) {
+				const quantity = toBigInt(quote.quantity || quote.fillAmount || "0");
+				const closedAmount = toBigInt(quote.closedAmount || "0");
+				const openAmount = quantity - closedAmount;
+				return openAmount > 0n ? openAmount : 0n;
 			}
 
 			function formatUnits(value, decimals = 18, precision = 6) {
