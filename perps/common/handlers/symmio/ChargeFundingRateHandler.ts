@@ -1,9 +1,9 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { GlobalFee, Quote } from "../../../../generated/schema";
+import { GlobalFee, Quote } from "../../../../generated/schema"
 import { getQuoteData } from "../../VersionedQuoteLoader"
 import { unDecimal } from "../../utils"
-import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote";
+import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 
 export class ChargeFundingRateHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
@@ -24,6 +24,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			}
 			let funding = unDecimal(chainQuote.openedPrice.minus(prevOpenedPrice).abs().times(openAmount))
 			quote.openedPrice = chainQuote.openedPrice
+			quote.lastFundingPaymentTimestamp = chainQuote.lastFundingPaymentTimestamp
 
 			const paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()

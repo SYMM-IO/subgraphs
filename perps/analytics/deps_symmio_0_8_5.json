@@ -398,6 +398,8 @@
 		"UpdateAccumulatedFundingFee",
 		"SetEpochDuration",
 		"ChargeAccumulatedFundingFee",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
 		"LiquidatePositionsForClearingHouse"
 	],
 	"WithdrawRequest": [
@@ -459,5 +461,14 @@
 		"SettleUpnlUnified",
 		"SettlePartyBUpnlForLiquidation"
 	],
-	"QuoteFundingSettlement": ["ChargeAccumulatedFundingFee", "FillCloseRequest", "ForceClosePosition", "EmergencyClosePosition", "ADLClose"]
+	"QuoteFundingSettlement": [
+		"ChargeAccumulatedFundingFee",
+		"FillCloseRequest",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"ADLClose",
+		"LiquidatePositionsPartyA",
+		"LiquidatePositionsPartyB",
+		"LiquidatePositionsForClearingHouse"
+	]
 }

@@ -174,6 +174,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.deadline = q.deadline
 			data.quoteStatus = q.quoteStatus
 			data.marketPrice = q.marketPrice
+			data.lastFundingPaymentTimestamp = q.lastFundingPaymentTimestamp
 			if (q.partyBsWhiteList) data.partyBsWhiteList = convertAddressArrayToBytes(q.partyBsWhiteList)
 			break
 		}
@@ -197,6 +198,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.deadline = q.deadline
 			data.quoteStatus = q.quoteStatus
 			data.marketPrice = q.marketPrice
+			data.lastFundingPaymentTimestamp = q.lastFundingPaymentTimestamp
 			if (q.partyBsWhiteList) data.partyBsWhiteList = convertAddressArrayToBytes(q.partyBsWhiteList)
 			break
 		}
@@ -221,6 +223,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.quoteStatus = q.quoteStatus
 			data.marketPrice = q.marketPrice
 			data.affiliate = q.affiliate
+			data.lastFundingPaymentTimestamp = q.lastFundingPaymentTimestamp
 			if (q.partyBsWhiteList) data.partyBsWhiteList = convertAddressArrayToBytes(q.partyBsWhiteList)
 			break
 		}
@@ -245,6 +248,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.quoteStatus = q.quoteStatus
 			data.marketPrice = q.marketPrice
 			data.affiliate = q.affiliate
+			data.lastFundingPaymentTimestamp = q.lastFundingPaymentTimestamp
 			if (q.partyBsWhiteList) data.partyBsWhiteList = convertAddressArrayToBytes(q.partyBsWhiteList)
 			break
 		}

@@ -7,8 +7,16 @@ import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { onPositionClose } from "../../utils/aggregatedPosition"
+import { syncFundingFeeState } from "../../utils/fundingFeeState"
+import { FundingSettlementContext, getQuoteFundingSignedAmount, recordQuoteFundingSettlement } from "../../utils/fundingHistory"
 
-export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Version, qId: BigInt, closeType: string): void {
+export function handleLiquidatePosition<T>(
+	_event: ethereum.Event,
+	version: Version,
+	qId: BigInt,
+	closeType: string,
+	fundingContext: FundingSettlementContext | null,
+): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
 	const quote = Quote.load(qId.toString() + "-" + event.address.toHexString())
@@ -32,16 +40,10 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 		quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
 		true,
 	)
+	if (fundingContext !== null) recordQuoteFundingSettlement(_event, version, qId, closeType, fundingContext, true)
+	if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
-	createQuoteEvent(
-		_event,
-		qId,
-		closeType,
-		new JSONBuilder()
-			.add("amount", liquidAmount.toString())
-			.add("closePrice", liquidPrice.toString())
-			.build(),
-	)
+	createQuoteEvent(_event, qId, closeType, new JSONBuilder().add("amount", liquidAmount.toString()).add("closePrice", liquidPrice.toString()).build())
 
 	let account = Account.load(quote.partyA.toHexString())
 	if (!account) return
@@ -58,12 +60,20 @@ export function handleLiquidatePosition<T>(_event: ethereum.Event, version: Vers
 	if (pnl.gt(BigInt.zero())) profit = pnl
 	else loss = pnl
 
+	let fundingPaid = BigInt.zero()
+	let fundingReceived = BigInt.zero()
+	let fundingSignedAmount = getQuoteFundingSignedAmount(quote, fundingContext)
+	if (fundingSignedAmount.gt(BigInt.zero())) fundingPaid = fundingSignedAmount
+	else if (fundingSignedAmount.lt(BigInt.zero())) fundingReceived = fundingSignedAmount.abs()
+
 	updateHistories(
 		new UpdateHistoriesParams(version, account, solverAccount, event)
 			.liquidateTradeVolume(additionalVolume)
 			.symbolId(quote.symbolId!)
 			.loss(loss)
-			.profit(profit),
+			.profit(profit)
+			.fundingPaid(fundingPaid)
+			.fundingReceived(fundingReceived),
 	)
 	if (_event.block.timestamp > BigInt.fromI32(1723852800)) {
 		// From this timestamp we count partyB volumes in analytics as well

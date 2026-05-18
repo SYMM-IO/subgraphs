@@ -30,6 +30,13 @@ export function captureQuoteFundingContext(event: ethereum.Event, quoteId: BigIn
 	return context
 }
 
+export function getQuoteFundingSignedAmount(quote: Quote, context: FundingSettlementContext | null): BigInt {
+	if (context === null || !context.found) return BigInt.zero()
+	let newAccumulatedPaidFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
+	let fundingDeltaPerUnit = newAccumulatedPaidFunding.minus(context.previousAccumulatedPaidFunding)
+	return unDecimal(fundingDeltaPerUnit.times(context.openAmount))
+}
+
 function paidThroughEpoch(timestamp: BigInt, symbolId: BigInt, partyB: Address, source: Address): BigInt | null {
 	let state = FundingFeeState.load(symbolId.toString() + "-" + partyB.toHexString() + "-" + source.toHexString())
 	if (!state || !state.epochDuration || state.epochDuration!.isZero()) return null
@@ -59,7 +66,7 @@ export function recordQuoteFundingSettlement(
 	}
 
 	let fundingDeltaPerUnit = newAccumulatedPaidFunding.minus(context.previousAccumulatedPaidFunding)
-	let signedAmount = unDecimal(fundingDeltaPerUnit.times(context.openAmount))
+	let signedAmount = getQuoteFundingSignedAmount(quote, context)
 	let paidByPartyA = BigInt.zero()
 	let receivedByPartyA = BigInt.zero()
 	if (signedAmount.gt(BigInt.zero())) paidByPartyA = signedAmount

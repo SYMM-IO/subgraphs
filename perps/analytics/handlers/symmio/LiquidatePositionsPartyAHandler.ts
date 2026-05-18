@@ -9,6 +9,7 @@ import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_3 } from "../.
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { captureQuoteFundingContext, FundingSettlementContext, getQuoteFundingSignedAmount } from "../../utils/fundingHistory"
 
 export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositionsPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -17,10 +18,15 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 		super.handle(_event, version)
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
+
+		let fundingContexts: Array<FundingSettlementContext> = []
+		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
+			fundingContexts.push(captureQuoteFundingContext(_event, event.params.quoteIds[i]))
+		}
 		super.handleQuote(_event, version) // Pre-computes liquidateAmount/liquidatePrice on each quote
 
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
-			handleLiquidatePosition<T>(_event, version, event.params.quoteIds[i], "LIQUIDATE_PARTY_A")
+			handleLiquidatePosition<T>(_event, version, event.params.quoteIds[i], "LIQUIDATE_PARTY_A", fundingContexts[i])
 		}
 
 		updatePartyALatestBalance(_event, version, event.params.partyA)
@@ -83,7 +89,8 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 					.times(quote.liquidatePrice!.minus(quote.openedPrice!))
 					.times(quote.liquidateAmount!),
 			)
-			accPnl = accPnl.plus(pnl)
+			let fundingAmount = getQuoteFundingSignedAmount(quote, fundingContexts[i])
+			accPnl = accPnl.plus(pnl.minus(fundingAmount))
 		}
 
 		entity.paidCva = accCva
