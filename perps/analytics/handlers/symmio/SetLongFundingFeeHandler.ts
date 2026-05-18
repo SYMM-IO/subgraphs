@@ -1,7 +1,7 @@
 import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { FundingRateSnapshot } from "../../../../generated/schema"
-import { enrichFundingFeeState, getOrCreateFundingFeeState } from "../../utils/fundingFeeState"
+import { applySetLongFundingFeeToFundingFeeState, enrichFundingFeeState, getOrCreateFundingFeeState } from "../../utils/fundingFeeState"
 import { createFundingIndexCheckpoint } from "../../utils/fundingHistory"
 
 export class SetLongFundingFeeHandler<T> extends BaseHandler {
@@ -28,8 +28,7 @@ export class SetLongFundingFeeHandler<T> extends BaseHandler {
 			snapshot.save()
 
 			let state = getOrCreateFundingFeeState(_event, version, symbolId, partyB)
-			state.currentLongRate = fee
-			state.lastMarketPrice = marketPrice
+			applySetLongFundingFeeToFundingFeeState(state, fee, marketPrice, event.block.timestamp)
 			state.updateTimestamp = event.block.timestamp
 			enrichFundingFeeState(state, event.address)
 			state.save()

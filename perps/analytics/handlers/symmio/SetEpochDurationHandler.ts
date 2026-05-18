@@ -1,6 +1,6 @@
 import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
-import { enrichFundingFeeState, getOrCreateFundingFeeState } from "../../utils/fundingFeeState"
+import { applySetEpochDurationToFundingFeeState, enrichFundingFeeState, getOrCreateFundingFeeState } from "../../utils/fundingFeeState"
 import { createFundingIndexCheckpoint } from "../../utils/fundingHistory"
 
 export class SetEpochDurationHandler<T> extends BaseHandler {
@@ -13,7 +13,7 @@ export class SetEpochDurationHandler<T> extends BaseHandler {
 			let partyB = event.params.partyB
 
 			let state = getOrCreateFundingFeeState(_event, version, symbolId, partyB)
-			state.epochDuration = duration
+			applySetEpochDurationToFundingFeeState(state, duration, event.block.timestamp)
 			state.updateTimestamp = event.block.timestamp
 			enrichFundingFeeState(state, event.address)
 			state.save()
