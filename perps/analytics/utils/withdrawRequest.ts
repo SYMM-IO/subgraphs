@@ -1,5 +1,5 @@
 import { Address, BigInt, Bytes, store } from "@graphprotocol/graph-ts"
-import { WithdrawFinalizationHint, WithdrawRequest, WithdrawRequestLookup } from "../../../generated/schema"
+import { WithdrawFinalizationHint, WithdrawRequest, WithdrawRequestAccountLookup, WithdrawRequestLookup } from "../../../generated/schema"
 
 const FINALIZE_WITHDRAW_REQUEST_SELECTOR = "0x1531b3c8"
 
@@ -13,6 +13,10 @@ function legacyWithdrawRequestId(requestId: BigInt, source: Address): string {
 
 function withdrawRequestLookupId(requestId: BigInt, source: Address): string {
 	return requestId.toString() + "-" + source.toHexString()
+}
+
+function withdrawRequestAccountLookupId(account: Bytes, source: Bytes): string {
+	return account.toHexString() + "-" + source.toHexString()
 }
 
 function withdrawFinalizationHintId(source: Address, transaction: Bytes, sender: Address): string {
@@ -62,9 +66,31 @@ export function addWithdrawRequestToLookup(wr: WithdrawRequest): void {
 	}
 	lookup.activeRequestIds = addString(lookup.activeRequestIds, wr.id)
 	lookup.save()
+
+	let accountLookupId = withdrawRequestAccountLookupId(wr.user, wr.source)
+	let accountLookup = WithdrawRequestAccountLookup.load(accountLookupId)
+	if (!accountLookup) {
+		accountLookup = new WithdrawRequestAccountLookup(accountLookupId)
+		accountLookup.source = wr.source
+		accountLookup.account = wr.user
+		accountLookup.activeRequestIds = []
+	}
+	accountLookup.activeRequestIds = addString(accountLookup.activeRequestIds, wr.id)
+	accountLookup.save()
 }
 
 export function removeWithdrawRequestFromLookup(wr: WithdrawRequest): void {
+	let accountLookupId = withdrawRequestAccountLookupId(wr.user, wr.source)
+	let accountLookup = WithdrawRequestAccountLookup.load(accountLookupId)
+	if (accountLookup) {
+		accountLookup.activeRequestIds = removeString(accountLookup.activeRequestIds, wr.id)
+		if (accountLookup.activeRequestIds.length == 0) {
+			store.remove("WithdrawRequestAccountLookup", accountLookupId)
+		} else {
+			accountLookup.save()
+		}
+	}
+
 	let source = changetype<Address>(wr.source)
 	let id = withdrawRequestLookupId(wr.requestId, source)
 	let lookup = WithdrawRequestLookup.load(id)
@@ -75,6 +101,10 @@ export function removeWithdrawRequestFromLookup(wr: WithdrawRequest): void {
 		return
 	}
 	lookup.save()
+}
+
+export function loadWithdrawRequestAccountLookup(account: Bytes, source: Bytes): WithdrawRequestAccountLookup | null {
+	return WithdrawRequestAccountLookup.load(withdrawRequestAccountLookupId(account, source))
 }
 
 function loadSingleCompletableWithdrawRequest(requestId: BigInt, source: Address): WithdrawRequest | null {

@@ -33,6 +33,7 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		account.userRef = user.toHexString()
 		account.lastLayerActivityTimestamp = event.block.timestamp
 		account.isVirtual = true
+		account.isDeleted = false
 		account.parentAddress = event.params.parent
 		account.subAccount = event.params.parent.toHexString()
 		account.virtualAccount = event.params.account.toHexString()
@@ -64,6 +65,9 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		}
 
 		let sub = SubAccount.load(event.params.parent.toHexString())
+		if (sub && sub.coreSource) coreSource = sub.coreSource
+		setAccountProfileSources(account, _event.address, coreSource, _event.address)
+		account.save()
 		setVirtualAccountProfileDefaults(va, sub, _event.address, coreSource, _event.address)
 		va.save()
 

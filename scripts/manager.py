@@ -112,13 +112,14 @@ class Config:
 
 
 abi_versions = {
-    "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3", "0_8_4", "0_8_5"],
+    "symmio": ["0_8_0", "0_8_1", "0_8_2", "0_8_3", "0_8_4", "0_8_5", "0_8_6"],
     "symmioLegacyOpen": ["0_8_5"],
     "symmioMultiAccount": ["1", "2", "3"],
     "options": ["1"],
     "optionsMultiAccount": ["1"],
     "feeCollector": ["1"],
     "accountLayer": ["1"],
+    "expressProvider": ["1"],
 }
 
 # Maps ABI name → version enum name used in BaseHandler.ts
@@ -127,6 +128,7 @@ abi_version_enums: Dict[str, str] = {
     "symmioMultiAccount": "MultiAccountVersion",
     "feeCollector": "FeeCollectorVersion",
     "accountLayer": "AccountLayerVersion",
+    "expressProvider": "ExpressProviderVersion",
     "options": "Version",
     "optionsMultiAccount": "MultiAccountVersion",
 }
@@ -281,6 +283,45 @@ def generate_src_ts(target_module: str, contract: Contract):
     for event in sorted_events:
         imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
         imports.add(f"import {{{event.numbered_name}}} from '{generated_prefix}generated/{event.source}/{event.source}'")
+        imports.add("import {ensureSyncMeta} from './src_sync_meta'")
+        handlers_code.append(
+            textwrap.dedent(
+                f"""
+                export function {event.handler_name}(event: {event.numbered_name}): void {{
+                    ensureSyncMeta(event.block)
+                    let handler = new {event.name}Handler<{event.numbered_name}>()
+                    handler.handle(event, {version_enum}.v_{contract.version})
+                }}
+                """
+            )
+        )
+
+    imports.add(f"import {{{version_enum}}} from '{base_handler_path}'")
+
+    with open(os.path.join(target_module, f"src_{contract.path()}.ts"), "w") as src_file:
+        src_file.write("\n".join(sorted(imports)))
+        src_file.write("\n\n")
+        src_file.write("\n".join(handlers_code))
+
+
+def generate_template_src_ts(target_module: str, contract: Contract, template_name: str):
+    imports = set()
+    handlers_code = []
+
+    depth = target_module.count("/") + 1
+    generated_prefix = "../" * depth
+    version_enum = abi_version_enums.get(contract.abi, "Version")
+
+    if "/" in target_module:
+        base_handler_path = "../common/BaseHandler"
+    else:
+        base_handler_path = "./BaseHandler"
+
+    sorted_events = sorted(contract.events, key=lambda e: e.name)
+
+    for event in sorted_events:
+        imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
+        imports.add(f"import {{{event.numbered_name}}} from '{generated_prefix}generated/templates/{template_name}/{event.source}'")
         imports.add("import {ensureSyncMeta} from './src_sync_meta'")
         handlers_code.append(
             textwrap.dedent(
@@ -543,12 +584,42 @@ def prepare_module(config: Config, target_module: str):
         "schema": {"file": "./schema.graphql"},
         "indexerHints": {"prune": "never"},
         "dataSources": [],
+        "templates": [],
     }
     contract_indexes = defaultdict(int)
     for contract in all_contracts:
         if not contract.events:
             continue
         copy_abi_files(f"{contract.path()}.json")
+
+        if contract.abi == "expressProvider":
+            template_name = "ExpressProvider"
+            subgraph_config["templates"].append(
+                {
+                    "kind": "ethereum/contract",
+                    "name": template_name,
+                    "network": config.network,
+                    "source": {
+                        "abi": contract.path(),
+                    },
+                    "mapping": {
+                        "kind": "ethereum/events",
+                        "apiVersion": "0.0.6",
+                        "language": "wasm/assemblyscript",
+                        "entities": [
+                            "AffiliateExpressWithdrawComponents",
+                            "ExpressProviderSource",
+                            "ExpressProviderSourceByCore",
+                            "WithdrawRequest",
+                        ],
+                        "abis": [{"name": contract.path(), "file": f"./abis/{contract.path()}.json"}],
+                        "eventHandlers": [{"event": event.signature, "handler": event.handler_name} for event in contract.events],
+                        "file": f"./{target_module}/src_{contract.path()}.ts",
+                    },
+                }
+            )
+            continue
+
         contract_events = contract.events
         if contract.fake:
             contract_events = [contract.events[0]]
@@ -597,6 +668,9 @@ def prepare_module(config: Config, target_module: str):
             source_config["name"] += f"_{contract_indexes[(contract.abi, contract.version)]}"
 
         subgraph_config["dataSources"].append(source_config)
+
+    if not subgraph_config["templates"]:
+        del subgraph_config["templates"]
 
     yaml_content = json_to_yaml(subgraph_config)
     with open("./subgraph.yaml", "w") as yaml_file:

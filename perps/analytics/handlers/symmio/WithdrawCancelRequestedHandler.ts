@@ -5,6 +5,7 @@ import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
 import { loadWithdrawRequest, removeWithdrawRequestFromLookup } from "../../utils/withdrawRequest"
+import { removeWithdrawRequestFromAffiliateExpressWithdrawComponents } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class WithdrawCancelRequestedHandler<T> extends CommonWithdrawCancelRequestedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,6 +23,7 @@ export class WithdrawCancelRequestedHandler<T> extends CommonWithdrawCancelReque
 			if (account) {
 				updateWithdrawHierarchyHistories(account, _event.block.timestamp, BigInt.zero(), BigInt.fromI32(-1), BigInt.zero(), wr.amount.neg())
 			}
+			removeWithdrawRequestFromAffiliateExpressWithdrawComponents(wr, _event.block.timestamp, _event.block.number)
 		}
 		wr.save()
 		if (immediateCancel) {

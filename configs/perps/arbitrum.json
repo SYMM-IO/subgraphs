@@ -4,6 +4,17 @@
 		{
 			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
 			"abi": "symmio",
+			"version": "0_8_6",
+			"startBlock": "454822977",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2",
+				"accountLayer_1"
+			]
+		},
+		{
+			"address": "0x8F06459f184553e5d04F07F868720BDaCAB39395",
+			"abi": "symmio",
 			"version": "0_8_5",
 			"startBlock": "454822977",
 			"dependencies": [

@@ -1,0 +1,19 @@
+{
+	"AffiliateExpressWithdrawComponents": [
+		"BadDebtAccrued",
+		"CreditBadDebtRepaid",
+		"DebtActivated",
+		"DebtCancelled",
+		"DebtReserved",
+		"DebtSettled",
+		"RequestDebtCleared"
+	],
+	"WithdrawRequest": [
+		"BadDebtAccrued",
+		"DebtActivated",
+		"DebtCancelled",
+		"DebtReserved",
+		"DebtSettled",
+		"RequestDebtCleared"
+	]
+}

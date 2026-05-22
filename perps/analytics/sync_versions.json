@@ -1,10 +1,14 @@
 {
-  "global": "2026-05-09-001",
+  "global": "2026-05-13-001",
   "entities": {
     "account": "v1",
+    "affiliate_express_withdraw_account_snapshot": "v1",
+    "affiliate_express_withdraw_component_bucket": "v1",
+    "affiliate_express_withdraw_components": "v1",
     "balance_change": "v1",
     "daily_account_owner_history": "v1",
     "daily_history": "v1",
+    "latest_account_balance": "v2",
     "monthly_history": "v1",
     "quote": "v1",
     "quote_event": "v1",
@@ -14,6 +18,7 @@
     "total_account_owner_history": "v1",
     "total_history": "v1",
     "user": "v1",
-    "weekly_history": "v1"
+    "weekly_history": "v1",
+    "withdraw_request": "v2"
   }
 }

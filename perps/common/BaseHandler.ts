@@ -1,5 +1,5 @@
-import {BigInt, ethereum} from "@graphprotocol/graph-ts"
-import {getGlobalCounterAndInc} from "./utils"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { getGlobalCounterAndInc } from "./utils"
 
 export enum Version {
 	v_0_8_0,
@@ -7,7 +7,8 @@ export enum Version {
 	v_0_8_2,
 	v_0_8_3,
 	v_0_8_4,
-	v_0_8_5
+	v_0_8_5,
+	v_0_8_6,
 }
 
 export enum MultiAccountVersion {
@@ -21,21 +22,15 @@ export enum FeeCollectorVersion {
 }
 
 export class BaseHandler {
+	constructor() {}
 
-	constructor() {
-	}
+	handle(_event: ethereum.Event, version: Version): void {}
 
-	handle(_event: ethereum.Event, version: Version): void {
-	}
+	handleQuote(_event: ethereum.Event, version: Version): void {}
 
-	handleQuote(_event: ethereum.Event, version: Version): void {
-	}
+	handleAccount(_event: ethereum.Event, version: Version): void {}
 
-	handleAccount(_event: ethereum.Event, version: Version): void {
-	}
-
-	handleSymbol(_event: ethereum.Event, version: Version): void {
-	}
+	handleSymbol(_event: ethereum.Event, version: Version): void {}
 
 	handleGlobalCounter(): BigInt {
 		return getGlobalCounterAndInc()
@@ -43,15 +38,11 @@ export class BaseHandler {
 }
 
 export class BaseMultiAccountHandler {
+	constructor() {}
 
-	constructor() {
-	}
+	handle(_event: ethereum.Event, version: MultiAccountVersion): void {}
 
-	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
-	}
-
-	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
-	}
+	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {}
 
 	handleGlobalCounter(): BigInt {
 		return getGlobalCounterAndInc()
@@ -59,12 +50,9 @@ export class BaseMultiAccountHandler {
 }
 
 export class BaseFeeCollectorHandler {
+	constructor() {}
 
-	constructor() {
-	}
-
-	handle(_event: ethereum.Event, version: FeeCollectorVersion): void {
-	}
+	handle(_event: ethereum.Event, version: FeeCollectorVersion): void {}
 
 	handleGlobalCounter(): BigInt {
 		return getGlobalCounterAndInc()
@@ -76,17 +64,23 @@ export enum AccountLayerVersion {
 }
 
 export class BaseAccountLayerHandler {
+	constructor() {}
 
-	constructor() {
-	}
+	handle(_event: ethereum.Event, version: AccountLayerVersion): void {}
 
-	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
-	}
-
-	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
-	}
+	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {}
 
 	handleGlobalCounter(): BigInt {
 		return getGlobalCounterAndInc()
 	}
+}
+
+export enum ExpressProviderVersion {
+	v_1,
+}
+
+export class BaseExpressProviderHandler {
+	constructor() {}
+
+	handle(_event: ethereum.Event, version: ExpressProviderVersion): void {}
 }

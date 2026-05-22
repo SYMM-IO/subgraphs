@@ -4,5 +4,14 @@
 		"EditAccountName",
 		"RoleGranted",
 		"RoleRevoked"
+	],
+	"AffiliateExpressWithdrawComponents": [
+		"AddAccount"
+	],
+	"AffiliateExpressWithdrawComponentBucket": [
+		"AddAccount"
+	],
+	"AffiliateExpressWithdrawAccountSnapshot": [
+		"AddAccount"
 	]
 }

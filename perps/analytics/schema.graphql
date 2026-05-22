@@ -671,12 +671,23 @@ type WithdrawRequest @entity(immutable: false) {
 	deploymentId: String
 	coreSource: Bytes
 	accountLayerSource: Bytes
+	componentSource: Bytes
+	componentAffiliate: Bytes
+	componentCollateral: Bytes
+	componentBucket: String
 	requestId: BigInt!
 	user: Bytes!
 	owner: Bytes
 	subAccountRef: SubAccount
 	virtualAccountRef: VirtualAccount
 	amount: BigInt!
+	classicAmount: BigInt!
+	expressAmount: BigInt!
+	virtualAmount: BigInt!
+	advancedAmount: BigInt!
+	reservedDebtAmount: BigInt!
+	activeDebtAmount: BigInt!
+	badDebtAmount: BigInt!
 	speedUp: Boolean!
 	isPureVirtual: Boolean!
 	cooldownEndTime: BigInt!
@@ -691,6 +702,13 @@ type WithdrawRequestLookup @entity(immutable: false) {
 	id: ID!
 	source: Bytes!
 	requestId: BigInt!
+	activeRequestIds: [String!]!
+}
+
+type WithdrawRequestAccountLookup @entity(immutable: false) {
+	id: ID!
+	source: Bytes!
+	account: Bytes!
 	activeRequestIds: [String!]!
 }
 
@@ -727,6 +745,155 @@ type LatestAccountBalance @entity(immutable: false) {
 	transaction: Bytes!
 	accountRef: Account
 	counterPartyRef: Account
+}
+
+type ExpressProviderSource @entity(immutable: false) {
+	id: ID!
+	provider: Bytes!
+	source: Bytes!
+	collateral: Bytes!
+	deploymentId: String
+	timestamp: BigInt!
+	blockNumber: BigInt!
+}
+
+type ExpressProviderSourceByCore @entity(immutable: false) {
+	id: ID!
+	providerSource: ExpressProviderSource!
+	source: Bytes!
+	provider: Bytes!
+	collateral: Bytes!
+	deploymentId: String
+	timestamp: BigInt!
+	blockNumber: BigInt!
+}
+
+# Raw affiliate-level component rollup for affiliate/deployment analytics reads.
+# The subgraph does not publish a spendable-value formula; it only exposes indexed
+# balances, pending withdrawals, tracked credit-line debt, and hierarchy health flags.
+type AffiliateExpressWithdrawComponents @entity(immutable: false) {
+	id: ID!
+	deploymentId: String
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	affiliate: Bytes!
+	collateral: Bytes!
+	collateralDecimals: Int!
+	accountCount: BigInt!
+	accountWithBalanceCount: BigInt!
+	freeBalance18: BigInt!
+	allocatedBalance18: BigInt!
+	lockedCva18: BigInt!
+	lockedLf18: BigInt!
+	lockedPartyAmm18: BigInt!
+	lockedPartyBmm18: BigInt!
+	pendingLockedCva18: BigInt!
+	pendingLockedLf18: BigInt!
+	pendingLockedPartyAmm18: BigInt!
+	pendingLockedPartyBmm18: BigInt!
+	totalBalance18: BigInt!
+	pendingWithdrawAmountCollateral: BigInt!
+	pendingClassicWithdrawAmountCollateral: BigInt!
+	pendingExpressWithdrawAmountCollateral: BigInt!
+	pendingVirtualWithdrawAmountCollateral: BigInt!
+	advancedWithdrawAmountCollateral: BigInt!
+	advancedWithdrawDataAvailable: Boolean!
+	reservedDebtCollateral: BigInt!
+	activeDebtCollateral: BigInt!
+	badDebtCollateral: BigInt!
+	debtDataAvailable: Boolean!
+	brokenHierarchyCount: BigInt!
+	unresolvedLegacyAccountCount: BigInt!
+	unknownAccountCount: BigInt!
+	lastBalanceTimestamp: BigInt
+	lastWithdrawTimestamp: BigInt
+	lastDebtTimestamp: BigInt
+	updateTimestamp: BigInt!
+	blockNumber: BigInt!
+}
+
+# Same raw component rollup split by account bucket so consumers can apply their own
+# policy to legacy accounts, AccountLayer subaccounts, custom subaccounts, and VAs.
+type AffiliateExpressWithdrawComponentBucket @entity(immutable: false) {
+	id: ID!
+	components: AffiliateExpressWithdrawComponents!
+	deploymentId: String
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	affiliate: Bytes!
+	collateral: Bytes!
+	collateralDecimals: Int!
+	bucket: String!
+	accountCount: BigInt!
+	accountWithBalanceCount: BigInt!
+	freeBalance18: BigInt!
+	allocatedBalance18: BigInt!
+	lockedCva18: BigInt!
+	lockedLf18: BigInt!
+	lockedPartyAmm18: BigInt!
+	lockedPartyBmm18: BigInt!
+	pendingLockedCva18: BigInt!
+	pendingLockedLf18: BigInt!
+	pendingLockedPartyAmm18: BigInt!
+	pendingLockedPartyBmm18: BigInt!
+	totalBalance18: BigInt!
+	pendingWithdrawAmountCollateral: BigInt!
+	pendingClassicWithdrawAmountCollateral: BigInt!
+	pendingExpressWithdrawAmountCollateral: BigInt!
+	pendingVirtualWithdrawAmountCollateral: BigInt!
+	advancedWithdrawAmountCollateral: BigInt!
+	advancedWithdrawDataAvailable: Boolean!
+	reservedDebtCollateral: BigInt!
+	activeDebtCollateral: BigInt!
+	badDebtCollateral: BigInt!
+	debtDataAvailable: Boolean!
+	brokenHierarchyCount: BigInt!
+	unresolvedLegacyAccountCount: BigInt!
+	unknownAccountCount: BigInt!
+	lastBalanceTimestamp: BigInt
+	lastWithdrawTimestamp: BigInt
+	lastDebtTimestamp: BigInt
+	updateTimestamp: BigInt!
+	blockNumber: BigInt!
+}
+
+# Per-account snapshot used by the subgraph to delta the aggregate when a balance
+# refresh or account classification changes.
+type AffiliateExpressWithdrawAccountSnapshot @entity(immutable: false) {
+	id: ID!
+	components: AffiliateExpressWithdrawComponents!
+	deploymentId: String
+	source: Bytes!
+	coreSource: Bytes
+	accountLayerSource: Bytes
+	affiliate: Bytes!
+	collateral: Bytes!
+	collateralDecimals: Int!
+	account: Bytes!
+	accountRef: Account
+	owner: Bytes
+	subAccountRef: SubAccount
+	virtualAccountRef: VirtualAccount
+	bucket: String!
+	hasBalance: Boolean!
+	freeBalance18: BigInt!
+	allocatedBalance18: BigInt!
+	lockedCva18: BigInt!
+	lockedLf18: BigInt!
+	lockedPartyAmm18: BigInt!
+	lockedPartyBmm18: BigInt!
+	pendingLockedCva18: BigInt!
+	pendingLockedLf18: BigInt!
+	pendingLockedPartyAmm18: BigInt!
+	pendingLockedPartyBmm18: BigInt!
+	totalBalance18: BigInt!
+	brokenHierarchy: Boolean!
+	unresolvedLegacyAccount: Boolean!
+	unknownAccount: Boolean!
+	timestamp: BigInt!
+	blockNumber: BigInt!
 }
 
 type AggregatedPosition @entity(immutable: false) {

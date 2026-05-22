@@ -32,6 +32,7 @@ import {
 	getBalanceOf as getBalanceOf_0_8_5,
 	isCrossPartyB as isCrossPartyB_0_8_5,
 } from "../../common/contract_utils_0_8_5"
+import { clearAffiliateExpressWithdrawBalanceSnapshot, syncAffiliateExpressWithdrawBalanceSnapshot } from "./affiliateExpressWithdrawComponents"
 
 function getBalanceOf(version: Version, source: Address, account: Address): BigInt | null {
 	if (version == Version.v_0_8_5) return getBalanceOf_0_8_5(source, account)
@@ -189,6 +190,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm.isZero() &&
 		entity.pendingLockedPartyBmm.isZero()
 	) {
+		clearAffiliateExpressWithdrawBalanceSnapshot(partyA, event.address, event.block.timestamp, event.block.number)
 		if (!isNew) store.remove("LatestAccountBalance", id)
 		return
 	}
@@ -197,6 +199,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash
 	entity.save()
+	syncAffiliateExpressWithdrawBalanceSnapshot(entity, event.block.timestamp, event.block.number)
 }
 
 export function updatePartyBLatestBalance(event: ethereum.Event, version: Version, partyB: Address, partyA: Address): void {

@@ -2,8 +2,11 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as Toast from "@radix-ui/react-toast";
 import clsx from "clsx";
 import { X } from "lucide-react";
+import { useEffect } from "react";
 import type { PropsWithChildren, ReactNode } from "react";
 import type { ApiToast } from "../types/fleet";
+
+const TOAST_DURATION_MS = 4200;
 
 export function Button({
   children,
@@ -74,13 +77,20 @@ export function Modal({
 }
 
 export function ToastHost({ toast, onOpenChange }: { toast: ApiToast | null; onOpenChange: (open: boolean) => void }) {
+  useEffect(() => {
+    if (!toast) return;
+
+    const timer = window.setTimeout(() => onOpenChange(false), TOAST_DURATION_MS);
+    return () => window.clearTimeout(timer);
+  }, [toast, onOpenChange]);
+
   return (
     <Toast.Provider swipeDirection="right">
       <Toast.Root
         className={clsx("toast", toast?.kind === "err" ? "toast-err" : "toast-ok")}
         open={!!toast}
         onOpenChange={onOpenChange}
-        duration={4200}
+        duration={TOAST_DURATION_MS}
       >
         <Toast.Title className="toast-title">{toast?.title}</Toast.Title>
         {toast?.body ? <Toast.Description className="toast-body">{toast.body}</Toast.Description> : null}

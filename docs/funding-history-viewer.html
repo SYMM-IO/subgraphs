@@ -23,7 +23,8 @@
 				--blue-soft: #e3edff;
 				--green: #15803d;
 				--green-soft: #def7e8;
-				--shadow: 0 12px 35px rgba(16, 36, 41, 0.08);
+				--panel-soft: #f8fbfb;
+				--shadow: 0 10px 24px rgba(16, 36, 41, 0.07);
 			}
 
 			* {
@@ -32,7 +33,7 @@
 
 			body {
 				margin: 0;
-				background: var(--bg);
+				background: linear-gradient(180deg, #edf3f1 0, #f7f9f9 280px, var(--bg) 100%);
 				color: var(--text);
 				font-family:
 					Inter,
@@ -50,6 +51,7 @@
 				background: var(--ink);
 				color: #f8fbfb;
 				padding: 24px;
+				border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 			}
 
 			header h1 {
@@ -157,6 +159,10 @@
 				min-height: 42px;
 			}
 
+			button:hover:not(:disabled) {
+				background: #0c6760;
+			}
+
 			button:disabled {
 				cursor: wait;
 				opacity: 0.65;
@@ -227,13 +233,29 @@
 				grid-template-columns: repeat(4, minmax(0, 1fr));
 			}
 
+			#upnl-calculator {
+				border-color: #b9d8d5;
+				background: linear-gradient(180deg, #ffffff 0%, #f7fcfb 100%);
+			}
+
+			#symbol-price {
+				min-height: 50px;
+				font-size: 18px;
+				font-weight: 760;
+			}
+
 			.metric,
 			.meta-item {
-				background: #fbfdfd;
+				background: var(--panel-soft);
 				border: 1px solid var(--line);
 				border-radius: 8px;
 				padding: 12px;
 				min-width: 0;
+			}
+
+			.metric.featured {
+				background: var(--teal-soft);
+				border-color: rgba(15, 118, 110, 0.38);
 			}
 
 			.metric strong,
@@ -242,7 +264,7 @@
 				margin-top: 5px;
 				overflow-wrap: anywhere;
 				color: var(--text);
-				font-size: 15px;
+				font-size: 16px;
 			}
 
 			.metric span,
@@ -876,12 +898,6 @@
 				if (checkpoints.length >= 1001) {
 					warnings.push("The checkpoint query hit its limit. Very long histories may need pagination.");
 				}
-				const adjustedRateCorrections = sortedCheckpoints.filter(checkpoint => usesDerivedPriceAdjustedRate(quote, checkpoint)).length;
-				if (adjustedRateCorrections > 0) {
-					warnings.push(
-						`Derived price-adjusted funding rates from raw rate and market price for ${adjustedRateCorrections} checkpoint(s) where the checkpoint current rate was not price-adjusted.`,
-					);
-				}
 
 				const closeEvents = parseCloseEvents(quoteEvents, epochDuration);
 				const parsedClosed = closeEvents.reduce((sum, item) => sum + item.amount, 0n);
@@ -1030,20 +1046,6 @@
 				return toBigInt(currentRate || "0");
 			}
 
-			function usesDerivedPriceAdjustedRate(quote, checkpoint) {
-				let rawRate = null;
-				let currentRate = null;
-				if (Number(quote.positionType) === 0) {
-					rawRate = checkpoint.rawLongRate;
-					currentRate = checkpoint.currentLongRate;
-				} else if (Number(quote.positionType) === 1) {
-					rawRate = checkpoint.rawShortRate;
-					currentRate = checkpoint.currentShortRate;
-				}
-				if (!hasValue(rawRate) || !hasValue(checkpoint.marketPrice) || !hasValue(currentRate)) return false;
-				return effectiveFundingRate(rawRate, currentRate, checkpoint.marketPrice) !== toBigInt(currentRate);
-			}
-
 			function checkpointEpoch(checkpoint, epochDuration) {
 				if (checkpoint.lastUpdatedEpoch !== null && checkpoint.lastUpdatedEpoch !== undefined) {
 					return toBigInt(checkpoint.lastUpdatedEpoch);
@@ -1141,7 +1143,7 @@
 						metric("Open amount", formatUnits(openAmount), openAmount.toString()),
 						metric("Opened price", formatUnits(openedPrice, 18, 8), openedPrice.toString()),
 						metricAmount("Funding adjustment", fundingAdjustment),
-						metric("Net uPNL", "-", "Enter a symbol price to calculate uPNL"),
+						metric("Net uPNL", "-", "Enter a symbol price to calculate uPNL", "featured"),
 					].join("");
 					return;
 				}
@@ -1153,14 +1155,14 @@
 						metric("Open amount", formatUnits(result.openAmount), result.openAmount.toString()),
 						metricAmount("Price PnL", result.pricePnl),
 						metricAmount("Funding adjustment", result.fundingAdjustment),
-						metricAmount("Net uPNL", result.netUpnl),
+						metricAmount("Net uPNL", result.netUpnl, "featured"),
 					].join("");
 				} catch (error) {
 					upnlResults.innerHTML = [
 						metric("Open amount", formatUnits(openAmount), openAmount.toString()),
 						metric("Opened price", formatUnits(openedPrice, 18, 8), openedPrice.toString()),
 						metricAmount("Funding adjustment", fundingAdjustment),
-						metric("Net uPNL", "Invalid price", error.message || "Invalid price"),
+						metric("Net uPNL", "Invalid price", error.message || "Invalid price", "featured"),
 					].join("");
 				}
 			}
@@ -1360,18 +1362,18 @@
 				`;
 			}
 
-			function metric(label, value, title) {
+			function metric(label, value, title, className = "") {
 				return `
-					<div class="metric" title="${escapeHtml(title || value || "")}">
+					<div class="metric ${escapeHtml(className)}" title="${escapeHtml(title || value || "")}">
 						<span>${escapeHtml(label)}</span>
 						<strong>${escapeHtml(value)}</strong>
 					</div>
 				`;
 			}
 
-			function metricAmount(label, value) {
+			function metricAmount(label, value, className = "") {
 				return `
-					<div class="metric" title="${escapeHtml(value.toString())}">
+					<div class="metric ${escapeHtml(className)}" title="${escapeHtml(value.toString())}">
 						<span>${escapeHtml(label)}</span>
 						<strong class="${amountClass(value)}">${escapeHtml(formatUnits(value))}</strong>
 					</div>

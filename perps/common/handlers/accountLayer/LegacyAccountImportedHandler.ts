@@ -31,6 +31,7 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 		account.userRef = event.params.owner.toHexString()
 		account.lastLayerActivityTimestamp = event.block.timestamp
 		account.isVirtual = false
+		account.isDeleted = false
 		account.affiliate = event.params.affiliate
 		account.subAccount = event.params.account.toHexString()
 		let coreSource = coreSourceForAccountLayer(_event.address)
@@ -84,5 +85,7 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 		setSubAccountProfileDefaults(sub, event.params.owner, _event.address, coreSource, _event.address)
 		sub.routingMode = "CUSTOM"
 		sub.save()
+		setAccountProfileSources(account, _event.address, coreSource, _event.address)
+		account.save()
 	}
 }

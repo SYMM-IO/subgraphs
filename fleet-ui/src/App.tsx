@@ -108,6 +108,10 @@ export function App() {
     setToast(response.toast);
   }
 
+  const closeToast = useCallback((open: boolean) => {
+    if (!open) setToast(null);
+  }, []);
+
   async function runAction(action: () => Promise<ApiActionResponse>, closeDialog = true) {
     setBusy(true);
     try {
@@ -272,7 +276,7 @@ export function App() {
         onUntag={(base, version, tag) => void runAction(() => removeTag({ base, version, tag }))}
         onRowPromote={(base, version, tags) => void runAction(() => rowPromote({ base, version, tags }))}
       />
-      <ToastHost toast={toast} onOpenChange={(open) => !open && setToast(null)} />
+      <ToastHost toast={toast} onOpenChange={closeToast} />
     </>
   );
 }

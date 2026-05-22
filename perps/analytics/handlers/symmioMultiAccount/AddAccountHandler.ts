@@ -1,9 +1,10 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { AddAccountHandler as CommonAddAccountHandler } from "../../../common/handlers/symmioMultiAccount/AddAccountHandler"
-import { Account as AccountModel, User } from "../../../../generated/schema";
+import { Account as AccountModel, User } from "../../../../generated/schema"
 import { MultiAccountVersion } from "../../../common/BaseHandler"
 import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory } from "../../utils/builders"
-import { getSource } from "../../../common/utils/get_source";
+import { getSource } from "../../../common/utils/get_source"
+import { syncAffiliateExpressWithdrawAccountMembership } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class AddAccountHandler<T> extends CommonAddAccountHandler<T> {
 	handle(_event: ethereum.Event, version: MultiAccountVersion): void {
@@ -25,5 +26,6 @@ export class AddAccountHandler<T> extends CommonAddAccountHandler<T> {
 		th.accounts = th.accounts.plus(BigInt.fromString("1"))
 		dh.save()
 		th.save()
+		syncAffiliateExpressWithdrawAccountMembership(account, event.block.timestamp, event.block.number)
 	}
 }

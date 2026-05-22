@@ -5,6 +5,7 @@ import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
 import { removeWithdrawRequestFromLookup, resolveWithdrawRequest } from "../../utils/withdrawRequest"
+import { removeWithdrawRequestFromAffiliateExpressWithdrawComponents } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,6 +21,7 @@ export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<
 		if (account) {
 			updateWithdrawHierarchyHistories(account, _event.block.timestamp, BigInt.zero(), BigInt.fromI32(-1), BigInt.fromI32(1), wr.amount.neg())
 		}
+		removeWithdrawRequestFromAffiliateExpressWithdrawComponents(wr, _event.block.timestamp, _event.block.number)
 		wr.save()
 		removeWithdrawRequestFromLookup(wr)
 		updatePartyALatestBalance(_event, version, Address.fromBytes(wr.user))

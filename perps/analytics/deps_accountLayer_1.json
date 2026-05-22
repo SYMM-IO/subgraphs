@@ -74,5 +74,32 @@
 	"TotalHistory": [
 		"SubAccountCreated",
 		"LegacyAccountImported"
+	],
+	"AffiliateExpressWithdrawComponents": [
+		"SubAccountCreated",
+		"LegacyAccountImported",
+		"VirtualAccountCreated",
+		"VirtualAccountReused",
+		"SingleVAModeChanged",
+		"SubAccountDeleted",
+		"VirtualAccountDeleted"
+	],
+	"AffiliateExpressWithdrawComponentBucket": [
+		"SubAccountCreated",
+		"LegacyAccountImported",
+		"VirtualAccountCreated",
+		"VirtualAccountReused",
+		"SingleVAModeChanged",
+		"SubAccountDeleted",
+		"VirtualAccountDeleted"
+	],
+	"AffiliateExpressWithdrawAccountSnapshot": [
+		"SubAccountCreated",
+		"LegacyAccountImported",
+		"VirtualAccountCreated",
+		"VirtualAccountReused",
+		"SingleVAModeChanged",
+		"SubAccountDeleted",
+		"VirtualAccountDeleted"
 	]
 }

@@ -1,0 +1,12 @@
+{
+	"AffiliateExpressWithdrawComponents": [
+		"RegisterExpressProvider",
+		"WithdrawAdvanced"
+	],
+	"ExpressProviderSource": [
+		"RegisterExpressProvider"
+	],
+	"WithdrawRequest": [
+		"WithdrawAdvanced"
+	]
+}

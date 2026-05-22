@@ -4,6 +4,7 @@ import { Account as AccountModel, User } from "../../../../generated/schema"
 import { AccountLayerVersion } from "../../../common/BaseHandler"
 import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
 import { getConfiguration, getDailyHistoryForTimestamp, getTotalHistory } from "../../utils/builders"
+import { syncAffiliateExpressWithdrawAccountMembership } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class SubAccountCreatedHandler<T> extends CommonSubAccountCreatedHandler<T> {
 	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -33,5 +34,6 @@ export class SubAccountCreatedHandler<T> extends CommonSubAccountCreatedHandler<
 		th.accounts = th.accounts.plus(BigInt.fromString("1"))
 		dh.save()
 		th.save()
+		syncAffiliateExpressWithdrawAccountMembership(account, event.block.timestamp, event.block.number)
 	}
 }

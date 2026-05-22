@@ -79,6 +79,7 @@ test("funding viewer derives price-adjusted checkpoint rates when stage currentR
 	assert.equal(build.rows.length, 253);
 	assert.equal(build.totals.unpaidDebt.toString(), "2850275887800000000");
 	assert.equal(build.rows[0].rate.toString(), "600000000000000");
+	assert.equal(build.warnings.length, 0);
 });
 
 test("uPNL calculator combines side-aware price pnl with unpaid funding", () => {
