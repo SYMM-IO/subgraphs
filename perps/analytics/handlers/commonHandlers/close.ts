@@ -34,6 +34,7 @@ export function handleClose<T>(
 		closeType,
 		new JSONBuilder()
 			.add("amount", event.params.filledAmount.toString())
+			.add("openedPrice", quote.openedPrice!.toString())
 			.add("closePrice", event.params.closedPrice.toString())
 			.add("quoteStatus", quote.quoteStatus.toString())
 			.build(),

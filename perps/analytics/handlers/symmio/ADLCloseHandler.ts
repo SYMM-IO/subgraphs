@@ -29,7 +29,11 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 			_event,
 			event.params.quoteId,
 			"ADL_CLOSE",
-			new JSONBuilder().add("amount", event.params.amount.toString()).add("closePrice", event.params.price.toString()).build(),
+			new JSONBuilder()
+				.add("amount", event.params.amount.toString())
+				.add("openedPrice", quote.openedPrice!.toString())
+				.add("closePrice", event.params.price.toString())
+				.build(),
 		)
 		updatePartyALatestBalance(_event, version, changetype<Address>(quote.partyA))
 		if (quote.partyB) updatePartyBLatestBalance(_event, version, changetype<Address>(quote.partyB!), changetype<Address>(quote.partyA))

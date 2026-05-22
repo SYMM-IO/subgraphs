@@ -6,6 +6,7 @@ const ADD_MARGIN_SELECTOR = "cf70cb69"
 const ADD_MARGIN_TO_NEXT_VA_SELECTOR = "a6d66852"
 const REMOVE_MARGIN_SELECTOR = "5ce56265"
 const EMERGENCY_RECOVER_MARGIN_SELECTOR = "3279017f"
+const AUTO_RETURN_MARGIN_TRANSFER_TYPE = "AUTO_RETURN"
 
 function findSelector(inputHex: string, selector: string, from: i32 = 0): i32 {
 	let localIndex = inputHex.substring(from).indexOf(selector)
@@ -91,6 +92,25 @@ function isEmergencyRecoverSideEffect(entity: BalanceChange, account: Account | 
 	return true
 }
 
+function isVirtualAccountAutoReturnSideEffect(entity: BalanceChange, account: Account | null): boolean {
+	let accountId = entity.account.toHexString()
+	let sender = senderHex(entity)
+
+	if (entity.type == "DEPOSIT") {
+		if (sender === null || account === null || account.subAccount === null) return false
+		let senderAccount = Account.load(sender)
+		if (senderAccount === null || senderAccount.virtualAccount === null || senderAccount.subAccount === null) return false
+		return senderAccount.virtualAccount == sender && senderAccount.subAccount == account.subAccount
+	}
+
+	if (account === null || account.virtualAccount === null) return false
+	if (account.virtualAccount != accountId) return false
+
+	if (entity.type == "DEALLOCATE") return true
+	if (entity.type == "WITHDRAW") return sender == accountId
+	return false
+}
+
 function marginTransferTypeFromInput(entity: BalanceChange, account: Account | null, input: Bytes): string | null {
 	let inputHex = input.toHexString()
 
@@ -122,6 +142,8 @@ function marginTransferTypeFromInput(entity: BalanceChange, account: Account | n
 		if (isEmergencyRecoverSideEffect(entity, account, subAccount)) return "EMERGENCY_RECOVER"
 		emergencyIndex = findSelector(inputHex, EMERGENCY_RECOVER_MARGIN_SELECTOR, emergencyIndex + 8)
 	}
+
+	if (isVirtualAccountAutoReturnSideEffect(entity, account)) return AUTO_RETURN_MARGIN_TRANSFER_TYPE
 
 	return null
 }
