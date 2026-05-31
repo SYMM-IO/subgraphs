@@ -662,6 +662,7 @@ type LiquidationDetail @entity(immutable: false) {
 	totalPnl: BigInt
 	paidCva: BigInt
 	paidLf: BigInt
+	potentialLf: BigInt
 	fullyLiquidatedTimestamp: BigInt
 }
 

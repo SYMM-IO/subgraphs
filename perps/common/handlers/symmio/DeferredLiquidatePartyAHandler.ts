@@ -34,6 +34,7 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.totalPnl = BigInt.zero()
 		entity.paidCva = BigInt.zero()
 		entity.paidLf = BigInt.zero()
+		entity.potentialLf = BigInt.zero()
 		let partyAAccount = Account.load(event.params.partyA.toHexString())
 		if (partyAAccount) {
 			entity.affiliate = partyAAccount.accountSource

@@ -11,6 +11,13 @@ import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_5 } from "../.
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 import { captureQuoteFundingContext, FundingSettlementContext, getQuoteFundingSignedAmount } from "../../utils/fundingHistory"
 
+function getActualPaidLf(version: Version, liquidationFee: BigInt): BigInt {
+	if (version >= Version.v_0_8_6) return liquidationFee
+
+	let half = liquidationFee.div(BigInt.fromI32(2))
+	return half.times(BigInt.fromI32(2))
+}
+
 export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositionsPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
@@ -40,7 +47,7 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 			updatePartyBLatestBalance(_event, version, changetype<Address>(quote.partyB!), event.params.partyA)
 		}
 
-		// Accumulate paidCva, paidLf, totalPnl on LiquidationDetail
+		// Accumulate paidCva, potentialLf, and totalPnl; paidLf tracks the actual liquidator reward from liquidation state.
 		if (version < Version.v_0_8_1) return
 
 		let liqState = getLiquidationStateData(version, event.address, event.params.partyA)
@@ -73,7 +80,7 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 		}
 
 		let accCva = entity.paidCva ? entity.paidCva! : BigInt.zero()
-		let accLf = entity.paidLf ? entity.paidLf! : BigInt.zero()
+		let accPotentialLf = entity.potentialLf ? entity.potentialLf! : BigInt.zero()
 		let accPnl = entity.totalPnl ? entity.totalPnl! : BigInt.zero()
 
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
@@ -82,7 +89,7 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 			if (!quote.liquidateAmount || !quote.liquidatePrice || !quote.openedPrice) continue
 
 			accCva = accCva.plus(quote.cva ? quote.cva! : BigInt.zero())
-			accLf = accLf.plus(quote.lf ? quote.lf! : BigInt.zero())
+			accPotentialLf = accPotentialLf.plus(quote.lf ? quote.lf! : BigInt.zero())
 
 			let pnl = unDecimal(
 				(quote.positionType == 0 ? BigInt.fromString("1") : BigInt.fromString("1").neg())
@@ -94,7 +101,8 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 		}
 
 		entity.paidCva = accCva
-		entity.paidLf = accLf
+		entity.paidLf = getActualPaidLf(version, liqState.liquidationFee)
+		entity.potentialLf = accPotentialLf
 		entity.totalPnl = accPnl
 		entity.save()
 	}

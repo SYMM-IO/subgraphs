@@ -16,6 +16,7 @@ export class AutoTakeoverPartyALiquidationHandler<T> extends BaseHandler {
 		entity.takeoverSettled = false
 		entity.disputed = false
 		entity.liquidationFee = BigInt.zero()
+		entity.paidLf = BigInt.zero()
 		entity.save()
 	}
 }
