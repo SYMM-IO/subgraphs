@@ -1,10 +1,38 @@
+"""
+Wallet-level owner record used to join classic accounts, sub-accounts, and
+virtual accounts owned by the same address.
+"""
 type User @entity(immutable: false) {
+	"""
+	Lowercase hex address string for the wallet.
+	"""
 	id: ID!
+	"""
+	Monotonic indexer-side ordering counter assigned when the user is first created.
+	"""
 	globalCounter: BigInt!
+	"""
+	Wallet address.
+	"""
 	address: Bytes!
+	"""
+	Block timestamp when the user was first indexed.
+	"""
 	timestamp: BigInt!
+	"""
+	Transaction hash that first created this user record.
+	"""
 	transaction: Bytes!
+	"""
+	Classic or normalized Account records owned by this wallet.
+	"""
 	accounts: [Account!]! @derivedFrom(field: "userRef")
+	"""
+	Account-layer sub-accounts owned by this wallet.
+	"""
 	subAccounts: [SubAccount!]! @derivedFrom(field: "ownerRef")
+	"""
+	Account-layer virtual accounts owned through this wallet's sub-accounts.
+	"""
 	virtualAccounts: [VirtualAccount!]! @derivedFrom(field: "ownerRef")
 }

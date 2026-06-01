@@ -31,6 +31,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 				quote.partyA = event.address
 				quote.partyAAccount = event.address.toHexString()
 				quote.tradingFee = BigInt.zero()
+				quote.closeFee = BigInt.zero()
 				quote.initialCva = BigInt.zero()
 				quote.initialPartyBmm = BigInt.zero()
 				quote.initialLf = BigInt.zero()
@@ -65,6 +66,7 @@ export class AcceptCancelRequestHandler<T> extends BaseHandler {
 				quote.maxFundingRate = q.maxFundingRate
 				quote.tradingFee = q.tradingFee
 			}
+			quote.closeFee = q.closeFee
 
 			if (version >= Version.v_0_8_3) {
 				quote.affiliate = q.affiliate

@@ -1,43 +1,173 @@
+"""
+Account-layer sub-account owned by a wallet and registered under an affiliate.
+
+Sub-accounts sit between a user wallet and one or more virtual accounts. They
+carry account-layer routing/configuration and aggregate counters for the
+positions and quotes routed through them.
+"""
 type SubAccount @entity(immutable: false) {
+	"""
+	Lowercase hex address string for the sub-account.
+	"""
 	id: ID!
+	"""
+	Sub-account address emitted by AccountLayer.
+	"""
 	address: Bytes!
+	"""
+	Wallet address that owns the sub-account.
+	"""
 	owner: Bytes!
+	"""
+	User entity for `owner`.
+	"""
 	ownerRef: User
+	"""
+	Affiliate entity associated with this sub-account.
+	"""
 	affiliate: Affiliate!
+	"""
+	Raw affiliate address associated with this sub-account.
+	"""
 	affiliateAddress: Bytes
+	"""
+	Human-readable sub-account name.
+	"""
 	name: String
+	"""
+	Whether the account layer reported single-VA mode for this sub-account.
+	"""
 	singleVAMode: Boolean!
+	"""
+	Deletion flag set by account-layer delete handlers.
+	"""
 	isDeleted: Boolean!
+	"""
+	AccountLayer contract address that emitted the account event.
+	"""
 	source: Bytes!
+	"""
+	Deployment identifier derived by profile helpers when available.
+	"""
 	deploymentId: String
+	"""
+	Symmio core associated with this sub-account when known.
+	"""
 	coreSource: Bytes
+	"""
+	AccountLayer contract associated with this sub-account.
+	"""
 	accountLayerSource: Bytes
+	"""
+	Block timestamp when the sub-account was first indexed.
+	"""
 	timestamp: BigInt!
+	"""
+	Block timestamp of the latest sub-account profile update.
+	"""
 	updateTimestamp: BigInt!
+	"""
+	Opaque account-layer metadata bytes returned by getSubAccount.
+	"""
 	metadata: Bytes
+	"""
+	Symmio core address returned by getSubAccount.
+	"""
 	symmioCore: Bytes
+	"""
+	Raw account-layer `SubAccountIsolationType` ordinal.
+	"""
 	isolationType: Int
+	"""
+	Subgraph routing label derived from account-layer configuration.
+	"""
 	routingMode: String
+	"""
+	True when created from a legacy account import flow.
+	"""
 	isLegacy: Boolean
+	"""
+	Legacy account contract/address associated with an imported account.
+	"""
 	legacyContract: Bytes
+	"""
+	True after the legacy import handler marks this sub-account as imported.
+	"""
 	legacyImported: Boolean
+	"""
+	Block timestamp when the legacy import was indexed.
+	"""
 	legacyImportedTimestamp: BigInt
+	"""
+	Latest margin balance tracked by margin-transfer handlers.
+	"""
 	latestMarginBalance: BigInt
+	"""
+	Latest trade timestamp routed through this sub-account.
+	"""
 	lastTradeTimestamp: BigInt
+	"""
+	Latest margin-transfer timestamp routed through this sub-account.
+	"""
 	lastMarginTransferTimestamp: BigInt
+	"""
+	Latest configuration timestamp for this sub-account.
+	"""
 	lastConfigTimestamp: BigInt
+	"""
+	Total number of virtual accounts ever created under this sub-account.
+	"""
 	totalVirtualAccounts: BigInt!
+	"""
+	Number of currently active virtual accounts under this sub-account.
+	"""
 	activeVirtualAccounts: BigInt!
+	"""
+	Current active position count tracked by quote lifecycle handlers.
+	"""
 	activePositions: BigInt!
+	"""
+	Total positions ever opened through this sub-account.
+	"""
 	totalPositions: BigInt!
+	"""
+	Current pending quote count tracked by quote lifecycle handlers.
+	"""
 	pendingQuotesCount: BigInt!
+	"""
+	Current open position count tracked by quote lifecycle handlers.
+	"""
 	openPositionsCount: BigInt!
+	"""
+	Total closed quote count tracked by quote lifecycle handlers.
+	"""
 	closedQuotesCount: BigInt!
+	"""
+	Total liquidated quote count tracked by quote lifecycle handlers.
+	"""
 	liquidatedQuotesCount: BigInt!
+	"""
+	Total cancelled quote count tracked by quote lifecycle handlers.
+	"""
 	cancelledQuotesCount: BigInt!
+	"""
+	Total expired quote count tracked by quote lifecycle handlers.
+	"""
 	expiredQuotesCount: BigInt!
+	"""
+	Total rejected quote count tracked by quote lifecycle handlers.
+	"""
 	rejectedQuotesCount: BigInt!
+	"""
+	Virtual accounts under this sub-account.
+	"""
 	virtualAccounts: [VirtualAccount!]! @derivedFrom(field: "parent")
+	"""
+	Immutable margin-transfer records routed through this sub-account.
+	"""
 	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "subAccount")
+	"""
+	Quotes routed through this sub-account.
+	"""
 	quotes: [Quote!]! @derivedFrom(field: "subAccount")
 }

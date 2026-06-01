@@ -1,34 +1,137 @@
+"""
+Account-layer virtual account used as the PartyA trading address on Symmio.
+
+Virtual accounts are deterministic child accounts under a SubAccount. They are
+created, deleted, and sometimes reused by AccountLayer to isolate positions by
+position, market, or market direction.
+"""
 type VirtualAccount @entity(immutable: false) {
+	"""
+	Lowercase hex address string for the virtual account.
+	"""
 	id: ID!
+	"""
+	Virtual-account address emitted by AccountLayer.
+	"""
 	address: Bytes!
+	"""
+	Parent sub-account that owns this virtual account.
+	"""
 	parent: SubAccount!
+	"""
+	Raw parent sub-account address.
+	"""
 	parentAddress: Bytes
+	"""
+	Wallet owner inherited from the parent sub-account when known.
+	"""
 	owner: Bytes
+	"""
+	User entity for `owner`.
+	"""
 	ownerRef: User
+	"""
+	Deletion flag set by AccountLayer delete/reuse handlers.
+	"""
 	isDeleted: Boolean!
+	"""
+	AccountLayer contract address that emitted the account event.
+	"""
 	source: Bytes!
+	"""
+	Deployment identifier derived by profile helpers when available.
+	"""
 	deploymentId: String
+	"""
+	Symmio core associated with this virtual account when known.
+	"""
 	coreSource: Bytes
+	"""
+	AccountLayer contract associated with this virtual account.
+	"""
 	accountLayerSource: Bytes
+	"""
+	Block timestamp when the virtual account was first indexed.
+	"""
 	timestamp: BigInt!
+	"""
+	Block timestamp of the latest virtual-account profile update.
+	"""
 	updateTimestamp: BigInt!
+	"""
+	Opaque account-layer metadata bytes returned by getVirtualAccount.
+	"""
 	metadata: Bytes
+	"""
+	Symbol id associated with market-isolated virtual accounts.
+	"""
 	symbolId: BigInt
+	"""
+	Raw account-layer `VirtualAccountIsolationType` ordinal.
+	"""
 	isolationType: Int
+	"""
+	Latest margin balance tracked by margin-transfer handlers.
+	"""
 	latestMarginBalance: BigInt
+	"""
+	Latest trade timestamp routed through this virtual account.
+	"""
 	lastTradeTimestamp: BigInt
+	"""
+	Latest margin-transfer timestamp routed through this virtual account.
+	"""
 	lastMarginTransferTimestamp: BigInt
+	"""
+	Number of times this virtual account was reused from AccountLayer's deleted-account pool.
+	"""
 	reuseCount: BigInt
+	"""
+	Block timestamp of the latest reuse event.
+	"""
 	lastReuseTimestamp: BigInt
+	"""
+	Block timestamp of the latest delete event.
+	"""
 	lastDeleteTimestamp: BigInt
+	"""
+	Total positions ever opened through this virtual account.
+	"""
 	totalPositions: BigInt!
+	"""
+	Current active position count tracked by quote lifecycle handlers.
+	"""
 	activePositions: BigInt!
+	"""
+	Current pending quote count tracked by quote lifecycle handlers.
+	"""
 	pendingQuotesCount: BigInt!
+	"""
+	Current open position count tracked by quote lifecycle handlers.
+	"""
 	openPositionsCount: BigInt!
+	"""
+	Total closed quote count tracked by quote lifecycle handlers.
+	"""
 	closedQuotesCount: BigInt!
+	"""
+	Total liquidated quote count tracked by quote lifecycle handlers.
+	"""
 	liquidatedQuotesCount: BigInt!
+	"""
+	Total cancelled quote count tracked by quote lifecycle handlers.
+	"""
 	cancelledQuotesCount: BigInt!
+	"""
+	Total expired quote count tracked by quote lifecycle handlers.
+	"""
 	expiredQuotesCount: BigInt!
+	"""
+	Total rejected quote count tracked by quote lifecycle handlers.
+	"""
 	rejectedQuotesCount: BigInt!
+	"""
+	Immutable margin-transfer records routed through this virtual account.
+	"""
 	marginTransfers: [MarginTransfer!]! @derivedFrom(field: "virtualAccount")
 }

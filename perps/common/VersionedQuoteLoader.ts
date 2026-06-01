@@ -27,12 +27,18 @@ import {
 	getLiquidatedStateOfPartyA as getLiqState_0_8_5,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_5,
 } from "./contract_utils_0_8_5"
+import {
+	getQuote as getQuote_0_8_6,
+	getLiquidatedStateOfPartyA as getLiqState_0_8_6,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_6,
+} from "./contract_utils_0_8_6"
 
 /**
  * Normalized quote data that abstracts version-specific field name differences.
  * v0.8.0: mm → partyAmm/partyBmm, maxInterestRate → maxFundingRate, no tradingFee/affiliate
- * v0.8.1-v0.8.2: all fields except affiliate
- * v0.8.3+: all fields including affiliate
+ * v0.8.1-v0.8.2: all fields except affiliate/closeFee
+ * v0.8.3-v0.8.4: all fields except closeFee
+ * v0.8.5-v0.8.6: all fields including affiliate/closeFee
  */
 export class QuoteData {
 	cva: BigInt
@@ -46,6 +52,7 @@ export class QuoteData {
 	partyA: Bytes
 	symbolId: BigInt
 	tradingFee: BigInt
+	closeFee: BigInt
 	positionType: i32
 	requestedOpenPrice: BigInt
 	quantity: BigInt
@@ -69,6 +76,7 @@ export class QuoteData {
 		this.partyA = Address.zero()
 		this.symbolId = BigInt.zero()
 		this.tradingFee = BigInt.zero()
+		this.closeFee = BigInt.zero()
 		this.positionType = 0
 		this.requestedOpenPrice = BigInt.zero()
 		this.quantity = BigInt.zero()
@@ -266,6 +274,34 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.partyA = q.partyA
 			data.symbolId = q.symbolId
 			data.tradingFee = q.tradingFee
+			data.closeFee = q.closeFee
+			data.positionType = q.positionType
+			data.requestedOpenPrice = q.requestedOpenPrice
+			data.quantity = q.quantity
+			data.deadline = q.deadline
+			data.quoteStatus = q.quoteStatus
+			data.marketPrice = q.marketPrice
+			data.affiliate = q.affiliate
+			data.accumulatedPaidFunding = q.accumulatedPaidFunding
+			data.lastFundingPaymentTimestamp = q.lastFundingPaymentTimestamp
+			if (q.partyBsWhiteList) data.partyBsWhiteList = convertAddressArrayToBytes(q.partyBsWhiteList)
+			break
+		}
+		case Version.v_0_8_6: {
+			let q = getQuote_0_8_6(address, id)
+			if (!q) return null
+			data.cva = q.lockedValues.cva
+			data.lf = q.lockedValues.lf
+			data.partyAmm = q.lockedValues.partyAmm
+			data.partyBmm = q.lockedValues.partyBmm
+			data.avgClosedPrice = q.avgClosedPrice
+			data.openedPrice = q.openedPrice
+			data.maxFundingRate = q.maxFundingRate
+			data.orderType = q.orderType
+			data.partyA = q.partyA
+			data.symbolId = q.symbolId
+			data.tradingFee = q.tradingFee
+			data.closeFee = q.closeFee
 			data.positionType = q.positionType
 			data.requestedOpenPrice = q.requestedOpenPrice
 			data.quantity = q.quantity
@@ -300,6 +336,8 @@ export function getSymbolName(version: Version, symbolId: BigInt, address: Addre
 			return symbolIdToSymbolName_0_8_4(symbolId, address)
 		case Version.v_0_8_5:
 			return symbolIdToSymbolName_0_8_5(symbolId, address)
+		case Version.v_0_8_6:
+			return symbolIdToSymbolName_0_8_6(symbolId, address)
 		default:
 			return ""
 	}
@@ -381,6 +419,22 @@ export function getLiquidationStateData(version: Version, address: Address, part
 		}
 		case Version.v_0_8_5: {
 			let d = getLiqState_0_8_5(address, partyA)
+			if (!d) return null
+			data.liquidationId = d.liquidationId
+			data.liquidationType = d.liquidationType
+			data.upnl = d.upnl
+			data.totalUnrealizedLoss = d.totalUnrealizedLoss
+			data.deficit = d.deficit
+			data.liquidationFee = d.liquidationFee
+			data.timestamp = d.timestamp
+			data.involvedPartyBCounts = d.involvedPartyBCounts
+			data.partyAAccumulatedUpnl = d.partyAAccumulatedUpnl
+			data.disputed = d.disputed
+			data.liquidationTimestamp = d.liquidationTimestamp
+			break
+		}
+		case Version.v_0_8_6: {
+			let d = getLiqState_0_8_6(address, partyA)
 			if (!d) return null
 			data.liquidationId = d.liquidationId
 			data.liquidationType = d.liquidationType

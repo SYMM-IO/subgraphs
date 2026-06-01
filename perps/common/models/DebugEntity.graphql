@@ -1,7 +1,25 @@
+"""
+Developer/debug record emitted by selected handlers for troubleshooting indexed flows.
+"""
 type DebugEntity @entity(immutable: true) {
+	"""
+	Debug record id chosen by the writing handler.
+	"""
 	id: String!
+	"""
+	Block timestamp associated with the debug record.
+	"""
 	timestamp: BigInt
+	"""
+	Optional numeric trigger value used by the writing handler.
+	"""
 	trigger: BigInt
+	"""
+	Debug category label.
+	"""
 	type: String
+	"""
+	Debug message text.
+	"""
 	message: String
 }

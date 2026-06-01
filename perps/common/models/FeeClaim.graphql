@@ -1,10 +1,40 @@
+"""
+Immutable nonzero AccountLayer `FeesClaimed` record for an affiliate.
+
+This entity records claim events only. It is not populated by `FeesDistributed`
+events.
+"""
 type FeeClaim @entity(immutable: true) {
+	"""
+	Event id `${transactionHash}-${logIndex}`.
+	"""
 	id: ID!
+	"""
+	Affiliate that claimed the fees.
+	"""
 	affiliate: Affiliate!
+	"""
+	Symmio core address for the claimed fees.
+	"""
 	symmio: Bytes!
+	"""
+	Raw claimed amount emitted by AccountLayer.
+	"""
 	amount: BigInt!
+	"""
+	AccountLayer contract address that emitted the claim event.
+	"""
 	source: Bytes!
+	"""
+	Block timestamp of the claim event.
+	"""
 	timestamp: BigInt!
+	"""
+	Block number of the claim event.
+	"""
 	blockNumber: BigInt!
+	"""
+	Transaction hash of the claim event.
+	"""
 	transaction: Bytes!
 }

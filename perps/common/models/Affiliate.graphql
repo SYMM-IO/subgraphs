@@ -1,20 +1,81 @@
+"""
+AccountLayer affiliate / account manager profile.
+
+Affiliates register with AccountLayer, can be approved/paused/unpaused, and
+own sub-accounts. This entity stores current affiliate metadata and fee/share
+configuration that the subgraph has observed.
+"""
 type Affiliate @entity(immutable: false) {
+	"""
+	Lowercase hex address string for the affiliate/account manager.
+	"""
 	id: ID!
+	"""
+	Affiliate/account-manager address.
+	"""
 	address: Bytes!
+	"""
+	Affiliate display name from registration/update events.
+	"""
 	name: String!
+	"""
+	Optional brand color from affiliate metadata events.
+	"""
 	brandColor: String
+	"""
+	Current affiliate admin address.
+	"""
 	admin: Bytes!
+	"""
+	Pending admin address while an admin transfer is proposed.
+	"""
 	pendingAdmin: Bytes
+	"""
+	Fee distributor address configured for this affiliate.
+	"""
 	feeDistributor: Bytes
+	"""
+	Subgraph status label derived from AccountLayer affiliate lifecycle events.
+	"""
 	status: String!
+	"""
+	Affiliate Symmio share value observed from AccountLayer/FeeCollector configuration.
+	"""
 	symmioShare: BigInt
+	"""
+	Express withdraw rate configured for this affiliate when emitted.
+	"""
 	expressRate: BigInt
+	"""
+	Virtual provider address configured for this affiliate when emitted.
+	"""
 	virtualProvider: Bytes
+	"""
+	Account manager address associated with this affiliate when emitted.
+	"""
 	accountManager: Bytes
+	"""
+	Whether a stakeholder update request is currently pending in the indexed event stream.
+	"""
 	stakeholdersUpdatePending: Boolean!
+	"""
+	AccountLayer contract address that emitted the affiliate event.
+	"""
 	source: Bytes!
+	"""
+	Block timestamp when this affiliate was first indexed.
+	"""
 	timestamp: BigInt!
+	"""
+	Block timestamp of the latest affiliate update.
+	"""
 	updateTimestamp: BigInt!
+	"""
+	Sub-accounts registered under this affiliate.
+	"""
 	subAccounts: [SubAccount!]! @derivedFrom(field: "affiliate")
+	"""
+	Nonzero fee-claim events recorded for this affiliate.
+	"""
 	feeClaims: [FeeClaim!]! @derivedFrom(field: "affiliate")
 }

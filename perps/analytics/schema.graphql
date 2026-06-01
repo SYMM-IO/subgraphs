@@ -1,954 +1,1842 @@
+"""Daily user activity marker used to count active and new users per account-source bucket."""
 type UserActivity @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""User or wallet address associated with this row."""
 	user: Bytes!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt
 }
 
+"""
+Immutable balance-change event snapshot.
+
+Rows are emitted from core balance events and enriched with account-layer
+profile context when the account can be resolved. `isMarginTransferSideEffect`
+marks balance changes caused by account-layer margin movement calls.
+"""
 type BalanceChange @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Subgraph or event type label for this row."""
 	type: String!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Secondary account address involved in this balance change."""
 	sideAccount: Bytes
+	"""Raw amount associated with this row."""
 	amount: BigInt!
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes
+	"""Account-layer SubAccount entity resolved for this balance change, when known."""
 	subAccountRef: SubAccount
+	"""Account-layer VirtualAccount entity resolved for this balance change, when known."""
 	virtualAccountRef: VirtualAccount
+	"""Subgraph account classification label when known."""
 	accountKind: String
+	"""True when this balance change is detected as a side effect of an account-layer margin movement call."""
 	isMarginTransferSideEffect: Boolean!
+	"""Detected margin movement kind: ADD, REMOVE, EMERGENCY_RECOVER, AUTO_RETURN, or null."""
 	marginTransferType: String
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
+	"""Event sender or transaction sender address when indexed."""
 	sender: Bytes
+	"""Account entity reference for sender when known."""
 	senderRef: Account
 }
 
+"""Immutable lifecycle event log attached to a normalized Quote entity."""
 type QuoteEvent @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Protocol quote id on the Symmio core contract."""
 	quoteId: BigInt!
+	"""Normalized Quote entity associated with this row."""
 	quote: Quote!
+	"""Subgraph or event type label for this row."""
 	type: String!
+	"""Metadata value indexed for this row."""
 	metadata: String
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
 }
 
+"""
+Per-day aggregate for a core/account-source bucket.
+
+Trade volume is `openTradeVolume + closeTradeVolume + liquidateTradeVolume`.
+`platformFee` is the aggregate of charged `openFee + closeFee` amounts; it does
+not include funding, CVA, or liquidation-fee locked values.
+"""
 type DailyHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Sum of open, close, and liquidation notional volume for the day."""
 	tradeVolume: BigInt!
+	"""Open notional added on OpenPosition, calculated as filledAmount * openedPrice / 1e18."""
 	openTradeVolume: BigInt!
+	"""Close notional added on close handlers, calculated as filledAmount * closedPrice / 1e18."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional added on liquidation handlers, calculated as amount * price / 1e18."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Number of active users counted in this aggregate bucket."""
 	activeUsers: BigInt!
+	"""Number of newly indexed users counted in this aggregate bucket."""
 	newUsers: BigInt!
+	"""Number of newly indexed accounts counted in this aggregate bucket."""
 	newAccounts: BigInt!
+	"""Charged platform fee amount, equal to openFee + closeFee."""
 	platformFee: BigInt!
+	"""Actual charged open-fee amount, not the quote fee rate."""
 	openFee: BigInt!
+	"""Actual charged close-fee amount, not the quote fee rate."""
 	closeFee: BigInt!
+	"""Subgraph-derived Symmio share of platform fees, using fee collector state or fallback share."""
 	symmioShare: BigInt!
+	"""Daily weighted-average open interest produced by open-interest settlement logic."""
 	openInterest: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Average opened position size maintained by analytics handlers."""
 	averagePositionSize: BigInt!
+	"""Number of positions counted by this aggregate."""
 	positionsCount: BigInt!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Current FeeCollector address configured for an affiliate/account source."""
 type AffiliateFeeCollector @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID! # affiliate
+	"""FeeCollector address currently configured for this affiliate/account-source id."""
 	feeCollector: Bytes!
 }
 
+"""Current Symmio share value observed for a fee collector."""
 type FeeCollectorShare @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID! # feeCollector
+	"""Subgraph-derived Symmio share of platform fees."""
 	symmioShare: BigInt
 }
 
+"""Per-day aggregate for a solver within a core/account-source bucket."""
 type SolverDailyHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""Sum of open, close, and liquidation notional volume for this solver/day."""
 	tradeVolume: BigInt!
+	"""Open notional added on OpenPosition for this solver/day."""
 	openTradeVolume: BigInt!
+	"""Close notional added on close handlers for this solver/day."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional added on liquidation handlers for this solver/day."""
 	liquidateTradeVolume: BigInt!
+	"""Open-interest value maintained by open-interest helpers for this aggregate."""
 	openInterest: BigInt!
+	"""Average opened position size maintained by analytics handlers."""
 	averagePositionSize: BigInt!
+	"""Number of positions counted by this aggregate."""
 	positionsCount: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Solver / PartyB address associated with this aggregate."""
 	solver: Bytes!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Charged platform fee amount, equal to openFee + closeFee."""
 	platformFee: BigInt!
+	"""Actual charged open-fee amount, not the quote fee rate."""
 	openFee: BigInt!
+	"""Actual charged close-fee amount, not the quote fee rate."""
 	closeFee: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Per-day aggregate for a solver across account sources within one core."""
 type SolverOnlyDailyHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""Open plus close plus liquidation notional volume for this aggregate."""
 	tradeVolume: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Open-interest value maintained by open-interest helpers for this aggregate."""
 	openInterest: BigInt!
+	"""Average opened position size maintained by analytics handlers."""
 	averagePositionSize: BigInt!
+	"""Number of positions counted by this aggregate."""
 	positionsCount: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Solver / PartyB address associated with this aggregate."""
 	solver: Bytes!
+	"""Charged platform fee amount, equal to openFee + closeFee."""
 	platformFee: BigInt!
+	"""Actual charged open-fee amount, not the quote fee rate."""
 	openFee: BigInt!
+	"""Actual charged close-fee amount, not the quote fee rate."""
 	closeFee: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Weekly aggregate used for high-level trade-volume and active-user charts."""
 type WeeklyHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Open plus close plus liquidation notional volume for this aggregate."""
 	tradeVolume: BigInt!
+	"""Number of active users counted in this aggregate bucket."""
 	activeUsers: BigInt!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Monthly aggregate used for high-level trade-volume and active-user charts."""
 type MonthlyHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Open plus close plus liquidation notional volume for this aggregate."""
 	tradeVolume: BigInt!
+	"""Number of active users counted in this aggregate bucket."""
 	activeUsers: BigInt!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""All-time aggregate for a core/account-source/collateral bucket."""
 type TotalHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Sum of open, close, and liquidation notional volume for this all-time bucket."""
 	tradeVolume: BigInt!
+	"""All-time open notional added on OpenPosition."""
 	openTradeVolume: BigInt!
+	"""All-time close notional added on close handlers."""
 	closeTradeVolume: BigInt!
+	"""All-time liquidation notional added on liquidation handlers."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""All-time user count tracked by account lifecycle handlers for this aggregate bucket."""
 	users: BigInt!
+	"""All-time account count tracked by account lifecycle handlers for this aggregate bucket."""
 	accounts: BigInt!
+	"""Charged platform fee amount, equal to openFee + closeFee."""
 	platformFee: BigInt!
+	"""Actual charged open-fee amount, not the quote fee rate."""
 	openFee: BigInt!
+	"""Actual charged close-fee amount, not the quote fee rate."""
 	closeFee: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""All-time aggregate for a solver within a core/account-source bucket."""
 type TotalSolverHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Open plus close plus liquidation notional volume for this aggregate."""
 	tradeVolume: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Open-interest value maintained by open-interest helpers for this aggregate."""
 	openInterest: BigInt!
+	"""Average opened position size maintained by analytics handlers."""
 	averagePositionSize: BigInt!
+	"""Number of positions counted by this aggregate."""
 	positionsCount: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Solver / PartyB address associated with this aggregate."""
 	solver: Bytes!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Per-day aggregate for one user/account profile."""
 type DailyUserHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""User or wallet address associated with this row."""
 	user: Bytes!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Account entity reference for the account address when known."""
 	accountRef: Account
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Accumulated allocate amount carried into this day and incremented by allocate events during the day."""
 	accAllocate: BigInt!
+	"""Accumulated deallocate amount carried into this day and incremented by deallocate events during the day."""
 	accDeallocate: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""CVA amount paid as accumulated by analytics handlers."""
 	cvaPaid: BigInt!
+	"""Liquidation-fee amount paid as accumulated by analytics handlers."""
 	lfPaid: BigInt!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""All-time aggregate for one user/account profile."""
 type TotalUserHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Account entity reference for the account address when known."""
 	accountRef: Account
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Per-day aggregate for a wallet owner across its indexed account-layer hierarchy."""
 type DailyAccountOwnerHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Current pending quote count tracked by quote lifecycle handlers."""
 	pendingQuotesCount: BigInt!
+	"""Total opened position count tracked by quote lifecycle handlers."""
 	openedPositionsCount: BigInt!
+	"""Current open position count tracked by quote lifecycle handlers."""
 	openPositionsCount: BigInt!
+	"""Total closed position count tracked by quote lifecycle handlers."""
 	closedPositionsCount: BigInt!
+	"""Total liquidated position count tracked by quote lifecycle handlers."""
 	liquidatedPositionsCount: BigInt!
+	"""Total cancelled quote count tracked by quote lifecycle handlers."""
 	cancelledQuotesCount: BigInt!
+	"""Total expired quote count tracked by quote lifecycle handlers."""
 	expiredQuotesCount: BigInt!
+	"""Total rejected quote count tracked by quote lifecycle handlers."""
 	rejectedQuotesCount: BigInt!
+	"""Total withdraw request count tracked by withdraw handlers."""
 	withdrawRequestsCount: BigInt!
+	"""Current active withdraw request count tracked by withdraw handlers."""
 	activeWithdrawRequestsCount: BigInt!
+	"""Total finalized withdraw request count tracked by withdraw handlers."""
 	finalizedWithdrawRequestsCount: BigInt!
+	"""Current pending withdraw amount tracked by withdraw handlers."""
 	pendingWithdrawAmount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""All-time aggregate for a wallet owner across its indexed account-layer hierarchy."""
 type TotalAccountOwnerHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Current pending quote count tracked by quote lifecycle handlers."""
 	pendingQuotesCount: BigInt!
+	"""Total opened position count tracked by quote lifecycle handlers."""
 	openedPositionsCount: BigInt!
+	"""Current open position count tracked by quote lifecycle handlers."""
 	openPositionsCount: BigInt!
+	"""Total closed position count tracked by quote lifecycle handlers."""
 	closedPositionsCount: BigInt!
+	"""Total liquidated position count tracked by quote lifecycle handlers."""
 	liquidatedPositionsCount: BigInt!
+	"""Total cancelled quote count tracked by quote lifecycle handlers."""
 	cancelledQuotesCount: BigInt!
+	"""Total expired quote count tracked by quote lifecycle handlers."""
 	expiredQuotesCount: BigInt!
+	"""Total rejected quote count tracked by quote lifecycle handlers."""
 	rejectedQuotesCount: BigInt!
+	"""Total withdraw request count tracked by withdraw handlers."""
 	withdrawRequestsCount: BigInt!
+	"""Current active withdraw request count tracked by withdraw handlers."""
 	activeWithdrawRequestsCount: BigInt!
+	"""Total finalized withdraw request count tracked by withdraw handlers."""
 	finalizedWithdrawRequestsCount: BigInt!
+	"""Current pending withdraw amount tracked by withdraw handlers."""
 	pendingWithdrawAmount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Per-day aggregate for one account-layer SubAccount."""
 type DailySubAccountHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""SubAccount address this daily aggregate is keyed by."""
 	subAccount: Bytes!
+	"""SubAccount entity reference for the keyed subAccount address."""
 	subAccountRef: SubAccount
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Current pending quote count tracked by quote lifecycle handlers."""
 	pendingQuotesCount: BigInt!
+	"""Current open position count tracked by quote lifecycle handlers."""
 	openPositionsCount: BigInt!
+	"""Total closed quote count tracked by quote lifecycle handlers."""
 	closedQuotesCount: BigInt!
+	"""Total liquidated quote count tracked by quote lifecycle handlers."""
 	liquidatedQuotesCount: BigInt!
+	"""Total cancelled quote count tracked by quote lifecycle handlers."""
 	cancelledQuotesCount: BigInt!
+	"""Total expired quote count tracked by quote lifecycle handlers."""
 	expiredQuotesCount: BigInt!
+	"""Total rejected quote count tracked by quote lifecycle handlers."""
 	rejectedQuotesCount: BigInt!
+	"""Total liquidation count tracked by liquidation handlers."""
 	liquidationsCount: BigInt!
+	"""Total withdraw request count tracked by withdraw handlers."""
 	withdrawRequestsCount: BigInt!
+	"""Current active withdraw request count tracked by withdraw handlers."""
 	activeWithdrawRequestsCount: BigInt!
+	"""Total finalized withdraw request count tracked by withdraw handlers."""
 	finalizedWithdrawRequestsCount: BigInt!
+	"""Current pending withdraw amount tracked by withdraw handlers."""
 	pendingWithdrawAmount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Cumulative margin added through account-layer margin handlers."""
 	marginAdd: BigInt!
+	"""Cumulative margin removed through account-layer margin handlers."""
 	marginRemove: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""Current active position count tracked by quote lifecycle handlers."""
 	activePositions: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""All-time aggregate for one account-layer SubAccount."""
 type TotalSubAccountHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""SubAccount address this all-time aggregate is keyed by."""
 	subAccount: Bytes!
+	"""SubAccount entity reference for the keyed subAccount address."""
 	subAccountRef: SubAccount
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Current pending quote count tracked by quote lifecycle handlers."""
 	pendingQuotesCount: BigInt!
+	"""Current open position count tracked by quote lifecycle handlers."""
 	openPositionsCount: BigInt!
+	"""Total closed quote count tracked by quote lifecycle handlers."""
 	closedQuotesCount: BigInt!
+	"""Total liquidated quote count tracked by quote lifecycle handlers."""
 	liquidatedQuotesCount: BigInt!
+	"""Total cancelled quote count tracked by quote lifecycle handlers."""
 	cancelledQuotesCount: BigInt!
+	"""Total expired quote count tracked by quote lifecycle handlers."""
 	expiredQuotesCount: BigInt!
+	"""Total rejected quote count tracked by quote lifecycle handlers."""
 	rejectedQuotesCount: BigInt!
+	"""Total liquidation count tracked by liquidation handlers."""
 	liquidationsCount: BigInt!
+	"""Total withdraw request count tracked by withdraw handlers."""
 	withdrawRequestsCount: BigInt!
+	"""Current active withdraw request count tracked by withdraw handlers."""
 	activeWithdrawRequestsCount: BigInt!
+	"""Total finalized withdraw request count tracked by withdraw handlers."""
 	finalizedWithdrawRequestsCount: BigInt!
+	"""Current pending withdraw amount tracked by withdraw handlers."""
 	pendingWithdrawAmount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Cumulative margin added through account-layer margin handlers."""
 	marginAdd: BigInt!
+	"""Cumulative margin removed through account-layer margin handlers."""
 	marginRemove: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""Current active position count tracked by quote lifecycle handlers."""
 	activePositions: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Per-day aggregate for one account-layer VirtualAccount."""
 type DailyVirtualAccountHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""VirtualAccount address this daily aggregate is keyed by."""
 	virtualAccount: Bytes!
+	"""VirtualAccount entity reference for the keyed virtualAccount address."""
 	virtualAccountRef: VirtualAccount
+	"""Parent SubAccount address for this virtual account aggregate."""
 	subAccount: Bytes!
+	"""Parent SubAccount entity reference for this virtual account aggregate."""
 	subAccountRef: SubAccount
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt
+	"""Isolation type copied from the VirtualAccount profile when known."""
 	isolationType: Int
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Current pending quote count tracked by quote lifecycle handlers."""
 	pendingQuotesCount: BigInt!
+	"""Current open position count tracked by quote lifecycle handlers."""
 	openPositionsCount: BigInt!
+	"""Total closed quote count tracked by quote lifecycle handlers."""
 	closedQuotesCount: BigInt!
+	"""Total liquidated quote count tracked by quote lifecycle handlers."""
 	liquidatedQuotesCount: BigInt!
+	"""Total cancelled quote count tracked by quote lifecycle handlers."""
 	cancelledQuotesCount: BigInt!
+	"""Total expired quote count tracked by quote lifecycle handlers."""
 	expiredQuotesCount: BigInt!
+	"""Total rejected quote count tracked by quote lifecycle handlers."""
 	rejectedQuotesCount: BigInt!
+	"""Total liquidation count tracked by liquidation handlers."""
 	liquidationsCount: BigInt!
+	"""Total withdraw request count tracked by withdraw handlers."""
 	withdrawRequestsCount: BigInt!
+	"""Current active withdraw request count tracked by withdraw handlers."""
 	activeWithdrawRequestsCount: BigInt!
+	"""Total finalized withdraw request count tracked by withdraw handlers."""
 	finalizedWithdrawRequestsCount: BigInt!
+	"""Current pending withdraw amount tracked by withdraw handlers."""
 	pendingWithdrawAmount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Cumulative margin added through account-layer margin handlers."""
 	marginAdd: BigInt!
+	"""Cumulative margin removed through account-layer margin handlers."""
 	marginRemove: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""Current active position count tracked by quote lifecycle handlers."""
 	activePositions: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""All-time aggregate for one account-layer VirtualAccount."""
 type TotalVirtualAccountHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""VirtualAccount address this all-time aggregate is keyed by."""
 	virtualAccount: Bytes!
+	"""VirtualAccount entity reference for the keyed virtualAccount address."""
 	virtualAccountRef: VirtualAccount
+	"""Parent SubAccount address for this virtual account aggregate."""
 	subAccount: Bytes!
+	"""Parent SubAccount entity reference for this virtual account aggregate."""
 	subAccountRef: SubAccount
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt
+	"""Isolation type copied from the VirtualAccount profile when known."""
 	isolationType: Int
+	"""Number of quotes counted by this aggregate."""
 	quotesCount: BigInt!
+	"""Current pending quote count tracked by quote lifecycle handlers."""
 	pendingQuotesCount: BigInt!
+	"""Current open position count tracked by quote lifecycle handlers."""
 	openPositionsCount: BigInt!
+	"""Total closed quote count tracked by quote lifecycle handlers."""
 	closedQuotesCount: BigInt!
+	"""Total liquidated quote count tracked by quote lifecycle handlers."""
 	liquidatedQuotesCount: BigInt!
+	"""Total cancelled quote count tracked by quote lifecycle handlers."""
 	cancelledQuotesCount: BigInt!
+	"""Total expired quote count tracked by quote lifecycle handlers."""
 	expiredQuotesCount: BigInt!
+	"""Total rejected quote count tracked by quote lifecycle handlers."""
 	rejectedQuotesCount: BigInt!
+	"""Total liquidation count tracked by liquidation handlers."""
 	liquidationsCount: BigInt!
+	"""Total withdraw request count tracked by withdraw handlers."""
 	withdrawRequestsCount: BigInt!
+	"""Current active withdraw request count tracked by withdraw handlers."""
 	activeWithdrawRequestsCount: BigInt!
+	"""Total finalized withdraw request count tracked by withdraw handlers."""
 	finalizedWithdrawRequestsCount: BigInt!
+	"""Current pending withdraw amount tracked by withdraw handlers."""
 	pendingWithdrawAmount: BigInt!
+	"""Open notional volume added by OpenPosition handling."""
 	openTradeVolume: BigInt!
+	"""Close notional volume added by close handling."""
 	closeTradeVolume: BigInt!
+	"""Liquidation notional volume added by liquidation handling."""
 	liquidateTradeVolume: BigInt!
+	"""Cumulative deposit amount counted by analytics handlers."""
 	deposit: BigInt!
+	"""Cumulative withdraw amount counted by analytics handlers."""
 	withdraw: BigInt!
+	"""Cumulative allocate amount counted by analytics handlers."""
 	allocate: BigInt!
+	"""Cumulative deallocate amount counted by analytics handlers."""
 	deallocate: BigInt!
+	"""Cumulative margin added through account-layer margin handlers."""
 	marginAdd: BigInt!
+	"""Cumulative margin removed through account-layer margin handlers."""
 	marginRemove: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Loss amount accumulated by analytics handlers."""
 	loss: BigInt!
+	"""Profit amount accumulated by analytics handlers."""
 	profit: BigInt!
+	"""Current active position count tracked by quote lifecycle handlers."""
 	activePositions: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Daily symbol-level volume aggregate for a core/account-source bucket."""
 type SymbolTradeHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Notional trade volume accumulated for this row."""
 	volume: BigInt!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
 }
 
+"""Per-day symbol aggregate for one account within a core/account-source bucket."""
 type DailySymbolTradesHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID! # date + source + account_source + account + symbolId
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""UTC day bucket number used by daily aggregate helpers."""
 	day: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""Number of trades counted by this symbol/account aggregate."""
 	totalTrades: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Notional trade volume accumulated for this row."""
 	volume: BigInt!
 }
 
+"""All-time symbol aggregate for one account within a core/account-source bucket."""
 type TotalSymbolTradesHistory @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID! # source + account_source + account + symbolId
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Affiliate, MultiAccount, or account-source address used for attribution."""
 	accountSource: Bytes
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""Number of trades counted by this symbol/account aggregate."""
 	totalTrades: BigInt!
+	"""Funding amount received from the PartyA perspective."""
 	fundingReceived: BigInt!
+	"""Funding amount paid from the PartyA perspective."""
 	fundingPaid: BigInt!
+	"""Charged platform fee amount paid by this user/account bucket."""
 	platformFeePaid: BigInt!
+	"""Actual charged open-fee amount paid by this user/account bucket."""
 	openFeePaid: BigInt!
+	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Notional trade volume accumulated for this row."""
 	volume: BigInt!
 }
 
+"""
+Open-interest accumulator used by daily weighting logic.
+
+`amount` is the current notional amount for the bucket. `weightedAmount`
+accumulates time-weighted notional used to write daily open-interest averages.
+"""
 type OpenInterest @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Raw amount associated with this row."""
 	amount: BigInt!
+	"""Time-weighted notional accumulator used to settle daily open-interest averages."""
 	weightedAmount: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Current core-level configuration values that analytics handlers need, such as collateral."""
 type Configuration @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Transaction hash that last updated this configuration row."""
 	updateTransaction: Bytes!
 }
 
+"""Current grant/revoke state for a role/user/contract tuple observed by role events."""
 type GrantedRole @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Access-control role name or identifier."""
 	role: String!
+	"""User or wallet address associated with this row."""
 	user: Bytes!
+	"""Contract address associated with this row when present."""
 	contract: Bytes
+	"""Transaction hash for the role grant event when present."""
 	grantTransaction: Bytes
+	"""Transaction hash for the role revoke event when present."""
 	revokeTransaction: Bytes
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
 }
 
+"""Bookkeeping row for days whose open-interest weighted value has been settled."""
 type OpenInterestSettleDay @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""UTC day bucket number used by open-interest settlement helpers."""
 	dayNumber: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Immutable raw funding-rate event snapshot for a symbol and PartyB."""
 type FundingRateSnapshot @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""PartyB or solver address associated with this row."""
 	partyB: Bytes!
+	"""Raw long-side funding value from the event when present."""
 	longFee: BigInt
+	"""Raw short-side funding value from the event when present."""
 	shortFee: BigInt
+	"""Market price used by the funding update."""
 	marketPrice: BigInt!
+	"""Handler label for the funding event that produced this snapshot."""
 	eventType: String!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
 }
 
+"""Immutable checkpoint of the funding index calculation after a funding-state update."""
 type FundingIndexCheckpoint @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""Symbol name resolved by the subgraph when available."""
 	symbolName: String!
+	"""PartyB or solver address associated with this row."""
 	partyB: Bytes!
+	"""Handler label for the event type that produced this row."""
 	eventType: String!
+	"""Raw long-side funding rate input from the funding update event, when present."""
 	rawLongRate: BigInt
+	"""Raw short-side funding rate input from the funding update event, when present."""
 	rawShortRate: BigInt
+	"""Market price input used by the funding update event, when present."""
 	marketPrice: BigInt
+	"""FundingFeeState currentLongRate value after applying the update."""
 	currentLongRate: BigInt
+	"""FundingFeeState currentShortRate value after applying the update."""
 	currentShortRate: BigInt
+	"""FundingFeeState accumulatedLongRate value after applying the update."""
 	accumulatedLongRate: BigInt
+	"""FundingFeeState accumulatedShortRate value after applying the update."""
 	accumulatedShortRate: BigInt
+	"""Funding epoch duration recorded on the funding state at checkpoint time."""
 	epochDuration: BigInt
+	"""Last funding epoch included in the accumulated-rate state at checkpoint time."""
 	lastUpdatedEpoch: BigInt
+	"""Start epoch of the funding accumulation window at checkpoint time."""
 	startEpoch: BigInt
+	"""Timestamp corresponding to the start of the funding accumulation window at checkpoint time."""
 	startEpochTimestamp: BigInt
+	"""Timestamp of the latest funding-state update included in this checkpoint."""
 	lastUpdatedTimestamp: BigInt
+	"""Long-side funding snapshot carried forward by the funding state at checkpoint time."""
 	snapshotLongFee: BigInt
+	"""Short-side funding snapshot carried forward by the funding state at checkpoint time."""
 	snapshotShortFee: BigInt
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
 }
 
+"""Latest accumulated funding-fee state for a core/symbol/PartyB bucket."""
 type FundingFeeState @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""Symbol name resolved by the subgraph when available."""
 	symbolName: String!
+	"""PartyB or solver address associated with this row."""
 	partyB: Bytes!
+	"""Current long-side funding rate after the subgraph's market-price adjustment."""
 	currentLongRate: BigInt
+	"""Current short-side funding rate after the subgraph's market-price adjustment."""
 	currentShortRate: BigInt
+	"""Accumulated long-side funding index for this symbol/PartyB bucket."""
 	accumulatedLongRate: BigInt
+	"""Accumulated short-side funding index for this symbol/PartyB bucket."""
 	accumulatedShortRate: BigInt
+	"""Configured funding epoch duration for this symbol/PartyB state."""
 	epochDuration: BigInt
+	"""Last funding epoch included in the accumulated-rate update."""
 	lastUpdatedEpoch: BigInt
+	"""Start epoch of the current funding accumulation window."""
 	startEpoch: BigInt
+	"""Timestamp corresponding to the start of the current funding accumulation window."""
 	startEpochTimestamp: BigInt
+	"""Timestamp of the latest funding-state update applied by the subgraph."""
 	lastUpdatedTimestamp: BigInt
+	"""Long-side funding snapshot carried forward when the accumulation window is reset."""
 	snapshotLongFee: BigInt
+	"""Short-side funding snapshot carried forward when the accumulation window is reset."""
 	snapshotShortFee: BigInt
+	"""Most recent market price used to apply a funding-fee update."""
 	lastMarketPrice: BigInt
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
 }
 
+"""Mutable PartyA liquidation state enriched with account-layer and settlement context."""
 type LiquidationDetail @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""PartyA address associated with the quote, trade, balance, or liquidation."""
 	partyA: Bytes!
+	"""Account entity reference for PartyA when known."""
 	partyAAccount: Account
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes
+	"""Account-layer SubAccount entity resolved for this liquidation PartyA, when known."""
 	subAccountRef: SubAccount
+	"""Account-layer VirtualAccount entity resolved for this liquidation PartyA, when known."""
 	virtualAccountRef: VirtualAccount
+	"""Liquidation id associated with this row."""
 	liquidationId: Bytes!
+	"""Raw liquidation type value from liquidation state."""
 	liquidationType: Int!
+	"""uPNL value indexed for this liquidation state."""
 	upnl: BigInt!
+	"""Total unrealized loss value indexed for this liquidation state."""
 	totalUnrealizedLoss: BigInt!
+	"""Deficit value indexed for this liquidation state."""
 	deficit: BigInt!
+	"""Liquidation fee value indexed for this liquidation state."""
 	liquidationFee: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt
+	"""Number of PartyB counterparties involved in the liquidation state."""
 	involvedPartyBCounts: BigInt!
+	"""Accumulated PartyA uPNL value from liquidation state."""
 	partyAAccumulatedUpnl: BigInt!
+	"""Whether the liquidation state is marked disputed."""
 	disputed: Boolean!
+	"""Timestamp recorded for the liquidation state."""
 	liquidationTimestamp: BigInt!
+	"""Liquidator address associated with this liquidation row when present."""
 	liquidator: Bytes
+	"""Allocated balance value indexed for this row."""
 	allocatedBalance: BigInt
+	"""Whether this liquidation row has been marked settled."""
 	settled: Boolean!
+	"""Whether this liquidation row has been marked fully liquidated."""
 	fullyLiquidated: Boolean!
+	"""Whether this liquidation row has entered takeover flow."""
 	takeover: Boolean!
+	"""Whether this liquidation row has entered auto-takeover flow."""
 	autoTakeover: Boolean!
+	"""Timestamp when takeover was indexed."""
 	takeoverTimestamp: BigInt
+	"""Whether takeover settlement has been indexed."""
 	takeoverSettled: Boolean!
+	"""Timestamp when takeover settlement was indexed."""
 	takeoverSettledTimestamp: BigInt
+	"""Amounts settled in this liquidation row."""
 	settledAmounts: [BigInt!]
+	"""PartyB addresses settled in this liquidation row."""
 	settledPartyBs: [Bytes!]
+	"""Affiliate or account-source address associated with this row."""
 	affiliate: Bytes
+	"""Total PnL value indexed for this liquidation row."""
 	totalPnl: BigInt
+	"""CVA amount paid during liquidation settlement."""
 	paidCva: BigInt
+	"""Liquidation-fee amount paid during liquidation settlement."""
 	paidLf: BigInt
+	"""Sum of locked liquidation-fee reserves on liquidated quotes."""
 	potentialLf: BigInt
+	"""Timestamp when full liquidation was indexed."""
 	fullyLiquidatedTimestamp: BigInt
 }
 
+"""Mutable withdraw request state across classic, express, virtual, and advanced flows."""
 type WithdrawRequest @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Source address used by express-withdraw component aggregation."""
 	componentSource: Bytes
+	"""Affiliate address used by express-withdraw component aggregation."""
 	componentAffiliate: Bytes
+	"""Collateral token address used by express-withdraw component aggregation."""
 	componentCollateral: Bytes
+	"""Account bucket used by express-withdraw component aggregation."""
 	componentBucket: String
+	"""Protocol withdraw request id."""
 	requestId: BigInt!
+	"""User or wallet address associated with this row."""
 	user: Bytes!
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes
+	"""Account-layer SubAccount entity resolved for this withdraw user/account, when known."""
 	subAccountRef: SubAccount
+	"""Account-layer VirtualAccount entity resolved for this withdraw user/account, when known."""
 	virtualAccountRef: VirtualAccount
+	"""Raw amount associated with this row."""
 	amount: BigInt!
+	"""Withdraw amount classified by the subgraph as classic."""
 	classicAmount: BigInt!
+	"""Withdraw amount classified by the subgraph as express."""
 	expressAmount: BigInt!
+	"""Withdraw amount classified by the subgraph as virtual."""
 	virtualAmount: BigInt!
+	"""Withdraw amount classified by the subgraph as advanced."""
 	advancedAmount: BigInt!
+	"""Reserved debt amount tracked for this withdraw request."""
 	reservedDebtAmount: BigInt!
+	"""Active debt amount tracked for this withdraw request."""
 	activeDebtAmount: BigInt!
+	"""Bad debt amount tracked for this withdraw request."""
 	badDebtAmount: BigInt!
+	"""Whether this withdraw request was marked as sped up."""
 	speedUp: Boolean!
+	"""Whether the withdraw request was classified as purely virtual."""
 	isPureVirtual: Boolean!
+	"""Cooldown end timestamp for this withdraw request."""
 	cooldownEndTime: BigInt!
+	"""Subgraph status label for this row."""
 	status: String!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
 }
 
+"""Lookup row for active withdraw request ids by source/request id bucket."""
 type WithdrawRequestLookup @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Protocol withdraw request id."""
 	requestId: BigInt!
+	"""Active withdraw request entity ids for this lookup row."""
 	activeRequestIds: [String!]!
 }
 
+"""Lookup row for active withdraw request ids by source/account bucket."""
 type WithdrawRequestAccountLookup @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Active withdraw request entity ids for this lookup row."""
 	activeRequestIds: [String!]!
 }
 
+"""Temporary hint row used to connect withdraw finalization side effects within a transaction."""
 type WithdrawFinalizationHint @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
+	"""Event sender or transaction sender address when indexed."""
 	sender: Bytes!
+	"""User or wallet address associated with this row."""
 	user: Bytes!
+	"""Raw amount associated with this row."""
 	amount: BigInt!
+	"""Log index of the event within the transaction receipt."""
 	logIndex: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
 }
 
+"""Latest indexed balance snapshot for a PartyA or PartyB account/counterparty bucket."""
 type LatestAccountBalance @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Counterparty address for this balance snapshot when present."""
 	counterParty: Bytes
+	"""Balance snapshot account type label."""
 	accountType: String!
+	"""Allocated balance value indexed for this row."""
 	allocatedBalance: BigInt!
+	"""Locked CVA balance from the latest balance snapshot."""
 	lockedCva: BigInt!
+	"""Locked liquidation-fee balance from the latest balance snapshot."""
 	lockedLf: BigInt!
+	"""Locked PartyA maintenance-margin balance from the latest balance snapshot."""
 	lockedPartyAmm: BigInt!
+	"""Locked PartyB maintenance-margin balance from the latest balance snapshot."""
 	lockedPartyBmm: BigInt!
+	"""Pending locked CVA balance from the latest balance snapshot."""
 	pendingLockedCva: BigInt!
+	"""Pending locked liquidation-fee balance from the latest balance snapshot."""
 	pendingLockedLf: BigInt!
+	"""Pending locked PartyA maintenance-margin balance from the latest balance snapshot."""
 	pendingLockedPartyAmm: BigInt!
+	"""Pending locked PartyB maintenance-margin balance from the latest balance snapshot."""
 	pendingLockedPartyBmm: BigInt!
+	"""Free balance from the latest balance snapshot."""
 	freeBalance: BigInt!
+	"""Free plus allocated, locked, and pending locked balance components from the latest snapshot."""
 	totalBalance: BigInt!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
+	"""Account entity reference for the account address when known."""
 	accountRef: Account
+	"""Account entity reference for the counterparty balance key when known."""
 	counterPartyRef: Account
 }
 
+"""Express provider registration keyed by provider/source/collateral context."""
 type ExpressProviderSource @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Express provider address associated with this row."""
 	provider: Bytes!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
 }
 
+"""Lookup from a core/provider/collateral bucket to an ExpressProviderSource."""
 type ExpressProviderSourceByCore @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""ExpressProviderSource entity reference for this lookup row."""
 	providerSource: ExpressProviderSource!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Express provider address associated with this row."""
 	provider: Bytes!
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
 }
 
-# Raw affiliate-level component rollup for affiliate/deployment analytics reads.
-# The subgraph does not publish a spendable-value formula; it only exposes indexed
-# balances, pending withdrawals, tracked credit-line debt, and hierarchy health flags.
+"""
+Raw affiliate-level component rollup for affiliate/deployment analytics reads.
+
+The subgraph does not publish a spendable-value formula; it only exposes indexed
+balances, pending withdrawals, tracked credit-line debt, and hierarchy health flags.
+"""
 type AffiliateExpressWithdrawComponents @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Affiliate or account-source address associated with this row."""
 	affiliate: Bytes!
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Collateral token decimals used by component aggregation."""
 	collateralDecimals: Int!
+	"""Number of accounts counted in this component aggregate."""
 	accountCount: BigInt!
+	"""Number of accounts with indexed balance in this component aggregate."""
 	accountWithBalanceCount: BigInt!
+	"""Free balance component scaled to 18 decimals by the subgraph."""
 	freeBalance18: BigInt!
+	"""Allocated balance component scaled to 18 decimals by the subgraph."""
 	allocatedBalance18: BigInt!
+	"""Locked CVA component scaled to 18 decimals by the subgraph."""
 	lockedCva18: BigInt!
+	"""Locked liquidation-fee component scaled to 18 decimals by the subgraph."""
 	lockedLf18: BigInt!
+	"""Locked PartyA maintenance-margin component scaled to 18 decimals by the subgraph."""
 	lockedPartyAmm18: BigInt!
+	"""Locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	lockedPartyBmm18: BigInt!
+	"""Pending locked CVA component scaled to 18 decimals by the subgraph."""
 	pendingLockedCva18: BigInt!
+	"""Pending locked liquidation-fee component scaled to 18 decimals by the subgraph."""
 	pendingLockedLf18: BigInt!
+	"""Pending locked PartyA maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyAmm18: BigInt!
+	"""Pending locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyBmm18: BigInt!
+	"""Total balance component scaled to 18 decimals by the subgraph."""
 	totalBalance18: BigInt!
+	"""Pending withdraw amount in collateral token units."""
 	pendingWithdrawAmountCollateral: BigInt!
+	"""Pending classic withdraw amount in collateral token units."""
 	pendingClassicWithdrawAmountCollateral: BigInt!
+	"""Pending express withdraw amount in collateral token units."""
 	pendingExpressWithdrawAmountCollateral: BigInt!
+	"""Pending virtual withdraw amount in collateral token units."""
 	pendingVirtualWithdrawAmountCollateral: BigInt!
+	"""Advanced withdraw amount in collateral token units."""
 	advancedWithdrawAmountCollateral: BigInt!
+	"""Whether advanced-withdraw component data was available to the subgraph."""
 	advancedWithdrawDataAvailable: Boolean!
+	"""Reserved debt amount in collateral token units."""
 	reservedDebtCollateral: BigInt!
+	"""Active debt amount in collateral token units."""
 	activeDebtCollateral: BigInt!
+	"""Bad debt amount in collateral token units."""
 	badDebtCollateral: BigInt!
+	"""Whether debt component data was available to the subgraph."""
 	debtDataAvailable: Boolean!
+	"""Number of accounts classified with broken hierarchy context."""
 	brokenHierarchyCount: BigInt!
+	"""Number of accounts classified as unresolved legacy accounts."""
 	unresolvedLegacyAccountCount: BigInt!
+	"""Number of accounts classified as unknown accounts."""
 	unknownAccountCount: BigInt!
+	"""Latest balance timestamp included in this component row."""
 	lastBalanceTimestamp: BigInt
+	"""Latest withdraw timestamp included in this component row."""
 	lastWithdrawTimestamp: BigInt
+	"""Latest debt timestamp included in this component row."""
 	lastDebtTimestamp: BigInt
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
 }
 
-# Same raw component rollup split by account bucket so consumers can apply their own
-# policy to legacy accounts, AccountLayer subaccounts, custom subaccounts, and VAs.
+"""
+Same raw component rollup split by account bucket so consumers can apply their own
+policy to legacy accounts, AccountLayer subaccounts, custom subaccounts, and VAs.
+"""
 type AffiliateExpressWithdrawComponentBucket @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Parent affiliate express-withdraw component aggregate."""
 	components: AffiliateExpressWithdrawComponents!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Affiliate or account-source address associated with this row."""
 	affiliate: Bytes!
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Collateral token decimals used by component aggregation."""
 	collateralDecimals: Int!
+	"""Account classification bucket used by component aggregation."""
 	bucket: String!
+	"""Number of accounts counted in this component aggregate."""
 	accountCount: BigInt!
+	"""Number of accounts with indexed balance in this component aggregate."""
 	accountWithBalanceCount: BigInt!
+	"""Free balance component scaled to 18 decimals by the subgraph."""
 	freeBalance18: BigInt!
+	"""Allocated balance component scaled to 18 decimals by the subgraph."""
 	allocatedBalance18: BigInt!
+	"""Locked CVA component scaled to 18 decimals by the subgraph."""
 	lockedCva18: BigInt!
+	"""Locked liquidation-fee component scaled to 18 decimals by the subgraph."""
 	lockedLf18: BigInt!
+	"""Locked PartyA maintenance-margin component scaled to 18 decimals by the subgraph."""
 	lockedPartyAmm18: BigInt!
+	"""Locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	lockedPartyBmm18: BigInt!
+	"""Pending locked CVA component scaled to 18 decimals by the subgraph."""
 	pendingLockedCva18: BigInt!
+	"""Pending locked liquidation-fee component scaled to 18 decimals by the subgraph."""
 	pendingLockedLf18: BigInt!
+	"""Pending locked PartyA maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyAmm18: BigInt!
+	"""Pending locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyBmm18: BigInt!
+	"""Total balance component scaled to 18 decimals by the subgraph."""
 	totalBalance18: BigInt!
+	"""Pending withdraw amount in collateral token units."""
 	pendingWithdrawAmountCollateral: BigInt!
+	"""Pending classic withdraw amount in collateral token units."""
 	pendingClassicWithdrawAmountCollateral: BigInt!
+	"""Pending express withdraw amount in collateral token units."""
 	pendingExpressWithdrawAmountCollateral: BigInt!
+	"""Pending virtual withdraw amount in collateral token units."""
 	pendingVirtualWithdrawAmountCollateral: BigInt!
+	"""Advanced withdraw amount in collateral token units."""
 	advancedWithdrawAmountCollateral: BigInt!
+	"""Whether advanced-withdraw component data was available to the subgraph."""
 	advancedWithdrawDataAvailable: Boolean!
+	"""Reserved debt amount in collateral token units."""
 	reservedDebtCollateral: BigInt!
+	"""Active debt amount in collateral token units."""
 	activeDebtCollateral: BigInt!
+	"""Bad debt amount in collateral token units."""
 	badDebtCollateral: BigInt!
+	"""Whether debt component data was available to the subgraph."""
 	debtDataAvailable: Boolean!
+	"""Number of accounts classified with broken hierarchy context."""
 	brokenHierarchyCount: BigInt!
+	"""Number of accounts classified as unresolved legacy accounts."""
 	unresolvedLegacyAccountCount: BigInt!
+	"""Number of accounts classified as unknown accounts."""
 	unknownAccountCount: BigInt!
+	"""Latest balance timestamp included in this component row."""
 	lastBalanceTimestamp: BigInt
+	"""Latest withdraw timestamp included in this component row."""
 	lastWithdrawTimestamp: BigInt
+	"""Latest debt timestamp included in this component row."""
 	lastDebtTimestamp: BigInt
+	"""Block timestamp of the latest update to this row."""
 	updateTimestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
 }
 
-# Per-account snapshot used by the subgraph to delta the aggregate when a balance
-# refresh or account classification changes.
+"""
+Per-account snapshot used by the subgraph to delta the affiliate aggregate when
+a balance refresh or account classification changes.
+"""
 type AffiliateExpressWithdrawAccountSnapshot @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Parent affiliate express-withdraw component aggregate."""
 	components: AffiliateExpressWithdrawComponents!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""Affiliate or account-source address associated with this row."""
 	affiliate: Bytes!
+	"""Collateral token address associated with this row."""
 	collateral: Bytes!
+	"""Collateral token decimals used by component aggregation."""
 	collateralDecimals: Int!
+	"""Account address associated with this row."""
 	account: Bytes!
+	"""Account entity reference for the account address when known."""
 	accountRef: Account
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes
+	"""Account-layer SubAccount entity resolved for this component snapshot, when known."""
 	subAccountRef: SubAccount
+	"""Account-layer VirtualAccount entity resolved for this component snapshot, when known."""
 	virtualAccountRef: VirtualAccount
+	"""Account classification bucket used by component aggregation."""
 	bucket: String!
+	"""Whether this account snapshot has a nonzero indexed balance component."""
 	hasBalance: Boolean!
+	"""Free balance component scaled to 18 decimals by the subgraph."""
 	freeBalance18: BigInt!
+	"""Allocated balance component scaled to 18 decimals by the subgraph."""
 	allocatedBalance18: BigInt!
+	"""Locked CVA component scaled to 18 decimals by the subgraph."""
 	lockedCva18: BigInt!
+	"""Locked liquidation-fee component scaled to 18 decimals by the subgraph."""
 	lockedLf18: BigInt!
+	"""Locked PartyA maintenance-margin component scaled to 18 decimals by the subgraph."""
 	lockedPartyAmm18: BigInt!
+	"""Locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	lockedPartyBmm18: BigInt!
+	"""Pending locked CVA component scaled to 18 decimals by the subgraph."""
 	pendingLockedCva18: BigInt!
+	"""Pending locked liquidation-fee component scaled to 18 decimals by the subgraph."""
 	pendingLockedLf18: BigInt!
+	"""Pending locked PartyA maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyAmm18: BigInt!
+	"""Pending locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyBmm18: BigInt!
+	"""Total balance component scaled to 18 decimals by the subgraph."""
 	totalBalance18: BigInt!
+	"""Whether this account snapshot is classified as having broken hierarchy context."""
 	brokenHierarchy: Boolean!
+	"""Whether this account snapshot is classified as an unresolved legacy account."""
 	unresolvedLegacyAccount: Boolean!
+	"""Whether this account snapshot is classified as an unknown account."""
 	unknownAccount: Boolean!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
 }
 
+"""Current aggregate open-position state for one PartyA/PartyB/symbol/side bucket."""
 type AggregatedPosition @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Deployment identifier derived by the subgraph when available."""
 	deploymentId: String
+	"""Symmio core contract address associated with this row when known."""
 	coreSource: Bytes
+	"""AccountLayer contract address associated with this row when known."""
 	accountLayerSource: Bytes
+	"""PartyA address associated with the quote, trade, balance, or liquidation."""
 	partyA: Bytes!
+	"""Wallet owner address associated with this row when known."""
 	owner: Bytes
+	"""Account-layer SubAccount entity resolved for this PartyA, when known."""
 	subAccountRef: SubAccount
+	"""Account-layer VirtualAccount entity resolved for this PartyA, when known."""
 	virtualAccountRef: VirtualAccount
+	"""PartyB or solver address associated with this row."""
 	partyB: Bytes!
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""Symbol name resolved by the subgraph when available."""
 	symbolName: String!
+	"""Raw Solidity PositionType ordinal: 0 LONG, 1 SHORT."""
 	positionType: Int!
+	"""Aggregated open amount for this position bucket."""
 	aggregatedAmount: BigInt!
+	"""Aggregated notional value for this position bucket."""
 	aggregatedNotional: BigInt!
+	"""Weighted paid funding value for this aggregated position bucket."""
 	weightedPaidFunding: BigInt!
+	"""Current open position count tracked by quote lifecycle handlers."""
 	openPositionsCount: Int!
+	"""Whether this aggregate position bucket is currently active."""
 	isActive: Boolean!
+	"""Timestamp when this aggregate position bucket was closed."""
 	closedTimestamp: BigInt
+	"""Block number when this aggregate position bucket was closed."""
 	closedBlockNumber: BigInt
+	"""Transaction hash that closed this aggregate position bucket."""
 	closedTransaction: Bytes
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
+	"""Account entity reference for PartyA when known."""
 	partyAAccount: Account
 }
 
+"""
+Immutable per-quote funding settlement emitted by analytics funding handlers.
+
+Positive signed amounts are paid by PartyA; negative signed amounts are received
+by PartyA and stored in `receivedByPartyA` as an absolute value.
+"""
 type QuoteFundingSettlement @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
 	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
+	"""Protocol quote id on the Symmio core contract."""
 	quoteId: BigInt!
+	"""Normalized Quote entity associated with this row."""
 	quote: Quote!
+	"""PartyA address associated with the quote, trade, balance, or liquidation."""
 	partyA: Bytes!
+	"""PartyB or solver address associated with this row."""
 	partyB: Bytes!
+	"""Protocol symbol id associated with this row."""
 	symbolId: BigInt!
+	"""Symbol name resolved by the subgraph when available."""
 	symbolName: String!
+	"""Raw Solidity PositionType ordinal: 0 LONG, 1 SHORT."""
 	positionType: Int!
+	"""Handler trigger label or value associated with this row."""
 	trigger: String!
+	"""Open quote amount used for the funding settlement calculation."""
 	openAmount: BigInt!
+	"""Previous quote accumulatedPaidFunding value before this settlement."""
 	previousAccumulatedPaidFunding: BigInt!
+	"""New quote accumulatedPaidFunding value after this settlement."""
 	newAccumulatedPaidFunding: BigInt!
+	"""Per-unit funding-index delta applied to the open amount."""
 	fundingDeltaPerUnit: BigInt!
+	"""Signed settlement amount; positive means PartyA paid, negative means PartyA received."""
 	signedAmount: BigInt!
+	"""Positive amount paid by PartyA for this settlement."""
 	paidByPartyA: BigInt!
+	"""Positive amount received by PartyA for this settlement."""
 	receivedByPartyA: BigInt!
+	"""Previous quote lastFundingPaymentTimestamp before this settlement."""
 	previousLastFundingPaymentTimestamp: BigInt!
+	"""New quote lastFundingPaymentTimestamp after this settlement."""
 	newLastFundingPaymentTimestamp: BigInt!
+	"""Previous paid-through epoch value before this settlement when available."""
 	previousPaidThroughEpoch: BigInt
+	"""New paid-through epoch value after this settlement when available."""
 	newPaidThroughEpoch: BigInt
+	"""Whether the settlement changed the quote funding balance."""
 	balanceChanged: Boolean!
+	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
 	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
 	transaction: Bytes!
 }

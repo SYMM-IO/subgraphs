@@ -1,37 +1,150 @@
+"""
+Normalized account profile for a PartyA-style address.
+
+This entity covers legacy MultiAccount accounts, direct core PartyA addresses,
+account-layer sub-accounts, and account-layer virtual accounts. Use
+`accountKind`, `isVirtual`, `subAccount`, and `virtualAccount` to distinguish
+the account-layer shape.
+"""
 type Account @entity(immutable: false) {
+	"""
+	Lowercase hex address string for the indexed account.
+	"""
 	id: ID!
+	"""
+	Contract address that first introduced or most recently updated the account.
+	"""
 	source: Bytes
+	"""
+	Deployment identifier derived by profile helpers when available.
+	"""
 	deploymentId: String
+	"""
+	Symmio core contract associated with this account when known.
+	"""
 	coreSource: Bytes
+	"""
+	AccountLayer contract associated with this account when known.
+	"""
 	accountLayerSource: Bytes
+	"""
+	Account address represented by this profile.
+	"""
 	account: Bytes!
+	"""
+	Account shape label set by handlers, such as sub-account or virtual-account.
+	"""
 	accountKind: String
+	"""
+	Monotonic indexer-side ordering counter assigned by this subgraph.
+	"""
 	globalCounter: BigInt!
+	"""
+	Wallet/user address that owns this account.
+	"""
 	user: Bytes!
+	"""
+	User entity for `user`.
+	"""
 	userRef: User
+	"""
+	Owner address for account-layer profiles; usually the same wallet as `user`.
+	"""
 	owner: Bytes
+	"""
+	Block timestamp when the account was first indexed.
+	"""
 	timestamp: BigInt!
+	"""
+	Block number of the latest account-profile update.
+	"""
 	blockNumber: BigInt!
+	"""
+	Human-readable account name from account creation or edit events.
+	"""
 	name: String
+	"""
+	Legacy account type label used by older account handlers.
+	"""
 	type: String
+	"""
+	Latest timestamp of any activity attributed to this account.
+	"""
 	lastActivityTimestamp: BigInt!
+	"""
+	Transaction hash that first created this account record.
+	"""
 	transaction: Bytes!
+	"""
+	Latest timestamp of profile-level changes to this account.
+	"""
 	updateTimestamp: BigInt!
+	"""
+	Affiliate, MultiAccount, or account-source address used for attribution.
+	"""
 	accountSource: Bytes
+	"""
+	Affiliate entity associated with `accountSource` when known.
+	"""
 	affiliateRef: Affiliate
+	"""
+	Number of quotes attributed to this account by analytics handlers.
+	"""
 	quotesCount: BigInt!
+	"""
+	Number of positions attributed to this account by analytics handlers.
+	"""
 	positionsCount: BigInt!
+	"""
+	Cumulative deposits attributed to this account.
+	"""
 	deposit: BigInt!
+	"""
+	Cumulative withdrawals attributed to this account.
+	"""
 	withdraw: BigInt!
+	"""
+	Cumulative allocate amount attributed to this account.
+	"""
 	allocated: BigInt!
+	"""
+	Cumulative deallocate amount attributed to this account.
+	"""
 	deallocated: BigInt!
+	"""
+	Parent sub-account address for virtual-account profiles.
+	"""
 	parentAddress: Bytes
+	"""
+	True when this Account row represents an account-layer virtual account.
+	"""
 	isVirtual: Boolean
+	"""
+	Affiliate address associated with the account-layer hierarchy.
+	"""
 	affiliate: Bytes
+	"""
+	SubAccount entity id for account-layer profiles.
+	"""
 	subAccount: SubAccount
+	"""
+	VirtualAccount entity id when this profile represents or is routed through a VA.
+	"""
 	virtualAccount: VirtualAccount
+	"""
+	Latest timestamp of core-contract activity attributed to this account.
+	"""
 	lastCoreActivityTimestamp: BigInt
+	"""
+	Latest timestamp of account-layer activity attributed to this account.
+	"""
 	lastLayerActivityTimestamp: BigInt
+	"""
+	Latest timestamp of balance-changing activity attributed to this account.
+	"""
 	lastBalanceActivityTimestamp: BigInt
+	"""
+	Deletion flag set by account-layer delete/reuse handlers.
+	"""
 	isDeleted: Boolean
 }

@@ -1,116 +1,382 @@
+"""
+Normalized lifecycle state for a SYMMIO quote.
+
+A quote starts as a PartyA trade request and is updated as events move it
+through lock, open, close, cancel, expiry, funding, and liquidation flows.
+The entity id is `${quoteId}-${coreAddress}` so the same numeric quote id on
+different Symmio core contracts does not collide.
+
+Numeric enum fields mirror Solidity enum ordinals from `QuoteStorage.sol`:
+`positionType` is 0 LONG, 1 SHORT; `orderTypeOpen` and `orderTypeClose` are
+0 LIMIT, 1 MARKET; `quoteStatus` is the raw `QuoteStatus` ordinal.
+Unless a field says otherwise, BigInt values are raw contract values.
+"""
 type Quote @entity(immutable: false) {
+	"""
+	Composite quote id `${quoteId}-${coreAddress}`.
+	"""
 	id: String!
+	"""
+	Symmio core contract address that emitted the indexed event.
+	"""
 	source: Bytes!
+	"""
+	Monotonic indexer-side ordering counter assigned by this subgraph.
+	"""
 	globalCounter: BigInt!
+	"""
+	Protocol quote id from the Symmio core contract.
+	"""
 	quoteId: BigInt!
+	"""
+	Raw Solidity `QuoteStatus` ordinal.
+	"""
 	quoteStatus: Int
+	"""
+	PartyA address on the Symmio core quote.
+	"""
 	partyA: Bytes!
+	"""
+	PartyB address once the quote is locked/opened by a solver.
+	"""
 	partyB: Bytes
+	"""
+	Subgraph affiliate/account-source attribution; not always the raw core quote affiliate.
+	"""
 	affiliate: Bytes
+	"""
+	Account-layer sub-account associated with this quote, when known.
+	"""
 	subAccount: SubAccount
+	"""
+	Account-layer virtual account associated with this quote, when known.
+	"""
 	virtualAccount: VirtualAccount
+	"""
+	Normalized account entity for PartyA or the account-layer PartyA address.
+	"""
 	partyAAccount: Account
+	"""
+	Last lifecycle action label written by the handler that updated the quote.
+	"""
 	action: String
+	"""
+	Block number of the last event that updated this quote.
+	"""
 	blockNumber: BigInt!
 
-	# open request
+	"""
+	Requested open price from SendQuote / quote storage.
+	"""
 	requestedOpenPrice: BigInt
+	"""
+	Market price recorded for market-order validation at quote creation.
+	"""
 	marketPrice: BigInt
+	"""
+	Raw Solidity `OrderType` ordinal for the open request.
+	"""
 	orderTypeOpen: Int
+	"""
+	Requested total quote quantity.
+	"""
 	quantity: BigInt
+	"""
+	CVA component from the quote locked values.
+	"""
 	cva: BigInt
+	"""
+	Liquidation-fee component from the quote locked values.
+	"""
 	lf: BigInt
+	"""
+	PartyB maintenance-margin component from the quote locked values.
+	"""
 	partyBmm: BigInt
+	"""
+	PartyA maintenance-margin component from the quote locked values.
+	"""
 	partyAmm: BigInt
+	"""
+	Symbol id from the quote.
+	"""
 	symbolId: BigInt
+	"""
+	Symbol name resolved from the core symbol registry when available.
+	"""
 	symbol: String
+	"""
+	Raw Solidity `PositionType` ordinal: 0 LONG, 1 SHORT.
+	"""
 	positionType: Int
+	"""
+	Open deadline copied from the quote deadline.
+	"""
 	openDeadline: BigInt
+	"""
+	PartyB whitelist submitted with the quote.
+	"""
 	partyBsWhiteList: [Bytes!]
+	"""
+	Maximum funding rate value from the quote; older cores called this max interest rate.
+	"""
 	maxFundingRate: BigInt
 
-	# open
+	"""
+	Amount filled by the OpenPosition event.
+	"""
 	fillAmount: BigInt
+	"""
+	Open execution price from the OpenPosition event or quote storage.
+	"""
 	openedPrice: BigInt
+	"""
+	Open-fee rate stored on the quote as `tradingFee`; zero for core versions that did not expose it.
+	"""
 	tradingFee: BigInt!
+	"""
+	Close-fee rate stored on newer quote structs; zero for older core versions that did not expose it.
+	"""
+	closeFee: BigInt!
 
-	# initial
+	"""
+	Initial opened price snapshot preserved after later partial closes.
+	"""
 	initialOpenedPrice: BigInt
+	"""
+	Initial CVA snapshot preserved after later close/liquidation updates.
+	"""
 	initialCva: BigInt!
+	"""
+	Initial PartyA maintenance-margin snapshot.
+	"""
 	initialPartyAmm: BigInt
+	"""
+	Initial PartyB maintenance-margin snapshot.
+	"""
 	initialPartyBmm: BigInt!
+	"""
+	Initial liquidation-fee snapshot.
+	"""
 	initialLf: BigInt!
 
-	# close request
-	closePrice: BigInt # request
+	"""
+	Requested close price from RequestToClosePosition.
+	"""
+	closePrice: BigInt
+	"""
+	Raw Solidity `OrderType` ordinal for the close request.
+	"""
 	orderTypeClose: Int
-	closedPrice: BigInt # done
+	"""
+	Executed close price from FillCloseRequest or liquidation/force-close handlers.
+	"""
+	closedPrice: BigInt
+	"""
+	Close request deadline.
+	"""
 	closeDeadline: BigInt
+	"""
+	Quantity requested to close.
+	"""
 	quantityToClose: BigInt
+	"""
+	Close request id emitted by close-request events.
+	"""
 	closeId: BigInt
 
-	# closed
+	"""
+	Cumulative amount closed or liquidated for this quote.
+	"""
 	closedAmount: BigInt
+	"""
+	Reserved analytics field; current handlers do not consistently populate it.
+	"""
 	leverage: BigInt
+	"""
+	Average closed price from quote storage / close handlers.
+	"""
 	averageClosedPrice: BigInt
 
-	# liquidation
+	"""
+	Price used by liquidation/ADL/force-close handling.
+	"""
 	liquidatePrice: BigInt
+	"""
+	Amount liquidated for this quote in the liquidation handler update.
+	"""
 	liquidateAmount: BigInt
+	"""
+	Liquidated side written by liquidation handlers: 0 for PartyA, 1 for PartyB.
+	"""
 	liquidatedSide: Int
+	"""
+	Liquidation id from PartyA liquidation state when present.
+	"""
 	liquidationId: Bytes
 
-	# funding rate
+	"""
+	Funding amount paid by PartyA as accumulated by ChargeFundingRate handling.
+	"""
 	userPaidFunding: BigInt
+	"""
+	Funding amount received by PartyA as accumulated by ChargeFundingRate handling.
+	"""
 	userReceivedFunding: BigInt
+	"""
+	Signed accumulated paid funding from quote storage, normalized as BigInt where supported.
+	"""
 	accumulatedPaidFunding: BigInt
+	"""
+	Last funding payment timestamp from quote storage.
+	"""
 	lastFundingPaymentTimestamp: BigInt
 
-	# timestamps
+	"""
+	Block timestamp of the last event that updated this quote.
+	"""
 	timestamp: BigInt!
+	"""
+	Block timestamp of the SendQuote event.
+	"""
 	timestampSendQuote: BigInt
+	"""
+	Block timestamp of the OpenPosition event.
+	"""
 	timestampOpenPosition: BigInt
+	"""
+	Block timestamp when the quote reached a fully closed terminal path.
+	"""
 	timestampFullyClose: BigInt
 
-	# derived
+	"""
+	Immutable event log entries written for this quote by the analytics subgraph.
+	"""
 	quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")
+	"""
+	Funding settlement entries written for this quote by ChargeFundingRate handling.
+	"""
 	fundingSettlements: [QuoteFundingSettlement!]! @derivedFrom(field: "quote")
 }
 
+"""
+PartyA liquidation helper state keyed by PartyA address.
+"""
 type PartyA @entity(immutable: false) {
+	"""
+	PartyA address used as this helper row id.
+	"""
 	id: String!
+	"""
+	PartyB address most recently associated with this PartyA liquidation helper row.
+	"""
 	partyB: Bytes
+	"""
+	Quote ids tracked as pending until the PartyA liquidation flow resolves them.
+	"""
 	quoteUntilLiquid: [BigInt!]
+	"""
+	Monotonic ordering counter from the handler update that last wrote this row.
+	"""
 	globalCounter: BigInt!
 }
 
+"""
+PartyB/PartyA liquidation helper state keyed by the handler that updates it.
+"""
 type PartyBPartyA @entity(immutable: false) {
+	"""
+	Composite PartyB/PartyA helper id used by liquidation handlers.
+	"""
 	id: String!
+	"""
+	PartyB address associated with the tracked liquidation quote ids.
+	"""
 	partyB: Bytes
+	"""
+	Quote ids tracked as pending until the PartyB/PartyA liquidation flow resolves them.
+	"""
 	quoteUntilLiquid: [BigInt!]
+	"""
+	Monotonic ordering counter from the handler update that last wrote this row.
+	"""
 	globalCounter: BigInt!
 }
 
+"""
+Mutable index of pending quote ids for a PartyA / optional PartyB bucket.
+"""
 type PendingQuoteIndex @entity(immutable: false) {
+	"""
+	Composite id `${source}-${partyA}` or `${source}-${partyA}-${partyB}` for this pending quote bucket.
+	"""
 	id: ID!
+	"""
+	Symmio core contract address that owns the pending quote ids.
+	"""
 	source: Bytes!
+	"""
+	PartyA address whose pending quote ids are indexed in this bucket.
+	"""
 	partyA: Bytes!
+	"""
+	Optional PartyB address when the pending quote bucket is narrowed by solver.
+	"""
 	partyB: Bytes
+	"""
+	Protocol quote ids currently pending for this source/PartyA(/PartyB) bucket.
+	"""
 	quoteIds: [BigInt!]!
 }
 
+"""
+Point-in-time requested-open-price sample for a PartyA and symbol.
+"""
 type PartyASymbolPrice @entity(immutable: false) {
+	"""
+	Subgraph id for the PartyA/symbol price sample row.
+	"""
 	id: String!
+	"""
+	PartyA address that submitted the sampled quote.
+	"""
 	partyA: Bytes!
+	"""
+	Protocol symbol id for the sampled quote.
+	"""
 	symbolId: BigInt!
+	"""
+	Requested open price captured from the sampled quote.
+	"""
 	requestedOpenPrice: BigInt!
+	"""
+	Block timestamp when this requested-open-price sample was indexed.
+	"""
 	timeStamp: BigInt!
+	"""
+	Transaction hash that produced this requested-open-price sample.
+	"""
 	trHash: Bytes!
+	"""
+	Monotonic ordering counter from the handler update that wrote this sample.
+	"""
 	GlobalCounter: BigInt!
 }
 
+"""
+Latest global fee value observed by handlers that track protocol fee updates.
+"""
 type GlobalFee @entity(immutable: false) {
+	"""
+	Singleton id, currently `GlobalEntity`.
+	"""
 	id: ID!
+	"""
+	Running global funding-fee total accumulated from ChargeFundingRate handling.
+	"""
 	globalFee: BigInt!
+	"""
+	Latest block timestamp included in the global fee accumulator.
+	"""
 	latestTimestamp: BigInt!
 }

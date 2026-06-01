@@ -1,16 +1,66 @@
+"""
+Immutable AccountLayer margin movement between a sub-account and virtual account.
+
+`type` is written by the AccountLayer margin handlers and is currently used for
+ADD, REMOVE, and EMERGENCY_RECOVER flows. Balances on SubAccount/VirtualAccount
+are subgraph-maintained latest balances, not a complete replacement for core
+balance reads.
+"""
 type MarginTransfer @entity(immutable: true) {
+	"""
+	Event id `${transactionHash}-${logIndex}`.
+	"""
 	id: ID!
+	"""
+	Margin movement type label written by the handler.
+	"""
 	type: String!
+	"""
+	Virtual account involved in the margin movement.
+	"""
 	virtualAccount: VirtualAccount!
+	"""
+	Parent sub-account involved in the margin movement.
+	"""
 	subAccount: SubAccount!
+	"""
+	Raw amount emitted by the AccountLayer event.
+	"""
 	amount: BigInt!
+	"""
+	AccountLayer contract address that emitted the margin event.
+	"""
 	source: Bytes!
+	"""
+	Deployment identifier derived by profile helpers when available.
+	"""
 	deploymentId: String
+	"""
+	Symmio core associated with the account hierarchy when known.
+	"""
 	coreSource: Bytes
+	"""
+	AccountLayer contract associated with the account hierarchy.
+	"""
 	accountLayerSource: Bytes
+	"""
+	Block timestamp of the margin event.
+	"""
 	timestamp: BigInt!
+	"""
+	Block number of the margin event.
+	"""
 	blockNumber: BigInt!
+	"""
+	Transaction hash of the margin event.
+	"""
 	transaction: Bytes!
+	"""
+	VirtualAccount entity reference when the virtual account existed in the indexed state.
+	"""
 	virtualAccountRef: VirtualAccount
+	"""
+	SubAccount entity reference when the sub-account existed in the indexed state.
+	"""
 	subAccountRef: SubAccount
 }

@@ -91,6 +91,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		quote.initialPartyAmm = partyAmm
 		quote.initialPartyBmm = partyBmm
 		quote.tradingFee = tradingFee
+		quote.closeFee = BigInt.zero()
 		quote.openDeadline = deadline
 		quote.quoteStatus = 0
 		quote.marketPrice = marketPrice
@@ -110,6 +111,7 @@ export class SendQuoteHandler<T> extends BaseHandler {
 		const q = getQuoteData(version, event.address, event.params.quoteId)
 		if (q) {
 			quote.maxFundingRate = q.maxFundingRate
+			quote.closeFee = q.closeFee
 		}
 
 		let account = Account.load(event.params.partyA.toHexString())

@@ -1,16 +1,65 @@
+"""
+Current indexed configuration for one Symmio trading symbol on one core contract.
+
+The entity id is `${symbolId}-${coreAddress}`. Values are sourced from AddSymbol
+and subsequent symbol-control events such as SetSymbolTradingFee,
+SetSymbolFundingState, and SetSymbolValidationState.
+"""
 type Symbol @entity(immutable: false) {
-    id: ID!
-    globalCounter: BigInt!
-    name: String!
-    symbolId: BigInt!
+	"""
+	Composite symbol id `${symbolId}-${coreAddress}`.
+	"""
+	id: ID!
+	"""
+	Monotonic indexer-side ordering counter assigned by this subgraph.
+	"""
+	globalCounter: BigInt!
+	"""
+	Symbol name emitted by the core contract.
+	"""
+	name: String!
+	"""
+	Protocol symbol id on the Symmio core contract.
+	"""
+	symbolId: BigInt!
+	"""
+	Symmio core contract address for this symbol.
+	"""
 	source: Bytes!
-    tradingFee: BigInt!
-    isValid: Boolean!
-    minAcceptableQuoteValue: BigInt
-    minAcceptablePortionLF: BigInt
-    fundingRateEpochDuration: BigInt
-    fundingRateWindowTime: BigInt
-    timestamp: BigInt!
-    blockNumber: BigInt!
-    updateTimestamp: BigInt!
+	"""
+	Default trading-fee rate for this symbol, stored with 1e18 precision in core.
+	"""
+	tradingFee: BigInt!
+	"""
+	Whether the core currently marks this symbol as valid for trading.
+	"""
+	isValid: Boolean!
+	"""
+	Minimum notional value required for quotes on this symbol, in collateral units.
+	"""
+	minAcceptableQuoteValue: BigInt
+	"""
+	Minimum portion reserved for liquidation fees, stored with 1e18 precision in core.
+	"""
+	minAcceptablePortionLF: BigInt
+	"""
+	Funding-rate epoch duration in seconds.
+	"""
+	fundingRateEpochDuration: BigInt
+	"""
+	Funding-rate application window in seconds; core requires it to be less than half the epoch duration.
+	"""
+	fundingRateWindowTime: BigInt
+	"""
+	Block timestamp when this symbol was first indexed.
+	"""
+	timestamp: BigInt!
+	"""
+	Block number of the latest symbol event handled for this entity.
+	"""
+	blockNumber: BigInt!
+	"""
+	Block timestamp of the latest symbol event handled for this entity.
+	"""
+	updateTimestamp: BigInt!
 }

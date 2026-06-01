@@ -1,8 +1,29 @@
+"""
+Named Symmio-related address metadata stored by SetEntityMetadata handling.
+"""
 type SymmioEntity @entity(immutable: false) {
+	"""
+	Address-based entity id.
+	"""
 	id: ID!
+	"""
+	Entity address.
+	"""
 	address: Bytes!
+	"""
+	Entity type label emitted or derived by metadata handlers.
+	"""
 	type: String!
+	"""
+	Optional display name.
+	"""
 	name: String
+	"""
+	Optional brand color.
+	"""
 	brandColor: String
+	"""
+	Optional raw metadata string.
+	"""
 	metadata: String
 }

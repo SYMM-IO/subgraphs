@@ -1,0 +1,68 @@
+import {Address, BigInt, Bytes, log} from "@graphprotocol/graph-ts"
+import {
+	symmio_0_8_6,
+	symmio_0_8_6__balanceInfoOfPartyAResult,
+	symmio_0_8_6__balanceInfoOfPartyBResult,
+	symmio_0_8_6__getFundingFeesOfPartyBResultValue0Struct,
+	symmio_0_8_6__getLiquidatedStateOfPartyAResultValue0Struct,
+	symmio_0_8_6__getQuoteResultValue0Struct,
+} from "../../generated/symmio_0_8_6/symmio_0_8_6"
+
+export function getQuote(address: Address, id: BigInt): symmio_0_8_6__getQuoteResultValue0Struct | null {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_getQuote(id)
+	return result.reverted ? null : result.value
+}
+
+export function getCollateral(address: Address,): Bytes | null {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_getCollateral()
+	return result.reverted ? null : result.value
+}
+
+export function getLiquidatedStateOfPartyA(address: Address, partyA: Address): symmio_0_8_6__getLiquidatedStateOfPartyAResultValue0Struct | null {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_getLiquidatedStateOfPartyA(partyA)
+	return result.reverted ? null : result.value
+}
+
+export function getBalanceInfoOfPartyA(address: Address, partyA: Address): symmio_0_8_6__balanceInfoOfPartyAResult | null {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_balanceInfoOfPartyA(partyA)
+	return result.reverted ? null : result.value
+}
+
+export function getBalanceOf(address: Address, account: Address): BigInt | null {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_balanceOf(account)
+	return result.reverted ? null : result.value
+}
+
+export function isCrossPartyB(address: Address, partyB: Address): bool {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_isCrossPartyB(partyB)
+	return result.reverted ? false : result.value
+}
+
+export function getBalanceInfoOfPartyB(address: Address, partyA: Address, partyB: Address): symmio_0_8_6__balanceInfoOfPartyBResult | null {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_balanceInfoOfPartyB(partyB, partyA)
+	return result.reverted ? null : result.value
+}
+
+export function getFundingFeesOfPartyB(address: Address, symbolId: BigInt, partyB: Address): symmio_0_8_6__getFundingFeesOfPartyBResultValue0Struct | null {
+	const contract = symmio_0_8_6.bind(address)
+	let result = contract.try_getFundingFeesOfPartyB(symbolId, partyB)
+	return result.reverted ? null : result.value
+}
+
+export function symbolIdToSymbolName(symbolId: BigInt, contractAddress: Address): string {
+	let symmioContract = symmio_0_8_6.bind(contractAddress)
+	let callResult = symmioContract.try_symbolNameById([symbolId])
+	if (callResult.reverted) {
+		log.error("error in symbol bind", [])
+		return ""
+	} else {
+		return callResult.value[0]
+	}
+}
