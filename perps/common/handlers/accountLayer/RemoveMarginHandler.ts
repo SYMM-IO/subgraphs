@@ -4,6 +4,7 @@ import { MarginTransfer, SubAccount, VirtualAccount } from "../../../../generate
 import { coreSourceForAccountLayer, setMarginTransferProfileSources } from "../../utils/profile"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { updateMarginHierarchyHistories } from "../../../analytics/utils/historyHelpers"
+import { refreshAccountLayerMarginLatestBalances } from "../../utils/accountLayerMarginBalances"
 
 export class RemoveMarginHandler<T> extends BaseAccountLayerHandler {
 	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -11,12 +12,13 @@ export class RemoveMarginHandler<T> extends BaseAccountLayerHandler {
 		const event = changetype<T>(_event)
 		let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
 		let mt = new MarginTransfer(id)
+		let coreSource = coreSourceForAccountLayer(event.address)
 		mt.type = "REMOVE"
 		mt.virtualAccount = event.params.virtualAccount.toHexString()
 		mt.subAccount = event.params.subAccount.toHexString()
 		mt.amount = event.params.amount
 		mt.source = event.address
-		setMarginTransferProfileSources(mt, event.address, coreSourceForAccountLayer(event.address), event.address)
+		setMarginTransferProfileSources(mt, event.address, coreSource, event.address)
 		mt.timestamp = event.block.timestamp
 		mt.blockNumber = event.block.number
 		mt.transaction = event.transaction.hash
@@ -36,5 +38,6 @@ export class RemoveMarginHandler<T> extends BaseAccountLayerHandler {
 		if (sub) {
 			updateMarginHierarchyHistories(sub, va, event.block.timestamp, BigInt.zero(), event.params.amount)
 		}
+		refreshAccountLayerMarginLatestBalances(event, coreSource, event.params.subAccount, event.params.virtualAccount)
 	}
 }

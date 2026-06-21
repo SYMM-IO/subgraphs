@@ -1,11 +1,12 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { LiquidationDetail } from "../../../../generated/schema"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
-import { getLiquidationStateData } from "../../VersionedQuoteLoader"
+import { getLiquidationStateData, getPartyASettlementBalanceData, getPartyBSettlementMode } from "../../VersionedQuoteLoader"
+import { applyPartyASettlementBalanceData, upsertSettlementSnapshot } from "../../utils/liquidationDetail"
 
 export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -92,6 +93,15 @@ export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 		}
 		for (let i = 0; i < amounts.length; i++) mergedAmounts.push(amounts[i])
 		entity.settledAmounts = mergedAmounts
+
+		for (let i = 0; i < partyBs.length; i++) {
+			let amount = i < amounts.length ? amounts[i] : BigInt.zero()
+			let mode = getPartyBSettlementMode(version, event.address, changetype<Address>(partyBs[i]))
+			upsertSettlementSnapshot(entity, partyBs[i], mode, BigInt.zero(), amount, BigInt.zero(), "settled", true)
+		}
+
+		let settlementBalances = getPartyASettlementBalanceData(version, event.address, event.params.partyA)
+		if (settlementBalances) applyPartyASettlementBalanceData(entity, settlementBalances, true)
 
 		// Only mark fully settled when the on-chain involvedPartyBCounts hits 0.
 		let liqState = getLiquidationStateData(version, event.address, event.params.partyA)

@@ -1,6 +1,8 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Account, LiquidationDetail } from "../../../../generated/schema"
+import { getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
+import { calculateDeferredBalanceAtStart, calculateFreeMarginAtStart, calculateLossRestsAt } from "../../utils/liquidationDetail"
 import { setLiquidationDetailProfileRefs } from "../../utils/profile"
 
 export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
@@ -26,6 +28,22 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.liquidationTimestamp = event.params.liquidationTimestamp
 		entity.liquidator = event.params.liquidator
 		entity.allocatedBalance = event.params.allocatedBalance
+		let balanceInfo = getPartyABalanceInfoData(version, event.address, event.params.partyA)
+		if (balanceInfo) {
+			let allocatedBalanceAtStart = event.params.liquidationAllocatedBalance
+			entity.freeBalance = balanceInfo.freeBalance
+			entity.freeMarginAtStart = calculateFreeMarginAtStart(allocatedBalanceAtStart, balanceInfo.lockedCva, balanceInfo.lockedLf)
+			entity.lockedCva = balanceInfo.lockedCva
+			entity.lockedLf = balanceInfo.lockedLf
+			entity.lockedPartyAmm = balanceInfo.lockedPartyAmm
+			entity.lockedPartyBmm = balanceInfo.lockedPartyBmm
+			entity.lossRestsAt = calculateLossRestsAt(allocatedBalanceAtStart, balanceInfo.lockedCva, balanceInfo.lockedLf, event.params.upnl)
+		}
+		if (version >= Version.v_0_8_5) entity.reimbursement = BigInt.zero()
+		if (version >= Version.v_0_8_6) {
+			entity.deferredBalance = calculateDeferredBalanceAtStart(event.params.allocatedBalance, event.params.liquidationAllocatedBalance)
+			entity.liquidationEscrow = BigInt.zero()
+		}
 		entity.settled = false
 		entity.fullyLiquidated = false
 		entity.takeover = false
@@ -35,6 +53,13 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.paidCva = BigInt.zero()
 		entity.paidLf = BigInt.zero()
 		entity.potentialLf = BigInt.zero()
+		entity.settlementPartyBs = []
+		entity.settlementModes = []
+		entity.settlementExpectedAmounts = []
+		entity.settlementActualAmounts = []
+		entity.settlementCvaReturned = []
+		entity.settlementReserveContributions = []
+		entity.settlementStates = []
 		let partyAAccount = Account.load(event.params.partyA.toHexString())
 		if (partyAAccount) {
 			entity.affiliate = partyAAccount.accountSource

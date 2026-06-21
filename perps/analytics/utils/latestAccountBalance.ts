@@ -32,9 +32,16 @@ import {
 	getBalanceOf as getBalanceOf_0_8_5,
 	isCrossPartyB as isCrossPartyB_0_8_5,
 } from "../../common/contract_utils_0_8_5"
+import {
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_6,
+	getBalanceInfoOfPartyB as getBalanceInfoOfPartyB_0_8_6,
+	getBalanceOf as getBalanceOf_0_8_6,
+	isCrossPartyB as isCrossPartyB_0_8_6,
+} from "../../common/contract_utils_0_8_6"
 import { clearAffiliateExpressWithdrawBalanceSnapshot, syncAffiliateExpressWithdrawBalanceSnapshot } from "./affiliateExpressWithdrawComponents"
 
 function getBalanceOf(version: Version, source: Address, account: Address): BigInt | null {
+	if (version == Version.v_0_8_6) return getBalanceOf_0_8_6(source, account)
 	if (version == Version.v_0_8_5) return getBalanceOf_0_8_5(source, account)
 	if (version == Version.v_0_8_4) return getBalanceOf_0_8_4(source, account)
 	if (version == Version.v_0_8_3) return getBalanceOf_0_8_3(source, account)
@@ -43,8 +50,8 @@ function getBalanceOf(version: Version, source: Address, account: Address): BigI
 	return getBalanceOf_0_8_0(source, account)
 }
 
-function finalizeBalance(entity: LatestAccountBalance, event: ethereum.Event, version: Version, account: Address): boolean {
-	let free = getBalanceOf(version, event.address, account)
+function finalizeBalance(entity: LatestAccountBalance, event: ethereum.Event, version: Version, source: Address, account: Address): boolean {
+	let free = getBalanceOf(version, source, account)
 	if (free === null) {
 		log.warning("Failed to get free balance of account {}", [account.toHexString()])
 		return false
@@ -64,19 +71,30 @@ function finalizeBalance(entity: LatestAccountBalance, event: ethereum.Event, ve
 }
 
 function resolvePartyBBalanceKey(event: ethereum.Event, version: Version, partyB: Address, partyA: Address): Address {
-	if (version != Version.v_0_8_5 || partyA.equals(Address.zero())) return partyA
-	let isCross = isCrossPartyB_0_8_5(event.address, partyB)
-	return isCross ? Address.zero() : partyA
+	if (partyA.equals(Address.zero())) return partyA
+	if (version == Version.v_0_8_6) {
+		let isCross = isCrossPartyB_0_8_6(event.address, partyB)
+		return isCross ? Address.zero() : partyA
+	}
+	if (version == Version.v_0_8_5) {
+		let isCross = isCrossPartyB_0_8_5(event.address, partyB)
+		return isCross ? Address.zero() : partyA
+	}
+	return partyA
 }
 
 export function updatePartyALatestBalance(event: ethereum.Event, version: Version, partyA: Address): void {
-	let id = partyA.toHexString() + "-" + event.address.toHexString()
+	updatePartyALatestBalanceForSource(event, version, event.address, partyA)
+}
+
+export function updatePartyALatestBalanceForSource(event: ethereum.Event, version: Version, source: Address, partyA: Address): void {
+	let id = partyA.toHexString() + "-" + source.toHexString()
 	let isNew = false
 	let entity = LatestAccountBalance.load(id)
 	if (!entity) {
 		isNew = true
 		entity = new LatestAccountBalance(id)
-		entity.source = event.address
+		entity.source = source
 		entity.account = partyA
 		entity.accountRef = partyA.toHexString()
 		entity.counterParty = null
@@ -84,8 +102,23 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.accountType = "PARTY_A"
 	}
 
-	if (version == Version.v_0_8_5) {
-		let info = getBalanceInfoOfPartyA_0_8_5(event.address, partyA)
+	if (version == Version.v_0_8_6) {
+		let info = getBalanceInfoOfPartyA_0_8_6(source, partyA)
+		if (!info) {
+			log.warning("Failed to get balance info of partyA {} for version 0.8.6", [partyA.toHexString()])
+			return
+		}
+		entity.allocatedBalance = info.value0
+		entity.lockedCva = info.value1
+		entity.lockedLf = info.value2
+		entity.lockedPartyAmm = info.value3
+		entity.lockedPartyBmm = info.value4
+		entity.pendingLockedCva = info.value5
+		entity.pendingLockedLf = info.value6
+		entity.pendingLockedPartyAmm = info.value7
+		entity.pendingLockedPartyBmm = info.value8
+	} else if (version == Version.v_0_8_5) {
+		let info = getBalanceInfoOfPartyA_0_8_5(source, partyA)
 		if (!info) {
 			log.warning("Failed to get balance info of partyA {} for version 0.8.5", [partyA.toHexString()])
 			return
@@ -100,7 +133,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm = info.value7
 		entity.pendingLockedPartyBmm = info.value8
 	} else if (version == Version.v_0_8_4) {
-		let info = getBalanceInfoOfPartyA_0_8_4(event.address, partyA)
+		let info = getBalanceInfoOfPartyA_0_8_4(source, partyA)
 		if (!info) {
 			log.warning("Failed to get balance info of partyA {} for version 0.8.4", [partyA.toHexString()])
 			return
@@ -115,7 +148,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm = info.value7
 		entity.pendingLockedPartyBmm = info.value8
 	} else if (version == Version.v_0_8_3) {
-		let info = getBalanceInfoOfPartyA_0_8_3(event.address, partyA)
+		let info = getBalanceInfoOfPartyA_0_8_3(source, partyA)
 		if (!info) {
 			log.warning("Failed to get balance info of partyA {} for version 0.8.3", [partyA.toHexString()])
 			return
@@ -130,7 +163,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm = info.value7
 		entity.pendingLockedPartyBmm = info.value8
 	} else if (version == Version.v_0_8_2) {
-		let info = getBalanceInfoOfPartyA_0_8_2(event.address, partyA)
+		let info = getBalanceInfoOfPartyA_0_8_2(source, partyA)
 		if (!info) {
 			log.warning("Failed to get balance info of partyA {} for version 0.8.2", [partyA.toHexString()])
 			return
@@ -145,7 +178,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm = info.value7
 		entity.pendingLockedPartyBmm = info.value8
 	} else if (version == Version.v_0_8_1) {
-		let info = getBalanceInfoOfPartyA_0_8_1(event.address, partyA)
+		let info = getBalanceInfoOfPartyA_0_8_1(source, partyA)
 		if (!info) {
 			log.warning("Failed to get balance info of partyA {} for version 0.8.1", [partyA.toHexString()])
 			return
@@ -160,7 +193,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm = info.value7
 		entity.pendingLockedPartyBmm = info.value8
 	} else if (version == Version.v_0_8_0) {
-		let info = getBalanceInfoOfPartyA_0_8_0(event.address, partyA)
+		let info = getBalanceInfoOfPartyA_0_8_0(source, partyA)
 		if (!info) {
 			log.warning("Failed to get balance info of partyA {} for version 0.8.0", [partyA.toHexString()])
 			return
@@ -176,7 +209,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyBmm = info.value8
 	}
 
-	if (!finalizeBalance(entity, event, version, partyA)) return
+	if (!finalizeBalance(entity, event, version, source, partyA)) return
 
 	if (
 		entity.freeBalance.isZero() &&
@@ -190,7 +223,7 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm.isZero() &&
 		entity.pendingLockedPartyBmm.isZero()
 	) {
-		clearAffiliateExpressWithdrawBalanceSnapshot(partyA, event.address, event.block.timestamp, event.block.number)
+		clearAffiliateExpressWithdrawBalanceSnapshot(partyA, source, event.block.timestamp, event.block.number)
 		if (!isNew) store.remove("LatestAccountBalance", id)
 		return
 	}
@@ -223,7 +256,22 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 		entity.accountType = "PARTY_B"
 	}
 
-	if (version == Version.v_0_8_5) {
+	if (version == Version.v_0_8_6) {
+		let info = getBalanceInfoOfPartyB_0_8_6(event.address, balanceKey, partyB)
+		if (!info) {
+			log.warning("Failed to get balance info of partyB {} for version 0.8.6", [partyB.toHexString()])
+			return
+		}
+		entity.allocatedBalance = info.value0
+		entity.lockedCva = info.value1
+		entity.lockedLf = info.value2
+		entity.lockedPartyAmm = info.value3
+		entity.lockedPartyBmm = info.value4
+		entity.pendingLockedCva = info.value5
+		entity.pendingLockedLf = info.value6
+		entity.pendingLockedPartyAmm = info.value7
+		entity.pendingLockedPartyBmm = info.value8
+	} else if (version == Version.v_0_8_5) {
 		let info = getBalanceInfoOfPartyB_0_8_5(event.address, balanceKey, partyB)
 		if (!info) {
 			log.warning("Failed to get balance info of partyB {} for version 0.8.5", [partyB.toHexString()])
@@ -315,7 +363,7 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyBmm = info.value8
 	}
 
-	if (!finalizeBalance(entity, event, version, partyB)) return
+	if (!finalizeBalance(entity, event, version, event.address, partyB)) return
 
 	if (
 		entity.freeBalance.isZero() &&

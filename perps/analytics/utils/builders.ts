@@ -269,6 +269,8 @@ export function getDailySymbolTradesHistory(
 		history.platformFeePaid = BigInt.zero()
 		history.openFeePaid = BigInt.zero()
 		history.closeFeePaid = BigInt.zero()
+		history.loss = BigInt.zero()
+		history.profit = BigInt.zero()
 		history.volume = BigInt.zero()
 		history.save()
 	}
@@ -306,6 +308,8 @@ export function getTotalSymbolTradesHistory(
 		history.platformFeePaid = BigInt.zero()
 		history.openFeePaid = BigInt.zero()
 		history.closeFeePaid = BigInt.zero()
+		history.loss = BigInt.zero()
+		history.profit = BigInt.zero()
 		history.volume = BigInt.zero()
 		history.save()
 	}

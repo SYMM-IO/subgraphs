@@ -1,35 +1,58 @@
 import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { Version } from "./BaseHandler"
 
-import { getQuote as getQuote_0_8_0, symbolIdToSymbolName as symbolIdToSymbolName_0_8_0 } from "./contract_utils_0_8_0"
+import {
+	getQuote as getQuote_0_8_0,
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0,
+	getBalanceOf as getBalanceOf_0_8_0,
+	symbolIdToSymbolName as symbolIdToSymbolName_0_8_0,
+} from "./contract_utils_0_8_0"
 import {
 	getQuote as getQuote_0_8_1,
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_1,
+	getBalanceOf as getBalanceOf_0_8_1,
 	getLiquidatedStateOfPartyA as getLiqState_0_8_1,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_1,
 } from "./contract_utils_0_8_1"
 import {
 	getQuote as getQuote_0_8_2,
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_2,
+	getBalanceOf as getBalanceOf_0_8_2,
 	getLiquidatedStateOfPartyA as getLiqState_0_8_2,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_2,
 } from "./contract_utils_0_8_2"
 import {
 	getQuote as getQuote_0_8_3,
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_3,
+	getBalanceOf as getBalanceOf_0_8_3,
 	getLiquidatedStateOfPartyA as getLiqState_0_8_3,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_3,
 } from "./contract_utils_0_8_3"
 import {
 	getQuote as getQuote_0_8_4,
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_4,
+	getBalanceOf as getBalanceOf_0_8_4,
 	getLiquidatedStateOfPartyA as getLiqState_0_8_4,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_4,
 } from "./contract_utils_0_8_4"
 import {
 	getQuote as getQuote_0_8_5,
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_5,
+	getBalanceOf as getBalanceOf_0_8_5,
 	getLiquidatedStateOfPartyA as getLiqState_0_8_5,
+	isCrossPartyB as isCrossPartyB_0_8_5,
+	partyAReimbursement as partyAReimbursement_0_8_5,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_5,
 } from "./contract_utils_0_8_5"
 import {
 	getQuote as getQuote_0_8_6,
+	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_6,
+	getBalanceOf as getBalanceOf_0_8_6,
+	getLiquidationEscrow as getLiquidationEscrow_0_8_6,
 	getLiquidatedStateOfPartyA as getLiqState_0_8_6,
+	getPartyADeferredBalance as getPartyADeferredBalance_0_8_6,
+	isCrossPartyB as isCrossPartyB_0_8_6,
+	partyAReimbursement as partyAReimbursement_0_8_6,
 	symbolIdToSymbolName as symbolIdToSymbolName_0_8_6,
 } from "./contract_utils_0_8_6"
 
@@ -120,6 +143,44 @@ export class LiquidationStateData {
 		this.partyAAccumulatedUpnl = BigInt.zero()
 		this.disputed = false
 		this.liquidationTimestamp = BigInt.zero()
+	}
+}
+
+export class PartyABalanceInfoData {
+	allocatedBalance: BigInt
+	lockedCva: BigInt
+	lockedLf: BigInt
+	lockedPartyAmm: BigInt
+	lockedPartyBmm: BigInt
+	pendingLockedCva: BigInt
+	pendingLockedLf: BigInt
+	pendingLockedPartyAmm: BigInt
+	pendingLockedPartyBmm: BigInt
+	freeBalance: BigInt
+
+	constructor() {
+		this.allocatedBalance = BigInt.zero()
+		this.lockedCva = BigInt.zero()
+		this.lockedLf = BigInt.zero()
+		this.lockedPartyAmm = BigInt.zero()
+		this.lockedPartyBmm = BigInt.zero()
+		this.pendingLockedCva = BigInt.zero()
+		this.pendingLockedLf = BigInt.zero()
+		this.pendingLockedPartyAmm = BigInt.zero()
+		this.pendingLockedPartyBmm = BigInt.zero()
+		this.freeBalance = BigInt.zero()
+	}
+}
+
+export class PartyASettlementBalanceData {
+	reimbursement: BigInt | null
+	deferredBalance: BigInt | null
+	liquidationEscrow: BigInt | null
+
+	constructor() {
+		this.reimbursement = null
+		this.deferredBalance = null
+		this.liquidationEscrow = null
 	}
 }
 
@@ -341,6 +402,204 @@ export function getSymbolName(version: Version, symbolId: BigInt, address: Addre
 		default:
 			return ""
 	}
+}
+
+function setPartyABalanceFields(
+	data: PartyABalanceInfoData,
+	allocatedBalance: BigInt,
+	lockedCva: BigInt,
+	lockedLf: BigInt,
+	lockedPartyAmm: BigInt,
+	lockedPartyBmm: BigInt,
+	pendingLockedCva: BigInt,
+	pendingLockedLf: BigInt,
+	pendingLockedPartyAmm: BigInt,
+	pendingLockedPartyBmm: BigInt,
+): void {
+	data.allocatedBalance = allocatedBalance
+	data.lockedCva = lockedCva
+	data.lockedLf = lockedLf
+	data.lockedPartyAmm = lockedPartyAmm
+	data.lockedPartyBmm = lockedPartyBmm
+	data.pendingLockedCva = pendingLockedCva
+	data.pendingLockedLf = pendingLockedLf
+	data.pendingLockedPartyAmm = pendingLockedPartyAmm
+	data.pendingLockedPartyBmm = pendingLockedPartyBmm
+}
+
+function getBalanceOfData(version: Version, address: Address, account: Address): BigInt | null {
+	switch (version) {
+		case Version.v_0_8_0:
+			return getBalanceOf_0_8_0(address, account)
+		case Version.v_0_8_1:
+			return getBalanceOf_0_8_1(address, account)
+		case Version.v_0_8_2:
+			return getBalanceOf_0_8_2(address, account)
+		case Version.v_0_8_3:
+			return getBalanceOf_0_8_3(address, account)
+		case Version.v_0_8_4:
+			return getBalanceOf_0_8_4(address, account)
+		case Version.v_0_8_5:
+			return getBalanceOf_0_8_5(address, account)
+		case Version.v_0_8_6:
+			return getBalanceOf_0_8_6(address, account)
+		default:
+			return null
+	}
+}
+
+export function getPartyABalanceInfoData(version: Version, address: Address, partyA: Address): PartyABalanceInfoData | null {
+	let data = new PartyABalanceInfoData()
+
+	switch (version) {
+		case Version.v_0_8_0: {
+			let info = getBalanceInfoOfPartyA_0_8_0(address, partyA)
+			if (!info) return null
+			setPartyABalanceFields(
+				data,
+				info.value0,
+				info.value1,
+				info.value2,
+				info.value3,
+				info.value4,
+				info.value5,
+				info.value6,
+				info.value7,
+				info.value8,
+			)
+			break
+		}
+		case Version.v_0_8_1: {
+			let info = getBalanceInfoOfPartyA_0_8_1(address, partyA)
+			if (!info) return null
+			setPartyABalanceFields(
+				data,
+				info.value0,
+				info.value1,
+				info.value2,
+				info.value3,
+				info.value4,
+				info.value5,
+				info.value6,
+				info.value7,
+				info.value8,
+			)
+			break
+		}
+		case Version.v_0_8_2: {
+			let info = getBalanceInfoOfPartyA_0_8_2(address, partyA)
+			if (!info) return null
+			setPartyABalanceFields(
+				data,
+				info.value0,
+				info.value1,
+				info.value2,
+				info.value3,
+				info.value4,
+				info.value5,
+				info.value6,
+				info.value7,
+				info.value8,
+			)
+			break
+		}
+		case Version.v_0_8_3: {
+			let info = getBalanceInfoOfPartyA_0_8_3(address, partyA)
+			if (!info) return null
+			setPartyABalanceFields(
+				data,
+				info.value0,
+				info.value1,
+				info.value2,
+				info.value3,
+				info.value4,
+				info.value5,
+				info.value6,
+				info.value7,
+				info.value8,
+			)
+			break
+		}
+		case Version.v_0_8_4: {
+			let info = getBalanceInfoOfPartyA_0_8_4(address, partyA)
+			if (!info) return null
+			setPartyABalanceFields(
+				data,
+				info.value0,
+				info.value1,
+				info.value2,
+				info.value3,
+				info.value4,
+				info.value5,
+				info.value6,
+				info.value7,
+				info.value8,
+			)
+			break
+		}
+		case Version.v_0_8_5: {
+			let info = getBalanceInfoOfPartyA_0_8_5(address, partyA)
+			if (!info) return null
+			setPartyABalanceFields(
+				data,
+				info.value0,
+				info.value1,
+				info.value2,
+				info.value3,
+				info.value4,
+				info.value5,
+				info.value6,
+				info.value7,
+				info.value8,
+			)
+			break
+		}
+		case Version.v_0_8_6: {
+			let info = getBalanceInfoOfPartyA_0_8_6(address, partyA)
+			if (!info) return null
+			setPartyABalanceFields(
+				data,
+				info.value0,
+				info.value1,
+				info.value2,
+				info.value3,
+				info.value4,
+				info.value5,
+				info.value6,
+				info.value7,
+				info.value8,
+			)
+			break
+		}
+	}
+
+	let freeBalance = getBalanceOfData(version, address, partyA)
+	if (freeBalance === null) return null
+	data.freeBalance = freeBalance
+	return data
+}
+
+export function getPartyASettlementBalanceData(version: Version, address: Address, partyA: Address): PartyASettlementBalanceData | null {
+	if (version < Version.v_0_8_5) return null
+
+	let data = new PartyASettlementBalanceData()
+	if (version == Version.v_0_8_5) {
+		data.reimbursement = partyAReimbursement_0_8_5(address, partyA)
+		return data
+	}
+	if (version == Version.v_0_8_6) {
+		data.reimbursement = partyAReimbursement_0_8_6(address, partyA)
+		data.deferredBalance = getPartyADeferredBalance_0_8_6(address, partyA)
+		data.liquidationEscrow = getLiquidationEscrow_0_8_6(address, partyA)
+		return data
+	}
+	return null
+}
+
+export function getPartyBSettlementMode(version: Version, address: Address, partyB: Address): string {
+	if (version == Version.v_0_8_6) return isCrossPartyB_0_8_6(address, partyB) ? "cross" : "isolated"
+	if (version == Version.v_0_8_5) return isCrossPartyB_0_8_5(address, partyB) ? "cross" : "isolated"
+	return "isolated"
 }
 
 /**

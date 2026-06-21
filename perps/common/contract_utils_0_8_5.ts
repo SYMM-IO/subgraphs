@@ -38,6 +38,12 @@ export function getBalanceOf(address: Address, account: Address): BigInt | null 
 	return result.reverted ? null : result.value
 }
 
+export function partyAReimbursement(address: Address, partyA: Address): BigInt | null {
+	const contract = symmio_0_8_5.bind(address)
+	let result = contract.try_partyAReimbursement(partyA)
+	return result.reverted ? null : result.value
+}
+
 export function isCrossPartyB(address: Address, partyB: Address): bool {
 	const contract = symmio_0_8_5.bind(address)
 	let result = contract.try_isCrossPartyB(partyB)

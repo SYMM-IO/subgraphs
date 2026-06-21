@@ -8,6 +8,7 @@ import {
 	setMarginTransferProfileSources,
 	setVirtualAccountProfileDefaults,
 } from "../../utils/profile"
+import { refreshAccountLayerMarginLatestBalances } from "../../utils/accountLayerMarginBalances"
 
 export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler {
 	handle(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -51,12 +52,13 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 		}
 		let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
 		let mt = new MarginTransfer(id)
+		let coreSource = coreSourceForAccountLayer(event.address)
 		mt.type = "EMERGENCY_RECOVER"
 		mt.virtualAccount = vaId
 		mt.subAccount = event.params.subAccount.toHexString()
 		mt.amount = event.params.amount
 		mt.source = event.address
-		setMarginTransferProfileSources(mt, event.address, coreSourceForAccountLayer(event.address), event.address)
+		setMarginTransferProfileSources(mt, event.address, coreSource, event.address)
 		mt.timestamp = event.block.timestamp
 		mt.blockNumber = event.block.number
 		mt.transaction = event.transaction.hash
@@ -67,5 +69,6 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 			sub.latestMarginBalance = (sub.latestMarginBalance === null ? BigInt.zero() : sub.latestMarginBalance!).minus(event.params.amount)
 			sub.save()
 		}
+		refreshAccountLayerMarginLatestBalances(event, coreSource, event.params.subAccount, event.params.virtualAccount)
 	}
 }

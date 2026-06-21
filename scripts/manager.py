@@ -655,6 +655,16 @@ def prepare_module(config: Config, target_module: str):
             if not any(a["name"] == "accountLayer_1" for a in source_config["mapping"]["abis"]):
                 source_config["mapping"]["abis"].append({"name": "accountLayer_1", "file": "./abis/accountLayer_1.json"})
 
+        # accountLayer margin handlers refresh LatestAccountBalance by binding the
+        # paired symmio core. Graph requires every bound contract ABI to be
+        # declared on the calling data source, not just on that contract's own
+        # event data source.
+        if contract.abi == "accountLayer" and "symmio" in unique_abis:
+            for c in all_contracts:
+                if c.abi == "symmio":
+                    if not any(a["name"] == c.path() for a in source_config["mapping"]["abis"]):
+                        source_config["mapping"]["abis"].append({"name": c.path(), "file": f"./abis/{c.path()}.json"})
+
         # Auto-include ABIs that were detected from deps/src files but not in config
         existing_abi_names = set(a["name"] for a in source_config["mapping"]["abis"])
         for c in all_contracts:
@@ -771,6 +781,9 @@ def generate_contract_utils(common_dir: str, version: str):
     v = version  # short alias
     abi_file = f"./configs/abis/symmio_{v}.json"
     has_liquidation = _abi_has_function(abi_file, "getLiquidatedStateOfPartyA")
+    has_party_a_reimbursement = _abi_has_function(abi_file, "partyAReimbursement")
+    has_party_a_deferred_balance = _abi_has_function(abi_file, "getPartyADeferredBalance")
+    has_liquidation_escrow = _abi_has_function(abi_file, "getLiquidationEscrow")
 
     lines = []
     lines.append(f'import {{Address, BigInt, Bytes, log}} from "@graphprotocol/graph-ts"')
@@ -828,6 +841,30 @@ def generate_contract_utils(common_dir: str, version: str):
     lines.append(f"\treturn result.reverted ? null : result.value")
     lines.append(f"}}")
     lines.append("")
+
+    if has_party_a_reimbursement:
+        lines.append(f"export function partyAReimbursement(address: Address, partyA: Address): BigInt | null {{")
+        lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+        lines.append(f"\tlet result = contract.try_partyAReimbursement(partyA)")
+        lines.append(f"\treturn result.reverted ? null : result.value")
+        lines.append(f"}}")
+        lines.append("")
+
+    if has_party_a_deferred_balance:
+        lines.append(f"export function getPartyADeferredBalance(address: Address, partyA: Address): BigInt | null {{")
+        lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+        lines.append(f"\tlet result = contract.try_getPartyADeferredBalance(partyA)")
+        lines.append(f"\treturn result.reverted ? null : result.value")
+        lines.append(f"}}")
+        lines.append("")
+
+    if has_liquidation_escrow:
+        lines.append(f"export function getLiquidationEscrow(address: Address, partyA: Address): BigInt | null {{")
+        lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+        lines.append(f"\tlet result = contract.try_getLiquidationEscrow(partyA)")
+        lines.append(f"\treturn result.reverted ? null : result.value")
+        lines.append(f"}}")
+        lines.append("")
 
     # getBalanceInfoOfPartyB
     lines.append(

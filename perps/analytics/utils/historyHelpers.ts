@@ -336,6 +336,8 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		dst.closeFeePaid = dst.closeFeePaid.plus(params._closeFee)
 		dst.fundingPaid = dst.fundingPaid.plus(params._fundingPaid)
 		dst.fundingReceived = dst.fundingReceived.plus(params._fundingReceived)
+		dst.loss = dst.loss.plus(params._loss)
+		dst.profit = dst.profit.plus(params._profit)
 		dst.updateTimestamp = timestamp
 		dst.save()
 
@@ -347,6 +349,8 @@ export function updateHistories(params: UpdateHistoriesParams): void {
 		tst.closeFeePaid = tst.closeFeePaid.plus(params._closeFee)
 		tst.fundingPaid = tst.fundingPaid.plus(params._fundingPaid)
 		tst.fundingReceived = tst.fundingReceived.plus(params._fundingReceived)
+		tst.loss = tst.loss.plus(params._loss)
+		tst.profit = tst.profit.plus(params._profit)
 		tst.updateTimestamp = timestamp
 		tst.save()
 	}

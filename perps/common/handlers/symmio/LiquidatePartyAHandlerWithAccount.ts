@@ -2,12 +2,13 @@ import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { Account, LiquidationDetail } from "../../../../generated/schema"
-import { getLiquidationStateData } from "../../VersionedQuoteLoader"
+import { getLiquidationStateData, getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
 import { LiquidatePartyA as LiquidatePartyA_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
 import { LiquidatePartyA as LiquidatePartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePartyA as LiquidatePartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePartyA as LiquidatePartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { setLiquidationDetailProfileRefs } from "../../utils/profile"
+import { calculateFreeMarginAtStart, calculateLossRestsAt } from "../../utils/liquidationDetail"
 
 export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -94,6 +95,22 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 			// @ts-ignore
 			entity.allocatedBalance = changetype<LiquidatePartyA_0_8_2>(_event).params.allocatedBalance
 		}
+		let balanceInfo = getPartyABalanceInfoData(version, event.address, event.params.partyA)
+		if (balanceInfo) {
+			let allocatedBalance = entity.allocatedBalance ? entity.allocatedBalance! : balanceInfo.allocatedBalance
+			entity.freeBalance = balanceInfo.freeBalance
+			entity.freeMarginAtStart = calculateFreeMarginAtStart(allocatedBalance, balanceInfo.lockedCva, balanceInfo.lockedLf)
+			entity.lockedCva = balanceInfo.lockedCva
+			entity.lockedLf = balanceInfo.lockedLf
+			entity.lockedPartyAmm = balanceInfo.lockedPartyAmm
+			entity.lockedPartyBmm = balanceInfo.lockedPartyBmm
+			entity.lossRestsAt = calculateLossRestsAt(allocatedBalance, balanceInfo.lockedCva, balanceInfo.lockedLf, upnl)
+		}
+		if (version >= Version.v_0_8_5) entity.reimbursement = BigInt.zero()
+		if (version >= Version.v_0_8_6) {
+			entity.deferredBalance = BigInt.zero()
+			entity.liquidationEscrow = BigInt.zero()
+		}
 		entity.settled = false
 		entity.fullyLiquidated = false
 		entity.takeover = false
@@ -103,6 +120,13 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 		entity.paidCva = BigInt.zero()
 		entity.paidLf = BigInt.zero()
 		entity.potentialLf = BigInt.zero()
+		entity.settlementPartyBs = []
+		entity.settlementModes = []
+		entity.settlementExpectedAmounts = []
+		entity.settlementActualAmounts = []
+		entity.settlementCvaReturned = []
+		entity.settlementReserveContributions = []
+		entity.settlementStates = []
 		let partyAAccount = Account.load(event.params.partyA.toHexString())
 		if (partyAAccount) {
 			entity.affiliate = partyAAccount.accountSource

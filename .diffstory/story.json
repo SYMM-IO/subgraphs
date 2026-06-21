@@ -1,0 +1,329 @@
+{
+  "version": 1,
+  "title": "PartyA liquidation accounting, margin-balance refresh, and 0.8.6 wiring tour",
+  "summary": "Start where a liquidation position event turns quote PnL into PartyB settlement snapshots, then follow the version-safe contract readers, the LiquidationDetail creation paths that seed the new accounting fields, settlement finalization, and the immutable lifecycle event rail. After that, branch into the symbol-history realized loss/profit counters, then the account-layer margin path that now refreshes cached PartyA balances through the paired symmio core, and finally the deps/src wiring that lights up 0.8.6 BalanceChange events.",
+  "base": "HEAD",
+  "steps": [
+    {
+      "id": "s1",
+      "order": 1,
+      "title": "Entry point: quote liquidation now reconstructs PartyB settlement buckets",
+      "file": "perps/analytics/handlers/symmio/LiquidatePositionsPartyAHandler.ts",
+      "range": [1, 149],
+      "kind": "changed",
+      "why": "Start here because LiquidatePositionsPartyA is where the analytics subgraph has quote ids, funding context, PartyB addresses, and live liquidation state in hand. The old path accumulated total PnL, paid CVA, and LF at the LiquidationDetail level, but it could not explain which PartyB settlement bucket got which expected amount, actual amount, returned CVA, or cross-mode reserve contribution. The new LATE and OVERDUE math turns quote PnL plus funding into per-PartyB snapshots, then asks getPartyBSettlementMode for isolated versus cross before upsertSettlementSnapshot stores the pending bucket; verify the deficit formulas, especially the zero locked-CVA and zero total-loss guards, because those are the tiny hinges that keep overdue accounting from inventing value.",
+      "calls": ["s2", "s11"]
+    },
+    {
+      "id": "s2",
+      "order": 2,
+      "title": "Version bridge: one loader speaks every liquidation-era ABI",
+      "file": "perps/common/VersionedQuoteLoader.ts",
+      "range": [1, 604],
+      "kind": "changed",
+      "why": "The handler above needs balance buckets, settlement-only PartyA balances, and PartyB allocation mode without learning seven ABI dialects. This loader now imports balanceOf, balanceInfoOfPartyA, reimbursement, deferred-balance, escrow, and isCrossPartyB readers per supported version, then normalizes them into PartyABalanceInfoData and PartyASettlementBalanceData. The old flow could read liquidation state, but it had no stable way to capture free balance, locked CVA/LF/MM buckets, reimbursement, deferred balance, escrow, or cross PartyB mode; verify the version gates here because a wrong null or fallback would silently erase accounting on older deployments.",
+      "calls": ["s3", "s4", "s5"],
+      "returnsTo": "s1"
+    },
+    {
+      "id": "s3",
+      "order": 3,
+      "title": "v0.8.5 exposes PartyA reimbursement without direct calls",
+      "file": "perps/common/contract_utils_0_8_5.ts",
+      "range": [35, 51],
+      "kind": "changed",
+      "why": "VersionedQuoteLoader can only stay graceful if every contract read goes through a try_ wrapper. v0.8.5 gains partyAReimbursement here, returning null on revert just like the surrounding balance helpers, so settlement accounting can read the reimbursement bucket without risking a subgraph handler abort. The review stake is simple: this generated wrapper must mirror the ABI name exactly and preserve the null-on-revert convention the rest of the subgraph relies on.",
+      "returnsTo": "s2"
+    },
+    {
+      "id": "s4",
+      "order": 4,
+      "title": "v0.8.6 adds reimbursement, deferred balance, and escrow readers",
+      "file": "perps/common/contract_utils_0_8_6.ts",
+      "range": [35, 63],
+      "kind": "changed",
+      "why": "The v0.8.6 settlement path carries more buckets than v0.8.5, so the loader needs wrappers for partyAReimbursement, getPartyADeferredBalance, and getLiquidationEscrow. The old utility surface stopped at balanceOf and isCrossPartyB, which left deferred liquidation settlement blind to escrow and deferred-balance movement. Check that all three calls use the try_ forms and return null on revert; that is what lets callers keep indexing even when a reader is unavailable on a chain.",
+      "returnsTo": "s2"
+    },
+    {
+      "id": "s5",
+      "order": 5,
+      "title": "Generator keeps the new balance wrappers from becoming hand-edited snowflakes",
+      "file": "scripts/manager.py",
+      "range": [781, 872],
+      "kind": "changed",
+      "why": "The two contract_utils files above are generated, so the durable fix lives in generate_contract_utils. The generator now probes each ABI for partyAReimbursement, getPartyADeferredBalance, and getLiquidationEscrow before writing optional wrappers, which keeps older versions clean and lets future --create-utils runs reproduce the v0.8.5/v0.8.6 surface. The thing to verify is the feature detection: if an ABI lacks one of these functions, the generator should skip that reader instead of producing code that fails graph codegen.",
+      "returnsTo": "s2"
+    },
+    {
+      "id": "s6",
+      "order": 6,
+      "title": "LIQUIDATE_PARTY_A seeds start balances on the LiquidationDetail row",
+      "file": "perps/common/handlers/symmio/LiquidatePartyAHandlerWithAccount.ts",
+      "range": [1, 129],
+      "kind": "changed",
+      "why": "After the loader is available, the first normal liquidation entry path can stamp the row with the balance picture from liquidation start. The old LiquidationDetail row knew upnl, totalUnrealizedLoss, and allocatedBalance, but it did not retain freeBalance, locked CVA/LF/MM buckets, lossRestsAt, or empty settlement arrays, so later settlement code had no clean place to land per-PartyB accounting. This handler now pulls PartyABalanceInfoData, computes freeMarginAtStart and lossRestsAt, initializes reimbursement/deferred/escrow only for versions that expose those concepts, and primes settlement arrays so the snapshot helper can append without null gymnastics.",
+      "calls": ["s2", "s11"]
+    },
+    {
+      "id": "s7",
+      "order": 7,
+      "title": "Deferred liquidation preserves the liquidationAllocatedBalance split",
+      "file": "perps/common/handlers/symmio/DeferredLiquidatePartyAHandler.ts",
+      "range": [1, 62],
+      "kind": "changed",
+      "why": "The deferred path has a nastier balance story: event.params.allocatedBalance and event.params.liquidationAllocatedBalance are not interchangeable. The old row creation wrote allocatedBalance and moved on, which made deferred balance invisible and made free margin calculations use the wrong starting band. This path now uses liquidationAllocatedBalance for freeMarginAtStart and lossRestsAt, derives deferredBalance from the difference, zeros v0.8.6 escrow, and initializes the same settlement arrays as the immediate path so downstream settlement code does not need a special deferred branch.",
+      "calls": ["s2", "s11"]
+    },
+    {
+      "id": "s8",
+      "order": 8,
+      "title": "Late-created position rows get the same accounting surface",
+      "file": "perps/common/handlers/symmio/LiquidatePositionsPartyAHandler.ts",
+      "range": [1, 135],
+      "kind": "changed",
+      "why": "Sometimes the position liquidation handler is the first place the subgraph sees enough state to materialize a LiquidationDetail row. Before this change, that fallback row could exist but miss reimbursement/deferred/escrow defaults and settlement arrays, leaving the analytics handler from step s1 with a half-built landing pad. The fallback now mirrors the start-balance fields and array initialization from the main liquidation path, then refreshes balance buckets from getPartyABalanceInfoData so quote processing and profile counters write into a fully shaped row.",
+      "calls": ["s1", "s2", "s11"]
+    },
+    {
+      "id": "s9",
+      "order": 9,
+      "title": "Price-setting rows no longer create skinny liquidation records",
+      "file": "perps/common/handlers/symmio/SetSymbolsPricesHandler.ts",
+      "range": [1, 91],
+      "kind": "changed",
+      "why": "SetSymbolsPrices can also create or refresh the LiquidationDetail row while the liquidation state evolves. The old path filled core liquidation fields but left the newer accounting buckets absent, so a reviewer should make sure this path now stays in lockstep with the LiquidatePositions fallback: initialize reimbursement/deferred/escrow defaults, prepare settlement arrays, then copy free balance, locked buckets, and lossRestsAt from the normalized balance info. That keeps every row creator speaking the same schema dialect.",
+      "calls": ["s2", "s11"]
+    },
+    {
+      "id": "s10",
+      "order": 10,
+      "title": "Settlement turns pending PartyB buckets into settled buckets",
+      "file": "perps/common/handlers/symmio/SettlePartyALiquidationHandler.ts",
+      "range": [1, 110],
+      "kind": "changed",
+      "why": "Once SettlePartyALiquidation arrives, the row already has pending snapshots from step s1 and versioned readers from step s2. The old settlement handler merged settledPartyBs and settledAmounts, but it did not reconcile those amounts into the richer settlement arrays or capture final PartyA reimbursement/deferred/escrow balances. This code now walks each settled PartyB, resolves isolated versus cross mode, replaces the actual amount for that bucket, marks it settled, and then applies PartyA settlement balances while preserving useful nonzero values; verify the amount indexing fallback to zero because mismatched partyBs/amounts arrays are exactly where quiet accounting drift likes to hide.",
+      "calls": ["s2", "s11"]
+    },
+    {
+      "id": "s11",
+      "order": 11,
+      "title": "LiquidationDetail schema now has room for start, pending, and settled accounting",
+      "file": "perps/analytics/schema.graphql",
+      "range": [1284, 1343],
+      "kind": "changed",
+      "why": "All the handlers above need storage for the numbers they now reconstruct. LiquidationDetail gains start-of-liquidation free balance, free margin, locked CVA/LF/MM buckets, lossRestsAt, v0.8.5+ reimbursement, v0.8.6 deferred balance and escrow, plus the parallel PartyB settlement arrays that track mode, expected amount, actual amount, CVA returned, reserve contribution, and state. The schema review should focus on nullability and array alignment: these are optional historical enrichments, but when arrays are present each index must describe the same PartyB bucket.",
+      "returnsTo": "s1"
+    },
+    {
+      "id": "s12",
+      "order": 12,
+      "title": "Liquidation lifecycle gets an immutable event rail",
+      "file": "perps/analytics/schema.graphql",
+      "range": [89, 110],
+      "kind": "changed",
+      "why": "Settlement snapshots answer the balance question; reviewers also need the state-machine breadcrumb trail. The new LiquidationEvent entity hangs immutable lifecycle rows off LiquidationDetail with source, liquidationId, type, optional metadata, timestamp, block, and transaction. The old analytics surface had quote events, but no account-level liquidation event log, so the next handler steps all write through this rail rather than making readers infer lifecycle from booleans alone.",
+      "calls": ["s13", "s14", "s15", "s16", "s17", "s18", "s19", "s20", "s21", "s22"]
+    },
+    {
+      "id": "s13",
+      "order": 13,
+      "title": "Immediate liquidation records LIQUIDATE_PARTY_A after the detail row exists",
+      "file": "perps/analytics/handlers/symmio/LiquidatePartyAHandler.ts",
+      "range": [1, 16],
+      "kind": "changed",
+      "why": "The analytics wrapper now emits a LIQUIDATE_PARTY_A lifecycle row after the common handler has created LiquidationDetail and refreshed quote, symbol, and account state. The old wrapper updated latest balance only, so reviewers had no immutable account-level mark for the start of liquidation. This path derives the liquidation id from state because older event versions do not all carry it directly; verify the helper call remains after super.handle so the target LiquidationDetail can be found.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s14",
+      "order": 14,
+      "title": "Deferred liquidation writes the same start marker with its event liquidationId",
+      "file": "perps/analytics/handlers/symmio/DeferredLiquidatePartyAHandler.ts",
+      "range": [1, 15],
+      "kind": "changed",
+      "why": "DeferredLiquidatePartyA already carries liquidationId, so the wrapper can write LIQUIDATE_PARTY_A directly after the common deferred handler seeds the richer row from step s7. The old path left deferred liquidations out of the lifecycle rail, which would make the new event log look like it began in the middle of the story. Check that the balance update still runs after the lifecycle insert, preserving the existing latest-balance side effect.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s15",
+      "order": 15,
+      "title": "Pending-position liquidation joins quote events to the PartyA lifecycle",
+      "file": "perps/analytics/handlers/symmio/LiquidatePendingPositionsPartyAHandler.ts",
+      "range": [1, 50],
+      "kind": "changed",
+      "why": "This handler already wrote one QuoteEvent per pending quote, but the account-level liquidation row had no matching LIQUIDATE_PENDING_POSITIONS marker. The new state-derived lifecycle event ties those quote-level rows back to PartyA's LiquidationDetail after quote, symbol, and account handlers run. The version switch for quoteIds stays intact; the review point is that the new account event should fire once per contract event, not once per quote.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s16",
+      "order": 16,
+      "title": "Price updates mark SET_SYMBOLS_PRICE on the liquidation timeline",
+      "file": "perps/analytics/handlers/symmio/SetSymbolsPricesHandler.ts",
+      "range": [1, 14],
+      "kind": "changed",
+      "why": "SetSymbolsPrices is one of the protocol ticks that can move liquidation state without settling positions, so it now writes SET_SYMBOLS_PRICE into the PartyA lifecycle rail. The old wrapper delegated to common quote, symbol, and account handlers only, leaving readers to infer price refreshes from state mutation. The cast is deliberately local to the wrapper so the helper can read partyA and fetch the version-appropriate liquidation id from state.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s17",
+      "order": 17,
+      "title": "Fully liquidated events bridge direct ids and old state-derived ids",
+      "file": "perps/analytics/handlers/symmio/FullyLiquidatedPartyAHandler.ts",
+      "range": [1, 15],
+      "kind": "changed",
+      "why": "FULLY_LIQUIDATED needs to land on the same LiquidationDetail no matter which contract version emitted it. v0.8.3+ events carry liquidationId, while older versions need the loader to pull it from liquidation state. The old analytics wrapper only ran common state mutation; now it chooses the direct-id path when possible and the state-derived path when necessary, which is the pattern to compare against the dispute and settle handlers below.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s18",
+      "order": 18,
+      "title": "Dispute events use the same ABI split as fully-liquidated events",
+      "file": "perps/analytics/handlers/symmio/LiquidationDisputedHandler.ts",
+      "range": [1, 35],
+      "kind": "changed",
+      "why": "LIQUIDATION_DISPUTED follows the same direct-id versus state-derived split because the event surface changes across versions in the same way. The previous wrapper did not leave any immutable dispute breadcrumb after common handling, which made dispute history depend on mutable flags. Review that the version boundary is v0.8.3 and that both branches write the same type label so downstream consumers can query one lifecycle vocabulary.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s19",
+      "order": 19,
+      "title": "Settlement emits SETTLE_PARTY_A beside the balance finalization",
+      "file": "perps/analytics/handlers/symmio/SettlePartyALiquidationHandler.ts",
+      "range": [1, 35],
+      "kind": "changed",
+      "why": "The common settle handler now finalizes PartyB snapshots and PartyA settlement balances, and this analytics wrapper records the matching SETTLE_PARTY_A lifecycle marker. Older versions again need the state-derived liquidation id, while v0.8.3+ can use event.params.liquidationId. The existing latest-balance refresh remains, so the review question is sequencing: common settlement first, event breadcrumb second, latest balance last.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s20",
+      "order": 20,
+      "title": "Resolved disputes are only logged where liquidationId is present",
+      "file": "perps/analytics/handlers/symmio/ResolveLiquidationDisputeHandler.ts",
+      "range": [1, 11],
+      "kind": "changed",
+      "why": "RESOLVE_DISPUTE gets a narrower gate than dispute creation: the wrapper writes a lifecycle event only on v0.8.3+ where the event carries liquidationId. The old handler did not produce a breadcrumb at all, and this avoids guessing an id for older versions that may not have a clean state lookup at resolution time. Verify that this intentional asymmetry matches the ABI reality instead of being an accidental omission.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s21",
+      "order": 21,
+      "title": "Manual takeover enters the lifecycle rail after quote handling",
+      "file": "perps/analytics/handlers/symmio/TakeoverPartyALiquidationHandler.ts",
+      "range": [1, 14],
+      "kind": "changed",
+      "why": "TAKEOVER now lands in the LiquidationEvent stream after common takeover handling and quote updates. Previously takeover mutated LiquidationDetail and quote state but left no immutable step in the account-level timeline. The call uses the liquidationId from the event, so review that this wrapper still runs super.handleQuote before writing the lifecycle marker; that keeps quote-side effects and the account breadcrumb in the expected order.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s22",
+      "order": 22,
+      "title": "Auto takeover logs only on versions that carry liquidationId",
+      "file": "perps/analytics/handlers/symmio/AutoTakeoverPartyALiquidationHandler.ts",
+      "range": [1, 13],
+      "kind": "changed",
+      "why": "AUTO_TAKEOVER is gated to v0.8.5+ because this wrapper reads event.params.liquidationId directly. The old handler only delegated to common auto-takeover behavior, so newer deployments had no timeline event for the automatic branch. The review risk is the gate: it should be tight enough to avoid reading a missing param on older generated event types, but broad enough to cover every deployed version that exposes the id.",
+      "returnsTo": "s12"
+    },
+    {
+      "id": "s23",
+      "order": 23,
+      "title": "Symbol trade history exposes realized loss and profit separately",
+      "file": "perps/analytics/schema.graphql",
+      "range": [1018, 1066],
+      "kind": "changed",
+      "why": "The next thread is separate from liquidation settlement: symbol/account aggregates now store realized loss and realized profit instead of forcing readers to infer them from broader volume or fee fields. The schema adds loss and profit to both DailySymbolTradesHistory and TotalSymbolTradesHistory, so the next two helper steps can initialize and increment them without nullable surprises. Check that both daily and total shapes move together; a mismatch here would compile but give consumers two different analytics contracts.",
+      "calls": ["s24", "s25"]
+    },
+    {
+      "id": "s24",
+      "order": 24,
+      "title": "New symbol-history rows start loss and profit at zero",
+      "file": "perps/analytics/utils/builders.ts",
+      "range": [260, 312],
+      "kind": "changed",
+      "why": "The schema fields are non-null, so the builders must seed loss and profit whenever a daily or total symbol history row is first created. The old constructors initialized fees, funding, and volume only; with the new fields, that would leave fresh entities invalid at save time. This step is dull but load-bearing: verify both getDailySymbolTradesHistory and getTotalSymbolTradesHistory initialize the pair before save.",
+      "returnsTo": "s23"
+    },
+    {
+      "id": "s25",
+      "order": 25,
+      "title": "History aggregation carries loss and profit through every symbol bucket",
+      "file": "perps/analytics/utils/historyHelpers.ts",
+      "range": [331, 353],
+      "kind": "changed",
+      "why": "Once rows have loss and profit fields, updateHistories has to move the values from UpdateHistoriesParams into both daily and total symbol aggregates. The old flow updated volume, trade count, fees, and funding, so realized PnL detail disappeared at the symbol/account level even when callers supplied _loss and _profit. Review that the increments sit inside the symbolId > 0 branch with the rest of the symbol-only accounting, so zero-symbol aggregate paths keep their existing behavior.",
+      "returnsTo": "s23"
+    },
+    {
+      "id": "s26",
+      "order": 26,
+      "title": "Margin top-ups now refresh the cached PartyA balance through the core",
+      "file": "perps/common/handlers/accountLayer/AddMarginHandler.ts",
+      "range": [1, 43],
+      "kind": "changed",
+      "why": "This is the entry point for a separate thread: account-layer margin movements that left the analytics balance snapshot stale. AddMargin records an ADD MarginTransfer and bumps SubAccount.latestMarginBalance, but the PartyA LatestAccountBalance row keyed by the symmio core stayed frozen until the next core event touched it. The handler now hoists coreSourceForAccountLayer(event.address) into coreSource, reuses it for the profile sources, and after the hierarchy history update calls refreshAccountLayerMarginLatestBalances against that core. Verify coreSource is the paired symmio core, not the account-layer address, because routing the refresh through the core is the entire point.",
+      "calls": ["s27", "s28", "s29", "s30"]
+    },
+    {
+      "id": "s27",
+      "order": 27,
+      "title": "Margin withdrawals mirror the same core-side balance refresh",
+      "file": "perps/common/handlers/accountLayer/RemoveMarginHandler.ts",
+      "range": [1, 43],
+      "kind": "changed",
+      "why": "RemoveMargin is the sibling of step s26: it logs a REMOVE MarginTransfer and feeds the amount into updateMarginHierarchyHistories on the loss side, then refreshes the same core-keyed LatestAccountBalance via refreshAccountLayerMarginLatestBalances. Without this, a withdrawal would shrink the on-chain balance while the indexed snapshot still showed the pre-withdrawal figure. Review that the coreSource hoist and the refresh call match AddMargin exactly so the two directions stay symmetric.",
+      "returnsTo": "s26"
+    },
+    {
+      "id": "s28",
+      "order": 28,
+      "title": "Emergency recovery also re-syncs the snapshot after draining the sub-account",
+      "file": "perps/common/handlers/accountLayer/EmergencyMarginRecoveredHandler.ts",
+      "range": [1, 74],
+      "kind": "changed",
+      "why": "EmergencyMarginRecovered resolves its virtual account id differently and subtracts the recovered amount from sub.latestMarginBalance, but it shares the same stale-snapshot problem as the two siblings above. It now hoists coreSource and calls the identical refreshAccountLayerMarginLatestBalances after the sub-account decrement. Confirm the refresh runs unconditionally at the end, not just inside the sub-account branch, so an emergency recovery still reconciles the core-side PartyA balance even when local sub-account state is absent.",
+      "returnsTo": "s26"
+    },
+    {
+      "id": "s29",
+      "order": 29,
+      "title": "Latest-balance helper decouples the read source from event.address",
+      "file": "perps/analytics/utils/latestAccountBalance.ts",
+      "range": [32, 388],
+      "kind": "changed",
+      "why": "The three margin handlers can only refresh the core-keyed snapshot because of the refactor here. updatePartyALatestBalance is now a thin wrapper over the new updatePartyALatestBalanceForSource(event, version, source, partyA), which lets a caller bind a balance source distinct from event.address — exactly what account-layer handlers need, since their event.address is the account-layer contract while balances live on the symmio core. The old code hard-coded event.address everywhere, so it could never read balances from a different contract. This also threads source through finalizeBalance and resolvePartyBBalanceKey and adds the full v0.8.6 reader set (getBalanceOf, getBalanceInfoOfPartyA/PartyB, isCrossPartyB) so 0.8.6 deployments populate locked and pending buckets. Verify every former event.address in the PartyA path became source, and that resolvePartyBBalanceKey's zero-partyA short-circuit now sits ahead of the version checks.",
+      "returnsTo": "s26"
+    },
+    {
+      "id": "s30",
+      "order": 30,
+      "title": "Build config declares the symmio core ABI on account-layer sources",
+      "file": "scripts/manager.py",
+      "range": [655, 671],
+      "kind": "changed",
+      "why": "The cross-contract bind from step s26 only works at runtime if The Graph can find the symmio core ABI on the account-layer data source itself. prepare_module now, for any accountLayer source where symmio is in scope, appends each symmio contract's ABI entry to that source's mapping.abis when missing. Skip this and the new refresh aborts with a missing-ABI error the moment an account-layer handler tries to bind the core. Review that it fires only for accountLayer plus symmio and dedupes by contract path so it cannot inject duplicate ABI entries.",
+      "returnsTo": "s26"
+    },
+    {
+      "id": "s31",
+      "order": 31,
+      "title": "0.8.6 entry file wires the new BalanceChange events",
+      "file": "perps/analytics/src_symmio_0_8_6.ts",
+      "range": [1, 22],
+      "kind": "changed",
+      "why": "The last thread lights up explicit balance-delta events that 0.8.6 emits. This generated entry file now exports handleBalanceChangePartyA and handleBalanceChangePartyB, each calling ensureSyncMeta before dispatching to the analytics BalanceChange handlers at Version.v_0_8_6. Previously the 0.8.6 src only covered express-provider and withdraw events, so on-chain BalanceChange logs went unindexed. Verify the imports pull BalanceChangePartyA/PartyB from the generated 0.8.6 bindings and that both handlers stamp the same version the deps file expects.",
+      "calls": ["s32"]
+    },
+    {
+      "id": "s32",
+      "order": 32,
+      "title": "Dependency map mounts the BalanceChange handlers into subgraph.yaml",
+      "file": "perps/analytics/deps_symmio_0_8_6.json",
+      "range": [1, 12],
+      "kind": "changed",
+      "why": "The src wiring from step s31 only runs if the manager includes those event handlers when it generates subgraph.yaml, and that inclusion is driven by this deps map. It now maps the BalanceChange entity to the BalanceChangePartyA and BalanceChangePartyB events. Without this entry, the two new handlers would compile but never be mounted as event handlers. Confirm the entity name matches the schema and that both event names line up with the exports added in s31.",
+      "returnsTo": "s31"
+    }
+  ]
+}

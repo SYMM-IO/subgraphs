@@ -3,6 +3,10 @@
 		"RegisterExpressProvider",
 		"WithdrawAdvanced"
 	],
+	"BalanceChange": [
+		"BalanceChangePartyA",
+		"BalanceChangePartyB"
+	],
 	"ExpressProviderSource": [
 		"RegisterExpressProvider"
 	],

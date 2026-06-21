@@ -1,10 +1,11 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { Account, DebugEntity, LiquidationDetail, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
-import { getQuoteData, getLiquidationStateData } from "../../VersionedQuoteLoader"
+import { getQuoteData, getLiquidationStateData, getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { setLiquidationDetailProfileRefs, updateQuoteHierarchyCounters } from "../../utils/profile"
+import { calculateFreeMarginAtStart, calculateLossRestsAt } from "../../utils/liquidationDetail"
 import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
@@ -90,6 +91,18 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 						entity.paidCva = BigInt.zero()
 						entity.paidLf = BigInt.zero()
 						entity.potentialLf = BigInt.zero()
+						if (version >= Version.v_0_8_5) entity.reimbursement = BigInt.zero()
+						if (version >= Version.v_0_8_6) {
+							entity.deferredBalance = BigInt.zero()
+							entity.liquidationEscrow = BigInt.zero()
+						}
+						entity.settlementPartyBs = []
+						entity.settlementModes = []
+						entity.settlementExpectedAmounts = []
+						entity.settlementActualAmounts = []
+						entity.settlementCvaReturned = []
+						entity.settlementReserveContributions = []
+						entity.settlementStates = []
 						let partyAAccount = Account.load(event.params.partyA.toHexString())
 						if (partyAAccount) {
 							entity.affiliate = partyAAccount.accountSource
@@ -109,6 +122,17 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 					entity.partyAAccumulatedUpnl = liqState.partyAAccumulatedUpnl
 					entity.disputed = liqState.disputed
 					entity.liquidationTimestamp = liqState.liquidationTimestamp
+					let balanceInfo = getPartyABalanceInfoData(version, event.address, event.params.partyA)
+					if (balanceInfo) {
+						let allocatedBalance = entity.allocatedBalance ? entity.allocatedBalance! : balanceInfo.allocatedBalance
+						entity.freeBalance = balanceInfo.freeBalance
+						entity.freeMarginAtStart = calculateFreeMarginAtStart(allocatedBalance, balanceInfo.lockedCva, balanceInfo.lockedLf)
+						entity.lockedCva = balanceInfo.lockedCva
+						entity.lockedLf = balanceInfo.lockedLf
+						entity.lockedPartyAmm = balanceInfo.lockedPartyAmm
+						entity.lockedPartyBmm = balanceInfo.lockedPartyBmm
+						entity.lossRestsAt = calculateLossRestsAt(allocatedBalance, balanceInfo.lockedCva, balanceInfo.lockedLf, liqState.upnl)
+					}
 					setLiquidationDetailProfileRefs(entity, Account.load(event.params.partyA.toHexString()), event.address)
 					entity.save()
 				}

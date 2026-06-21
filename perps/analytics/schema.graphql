@@ -86,6 +86,28 @@ type QuoteEvent @entity(immutable: true) {
 	transaction: Bytes!
 }
 
+"""Immutable account-level lifecycle event log attached to a PartyA liquidation."""
+type LiquidationEvent @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted or originated the indexed data for this row."""
+	source: Bytes!
+	"""Protocol liquidation id on the Symmio core contract."""
+	liquidationId: Bytes!
+	"""Normalized LiquidationDetail entity associated with this row."""
+	liquidationDetail: LiquidationDetail!
+	"""Subgraph or event type label for this row."""
+	type: String!
+	"""Metadata value indexed for this row."""
+	metadata: String
+	"""Block timestamp associated with this row."""
+	timestamp: BigInt!
+	"""Block number of the indexed event or latest update."""
+	blockNumber: BigInt!
+	"""Transaction hash associated with this row."""
+	transaction: Bytes!
+}
+
 """
 Per-day aggregate for a core/account-source bucket.
 
@@ -1002,6 +1024,10 @@ type DailySymbolTradesHistory @entity(immutable: false) {
 	openFeePaid: BigInt!
 	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Realized loss amount accumulated for this account and symbol by analytics handlers."""
+	loss: BigInt!
+	"""Realized profit amount accumulated for this account and symbol by analytics handlers."""
+	profit: BigInt!
 	"""Notional trade volume accumulated for this row."""
 	volume: BigInt!
 }
@@ -1032,6 +1058,10 @@ type TotalSymbolTradesHistory @entity(immutable: false) {
 	openFeePaid: BigInt!
 	"""Actual charged close-fee amount paid by this user/account bucket."""
 	closeFeePaid: BigInt!
+	"""Realized loss amount accumulated for this account and symbol by analytics handlers."""
+	loss: BigInt!
+	"""Realized profit amount accumulated for this account and symbol by analytics handlers."""
+	profit: BigInt!
 	"""Notional trade volume accumulated for this row."""
 	volume: BigInt!
 }
@@ -1257,6 +1287,28 @@ type LiquidationDetail @entity(immutable: false) {
 	liquidator: Bytes
 	"""Allocated balance value indexed for this row."""
 	allocatedBalance: BigInt
+	"""Withdrawable free balance of PartyA captured when the liquidation row is created."""
+	freeBalance: BigInt
+	"""Allocated balance less locked CVA and LF at liquidation start; the UI's free-plus-margin band."""
+	freeMarginAtStart: BigInt
+	"""PartyA locked CVA bucket captured at liquidation start."""
+	lockedCva: BigInt
+	"""PartyA locked liquidation-fee bucket captured at liquidation start."""
+	lockedLf: BigInt
+	"""PartyA maintenance-margin bucket captured at liquidation start."""
+	lockedPartyAmm: BigInt
+	"""PartyB maintenance-margin bucket captured from PartyA's balance view at liquidation start."""
+	lockedPartyBmm: BigInt
+	"""Signed level after free margin and liquidation-start uPNL are applied."""
+	lossRestsAt: BigInt
+	"""PartyA reimbursement bucket captured during liquidation settlement accounting."""
+	reimbursement: BigInt
+	"""PartyA deferred balance captured for deferred liquidation settlement accounting."""
+	deferredBalance: BigInt
+	"""PartyA liquidation escrow balance/amount captured after LATE or OVERDUE settlement."""
+	liquidationEscrow: BigInt
+	"""Account-level lifecycle events attached to this liquidation."""
+	events: [LiquidationEvent!]! @derivedFrom(field: "liquidationDetail")
 	"""Whether this liquidation row has been marked settled."""
 	settled: Boolean!
 	"""Whether this liquidation row has been marked fully liquidated."""
@@ -1275,6 +1327,20 @@ type LiquidationDetail @entity(immutable: false) {
 	settledAmounts: [BigInt!]
 	"""PartyB addresses settled in this liquidation row."""
 	settledPartyBs: [Bytes!]
+	"""PartyB addresses with reconstructed liquidation settlement buckets."""
+	settlementPartyBs: [Bytes!]
+	"""Settlement allocation mode for each PartyB bucket: isolated or cross."""
+	settlementModes: [String!]
+	"""Full expected PnL amount used to verify PartyA uPNL for each PartyB bucket."""
+	settlementExpectedAmounts: [BigInt!]
+	"""Actual settlement amount applied for each PartyB bucket."""
+	settlementActualAmounts: [BigInt!]
+	"""CVA amount returned to each PartyB bucket during settlement."""
+	settlementCvaReturned: [BigInt!]
+	"""Positive cross-mode accounting reserve contribution for each PartyB bucket."""
+	settlementReserveContributions: [BigInt!]
+	"""Lifecycle state for each PartyB settlement bucket."""
+	settlementStates: [String!]
 	"""Affiliate or account-source address associated with this row."""
 	affiliate: Bytes
 	"""Total PnL value indexed for this liquidation row."""
