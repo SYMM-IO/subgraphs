@@ -29,3 +29,7 @@ uv.lock
 pyproject.toml
 __pycache__/
 .superpowers/
+
+# SYMMIO Fleet desktop app — generated bundle (machine-specific path) + runtime
+/SYMMIO Fleet.app/
+/.fleet-app/
