@@ -26,7 +26,6 @@ perps/analytics/currentConfig.json
 .venv/
 .python-version
 uv.lock
-pyproject.toml
 __pycache__/
 .superpowers/
 
