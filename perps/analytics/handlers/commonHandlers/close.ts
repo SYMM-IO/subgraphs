@@ -34,7 +34,9 @@ export function handleClose<T>(
 		closeType,
 		new JSONBuilder()
 			.add("amount", event.params.filledAmount.toString())
-			.add("openedPrice", quote.openedPrice!.toString())
+			// openedPrice can be null on anomalous closes (the null-field guard below logs + returns);
+			// omit it here rather than force-unwrap, which aborts the whole mapping.
+			.addNullable("openedPrice", quote.openedPrice === null ? null : quote.openedPrice!.toString())
 			.add("closePrice", event.params.closedPrice.toString())
 			.add("quoteStatus", quote.quoteStatus.toString())
 			.build(),
