@@ -1,15 +1,15 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseHandler, Version } from "../../../common/BaseHandler"
-import { Account, BalanceChange } from "../../../../generated/schema"
+import { Account } from "../../../../generated/schema"
 import { TransferToBridge } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { getConfiguration } from "../../utils/builders"
-import { setBalanceChangeContext } from "../../utils/balanceChange"
+import { newBalanceChange, setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class TransferToBridgeHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<TransferToBridge>(_event)
-		let bridge = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		let bridge = newBalanceChange(event)
 		bridge.source = event.address
 		bridge.amount = event.params.amount
 		bridge.account = event.params.user

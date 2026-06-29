@@ -1,5 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { Account, DebugEntity, LiquidationDetail, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
+import { getGlobalCounterAndInc } from "../../utils"
 import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { getQuoteData, getLiquidationStateData, getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
@@ -82,6 +83,7 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 					let entity = LiquidationDetail.load(entityId)
 					if (!entity) {
 						entity = new LiquidationDetail(entityId)
+						entity.globalCounter = getGlobalCounterAndInc()
 						entity.settled = false
 						entity.fullyLiquidated = false
 						entity.takeover = false

@@ -1,5 +1,4 @@
 import { WithdrawHandler as CommonWithdrawHandler } from "../../../common/handlers/symmio/WithdrawHandler"
-import { BalanceChange } from "../../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getConfiguration } from "../../utils/builders"
@@ -10,7 +9,7 @@ import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { resolveAccountSourceFromAccountLayer } from "../../../common/utils/account_layer_resolver"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { isFinalizeWithdrawRequestCall, recordWithdrawFinalizationHint } from "../../utils/withdrawRequest"
-import { setBalanceChangeContext } from "../../utils/balanceChange"
+import { newBalanceChange, setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -36,7 +35,7 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		account.updateTimestamp = event.block.timestamp
 		account.save()
 		updateActivityTimestamps(account, event.block.timestamp, event.address)
-		let withdraw = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		let withdraw = newBalanceChange(event)
 		withdraw.source = event.address
 		withdraw.type = "WITHDRAW"
 		withdraw.timestamp = event.block.timestamp

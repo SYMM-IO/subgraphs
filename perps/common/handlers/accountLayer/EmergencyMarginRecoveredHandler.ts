@@ -1,5 +1,6 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
+import { getGlobalCounterAndInc } from "../../utils"
 import { Account, MarginTransfer, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import {
 	coreSourceForAccountLayer,
@@ -52,6 +53,7 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 		}
 		let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
 		let mt = new MarginTransfer(id)
+		mt.globalCounter = getGlobalCounterAndInc()
 		let coreSource = coreSourceForAccountLayer(event.address)
 		mt.type = "EMERGENCY_RECOVER"
 		mt.virtualAccount = vaId

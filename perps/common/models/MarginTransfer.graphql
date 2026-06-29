@@ -12,6 +12,10 @@ type MarginTransfer @entity(immutable: true) {
 	"""
 	id: ID!
 	"""
+	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
+	"""
+	globalCounter: BigInt!
+	"""
 	Margin movement type label written by the handler.
 	"""
 	type: String!

@@ -1,5 +1,5 @@
 import { DeallocatePartyAHandler as CommonDeallocatePartyAHandler } from "../../../common/handlers/symmio/DeallocatePartyAWithAccountHandler"
-import { Account, BalanceChange } from "../../../../generated/schema"
+import { Account } from "../../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getConfiguration } from "../../utils/builders"
@@ -8,7 +8,7 @@ import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpe
 import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
-import { setBalanceChangeContext } from "../../utils/balanceChange"
+import { newBalanceChange, setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -23,7 +23,7 @@ export class DeallocatePartyAHandler<T> extends CommonDeallocatePartyAHandler<T>
 		if (account == null) return
 		updateActivityTimestamps(account, event.block.timestamp, event.address)
 		if (version < Version.v_0_8_3) {
-			let deallocate = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+			let deallocate = newBalanceChange(event)
 			deallocate.source = event.address
 			deallocate.type = balanceChangeTypes.get(BalanceChangeType.DEALLOCATE)
 			deallocate.timestamp = event.block.timestamp

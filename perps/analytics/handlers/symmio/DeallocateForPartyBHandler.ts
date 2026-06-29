@@ -1,11 +1,11 @@
 import { DeallocateForPartyBHandler as CommonDeallocateForPartyBHandler } from "../../../common/handlers/symmio/DeallocateForPartyBWithAccountHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
-import { Account, BalanceChange } from "../../../../generated/schema"
+import { Account } from "../../../../generated/schema"
 import { BalanceChangeType, balanceChangeTypes } from "../../utils/constants"
 import { getConfiguration } from "../../utils/builders"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
-import { setBalanceChangeContext } from "../../utils/balanceChange"
+import { newBalanceChange, setBalanceChangeContext } from "../../utils/balanceChange"
 
 export class DeallocateForPartyBHandler<T> extends CommonDeallocateForPartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -18,7 +18,7 @@ export class DeallocateForPartyBHandler<T> extends CommonDeallocateForPartyBHand
 		const event = changetype<T>(_event)
 
 		if (version < Version.v_0_8_3) {
-			let allocate = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+			let allocate = newBalanceChange(event)
 			allocate.source = event.address
 			allocate.type = balanceChangeTypes.get(BalanceChangeType.DEALLOCATE)
 			allocate.timestamp = event.block.timestamp

@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Account, LiquidationDetail } from "../../../../generated/schema"
+import { getGlobalCounterAndInc } from "../../utils"
 import { getLiquidationStateData, getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
 import { SetSymbolsPrices as SetSymbolsPrices_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SetSymbolsPrices as SetSymbolsPrices_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
@@ -38,6 +39,7 @@ export class SetSymbolsPricesHandler<T> extends BaseHandler {
 		let entity = LiquidationDetail.load(entityId)
 		if (!entity) {
 			entity = new LiquidationDetail(entityId)
+			entity.globalCounter = getGlobalCounterAndInc()
 			entity.settled = false
 			entity.fullyLiquidated = false
 			entity.takeover = false

@@ -2,6 +2,7 @@ import { WithdrawInitiatedHandler as CommonWithdrawInitiatedHandler } from "../.
 import { Account, WithdrawRequest } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
+import { getGlobalCounterAndInc } from "../../../common/utils"
 import { setWithdrawRequestProfileRefs } from "../../../common/utils/profile"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
@@ -20,6 +21,7 @@ export class WithdrawInitiatedHandler<T> extends CommonWithdrawInitiatedHandler<
 
 		let id = withdrawRequestId(event.params.user, event.params.requestId, _event.address)
 		let wr = new WithdrawRequest(id)
+		wr.globalCounter = getGlobalCounterAndInc()
 		wr.source = _event.address
 		wr.requestId = event.params.requestId
 		wr.user = event.params.user

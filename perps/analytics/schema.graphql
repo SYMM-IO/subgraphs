@@ -62,12 +62,20 @@ type BalanceChange @entity(immutable: true) {
 	sender: Bytes
 	"""Account entity reference for sender when known."""
 	senderRef: Account
+	"""
+	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
+	"""
+	globalCounter: BigInt!
 }
 
 """Immutable lifecycle event log attached to a normalized Quote entity."""
 type QuoteEvent @entity(immutable: true) {
 	"""Subgraph entity id for this row."""
 	id: ID!
+	"""
+	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
+	"""
+	globalCounter: BigInt!
 	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
 	"""Protocol quote id on the Symmio core contract."""
@@ -96,6 +104,10 @@ type LiquidationEvent @entity(immutable: true) {
 	liquidationId: Bytes!
 	"""Normalized LiquidationDetail entity associated with this row."""
 	liquidationDetail: LiquidationDetail!
+	"""
+	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
+	"""
+	globalCounter: BigInt!
 	"""Subgraph or event type label for this row."""
 	type: String!
 	"""Metadata value indexed for this row."""
@@ -1243,6 +1255,10 @@ type FundingFeeState @entity(immutable: false) {
 type LiquidationDetail @entity(immutable: false) {
 	"""Subgraph entity id for this row."""
 	id: ID!
+	"""
+	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
+	"""
+	globalCounter: BigInt!
 	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
 	"""Deployment identifier derived by the subgraph when available."""
@@ -1359,6 +1375,10 @@ type LiquidationDetail @entity(immutable: false) {
 type WithdrawRequest @entity(immutable: false) {
 	"""Subgraph entity id for this row."""
 	id: ID!
+	"""
+	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
+	"""
+	globalCounter: BigInt!
 	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
 	"""Deployment identifier derived by the subgraph when available."""

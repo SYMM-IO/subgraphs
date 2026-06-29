@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Account, LiquidationDetail } from "../../../../generated/schema"
+import { getGlobalCounterAndInc } from "../../utils"
 import { getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
 import { calculateDeferredBalanceAtStart, calculateFreeMarginAtStart, calculateLossRestsAt } from "../../utils/liquidationDetail"
 import { setLiquidationDetailProfileRefs } from "../../utils/profile"
@@ -12,6 +13,7 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		let entity = new LiquidationDetail(
 			event.params.partyA.toHexString() + "-" + event.params.liquidationId.toHexString() + "-" + event.address.toHexString(),
 		)
+		entity.globalCounter = getGlobalCounterAndInc()
 		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.partyAAccount = event.params.partyA.toHexString()

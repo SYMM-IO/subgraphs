@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
+import { getGlobalCounterAndInc } from "../../utils"
 import { Account, LiquidationDetail } from "../../../../generated/schema"
 import { getLiquidationStateData, getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
 import { LiquidatePartyA as LiquidatePartyA_0_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
@@ -67,6 +68,7 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 		}
 
 		let entity = new LiquidationDetail(event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString())
+		entity.globalCounter = getGlobalCounterAndInc()
 		entity.source = event.address
 		entity.partyA = event.params.partyA
 		entity.partyAAccount = event.params.partyA.toHexString()

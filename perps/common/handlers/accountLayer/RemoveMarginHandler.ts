@@ -1,5 +1,6 @@
 import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
+import { getGlobalCounterAndInc } from "../../utils"
 import { MarginTransfer, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { coreSourceForAccountLayer, setMarginTransferProfileSources } from "../../utils/profile"
 import { BigInt } from "@graphprotocol/graph-ts"
@@ -12,6 +13,7 @@ export class RemoveMarginHandler<T> extends BaseAccountLayerHandler {
 		const event = changetype<T>(_event)
 		let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
 		let mt = new MarginTransfer(id)
+		mt.globalCounter = getGlobalCounterAndInc()
 		let coreSource = coreSourceForAccountLayer(event.address)
 		mt.type = "REMOVE"
 		mt.virtualAccount = event.params.virtualAccount.toHexString()

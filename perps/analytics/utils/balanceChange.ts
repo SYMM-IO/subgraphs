@@ -1,6 +1,18 @@
-import { BigInt, Bytes } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Account, BalanceChange } from "../../../generated/schema"
 import { setCoreEntityProfileSources } from "../../common/utils/profile"
+import { getGlobalCounterAndInc } from "../../common/utils"
+
+/**
+ * Allocate a BalanceChange with the canonical `${txHash}-${logIndex}` id and a
+ * monotonic globalCounter for stable cross-source ordering. Callers set the
+ * remaining fields and save.
+ */
+export function newBalanceChange(event: ethereum.Event): BalanceChange {
+	let entity = new BalanceChange(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+	entity.globalCounter = getGlobalCounterAndInc()
+	return entity
+}
 
 const ADD_MARGIN_SELECTOR = "cf70cb69"
 const ADD_MARGIN_TO_NEXT_VA_SELECTOR = "a6d66852"

@@ -1,5 +1,6 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { QuoteEvent } from "../../../generated/schema"
+import { getGlobalCounterAndInc } from "../../common/utils"
 
 export class JSONBuilder {
 	private pairs: string[] = []
@@ -21,14 +22,10 @@ export class JSONBuilder {
 	}
 }
 
-export function createQuoteEvent(
-	event: ethereum.Event,
-	quoteId: BigInt,
-	type: string,
-	metadata: string | null,
-): void {
+export function createQuoteEvent(event: ethereum.Event, quoteId: BigInt, type: string, metadata: string | null): void {
 	let id = event.transaction.hash.toHexString() + "-" + event.logIndex.toString() + "-" + quoteId.toString()
 	let entity = new QuoteEvent(id)
+	entity.globalCounter = getGlobalCounterAndInc()
 	entity.source = event.address
 	entity.quoteId = quoteId
 	entity.quote = quoteId.toString() + "-" + event.address.toHexString()
