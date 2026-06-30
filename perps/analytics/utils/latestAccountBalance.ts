@@ -366,7 +366,6 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 	if (!finalizeBalance(entity, event, version, event.address, partyB)) return
 
 	if (
-		entity.freeBalance.isZero() &&
 		entity.allocatedBalance.isZero() &&
 		entity.lockedCva.isZero() &&
 		entity.lockedLf.isZero() &&

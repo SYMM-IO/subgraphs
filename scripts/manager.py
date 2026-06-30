@@ -672,6 +672,9 @@ def prepare_module(config: Config, target_module: str):
                 source_config["mapping"]["abis"].append({"name": c.path(), "file": f"./abis/{c.path()}.json"})
                 existing_abi_names.add(c.path())
 
+        for abi_ref in source_config["mapping"]["abis"]:
+            copy_abi_files(os.path.basename(abi_ref["file"]))
+
         contract_indexes[(contract.abi, contract.version)] += 1
 
         if contract_indexes[(contract.abi, contract.version)] > 1:
