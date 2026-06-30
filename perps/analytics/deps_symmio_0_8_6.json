@@ -1,16 +1,182 @@
 {
 	"AffiliateExpressWithdrawComponents": [
 		"RegisterExpressProvider",
-		"WithdrawAdvanced"
+		"WithdrawAdvanced",
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
 	],
 	"BalanceChange": [
 		"BalanceChangePartyA",
-		"BalanceChangePartyB"
+		"BalanceChangePartyB",
+		"Deposit(address,address,uint256)"
 	],
 	"ExpressProviderSource": [
 		"RegisterExpressProvider"
 	],
 	"WithdrawRequest": [
 		"WithdrawAdvanced"
+	],
+	"UserActivity": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"
+	],
+	"QuoteEvent": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
+	],
+	"DailyHistory": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"TotalHistory": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"SymbolTradeHistory": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)"
+	],
+	"OpenInterest": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)"
+	],
+	"DailySymbolTradesHistory": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"TotalSymbolTradesHistory": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"DailyUserHistory": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)",
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"
+	],
+	"TotalUserHistory": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)",
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"
+	],
+	"DailyAccountOwnerHistory": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"TotalAccountOwnerHistory": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"DailySubAccountHistory": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"TotalSubAccountHistory": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"DailyVirtualAccountHistory": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"TotalVirtualAccountHistory": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)"
+	],
+	"AffiliateFeeCollector": [
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"Deposit(address,address,uint256)",
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)"
+	],
+	"FundingFeeState": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
+	],
+	"LatestAccountBalance": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
+	],
+	"AffiliateExpressWithdrawComponentBucket": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
+	],
+	"AffiliateExpressWithdrawAccountSnapshot": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
+	],
+	"AggregatedPosition": [
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
+	],
+	"QuoteFundingSettlement": [
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])"
 	]
 }

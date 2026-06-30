@@ -70,6 +70,7 @@ class Event:
     name: str
     numbered_name: str
     handler_name: str
+    overload_index: int = 0
 
 
 @dataclass
@@ -278,7 +279,7 @@ def generate_src_ts(target_module: str, contract: Contract):
         base_handler_path = "./BaseHandler"
 
     # Sort events by name
-    sorted_events = sorted(contract.events, key=lambda e: e.name)
+    sorted_events = sorted(contract.events, key=lambda e: (e.name, e.numbered_name))
 
     for event in sorted_events:
         imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
@@ -317,7 +318,7 @@ def generate_template_src_ts(target_module: str, contract: Contract, template_na
     else:
         base_handler_path = "./BaseHandler"
 
-    sorted_events = sorted(contract.events, key=lambda e: e.name)
+    sorted_events = sorted(contract.events, key=lambda e: (e.name, e.numbered_name))
 
     for event in sorted_events:
         imports.add(f"import {{{event.name}Handler}} from './handlers/{contract.abi}/{event.name}Handler'")
@@ -449,8 +450,20 @@ def get_needed_events_for(models: List[str], target_module: str, contract: Contr
 
 
 def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
+    return [entry["signature"] for entry in get_event_signature_entries(event_name, abi_file_path)]
+
+
+def get_event_signature_entries(event_ref: str, abi_file_path: str) -> List[Dict[str, Any]]:
     with open(abi_file_path, "r") as file:
         abi = json.load(file)
+
+    exact_signature = None
+    exact_match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\((.*)\)$", event_ref)
+    if exact_match:
+        event_name = exact_match.group(1)
+        exact_signature = event_ref
+    else:
+        event_name = event_ref
 
     def parse_type(input_item):
         type_str = input_item["type"]
@@ -465,12 +478,28 @@ def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
         else:
             return input_item["type"]
 
+    def build_signature(entry: Dict[str, Any], include_indexed: bool) -> str:
+        inputs = [
+            ("indexed " if include_indexed and inp["indexed"] else "") + parse_type(inp)
+            for inp in entry["inputs"]
+        ]
+        return f"{entry['name']}({','.join(inputs)})"
+
     signatures = []
+    overload_index = 0
     for entry in abi:
         if entry["type"] == "event" and entry["name"] == event_name:
-            inputs = [("indexed " if inp["indexed"] else "") + parse_type(inp) for inp in entry["inputs"]]
-            signature = f"{entry['name']}({','.join(inputs)})"
-            signatures.append(signature)
+            signature = build_signature(entry, True)
+            comparable_signature = build_signature(entry, False)
+            if exact_signature is None or exact_signature in (signature, comparable_signature):
+                signatures.append(
+                    {
+                        "name": entry["name"],
+                        "signature": signature,
+                        "overload_index": overload_index,
+                    }
+                )
+            overload_index += 1
     return signatures
 
 
@@ -478,16 +507,27 @@ def get_events_with_signatures(needed_events: Set[str], contract: Contract) -> L
     events = []
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
-    for event in needed_events:
-        sigs = get_event_signature(event, abi_file)
-        for sig in sigs:
+    seen: Set[str] = set()
+    for event_ref in needed_events:
+        entries = get_event_signature_entries(event_ref, abi_file)
+        for entry in entries:
+            if entry["signature"] in seen:
+                continue
+            seen.add(entry["signature"])
+            event_name = entry["name"]
+            overload_index = entry["overload_index"]
+            numbered_name = event_name if overload_index == 0 else f"{event_name}{overload_index}"
+            handler_name = (
+                f"handle{numbered_name}" if not contract.fake else "handleIgnoredEvent"
+            )
             events.append(
                 Event(
                     source=source,
-                    name=event,
-                    signature=sig,
-                    handler_name=(f"handle{event}" if not contract.fake else "handleIgnoredEvent"),
-                    numbered_name=event,
+                    name=event_name,
+                    signature=entry["signature"],
+                    handler_name=handler_name,
+                    numbered_name=numbered_name,
+                    overload_index=overload_index,
                 )
             )
     return events
@@ -566,17 +606,7 @@ def prepare_module(config: Config, target_module: str):
 
     # Process events for all contracts
     for contract in all_contracts:
-        events = get_events_with_signatures(set(all_needed_events.get(contract.path(), [])), contract)
-
-        event_counter = {}
-        for e in events:
-            if e.signature is None:
-                continue  # Skip events without signatures
-            event_counter[e.name] = event_counter.get(e.name, 0) + 1
-            if event_counter[e.name] > 1:
-                e.handler_name = f"handle{e.name}{event_counter[e.name] - 1}"
-                e.numbered_name = f"{e.name}{event_counter[e.name] - 1}"
-        contract.events = events
+        contract.events = get_events_with_signatures(set(all_needed_events.get(contract.path(), [])), contract)
 
     subgraph_config = {
         "specVersion": "1.2.0",
