@@ -51,3 +51,51 @@ test("v0.8.6 analytics source wires the new overloaded core event handlers", () 
 		assert.doesNotMatch(source, new RegExp(`${name}1`), `must not wire legacy ${name} overload through v0.8.6`)
 	}
 })
+
+const duplicatedHyperEvmEvents = [
+	"BalanceChangePartyA",
+	"BalanceChangePartyB",
+	"Deposit",
+	"SendQuote",
+	"OpenPosition",
+	"FillCloseRequest",
+	"LiquidatePositionsPartyA",
+	"LiquidatePositionsPartyB",
+]
+
+test("HyperEVM mainnet analytics keeps the v0.8.5 core source only", () => {
+	const config = JSON.parse(read("configs/perps/hyperevm.json"))
+	const coreVersions = config.contracts
+		.filter((contract) => contract.abi === "symmio")
+		.map((contract) => contract.version)
+
+	assert.deepEqual(coreVersions, ["0_8_5"])
+	assert.equal(config.deploy_urls["perps/analytics"], "hyperevm_mainnet_analytics")
+
+	const legacyCore = config.contracts.find((contract) => contract.abi === "symmio" && contract.version === "0_8_5")
+	assert.ok(legacyCore, "missing legacy core data source")
+	assert.equal(legacyCore.excludedEvents, undefined, "mainnet v0.8.5 must not drop core lifecycle events")
+})
+
+test("HyperEVM v0.8.6 wiring is limited to stage and must suppress duplicated legacy events", () => {
+	const mainnet = JSON.parse(read("configs/perps/hyperevm.json"))
+	const stage = JSON.parse(read("configs/perps/hyperevm_stage.json"))
+
+	assert.equal(
+		mainnet.contracts.some((contract) => contract.abi === "symmio" && contract.version === "0_8_6"),
+		false,
+		"mainnet HyperEVM must not use v0.8.6",
+	)
+
+	const stageCore086 = stage.contracts.find((contract) => contract.abi === "symmio" && contract.version === "0_8_6")
+	if (!stageCore086) return
+
+	assert.equal(stage.deploy_urls["perps/analytics"], "hyperevm_analytics")
+
+	const stageLegacy = stage.contracts.find((contract) => contract.abi === "symmio" && contract.version === "0_8_5")
+	assert.ok(stageLegacy, "stage v0.8.6 needs the legacy source for old-only events")
+	const excludedEvents = new Set(stageLegacy.excludedEvents)
+	for (const eventName of duplicatedHyperEvmEvents) {
+		assert.ok(excludedEvents.has(eventName), `stage legacy source must exclude duplicated ${eventName}`)
+	}
+})

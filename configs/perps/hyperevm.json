@@ -4,12 +4,6 @@
 		{
 			"address": "0x57331038c21982116EE9b0906E4a5c5cB52dcE2e",
 			"abi": "symmio",
-			"version": "0_8_6",
-			"startBlock": "32012153"
-		},
-		{
-			"address": "0x57331038c21982116EE9b0906E4a5c5cB52dcE2e",
-			"abi": "symmio",
 			"version": "0_8_5",
 			"startBlock": "32012153"
 		},

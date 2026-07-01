@@ -84,6 +84,7 @@ class Contract:
     name: Optional[str] = None
     events: List[Event] = field(default_factory=list)
     dependencies: List[str] = field(default_factory=list)
+    excludedEvents: List[str] = field(default_factory=list)
 
     def path(self) -> str:
         return f"{self.abi}_{self.version}"
@@ -508,9 +509,12 @@ def get_events_with_signatures(needed_events: Set[str], contract: Contract) -> L
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
     seen: Set[str] = set()
+    excluded_events = set(contract.excludedEvents)
     for event_ref in needed_events:
         entries = get_event_signature_entries(event_ref, abi_file)
         for entry in entries:
+            if event_ref in excluded_events or entry["name"] in excluded_events or entry["signature"] in excluded_events:
+                continue
             if entry["signature"] in seen:
                 continue
             seen.add(entry["signature"])

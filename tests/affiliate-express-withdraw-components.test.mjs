@@ -98,7 +98,7 @@ test("provider debt events feed raw aggregate debt fields through a dynamic temp
   const src = read("perps/analytics/src_expressProvider_1.ts")
   const helper = read("perps/analytics/utils/affiliateExpressWithdrawComponents.ts")
   const manager = read("scripts/manager.py")
-  const hyperevm = read("configs/perps/hyperevm.json")
+  const hyperevmMainnet = read("configs/perps/hyperevm.json")
   const arbitrum = read("configs/perps/arbitrum.json")
 
   for (const eventName of [
@@ -122,7 +122,7 @@ test("provider debt events feed raw aggregate debt fields through a dynamic temp
   assert.match(helper, /recordRepaidBadCreditLineDebt/)
   assert.match(manager, /generated\/templates\/\{template_name\}/)
   assert.match(manager, /"templates": \[\]/)
-  assert.match(hyperevm, /"version": "0_8_6"/)
+  assert.doesNotMatch(hyperevmMainnet, /"version": "0_8_6"/)
   assert.match(arbitrum, /"version": "0_8_6"/)
 })
 
