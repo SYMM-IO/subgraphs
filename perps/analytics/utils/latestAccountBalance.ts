@@ -1,6 +1,6 @@
 import { Address, BigInt, ethereum, log, store } from "@graphprotocol/graph-ts"
 import { Version } from "../../common/BaseHandler"
-import { LatestAccountBalance } from "../../../generated/schema"
+import { LatestAccountBalance, LatestAccountBalanceRemovalGuard } from "../../../generated/schema"
 import {
 	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0,
 	getBalanceInfoOfPartyB as getBalanceInfoOfPartyB_0_8_0,
@@ -81,6 +81,23 @@ function resolvePartyBBalanceKey(event: ethereum.Event, version: Version, partyB
 		return isCross ? Address.zero() : partyA
 	}
 	return partyA
+}
+
+function markLatestBalanceRemoval(id: string, event: ethereum.Event): void {
+	let guard = LatestAccountBalanceRemovalGuard.load(id)
+	if (guard == null) guard = new LatestAccountBalanceRemovalGuard(id)
+	guard.blockNumber = event.block.number
+	guard.transaction = event.transaction.hash
+	guard.logIndex = event.logIndex
+	guard.save()
+}
+
+function shouldSkipStaleLatestBalanceWrite(id: string, event: ethereum.Event): boolean {
+	let guard = LatestAccountBalanceRemovalGuard.load(id)
+	if (guard == null) return false
+	if (!guard.blockNumber.equals(event.block.number)) return false
+	if (!guard.transaction.equals(event.transaction.hash)) return false
+	return guard.logIndex.gt(event.logIndex) || guard.logIndex.equals(event.logIndex)
 }
 
 export function updatePartyALatestBalance(event: ethereum.Event, version: Version, partyA: Address): void {
@@ -224,10 +241,12 @@ export function updatePartyALatestBalanceForSource(event: ethereum.Event, versio
 		entity.pendingLockedPartyBmm.isZero()
 	) {
 		clearAffiliateExpressWithdrawBalanceSnapshot(partyA, source, event.block.timestamp, event.block.number)
+		markLatestBalanceRemoval(id, event)
 		if (!isNew) store.remove("LatestAccountBalance", id)
 		return
 	}
 
+	if (shouldSkipStaleLatestBalanceWrite(id, event)) return
 	entity.timestamp = event.block.timestamp
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash
@@ -239,6 +258,7 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 	let balanceKey = resolvePartyBBalanceKey(event, version, partyB, partyA)
 	if (!balanceKey.equals(partyA)) {
 		let staleId = partyB.toHexString() + "-" + partyA.toHexString() + "-" + event.address.toHexString()
+		markLatestBalanceRemoval(staleId, event)
 		store.remove("LatestAccountBalance", staleId)
 	}
 
@@ -376,10 +396,12 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 		entity.pendingLockedPartyAmm.isZero() &&
 		entity.pendingLockedPartyBmm.isZero()
 	) {
+		markLatestBalanceRemoval(id, event)
 		if (!isNew) store.remove("LatestAccountBalance", id)
 		return
 	}
 
+	if (shouldSkipStaleLatestBalanceWrite(id, event)) return
 	entity.timestamp = event.block.timestamp
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash

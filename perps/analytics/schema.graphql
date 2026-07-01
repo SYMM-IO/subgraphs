@@ -1529,6 +1529,18 @@ type LatestAccountBalance @entity(immutable: false) {
 	counterPartyRef: Account
 }
 
+"""Latest-balance deletion marker used to ignore older same-transaction writes processed out of log order."""
+type LatestAccountBalanceRemovalGuard @entity(immutable: false) {
+	"""LatestAccountBalance entity id protected by this guard."""
+	id: ID!
+	"""Block number of the removal event."""
+	blockNumber: BigInt!
+	"""Transaction hash associated with the removal event."""
+	transaction: Bytes!
+	"""Log index of the removal event within the transaction receipt."""
+	logIndex: BigInt!
+}
+
 """Express provider registration keyed by provider/source/collateral context."""
 type ExpressProviderSource @entity(immutable: false) {
 	"""Subgraph entity id for this row."""
