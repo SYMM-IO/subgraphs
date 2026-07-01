@@ -1,3 +1,5 @@
+import {ethereum} from '@graphprotocol/graph-ts'
+import {handleLatestAccountBalanceBlock as handleLatestAccountBalanceBlockImpl} from './src_latest_account_balance_block'
 import {AcceptCancelCloseRequestHandler} from './handlers/symmio/AcceptCancelCloseRequestHandler'
 import {AcceptCancelCloseRequest} from '../../generated/symmio_0_8_2/symmio_0_8_2'
 import {AcceptCancelRequestHandler} from './handlers/symmio/AcceptCancelRequestHandler'
@@ -341,4 +343,9 @@ export function handleWithdraw(event: Withdraw): void {
 	ensureSyncMeta(event.block)
     let handler = new WithdrawHandler<Withdraw>()
     handler.handle(event, Version.v_0_8_2)
+}
+
+
+export function handleLatestAccountBalanceBlock(block: ethereum.Block): void {
+    handleLatestAccountBalanceBlockImpl(block)
 }

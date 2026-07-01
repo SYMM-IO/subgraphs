@@ -1541,6 +1541,36 @@ type LatestAccountBalanceRemovalGuard @entity(immutable: false) {
 	logIndex: BigInt!
 }
 
+"""Source-scoped latest-balance row queued for a final block-state refresh."""
+type LatestAccountBalanceBlockRefresh @entity(immutable: false) {
+	"""LatestAccountBalance entity id to refresh at block end."""
+	id: ID!
+	"""Contract address that owns the balance bucket."""
+	source: Bytes!
+	"""Account address associated with this row."""
+	account: Bytes!
+	"""Counterparty or balance-key address for this refresh."""
+	counterParty: Bytes!
+	"""Balance snapshot account type label."""
+	accountType: String!
+	"""Symmio core version ordinal used by contract utility dispatch."""
+	version: Int!
+	"""Transaction hash of the latest event that queued this refresh."""
+	transaction: Bytes!
+}
+
+"""Per-block list of source-scoped latest-balance refresh ids."""
+type LatestAccountBalanceBlockRefreshQueue @entity(immutable: false) {
+	"""Queue id, built from block number and source address."""
+	id: ID!
+	"""Contract address whose data source should flush this queue."""
+	source: Bytes!
+	"""Block number associated with this refresh queue."""
+	blockNumber: BigInt!
+	"""LatestAccountBalanceBlockRefresh ids to refresh."""
+	ids: [String!]!
+}
+
 """Express provider registration keyed by provider/source/collateral context."""
 type ExpressProviderSource @entity(immutable: false) {
 	"""Subgraph entity id for this row."""

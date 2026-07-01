@@ -1,3 +1,5 @@
+import {ethereum} from '@graphprotocol/graph-ts'
+import {handleLatestAccountBalanceBlock as handleLatestAccountBalanceBlockImpl} from './src_latest_account_balance_block'
 import {BalanceChangePartyAHandler} from './handlers/symmio/BalanceChangePartyAHandler'
 import {BalanceChangePartyA} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {BalanceChangePartyBHandler} from './handlers/symmio/BalanceChangePartyBHandler'
@@ -89,4 +91,9 @@ export function handleWithdrawAdvanced(event: WithdrawAdvanced): void {
     ensureSyncMeta(event.block)
     let handler = new WithdrawAdvancedHandler<WithdrawAdvanced>()
     handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleLatestAccountBalanceBlock(block: ethereum.Block): void {
+    handleLatestAccountBalanceBlockImpl(block)
 }

@@ -4,6 +4,7 @@ import test from "node:test";
 
 const source = readFileSync("perps/analytics/utils/latestAccountBalance.ts", "utf8");
 const schema = readFileSync("perps/analytics/schema.graphql", "utf8");
+const manager = readFileSync("scripts/manager.py", "utf8");
 
 test("PartyB counterparty buckets are cleared when bucket-specific balances are zero", () => {
 	const partyBUpdate = source.slice(source.indexOf("export function updatePartyBLatestBalance"));
@@ -30,4 +31,18 @@ test("later same-transaction removals guard against older out-of-order balance w
 		assert.match(updateSource, /markLatestBalanceRemoval\(id, event\)[\s\S]*store\.remove\("LatestAccountBalance", id\)/);
 		assert.match(updateSource, /if \(shouldSkipStaleLatestBalanceWrite\(id, event\)\) return[\s\S]*entity\.save\(\)/);
 	}
+});
+
+test("latest balances are reconciled once more at block end", () => {
+	assert.match(schema, /type LatestAccountBalanceBlockRefresh @entity\(immutable: false\)/);
+	assert.match(schema, /type LatestAccountBalanceBlockRefreshQueue @entity\(immutable: false\)/);
+	assert.match(source, /function enqueueLatestBalanceBlockRefresh/);
+	assert.match(source, /export function flushLatestAccountBalanceBlockRefreshes/);
+	assert.match(source, /LatestAccountBalanceBlockRefreshQueue\.load/);
+	assert.match(source, /store\.remove\("LatestAccountBalanceBlockRefresh"/);
+	assert.match(source, /enqueueLatestBalanceBlockRefresh\([\s\S]*"PARTY_A"/);
+	assert.match(source, /enqueueLatestBalanceBlockRefresh\([\s\S]*"PARTY_B"/);
+	assert.match(manager, /\["blockHandlers"\] = \[\{"handler": "handleLatestAccountBalanceBlock"/);
+	assert.match(manager, /"filter": \{"kind": "polling", "every": 1\}/);
+	assert.match(manager, /target_module == "perps\/analytics"[\s\S]*contract\.abi == "symmio"/);
 });

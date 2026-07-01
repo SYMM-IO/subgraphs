@@ -300,6 +300,21 @@ def generate_src_ts(target_module: str, contract: Contract):
 
     imports.add(f"import {{{version_enum}}} from '{base_handler_path}'")
 
+    if target_module == "perps/analytics" and contract.abi == "symmio":
+        imports.add("import {ethereum} from '@graphprotocol/graph-ts'")
+        imports.add(
+            "import {handleLatestAccountBalanceBlock as handleLatestAccountBalanceBlockImpl} from './src_latest_account_balance_block'"
+        )
+        handlers_code.append(
+            textwrap.dedent(
+                """
+                export function handleLatestAccountBalanceBlock(block: ethereum.Block): void {
+                    handleLatestAccountBalanceBlockImpl(block)
+                }
+                """
+            )
+        )
+
     with open(os.path.join(target_module, f"src_{contract.path()}.ts"), "w") as src_file:
         src_file.write("\n".join(sorted(imports)))
         src_file.write("\n\n")
@@ -678,6 +693,9 @@ def prepare_module(config: Config, target_module: str):
         }
         if contract.endBlock:
             source_config["source"]["endBlock"] = int(contract.endBlock)
+
+        if target_module == "perps/analytics" and contract.abi == "symmio" and not contract.fake:
+            source_config["mapping"]["blockHandlers"] = [{"handler": "handleLatestAccountBalanceBlock", "filter": {"kind": "polling", "every": 1}}]
 
         if len(contract.dependencies) > 0:
             source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in contract.dependencies]
