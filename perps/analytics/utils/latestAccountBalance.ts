@@ -95,16 +95,6 @@ function finalizeBalanceAtBlock(entity: LatestAccountBalance, block: ethereum.Bl
 	return true
 }
 
-function versionFromInt(version: i32): Version {
-	if (version == 6) return Version.v_0_8_6
-	if (version == 5) return Version.v_0_8_5
-	if (version == 4) return Version.v_0_8_4
-	if (version == 3) return Version.v_0_8_3
-	if (version == 2) return Version.v_0_8_2
-	if (version == 1) return Version.v_0_8_1
-	return Version.v_0_8_0
-}
-
 function versionToInt(version: Version): i32 {
 	if (version == Version.v_0_8_6) return 6
 	if (version == Version.v_0_8_5) return 5
@@ -409,7 +399,7 @@ function applyPartyBBalanceInfo(entity: LatestAccountBalance, version: Version, 
 	return true
 }
 
-export function flushLatestAccountBalanceBlockRefreshes(block: ethereum.Block, source: Address): void {
+export function flushLatestAccountBalanceBlockRefreshes(block: ethereum.Block, source: Address, sourceVersion: Version): void {
 	let queueId = blockRefreshQueueId(block.number, source)
 	let queue = LatestAccountBalanceBlockRefreshQueue.load(queueId)
 	if (queue == null) return
@@ -420,7 +410,6 @@ export function flushLatestAccountBalanceBlockRefreshes(block: ethereum.Block, s
 		if (refresh == null) continue
 		if (!changetype<Address>(refresh.source).equals(source)) continue
 
-		let version = versionFromInt(refresh.version)
 		let account = changetype<Address>(refresh.account)
 
 		if (refresh.accountType == "PARTY_A") {
@@ -434,8 +423,8 @@ export function flushLatestAccountBalanceBlockRefreshes(block: ethereum.Block, s
 				entity.counterPartyRef = null
 				entity.accountType = "PARTY_A"
 			}
-			if (!applyPartyABalanceInfo(entity, version, source, account)) continue
-			if (!finalizeBalanceAtBlock(entity, block, version, source, account)) continue
+			if (!applyPartyABalanceInfo(entity, sourceVersion, source, account)) continue
+			if (!finalizeBalanceAtBlock(entity, block, sourceVersion, source, account)) continue
 			if (isPartyALatestBalanceEmpty(entity)) {
 				clearAffiliateExpressWithdrawBalanceSnapshot(account, source, block.timestamp, block.number)
 				store.remove("LatestAccountBalance", refresh.id)
@@ -462,8 +451,8 @@ export function flushLatestAccountBalanceBlockRefreshes(block: ethereum.Block, s
 			entity.counterPartyRef = balanceKey.toHexString()
 			entity.accountType = "PARTY_B"
 		}
-		if (!applyPartyBBalanceInfo(entity, version, source, account, balanceKey)) continue
-		if (!finalizeBalanceAtBlock(entity, block, version, source, account)) continue
+		if (!applyPartyBBalanceInfo(entity, sourceVersion, source, account, balanceKey)) continue
+		if (!finalizeBalanceAtBlock(entity, block, sourceVersion, source, account)) continue
 		if (isPartyBLatestBalanceBucketEmpty(entity)) {
 			store.remove("LatestAccountBalance", refresh.id)
 			store.remove("LatestAccountBalanceBlockRefresh", refresh.id)

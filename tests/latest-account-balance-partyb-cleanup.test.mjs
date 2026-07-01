@@ -38,11 +38,16 @@ test("latest balances are reconciled once more at block end", () => {
 	assert.match(schema, /type LatestAccountBalanceBlockRefreshQueue @entity\(immutable: false\)/);
 	assert.match(source, /function enqueueLatestBalanceBlockRefresh/);
 	assert.match(source, /export function flushLatestAccountBalanceBlockRefreshes/);
+	assert.match(source, /flushLatestAccountBalanceBlockRefreshes\(block: ethereum\.Block, source: Address, sourceVersion: Version\)/);
+	assert.doesNotMatch(source, /versionFromInt/);
+	assert.match(source, /applyPartyABalanceInfo\(entity, sourceVersion, source, account\)/);
+	assert.match(source, /applyPartyBBalanceInfo\(entity, sourceVersion, source, account, balanceKey\)/);
 	assert.match(source, /LatestAccountBalanceBlockRefreshQueue\.load/);
 	assert.match(source, /store\.remove\("LatestAccountBalanceBlockRefresh"/);
 	assert.match(source, /enqueueLatestBalanceBlockRefresh\([\s\S]*"PARTY_A"/);
 	assert.match(source, /enqueueLatestBalanceBlockRefresh\([\s\S]*"PARTY_B"/);
 	assert.match(manager, /\["blockHandlers"\] = \[\{"handler": "handleLatestAccountBalanceBlock"/);
+	assert.match(manager, /handleLatestAccountBalanceBlockImpl\(block, \{version_enum\}\.v_\{contract\.version\}\)/);
 	assert.match(manager, /"filter": \{"kind": "polling", "every": 1\}/);
 	assert.match(manager, /target_module == "perps\/analytics"[\s\S]*contract\.abi == "symmio"/);
 });

@@ -307,10 +307,10 @@ def generate_src_ts(target_module: str, contract: Contract):
         )
         handlers_code.append(
             textwrap.dedent(
-                """
-                export function handleLatestAccountBalanceBlock(block: ethereum.Block): void {
-                    handleLatestAccountBalanceBlockImpl(block)
-                }
+                f"""
+                export function handleLatestAccountBalanceBlock(block: ethereum.Block): void {{
+                    handleLatestAccountBalanceBlockImpl(block, {version_enum}.v_{contract.version})
+                }}
                 """
             )
         )

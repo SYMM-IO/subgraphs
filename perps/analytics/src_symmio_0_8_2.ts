@@ -347,5 +347,5 @@ export function handleWithdraw(event: Withdraw): void {
 
 
 export function handleLatestAccountBalanceBlock(block: ethereum.Block): void {
-    handleLatestAccountBalanceBlockImpl(block)
+    handleLatestAccountBalanceBlockImpl(block, Version.v_0_8_2)
 }
