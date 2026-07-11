@@ -1,0 +1,129 @@
+name: hyperevm-solvency-engine
+description: ""
+resource_size: s
+apiVersion: 3
+sources:
+  funding_fee_state:
+    type: subgraph_entity
+    subgraphs:
+      - name: hyperevm_mainnet_analytics
+        version: v0.2.18
+    name: funding_fee_state
+  aggregated_position:
+    type: subgraph_entity
+    subgraphs:
+      - name: hyperevm_mainnet_analytics
+        version: v0.2.18
+    name: aggregated_position
+  latest_account_balance:
+    type: subgraph_entity
+    subgraphs:
+      - name: hyperevm_mainnet_analytics
+        version: v0.2.18
+    name: latest_account_balance
+transforms:
+  liquidator_funding_state:
+    type: sql
+    primary_key: id
+    sql: |-
+      SELECT
+        id,
+        source,
+        symbol_id,
+        symbol_name,
+        party_b,
+        current_long_rate,
+        current_short_rate,
+        accumulated_long_rate,
+        accumulated_short_rate,
+        epoch_duration,
+        last_updated_epoch,
+        start_epoch,
+        start_epoch_timestamp,
+        last_updated_timestamp,
+        snapshot_long_fee,
+        snapshot_short_fee,
+        update_timestamp
+      FROM funding_fee_state
+  liquidator_position_state:
+    type: sql
+    primary_key: id
+    sql: |-
+      SELECT
+        id,
+        source,
+        party_a,
+        party_b,
+        symbol_id,
+        symbol_name,
+        position_type,
+        aggregated_amount,
+        aggregated_notional,
+        weighted_paid_funding,
+        open_positions_count,
+        is_active,
+        closed_timestamp,
+        closed_block_number,
+        closed_transaction,
+        block_number,
+        transaction
+      FROM aggregated_position
+  liquidator_party_a_balance_state:
+    type: sql
+    primary_key: id
+    sql: |-
+      SELECT
+        id,
+        source,
+        account,
+        allocated_balance,
+        locked_cva,
+        locked_lf,
+        block_number,
+        transaction
+      FROM latest_account_balance
+      WHERE account_type = 'PARTY_A'
+sinks:
+  liquidator_funding_state_kafka:
+    type: kafka
+    topic: hyperevm_liquidator_funding_state
+    data_format: json
+    secret_name: KAFKA_SECRET_STAGE
+    upsert_mode: false
+    from: liquidator_funding_state
+  liquidator_funding_state_kafka_prod:
+    type: kafka
+    topic: liquidator_funding_state_prod
+    data_format: json
+    secret_name: KAFKA_SECRET_PROD
+    upsert_mode: false
+    from: liquidator_funding_state
+  liquidator_position_state_kafka:
+    type: kafka
+    topic: hyperevm_liquidator_position_state
+    data_format: json
+    secret_name: KAFKA_SECRET_STAGE
+    upsert_mode: false
+    from: liquidator_position_state
+  liquidator_position_state_kafka_prod:
+    type: kafka
+    topic: liquidator_position_state_prod
+    data_format: json
+    secret_name: KAFKA_SECRET_PROD
+    upsert_mode: false
+    from: liquidator_position_state
+  liquidator_party_a_balance_state_kafka:
+    type: kafka
+    topic: hyperevm_liquidator_party_a_balance_state
+    data_format: json
+    secret_name: KAFKA_SECRET_STAGE
+    upsert_mode: false
+    from: liquidator_party_a_balance_state
+  liquidator_party_a_balance_state_kafka_prod:
+    type: kafka
+    topic: liquidator_party_a_balance_state_prod
+    data_format: json
+    secret_name: KAFKA_SECRET_PROD
+    upsert_mode: false
+    from: liquidator_party_a_balance_state
+use_dedicated_ip: false

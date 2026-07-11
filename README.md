@@ -195,6 +195,32 @@ python3 scripts/monitor.py --version v0.0.1 --watch 60
 
 The script reports sync percentage, block range, and flags any errors or subgraphs that are not yet fully synced. Edit the `SUBGRAPHS` list at the top of the file to add or remove monitored subgraphs.
 
+## Automatic Goldsky Pipeline Updates
+
+Goldsky deployments automatically update existing Mirror pipelines that consume the deployed subgraph. Pipeline definitions under `pipelines/` are the source of truth and also define the dependency relationship: every `subgraph_entity` reference whose `name` matches the deployed subgraph is rendered with the new immutable version.
+
+After a successful `goldsky subgraph deploy`, `scripts/manager.py` runs the pipeline updater. For every related pipeline it:
+
+1. Confirms the pipeline already exists, so the automatic hook cannot accidentally create one.
+2. Renders all matching source references with the deployed version.
+3. Validates the rendered definition.
+4. Applies it with `--from-snapshot new --force`, preserving pipeline progress with a fresh snapshot.
+
+Pipeline maintenance is best-effort. Validation errors, Goldsky failures, and timeouts are printed as warnings, but the manager still exits successfully because the subgraph deployment has already completed. This also means a failed pipeline update does not stop later deployments in a fleet batch.
+
+```bash
+# Preview which managed pipelines consume a subgraph (no Goldsky writes)
+python3 scripts/pipeline_updater.py --subgraph hyperevm_mainnet_analytics --version v0.2.18
+
+# Validate and apply the related pipeline definitions
+python3 scripts/pipeline_updater.py --subgraph hyperevm_mainnet_analytics --version v0.2.18 --apply
+
+# Emergency/manual deployment without the automatic pipeline follow-up
+python3 scripts/manager.py configs/perps/hyperevm.json perps/analytics v0.2.18 --deploy --skip-pipeline-update
+```
+
+Each Goldsky command has a default timeout of 900 seconds. Override it with `GOLDSKY_PIPELINE_TIMEOUT_SECONDS` when needed. Automatic updates never create, delete, or move subgraph tags.
+
 ## Troubleshooting
 
 - **Missing Events**: If certain events are not indexed, ensure the dependency files correctly map the events to the
