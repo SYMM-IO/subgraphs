@@ -63,6 +63,35 @@ def header(msg):
     print(f"{'─' * 50}{Style.RESET}\n")
 
 
+def update_pipelines_after_deploy(subgraph: str, version: str) -> bool:
+    """Apply related Goldsky pipeline updates without failing deployment."""
+    updater_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipeline_updater.py")
+    print(f"\n{Style.BLUE}{Style.BOLD}Updating related Goldsky pipelines...{Style.RESET}")
+    try:
+        result = subprocess.run(
+            [
+                sys.executable,
+                updater_path,
+                "--subgraph",
+                subgraph,
+                "--version",
+                version,
+                "--apply",
+            ],
+            check=False,
+        )
+    except OSError as exc:
+        warn(f"Subgraph deployment succeeded, but the pipeline updater could not start: {exc}")
+        return False
+
+    if result.returncode != 0:
+        warn("Subgraph deployment succeeded, but one or more related pipeline updates failed. See the errors above.")
+        return False
+
+    success("Related pipeline update check complete")
+    return True
+
+
 @dataclass
 class Event:
     source: str
@@ -975,6 +1004,11 @@ def main():
     parser.add_argument("--generate-entities", action="store_true", help="Generate and print entities")  # New option
     parser.add_argument("--create-utils", action="store_true", help="Generate contract_utils files for symmio versions")
     parser.add_argument("--provider", choices=["goldsky", "0xgraph"], default="goldsky", help="Deployment provider (default: goldsky)")
+    parser.add_argument(
+        "--skip-pipeline-update",
+        action="store_true",
+        help="Do not apply related Goldsky pipeline updates after a successful subgraph deployment",
+    )
 
     args = parser.parse_args()
     if not os.path.exists(args.config_file):
@@ -1084,6 +1118,8 @@ def main():
             ]
             subprocess.run(command, check=True)
             success(f"Deployed {args.version} to Goldsky")
+            if not args.skip_pipeline_update:
+                update_pipelines_after_deploy(deploy_url, args.version)
 
         elif args.provider == "0xgraph":
             load_env_file()
