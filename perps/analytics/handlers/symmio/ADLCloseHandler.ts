@@ -31,7 +31,7 @@ export class ADLCloseHandler<T> extends CommonADLCloseHandler<T> {
 			"ADL_CLOSE",
 			new JSONBuilder()
 				.add("amount", event.params.amount.toString())
-				.add("openedPrice", quote.openedPrice!.toString())
+				.addNullable("openedPrice", quote.openedPrice === null ? null : quote.openedPrice!.toString())
 				.add("closePrice", event.params.price.toString())
 				.build(),
 		)

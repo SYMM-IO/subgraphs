@@ -1,29 +1,50 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Quote } from "../../../../generated/schema"
-import { symmio_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { QuoteStatus } from "../../../analytics/utils/constants"
-import { getLiquidatablePendingQuoteIds, removeQuoteFromPendingList, setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
+import { ClearingHouseLiquidationType, resolveClearingHouseLiquidationType } from "../../utils/clearingHouseLiquidation"
+import {
+	getClearingHouseLiquidatablePendingQuoteIds,
+	removeQuoteFromPendingList,
+	setEventTimestampAndTransactionHashAndAction,
+} from "../../utils/quote"
 import { updateQuoteHierarchyCounters } from "../../utils/profile"
 import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 
-export function isPartyATakeoverSubject(version: Version, source: Address, subject: Address): bool {
-	if (version < Version.v_0_8_5) return false
-	let contract = symmio_0_8_5.bind(source)
-	let cross = contract.try_getCrossLiquidationDetails(subject)
-	if (!cross.reverted && cross.value.inProgress) return false
-	let takeover = contract.try_getPartyATakeoverDetails(subject)
-	return !takeover.reverted && takeover.value.inProgress
+export function resolveClearingHousePendingQuoteIds(
+	version: Version,
+	source: Address,
+	subject: Address,
+	counterparties: Array<Address>,
+	liquidatedAmountCount: i32,
+): Array<BigInt> {
+	let liquidationType = resolveClearingHouseLiquidationType(version, source, subject, liquidatedAmountCount)
+	if (liquidationType == ClearingHouseLiquidationType.NONE) return new Array<BigInt>()
+	return getClearingHouseLiquidatablePendingQuoteIds(
+		subject,
+		counterparties,
+		source,
+		liquidationType == ClearingHouseLiquidationType.PARTY_A_TAKEOVER,
+	)
 }
 
 export class LiquidatePendingPositionsForClearingHouseHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let counterparties: Address[] = isPartyATakeoverSubject(version, event.address, event.params.subject)
-			? new Array<Address>()
-			: event.params.counterparties
-		let quoteIds = getLiquidatablePendingQuoteIds(event.params.subject, counterparties, event.address)
+		let quoteIds = resolveClearingHousePendingQuoteIds(
+			version,
+			event.address,
+			event.params.subject,
+			event.params.counterparties,
+			event.params.liquidatedAmounts.length,
+		)
+		this.handleQuoteIds(_event, quoteIds)
+	}
+
+	handleQuoteIds(_event: ethereum.Event, quoteIds: Array<BigInt>): void {
+		// @ts-ignore
+		const event = changetype<T>(_event)
 		for (let i = 0; i < quoteIds.length; i++) {
 			let quoteId = quoteIds[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())

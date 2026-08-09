@@ -2,9 +2,6 @@ import { SetSymbolsPrices as SetSymbolsPricesEntity } from "../../../../generate
 import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { SetSymbolsPrices as SetSymbolsPrices_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { SetSymbolsPrices as SetSymbolsPrices_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { SetSymbolsPrices as SetSymbolsPrices_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class SetSymbolsPricesHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,30 +19,7 @@ export class SetSymbolsPricesHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<SetSymbolsPrices_8_5>(_event)
-				entity.liquidationId = e.params.liquidationId
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<SetSymbolsPrices_8_4>(_event)
-				entity.liquidationId = e.params.liquidationId
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<SetSymbolsPrices_8_3>(_event)
-				entity.liquidationId = e.params.liquidationId
-				break
-			}
-			default: {
-				entity.liquidationId = Bytes.empty()
-				break
-			}
-		}
+		entity.liquidationId = _event.parameters.length >= 5 ? _event.parameters[4].value.toBytes() : Bytes.empty()
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

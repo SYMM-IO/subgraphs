@@ -61,6 +61,8 @@ export class BaseFeeCollectorHandler {
 
 export enum AccountLayerVersion {
 	v_1,
+	v_2,
+	v_3,
 }
 
 export class BaseAccountLayerHandler {
@@ -83,4 +85,18 @@ export class BaseExpressProviderHandler {
 	constructor() {}
 
 	handle(_event: ethereum.Event, version: ExpressProviderVersion): void {}
+}
+
+export enum BuybackGatewayVersion {
+	v_1,
+}
+
+export class BaseBuybackGatewayHandler {
+	constructor() {}
+
+	handle(_event: ethereum.Event, version: BuybackGatewayVersion): void {}
+
+	handleGlobalCounter(): BigInt {
+		return getGlobalCounterAndInc()
+	}
 }

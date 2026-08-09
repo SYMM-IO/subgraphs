@@ -20,7 +20,7 @@ export class LiquidatePositionsPartyBHandler<T> extends CommonLiquidatePositions
 		super.handleQuote(_event, version) // Pre-computes liquidateAmount/liquidatePrice on each quote
 
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
-			handleLiquidatePosition<T>(_event, version, event.params.quoteIds[i], "LIQUIDATE_PARTY_B", fundingContexts[i])
+			handleLiquidatePosition<T>(_event, version, event.params.quoteIds[i], "LIQUIDATE_PARTY_B", fundingContexts[i], null)
 		}
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)

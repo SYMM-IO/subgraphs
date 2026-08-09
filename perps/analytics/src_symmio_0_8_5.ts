@@ -1,5 +1,3 @@
-import {ethereum} from '@graphprotocol/graph-ts'
-import {handleLatestAccountBalanceBlock as handleLatestAccountBalanceBlockImpl} from './src_latest_account_balance_block'
 import {ADLCloseHandler} from './handlers/symmio/ADLCloseHandler'
 import {ADLClose} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {AcceptCancelCloseRequestHandler} from './handlers/symmio/AcceptCancelCloseRequestHandler'
@@ -50,6 +48,8 @@ import {ForceClosePositionHandler} from './handlers/symmio/ForceClosePositionHan
 import {ForceClosePosition} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {FullyLiquidatedPartyAHandler} from './handlers/symmio/FullyLiquidatedPartyAHandler'
 import {FullyLiquidatedPartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {LiquidateCrossPartyBHandler} from './handlers/symmio/LiquidateCrossPartyBHandler'
+import {LiquidateCrossPartyB} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePartyAHandler} from './handlers/symmio/LiquidatePartyAHandler'
 import {LiquidatePartyA} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {LiquidatePartyBHandler} from './handlers/symmio/LiquidatePartyBHandler'
@@ -70,6 +70,8 @@ import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
 import {LockQuote} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
 import {OpenPosition} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {RegisterExpressProviderHandler} from './handlers/symmio/RegisterExpressProviderHandler'
+import {RegisterExpressProvider} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {RegisterPartyBHandler} from './handlers/symmio/RegisterPartyBHandler'
 import {RegisterPartyB} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {RequestToCancelCloseRequestHandler} from './handlers/symmio/RequestToCancelCloseRequestHandler'
@@ -106,6 +108,8 @@ import {SetSymbolValidationStateHandler} from './handlers/symmio/SetSymbolValida
 import {SetSymbolValidationState} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SetSymbolsPricesHandler} from './handlers/symmio/SetSymbolsPricesHandler'
 import {SetSymbolsPrices} from '../../generated/symmio_0_8_5/symmio_0_8_5'
+import {SettleCrossPartyBLiquidationHandler} from './handlers/symmio/SettleCrossPartyBLiquidationHandler'
+import {SettleCrossPartyBLiquidation} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SettlePartyALiquidationHandler} from './handlers/symmio/SettlePartyALiquidationHandler'
 import {SettlePartyALiquidation} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {SettlePartyATakeoverHandler} from './handlers/symmio/SettlePartyATakeoverHandler'
@@ -148,6 +152,8 @@ import {WithdrawSuspendedHandler} from './handlers/symmio/WithdrawSuspendedHandl
 import {WithdrawSuspended} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {Withdraw} from '../../generated/symmio_0_8_5/symmio_0_8_5'
 import {ensureSyncMeta} from './src_sync_meta'
+import {ethereum} from '@graphprotocol/graph-ts'
+import {handleLatestAccountBalanceBlock as handleLatestAccountBalanceBlockImpl} from './src_latest_account_balance_block'
 
 
 export function handleADLClose(event: ADLClose): void {
@@ -325,6 +331,13 @@ export function handleFullyLiquidatedPartyA(event: FullyLiquidatedPartyA): void 
 }
 
 
+export function handleLiquidateCrossPartyB(event: LiquidateCrossPartyB): void {
+    ensureSyncMeta(event.block)
+    let handler = new LiquidateCrossPartyBHandler<LiquidateCrossPartyB>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
 export function handleLiquidatePartyA(event: LiquidatePartyA): void {
     ensureSyncMeta(event.block)
     let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
@@ -391,6 +404,13 @@ export function handleLockQuote(event: LockQuote): void {
 export function handleOpenPosition(event: OpenPosition): void {
     ensureSyncMeta(event.block)
     let handler = new OpenPositionHandler<OpenPosition>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleRegisterExpressProvider(event: RegisterExpressProvider): void {
+    ensureSyncMeta(event.block)
+    let handler = new RegisterExpressProviderHandler<RegisterExpressProvider>()
     handler.handle(event, Version.v_0_8_5)
 }
 
@@ -517,6 +537,13 @@ export function handleSetSymbolValidationState(event: SetSymbolValidationState):
 export function handleSetSymbolsPrices(event: SetSymbolsPrices): void {
     ensureSyncMeta(event.block)
     let handler = new SetSymbolsPricesHandler<SetSymbolsPrices>()
+    handler.handle(event, Version.v_0_8_5)
+}
+
+
+export function handleSettleCrossPartyBLiquidation(event: SettleCrossPartyBLiquidation): void {
+    ensureSyncMeta(event.block)
+    let handler = new SettleCrossPartyBLiquidationHandler<SettleCrossPartyBLiquidation>()
     handler.handle(event, Version.v_0_8_5)
 }
 

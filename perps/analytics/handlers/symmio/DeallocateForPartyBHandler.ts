@@ -18,18 +18,18 @@ export class DeallocateForPartyBHandler<T> extends CommonDeallocateForPartyBHand
 		const event = changetype<T>(_event)
 
 		if (version < Version.v_0_8_3) {
-			let allocate = newBalanceChange(event)
-			allocate.source = event.address
-			allocate.type = balanceChangeTypes.get(BalanceChangeType.DEALLOCATE)
-			allocate.timestamp = event.block.timestamp
-			allocate.blockNumber = event.block.number
-			allocate.transaction = event.transaction.hash
-			allocate.amount = event.params.amount
-			allocate.account = event.params.partyB
-			allocate.sideAccount = event.params.partyA
-			allocate.collateral = getConfiguration(event).collateral
-			setBalanceChangeContext(allocate, Account.load(event.params.partyB.toHexString()), event.address, _event.transaction.input)
-			allocate.save()
+			let deallocate = newBalanceChange(event)
+			deallocate.source = event.address
+			deallocate.type = balanceChangeTypes.get(BalanceChangeType.DEALLOCATE)
+			deallocate.timestamp = event.block.timestamp
+			deallocate.blockNumber = event.block.number
+			deallocate.transaction = event.transaction.hash
+			deallocate.amount = event.params.amount
+			deallocate.account = event.params.partyB
+			deallocate.sideAccount = event.params.partyA
+			deallocate.collateral = getConfiguration(event).collateral
+			setBalanceChangeContext(deallocate, Account.load(event.params.partyB.toHexString()), event.address, _event.transaction.input)
+			deallocate.save()
 		}
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)

@@ -23,7 +23,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
-			if (quote) {
+			if (quote !== null && quote.openedPrice !== null && quote.quantity !== null && quote.closedAmount !== null) {
 				prevPrices.push(quote.openedPrice!)
 				openAmounts.push(quote.quantity!.minus(quote.closedAmount!))
 			} else {
@@ -38,6 +38,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			let quoteId = event.params.quoteIds[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
+			if (quote.openedPrice === null || quote.symbolId === null || quote.partyB === null) continue
 
 			let rate = event.params.rates[i]
 			let newPrice = quote.openedPrice!
@@ -45,17 +46,7 @@ export class ChargeFundingRateHandler<T> extends CommonChargeFundingRateHandler<
 			let openAmount = openAmounts[i]
 			let funding = unDecimal(newPrice.minus(prevPrice).abs().times(openAmount))
 
-			onPriceUpdate(
-				_event,
-				version,
-				event.params.partyA,
-				event.params.partyB,
-				quote.symbolId!,
-				quote.positionType,
-				openAmount,
-				prevPrice,
-				newPrice,
-			)
+			onPriceUpdate(_event, version, event.params.partyA, event.params.partyB, quote.symbolId!, quote.positionType, openAmount, prevPrice, newPrice)
 
 			let paid = rate.gt(BigInt.zero())
 			let fundingPaid = BigInt.zero()

@@ -2,10 +2,6 @@ import { SettlePartyALiquidation as SettlePartyALiquidationEntity } from "../../
 import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { SettlePartyALiquidation as SettlePartyALiquidation_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { SettlePartyALiquidation as SettlePartyALiquidation_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { SettlePartyALiquidation as SettlePartyALiquidation_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
-import { SettlePartyALiquidation as SettlePartyALiquidation_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class SettlePartyALiquidationHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,40 +23,21 @@ export class SettlePartyALiquidationHandler<T> {
 			entity.partyBs = partyBs
 		}
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<SettlePartyALiquidation_8_5>(_event)
-				entity.liquidationId = e.params.liquidationId
-				entity.amounts = e.params.amounts
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<SettlePartyALiquidation_8_4>(_event)
-				entity.liquidationId = e.params.liquidationId
-				entity.amounts = e.params.amounts
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<SettlePartyALiquidation_8_3>(_event)
-				entity.liquidationId = e.params.liquidationId
-				entity.amounts = e.params.amounts
-				break
-			}
-			case Version.v_0_8_2: {
-				// @ts-ignore
-				const e = changetype<SettlePartyALiquidation_8_2>(_event)
-				entity.amounts = e.params.amounts
-				entity.liquidationId = Bytes.empty()
-				break
-			}
-			case Version.v_0_8_1: {
-				entity.amounts = []
-				entity.liquidationId = Bytes.empty()
-				break
-			}
+		entity.amounts = []
+		entity.allocationKeys = []
+		entity.cvaAmounts = []
+		entity.liquidationId = Bytes.empty()
+		if (_event.parameters.length >= 6) {
+			let allocationKeys = _event.parameters[2].value.toAddressArray()
+			let normalizedAllocationKeys: Bytes[] = []
+			for (let i = 0; i < allocationKeys.length; i++) normalizedAllocationKeys.push(allocationKeys[i])
+			entity.allocationKeys = normalizedAllocationKeys
+			entity.amounts = _event.parameters[3].value.toBigIntArray()
+			entity.cvaAmounts = _event.parameters[4].value.toBigIntArray()
+			entity.liquidationId = _event.parameters[5].value.toBytes()
+		} else if (_event.parameters.length >= 3) {
+			entity.amounts = _event.parameters[2].value.toBigIntArray()
+			if (_event.parameters.length >= 4) entity.liquidationId = _event.parameters[3].value.toBytes()
 		}
 
 		entity.blockTimestamp = event.block.timestamp

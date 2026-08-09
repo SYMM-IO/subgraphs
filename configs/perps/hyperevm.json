@@ -10,7 +10,7 @@
 		{
 			"address": "0x46493c376758Da47823D7E3Ae5d417eA6546eEB3",
 			"abi": "accountLayer",
-			"version": "1",
+			"version": "2",
 			"startBlock": "32015874"
 		}
 	],

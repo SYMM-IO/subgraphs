@@ -16,7 +16,7 @@
 			"abi": "symmio",
 			"version": "0_8_3",
 			"startBlock": "59068459",
-			"endBlock": "63584470",
+			"endBlock": "63584469",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
@@ -27,7 +27,7 @@
 			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "49420747",
-			"endBlock": "59068459",
+			"endBlock": "59068458",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"

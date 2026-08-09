@@ -62,4 +62,48 @@ type Symbol @entity(immutable: false) {
 	Block timestamp of the latest symbol event handled for this entity.
 	"""
 	updateTimestamp: BigInt!
+	"""
+	Raw SymbolAdjustmentStorage.AdjustmentState ordinal for the latest adjustment.
+	"""
+	adjustmentState: Int
+	"""
+	Zero-based index of the latest scheduled adjustment.
+	"""
+	adjustmentIndex: BigInt
+	"""
+	Latest scheduled price/quantity factor, scaled by 1e18.
+	"""
+	adjustmentFactor: BigInt
+	"""
+	Venue timestamp when the latest scheduled adjustment becomes effective.
+	"""
+	adjustmentEffectiveTimestamp: BigInt
+	"""
+	Confirmed cumulative factor that is active in Muon-facing price views.
+	"""
+	adjustmentCumulativeFactor: BigInt
+	"""
+	Latest physical quote-restatement epoch.
+	"""
+	restatementEpoch: BigInt
+	"""
+	Whether a quote-restatement maintenance window is currently open.
+	"""
+	restating: Boolean
+	"""
+	Whether the current restatement window has mutated a quote or pending inventory.
+	"""
+	restatementMutated: Boolean
+	"""
+	Factor selected for the current restatement window.
+	"""
+	restatementFactor: BigInt
+	"""
+	Timestamp from which the symbol has remained frozen for the current window.
+	"""
+	restatementStartedAt: BigInt
+	"""
+	Physical price/quantity basis version, incremented after each finalized restatement.
+	"""
+	basisVersion: BigInt
 }

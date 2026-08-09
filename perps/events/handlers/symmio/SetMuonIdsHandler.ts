@@ -13,8 +13,8 @@ export class SetMuonIdsHandler<T> {
 		entity.source = event.address
 		entity.muonAppId = event.params.muonAppId
 
-		// v0.8.5 only has muonAppId, older versions have gateway, x, parity
-		if (version != Version.v_0_8_5) {
+		// v0.8.5+ only has muonAppId, older versions have gateway, x, parity
+		if (version < Version.v_0_8_5) {
 			entity.gateway = _event.parameters[1].value.toAddress()
 			entity.x = _event.parameters[2].value.toBigInt()
 			entity.parity = _event.parameters[3].value.toI32()

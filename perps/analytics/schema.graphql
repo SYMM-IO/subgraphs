@@ -1,3 +1,131 @@
+"""Immutable tracked deposit into the SYMMIO BuyBack Gateway."""
+type BuybackDeposit @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this deposit."""
+	id: ID!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""BuyBack Gateway proxy that received the deposit."""
+	gateway: Bytes!
+	"""Account that transferred the funds into the gateway."""
+	depositor: Bytes!
+	"""ERC-20 token deposited into the gateway."""
+	token: Bytes!
+	"""Raw deposited token amount in the token's smallest unit."""
+	amount: BigInt!
+	"""Human-readable attribution supplied to the gateway deposit call."""
+	depositSource: String!
+	"""UTC day number computed as blockTimestamp divided by 86,400."""
+	dayId: BigInt!
+	"""Block number that included this deposit."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this deposit."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this deposit."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this deposit."""
+	blockHash: Bytes!
+}
+
+"""Immutable V2 buyback executed by the SYMMIO BuyBack Gateway."""
+type Buyback @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this buyback."""
+	id: ID!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""BuyBack Gateway proxy that executed the swap."""
+	gateway: Bytes!
+	"""Operator that submitted the V2 buyback."""
+	operator: Bytes!
+	"""ERC-20 token spent by the buyback when it can be resolved."""
+	inputToken: Bytes
+	"""ERC-20 token bought by the buyback when it can be resolved."""
+	outputToken: Bytes
+	"""DEX or aggregator contract called by the V2 buyback."""
+	callTarget: Bytes!
+	"""Contract given the temporary input-token allowance by the V2 buyback."""
+	allowanceTarget: Bytes!
+	"""Raw input-token amount spent in the swap."""
+	amountIn: BigInt!
+	"""Operator-specified minimum output for the V2 buyback."""
+	minAmountOut: BigInt!
+	"""Raw output-token amount purchased and settled."""
+	amountOut: BigInt!
+	"""Settlement-mode ordinal: 0 for staking or 1 for burn."""
+	settlementMode: Int!
+	"""Cumulative input spend for the contract's UTC day."""
+	dayTotal: BigInt!
+	"""UTC day number computed as blockTimestamp divided by 86,400."""
+	dayId: BigInt!
+	"""Block number that included this buyback."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this buyback."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this buyback."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this buyback."""
+	blockHash: Bytes!
+}
+
+"""Cumulative funnel totals for one SYMMIO BuyBack Gateway proxy."""
+type BuybackGatewayStats @entity(immutable: false) {
+	"""Lowercase gateway address used as the stable aggregate id."""
+	id: ID!
+	"""BuyBack Gateway proxy summarized by this row."""
+	gateway: Bytes!
+	"""Total funds observed through the tracked deposit entrypoint."""
+	totalDeposited: BigInt!
+	"""Total input-token amount spent across V2 buybacks."""
+	totalAmountIn: BigInt!
+	"""Total output-token amount bought across V2 buybacks."""
+	totalAmountOut: BigInt!
+	"""Number of tracked deposit events."""
+	depositCount: BigInt!
+	"""Number of V2 buybacks."""
+	buybackCount: BigInt!
+	"""Most recently resolved input-token address."""
+	inputToken: Bytes
+	"""Most recently resolved output-token address."""
+	outputToken: Bytes
+	"""Timestamp of the first indexed deposit or buyback."""
+	firstActivityAt: BigInt!
+	"""Timestamp of the latest indexed deposit or buyback."""
+	lastActivityAt: BigInt!
+	"""Block number of the latest indexed deposit or buyback."""
+	lastActivityBlock: BigInt!
+}
+
+"""UTC-day funnel totals for one SYMMIO BuyBack Gateway proxy."""
+type BuybackDay @entity(immutable: false) {
+	"""Gateway address and UTC day number joined as the aggregate id."""
+	id: ID!
+	"""BuyBack Gateway proxy summarized by this row."""
+	gateway: Bytes!
+	"""UTC day number computed as timestamp divided by 86,400."""
+	dayId: BigInt!
+	"""UTC timestamp at the start of this day."""
+	dayStart: BigInt!
+	"""Tracked amount deposited during this UTC day."""
+	depositedAmount: BigInt!
+	"""Input-token amount spent by buybacks during this UTC day."""
+	amountIn: BigInt!
+	"""Output-token amount bought during this UTC day."""
+	amountOut: BigInt!
+	"""Number of tracked deposits during this UTC day."""
+	depositCount: BigInt!
+	"""Number of V2 buybacks during this UTC day."""
+	buybackCount: BigInt!
+	"""Timestamp of the latest deposit or buyback in this UTC day."""
+	lastActivityAt: BigInt!
+}
+
 """Daily user activity marker used to count active and new users per account-source bucket."""
 type UserActivity @entity(immutable: false) {
 	"""Subgraph entity id for this row."""
@@ -1251,6 +1379,34 @@ type FundingFeeState @entity(immutable: false) {
 	updateTimestamp: BigInt!
 }
 
+"""Latest Muon-signed PartyB/symbol funding state for one PartyA liquidation."""
+type PartyALiquidationFundingSnapshot @entity(immutable: false) {
+	"""Source, PartyA, liquidation id, PartyB, and symbol composite id."""
+	id: ID!
+	"""SYMMIO core contract that emitted the snapshot."""
+	source: Bytes!
+	"""PartyA whose liquidation owns this snapshot."""
+	partyA: Bytes!
+	"""Protocol liquidation identifier."""
+	liquidationId: Bytes!
+	"""PartyB whose signed symbol state was captured."""
+	partyB: Bytes!
+	"""Protocol symbol identifier."""
+	symbolId: BigInt!
+	"""Muon-signed liquidation price for this PartyB/symbol pair."""
+	price: BigInt!
+	"""Muon-signed cumulative long funding index."""
+	cumulativeLongFee: BigInt!
+	"""Muon-signed cumulative short funding index."""
+	cumulativeShortFee: BigInt!
+	"""Block timestamp when the latest snapshot was indexed."""
+	timestamp: BigInt!
+	"""Block number when the latest snapshot was indexed."""
+	blockNumber: BigInt!
+	"""Transaction that emitted the latest snapshot."""
+	transaction: Bytes!
+}
+
 """Mutable PartyA liquidation state enriched with account-layer and settlement context."""
 type LiquidationDetail @entity(immutable: false) {
 	"""Subgraph entity id for this row."""
@@ -1303,6 +1459,10 @@ type LiquidationDetail @entity(immutable: false) {
 	liquidator: Bytes
 	"""Allocated balance value indexed for this row."""
 	allocatedBalance: BigInt
+	"""Muon-signed PartyA allocation used by the core to classify this liquidation."""
+	liquidationAllocatedBalance: BigInt
+	"""Transaction that emitted the event which created this liquidation row."""
+	liquidationStartTransaction: Bytes
 	"""Withdrawable free balance of PartyA captured when the liquidation row is created."""
 	freeBalance: BigInt
 	"""Allocated balance less locked CVA and LF at liquidation start; the UI's free-plus-margin band."""
@@ -1349,13 +1509,13 @@ type LiquidationDetail @entity(immutable: false) {
 	settlementModes: [String!]
 	"""Full expected PnL amount used to verify PartyA uPNL for each PartyB bucket."""
 	settlementExpectedAmounts: [BigInt!]
-	"""Actual settlement amount applied for each PartyB bucket."""
+	"""Actual settlement amount applied for each PartyB bucket; zero when takeover clears an unapplied bucket."""
 	settlementActualAmounts: [BigInt!]
-	"""CVA amount returned to each PartyB bucket during settlement."""
+	"""CVA amount returned to each PartyB bucket; zero when takeover clears a pending bucket."""
 	settlementCvaReturned: [BigInt!]
-	"""Positive cross-mode accounting reserve contribution for each PartyB bucket."""
+	"""Positive settlement reserve contribution retained for each pending PartyB bucket."""
 	settlementReserveContributions: [BigInt!]
-	"""Lifecycle state for each PartyB settlement bucket."""
+	"""Lifecycle state for each PartyB settlement bucket: pending, settled, or takeover-cleared."""
 	settlementStates: [String!]
 	"""Affiliate or account-source address associated with this row."""
 	affiliate: Bytes
@@ -1363,12 +1523,66 @@ type LiquidationDetail @entity(immutable: false) {
 	totalPnl: BigInt
 	"""CVA amount paid during liquidation settlement."""
 	paidCva: BigInt
+	"""Whether per-PartyB CVA attribution was complete when terminal accounting was reconciled."""
+	settlementAttributionComplete: Boolean
 	"""Liquidation-fee amount paid during liquidation settlement."""
 	paidLf: BigInt
 	"""Sum of locked liquidation-fee reserves on liquidated quotes."""
 	potentialLf: BigInt
 	"""Timestamp when full liquidation was indexed."""
 	fullyLiquidatedTimestamp: BigInt
+}
+
+"""Current PartyA liquidation pointer and event-sourced locked-value accumulator."""
+type ActivePartyALiquidation @entity(immutable: false) {
+	"""PartyA and core source composite id."""
+	id: ID!
+	"""Core contract for this liquidation."""
+	source: Bytes!
+	"""PartyA whose liquidation is active."""
+	partyA: Bytes!
+	"""Protocol liquidation id."""
+	liquidationId: Bytes!
+	"""LiquidationDetail entity id."""
+	liquidationDetailId: String!
+	"""Transaction that emitted the liquidation start event."""
+	startTransaction: Bytes!
+	"""CVA captured from every indexed open-position liquidation batch."""
+	capturedLockedCva: BigInt!
+	"""LF captured from every indexed open-position liquidation batch."""
+	capturedLockedLf: BigInt!
+	"""PartyA MM captured from every indexed open-position liquidation batch."""
+	capturedLockedPartyAmm: BigInt!
+	"""PartyB MM captured from every indexed open-position liquidation batch."""
+	capturedLockedPartyBmm: BigInt!
+	"""Whether every observed quote supplied a current CVA value."""
+	cvaComplete: Boolean!
+	"""Whether every observed quote supplied a current LF value."""
+	lfComplete: Boolean!
+	"""Whether every observed quote supplied a current PartyA MM value."""
+	partyAmmComplete: Boolean!
+	"""Whether every observed quote supplied a current PartyB MM value."""
+	partyBmmComplete: Boolean!
+	"""Whether every normally liquidated quote supplied its PartyB for CVA attribution."""
+	partyBComplete: Boolean!
+	"""PartyB for each quote whose starting CVA was captured, in event order."""
+	capturedQuotePartyBs: [Bytes!]!
+	"""Starting CVA for each captured quote, aligned with capturedQuotePartyBs."""
+	capturedQuoteCvas: [BigInt!]!
+}
+
+"""Transaction-scoped deferred-balance amount emitted immediately before liquidation start."""
+type PartyALiquidationDeferredBalanceHint @entity(immutable: false) {
+	"""Core, PartyA, and transaction composite id."""
+	id: ID!
+	"""Core contract that emitted the balance change."""
+	source: Bytes!
+	"""PartyA entering liquidation."""
+	partyA: Bytes!
+	"""Exact amount moved into deferred balance."""
+	amount: BigInt!
+	"""Transaction shared with the following liquidation start event."""
+	transaction: Bytes!
 }
 
 """Mutable withdraw request state across classic, express, virtual, and advanced flows."""
@@ -1423,6 +1637,36 @@ type WithdrawRequest @entity(immutable: false) {
 	badDebtAmount: BigInt!
 	"""Whether this withdraw request was marked as sped up."""
 	speedUp: Boolean!
+	"""Provider-specific data payload emitted with this withdraw request."""
+	providerData: Bytes!
+	"""Block timestamp when a STANDARD request was accelerated by its express provider."""
+	acceleratedAt: BigInt
+	"""Affiliate whose funding split was selected when this request was accelerated."""
+	accelerationAffiliate: Bytes
+	"""Affiliate-pool amount selected by the acceleration offer."""
+	accelerationAffiliateAmount: BigInt
+	"""Credit-line amount selected by the acceleration offer."""
+	accelerationCreditAmount: BigInt
+	"""General-pool amount selected by the acceleration offer."""
+	accelerationGeneralAmount: BigInt
+	"""Raw express-provider OptionType ordinal: 0 SAME_TX, 1 WINDOWED, 2 STANDARD."""
+	providerOptionType: Int
+	"""Latest provider-side lifecycle status, kept separate from the core request status."""
+	providerStatus: String
+	"""Timestamp of the latest provider-side lifecycle transition."""
+	providerStatusUpdatedAt: BigInt
+	"""Block number of the latest provider-side lifecycle transition."""
+	providerStatusBlockNumber: BigInt
+	"""Transaction of the latest provider-side lifecycle transition."""
+	providerStatusTransaction: Bytes
+	"""Timestamp when the express provider completed its own processing stage."""
+	providerProcessedAt: BigInt
+	"""Block number when the express provider completed its own processing stage."""
+	providerProcessedBlockNumber: BigInt
+	"""Transaction that emitted the provider processing event."""
+	providerProcessedTransaction: Bytes
+	"""Provider event that completed processing: WithdrawProcessed or WithdrawUnlockedAndProcessed."""
+	providerProcessingEvent: String
 	"""Whether the withdraw request was classified as purely virtual."""
 	isPureVirtual: Boolean!
 	"""Cooldown end timestamp for this withdraw request."""
@@ -1437,6 +1681,53 @@ type WithdrawRequest @entity(immutable: false) {
 	blockNumber: BigInt!
 	"""Transaction hash associated with this row."""
 	transaction: Bytes!
+}
+
+"""
+Transaction-scoped bridge for express-provider lifecycle events emitted before the
+core WithdrawInitiated event creates its WithdrawRequest row.
+"""
+type ExpressProviderWithdrawLifecycleHint @entity(immutable: false) {
+	"""Core/user/request/transaction composite id."""
+	id: ID!
+	"""Express provider that emitted the lifecycle event."""
+	provider: Bytes!
+	"""SYMMIO core associated with the provider."""
+	source: Bytes!
+	"""Withdraw user."""
+	user: Bytes!
+	"""Protocol withdraw request id."""
+	requestId: BigInt!
+	"""Transaction shared with the later core WithdrawInitiated event."""
+	transaction: Bytes!
+	"""Whether the provider accepted the request in this transaction."""
+	accepted: Boolean!
+	"""Raw express-provider OptionType ordinal carried by WithdrawAccepted."""
+	providerOptionType: Int
+	"""Latest provider-side lifecycle status observed before core request creation."""
+	providerStatus: String
+	"""Whether the provider processed the request in this transaction."""
+	processed: Boolean!
+	"""Provider processing event observed before the core request row was created."""
+	processingEvent: String
+	"""Acceleration timestamp when an acceleration event preceded initiation."""
+	acceleratedAt: BigInt
+	"""Acceleration affiliate when an acceleration event preceded initiation."""
+	accelerationAffiliate: Bytes
+	"""Acceleration affiliate-pool amount."""
+	accelerationAffiliateAmount: BigInt
+	"""Acceleration credit-line amount."""
+	accelerationCreditAmount: BigInt
+	"""Acceleration general-pool amount."""
+	accelerationGeneralAmount: BigInt
+	"""Net reserved credit-line debt emitted before request creation."""
+	reservedDebtAmount: BigInt!
+	"""Net active credit-line debt emitted before request creation."""
+	activeDebtAmount: BigInt!
+	"""Timestamp of the latest provider lifecycle event represented by this hint."""
+	updateTimestamp: BigInt!
+	"""Block number of the latest provider lifecycle event represented by this hint."""
+	blockNumber: BigInt!
 }
 
 """Lookup row for active withdraw request ids by source/request id bucket."""
@@ -1461,6 +1752,28 @@ type WithdrawRequestAccountLookup @entity(immutable: false) {
 	account: Bytes!
 	"""Active withdraw request entity ids for this lookup row."""
 	activeRequestIds: [String!]!
+}
+
+"""Transaction-scoped core lifecycle emitted before its WithdrawInitiated row."""
+type WithdrawCoreLifecycleHint @entity(immutable: false) {
+	"""Core, user, request id, and transaction composite id."""
+	id: ID!
+	"""SYMMIO core that emitted the early lifecycle event."""
+	source: Bytes!
+	"""Withdraw user."""
+	user: Bytes!
+	"""Protocol withdraw request id."""
+	requestId: BigInt!
+	"""Transaction shared with the later WithdrawInitiated event."""
+	transaction: Bytes!
+	"""Core request status emitted before request entity creation."""
+	status: String
+	"""Advanced amount emitted before request entity creation."""
+	advancedAmount: BigInt!
+	"""Timestamp of the latest early core lifecycle event."""
+	updateTimestamp: BigInt!
+	"""Block number of the latest early core lifecycle event."""
+	blockNumber: BigInt!
 }
 
 """Temporary hint row used to connect withdraw finalization side effects within a transaction."""
@@ -1541,34 +1854,30 @@ type LatestAccountBalanceRemovalGuard @entity(immutable: false) {
 	logIndex: BigInt!
 }
 
-"""Source-scoped latest-balance row queued for a final block-state refresh."""
-type LatestAccountBalanceBlockRefresh @entity(immutable: false) {
-	"""LatestAccountBalance entity id to refresh at block end."""
+"""Per-source sweep state for the periodic latest-balance reconciliation pass."""
+type LatestAccountBalanceSweepMeta @entity(immutable: false) {
+	"""Source contract address, hex encoded."""
 	id: ID!
-	"""Contract address that owns the balance bucket."""
-	source: Bytes!
-	"""Account address associated with this row."""
-	account: Bytes!
-	"""Counterparty or balance-key address for this refresh."""
-	counterParty: Bytes!
-	"""Balance snapshot account type label."""
-	accountType: String!
-	"""Symmio core version ordinal used by contract utility dispatch."""
-	version: Int!
-	"""Transaction hash of the latest event that queued this refresh."""
-	transaction: Bytes!
+	"""LatestAccountBalance id at the head (most recently verified end) of the registry list."""
+	head: String
+	"""LatestAccountBalance id at the tail (least recently verified end) of the registry list."""
+	tail: String
+	"""Block timestamp of the last completed sweep pass."""
+	lastSweepTimestamp: BigInt!
 }
 
-"""Per-block list of source-scoped latest-balance refresh ids."""
-type LatestAccountBalanceBlockRefreshQueue @entity(immutable: false) {
-	"""Queue id, built from block number and source address."""
+"""Linked-list membership node tracking one live LatestAccountBalance row for sweep iteration."""
+type LatestAccountBalanceRegistryNode @entity(immutable: false) {
+	"""LatestAccountBalance entity id this node tracks."""
 	id: ID!
-	"""Contract address whose data source should flush this queue."""
+	"""Source contract address that owns the tracked row."""
 	source: Bytes!
-	"""Block number associated with this refresh queue."""
-	blockNumber: BigInt!
-	"""LatestAccountBalanceBlockRefresh ids to refresh."""
-	ids: [String!]!
+	"""Previous LatestAccountBalance id in the registry list."""
+	prev: String
+	"""Next LatestAccountBalance id in the registry list."""
+	next: String
+	"""Block timestamp when the row was last written from or verified against chain state."""
+	lastVerifiedTimestamp: BigInt!
 }
 
 """Express provider registration keyed by provider/source/collateral context."""
@@ -1589,16 +1898,12 @@ type ExpressProviderSource @entity(immutable: false) {
 	blockNumber: BigInt!
 }
 
-"""Lookup from a core/provider/collateral bucket to an ExpressProviderSource."""
+"""Core-scoped marker that Express Provider debt data is available for this source."""
 type ExpressProviderSourceByCore @entity(immutable: false) {
 	"""Subgraph entity id for this row."""
 	id: ID!
-	"""ExpressProviderSource entity reference for this lookup row."""
-	providerSource: ExpressProviderSource!
 	"""Contract address that emitted or originated the indexed data for this row."""
 	source: Bytes!
-	"""Express provider address associated with this row."""
-	provider: Bytes!
 	"""Collateral token address associated with this row."""
 	collateral: Bytes!
 	"""Deployment identifier derived by the subgraph when available."""

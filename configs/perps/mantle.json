@@ -13,7 +13,7 @@
 			"abi": "symmio",
 			"version": "0_8_4",
 			"startBlock": "74098243",
-			"endBlock": "93845050",
+			"endBlock": "93845049",
 			"dependencies": ["feeCollector_1", "symmioMultiAccount_2"]
 		},
 		{
@@ -27,7 +27,7 @@
 			"abi": "symmio",
 			"version": "0_8_3",
 			"startBlock": "68788650",
-			"endBlock": "74098243",
+			"endBlock": "74098242",
 			"dependencies": ["feeCollector_1", "symmioMultiAccount_2"]
 		},
 		{
@@ -35,7 +35,7 @@
 			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "61972155",
-			"endBlock": "68788650",
+			"endBlock": "68788649",
 			"dependencies": ["feeCollector_1", "symmioMultiAccount_2"]
 		},
 		{

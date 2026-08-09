@@ -29,7 +29,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 			let fundingContext = captureQuoteFundingContext(_event, quoteId)
 			fundingContexts.push(fundingContext)
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
-			if (quote) {
+			if (quote !== null && quote.quantity !== null && quote.closedAmount !== null) {
 				prevFundings.push(quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero())
 				openAmounts.push(quote.quantity!.minus(quote.closedAmount!))
 			} else {
@@ -45,6 +45,7 @@ export class ChargeAccumulatedFundingFeeHandler<T> extends CommonChargeAccumulat
 			let quoteId = event.params.quoteIds[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
+			if (quote.symbolId === null || quote.partyB === null || quote.openedPrice === null) continue
 
 			let newFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
 			let delta = newFunding.minus(prevFundings[i])

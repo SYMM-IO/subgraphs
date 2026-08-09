@@ -4,7 +4,7 @@ This document describes the affiliate-level aggregate analytics models added und
 
 The models roll up account balances, open withdrawal amounts, provider debt fields, and hierarchy health flags at affiliate + deployment level. They store raw indexed components only and do not publish a derived balance formula or policy decision.
 
-Initial validation targets are HyperEVM and Arbitrum analytics deployments. Both configs include a narrow `symmio_0_8_6` data source for the 8.6-only advanced-withdraw and provider-registration events. Provider contracts are indexed through a dynamic template created from the registration event.
+Initial validation targets are HyperEVM and Arbitrum analytics deployments. Arbitrum switches to the full `symmio_0_8_6` release source, while HyperEVM keeps its deployed core version and stage-specific routing. Provider contracts are indexed through a dynamic template created from the registration event.
 
 ## Account Universe
 
@@ -25,20 +25,22 @@ Accounts with known source and affiliate but incomplete hierarchy or classificat
 
 The aggregate is maintained incrementally by account lifecycle, balance, and withdrawal events.
 
-| Flow                                 | Trigger                                                                                                                | What gets updated                                                                                                                                                                            |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Legacy MultiAccount account creation | `symmioMultiAccount.AddAccount`                                                                                        | Creates/updates `Account`, stores core deployment profile refs, then creates an `AffiliateExpressWithdrawAccountSnapshot`.                                                                   |
-| AccountLayer subaccount creation     | `SubAccountCreated`                                                                                                    | Creates a subaccount snapshot and applies its account-count delta into the affiliate aggregate and bucket.                                                                                   |
-| Legacy import into AccountLayer      | `LegacyAccountImported`                                                                                                | Removes the old legacy snapshot, rewrites account membership, adds the imported snapshot, and reclassifies active pending withdrawals.                                                       |
-| Virtual account lifecycle            | `VirtualAccountCreated`, `VirtualAccountReused`, `VirtualAccountDeleted`                                               | Adds, moves, or removes VA snapshots. Reuse/deletion also reclassifies active pending withdrawals for that account.                                                                          |
-| Custom routing changes               | `SingleVAModeChanged`                                                                                                  | Recomputes the subaccount bucket, for example `SUB_ACCOUNT` vs `CUSTOM_SUB_ACCOUNT`, and reclassifies active pending withdrawals.                                                            |
-| Account deletion                     | `SubAccountDeleted`, `VirtualAccountDeleted`                                                                           | Removes the snapshot from aggregate/bucket counts and clears or moves active pending-withdrawal aggregate refs.                                                                              |
-| PartyA balance refresh               | `updatePartyALatestBalance`                                                                                            | Reads current PartyA balance components from the core contract and applies a snapshot delta into aggregate and bucket rows.                                                                  |
-| Withdrawal initiation                | `WithdrawInitiated`                                                                                                    | Creates `WithdrawRequest`, splits the amount into raw provider categories, stores aggregate refs, adds pending-withdrawal deltas, and indexes the request by account.                        |
-| Withdrawal terminal state            | `WithdrawFinalized`, `WithdrawCancelled`, immediate `WithdrawCancelRequested`, `WithdrawRejected`, `WithdrawSuspended` | Subtracts pending-withdrawal deltas using the request's stored component refs, then removes lookup entries.                                                                                  |
-| Provider registration                | `RegisterExpressProvider` from `symmio_0_8_6`                                                                          | Stores provider-to-core metadata in `ExpressProviderSource`, creates the dynamic provider template, and marks debt data available for the source once aggregate rows are touched.            |
-| Advanced withdrawal                  | `WithdrawAdvanced` from `symmio_0_8_6`                                                                                 | Finds the open `WithdrawRequest`, increments `WithdrawRequest.advancedAmount`, and applies the same delta to `advancedWithdrawAmountCollateral` on the aggregate and bucket rows.            |
-| Provider debt                        | Dynamic provider-template events                                                                                       | Populates raw reserved, active, and bad debt fields from `DebtReserved`, `DebtActivated`, `DebtSettled`, `DebtCancelled`, `BadDebtAccrued`, `RequestDebtCleared`, and `CreditBadDebtRepaid`. |
+| Flow                                 | Trigger                                                                                                                | What gets updated                                                                                                                                                                                 |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Legacy MultiAccount account creation | `symmioMultiAccount.AddAccount`                                                                                        | Creates/updates `Account`, stores core deployment profile refs, then creates an `AffiliateExpressWithdrawAccountSnapshot`.                                                                        |
+| AccountLayer subaccount creation     | `SubAccountCreated`                                                                                                    | Creates a subaccount snapshot and applies its account-count delta into the affiliate aggregate and bucket.                                                                                        |
+| Legacy import into AccountLayer      | `LegacyAccountImported`                                                                                                | Removes the old legacy snapshot, rewrites account membership, adds the imported snapshot, and reclassifies active pending withdrawals.                                                            |
+| Virtual account lifecycle            | `VirtualAccountCreated`, `VirtualAccountReused`, `VirtualAccountDeleted`                                               | Adds, moves, or removes VA snapshots. Reuse/deletion also reclassifies active pending withdrawals for that account.                                                                               |
+| Subaccount ownership transfer        | `SubAccountOwnershipTransferred`                                                                                       | Rewrites the owner across the complete subaccount/virtual-account hierarchy and refreshes each aggregate membership snapshot.                                                                     |
+| Custom routing changes               | `SingleVAModeChanged`                                                                                                  | Recomputes the subaccount bucket, for example `SUB_ACCOUNT` vs `CUSTOM_SUB_ACCOUNT`, and reclassifies active pending withdrawals.                                                                 |
+| Account deletion                     | `SubAccountDeleted`, `VirtualAccountDeleted`                                                                           | Removes the snapshot from aggregate/bucket counts and clears or moves active pending-withdrawal aggregate refs.                                                                                   |
+| PartyA balance refresh               | `updatePartyALatestBalance`                                                                                            | Reads current PartyA balance components from the core contract and applies a snapshot delta into aggregate and bucket rows.                                                                       |
+| Withdrawal initiation                | `WithdrawInitiated`                                                                                                    | Creates `WithdrawRequest`, splits the amount into raw provider categories, stores aggregate refs, adds pending-withdrawal deltas, and indexes the request by account.                             |
+| Withdrawal terminal state            | `WithdrawFinalized`, `WithdrawCancelled`, immediate `WithdrawCancelRequested`, `WithdrawRejected`, `WithdrawSuspended` | Subtracts pending-withdrawal deltas using the request's stored component refs, then removes lookup entries.                                                                                       |
+| Provider registration                | `RegisterExpressProvider` from `symmio_0_8_6`                                                                          | Stores provider-to-core metadata in `ExpressProviderSource`, creates the dynamic provider template, and marks debt data available for the source once aggregate rows are touched.                 |
+| Provider withdrawal lifecycle        | `WithdrawAccepted`, `WithdrawAccelerated`, `WithdrawProcessed`, `WithdrawUnlockedAndProcessed`                         | Records provider acceptance, acceleration amounts, and provider-side processing metadata. Provider processing does not close the core request; only a core terminal event removes pending totals. |
+| Advanced withdrawal                  | `WithdrawAdvanced` from `symmio_0_8_6`                                                                                 | Finds the open `WithdrawRequest`, increments `WithdrawRequest.advancedAmount`, and applies the same delta to `advancedWithdrawAmountCollateral` on the aggregate and bucket rows.                 |
+| Provider debt                        | Dynamic provider-template events                                                                                       | Populates raw reserved, active, and bad debt fields from `DebtReserved`, `DebtActivated`, `DebtSettled`, `DebtCancelled`, `BadDebtAccrued`, `RequestDebtCleared`, and `CreditBadDebtRepaid`.      |
 
 ## Shared Rules
 
@@ -207,6 +209,11 @@ These fields let pending-withdrawal deltas be split and later removed safely. Te
 | `reservedDebtAmount`  | Request-level reserved debt mirror.                                     | Initialized to zero; increased on `DebtReserved`; decreased on `DebtActivated`, `DebtCancelled`, and non-activated `RequestDebtCleared`.                                                       |
 | `activeDebtAmount`    | Request-level active debt mirror.                                       | Initialized to zero; increased on `DebtActivated`; decreased on `DebtSettled` and activated `RequestDebtCleared`.                                                                              |
 | `badDebtAmount`       | Request-level bad debt mirror.                                          | Initialized to zero; increased on `BadDebtAccrued`. Affiliate-level bad debt repayment is tracked on the aggregate because the repayment event is affiliate-scoped rather than request-scoped. |
+| `acceleratedAt`       | Provider acceleration timestamp.                                        | Set by `WithdrawAccelerated`, including through a transaction-scoped pre-init hint.                                                                                                            |
+| `acceleration*`       | Raw affiliate, credit-line, and general-pool acceleration values.       | Copied from `WithdrawAccelerated`.                                                                                                                                                             |
+| `providerOptionType`  | Raw provider tier: `0` SAME_TX, `1` WINDOWED, or `2` STANDARD.          | Copied from `WithdrawAccepted`, including through a transaction-scoped pre-init hint.                                                                                                          |
+| `providerProcessedAt` | Timestamp when the provider completed its processing stage.             | Set by either `WithdrawProcessed` or `WithdrawUnlockedAndProcessed`; this does not change the core request `status`.                                                                           |
+| `providerProcessed*`  | Provider processing block, transaction, and event name.                 | Copied from the provider terminal event so provider state remains distinct from core finalization.                                                                                             |
 
 ## `WithdrawRequestAccountLookup`
 
@@ -220,6 +227,14 @@ This index lets lifecycle handlers reclassify one account's active pending withd
 | `activeRequestIds` | Active withdrawal request ids for this account/source pair. | `addWithdrawRequestToLookup()` appends on `WithdrawInitiated`; terminal handlers remove through `removeWithdrawRequestFromLookup()`. The row is removed when the array becomes empty. |
 
 `syncAffiliateExpressWithdrawAccountPendingRequests()` loads this index for the previous and current source of one account, subtracts each active request from its stored component refs, recomputes refs, and re-adds it. This is linear in that account's active withdrawal count, not in total protocol accounts.
+
+## `ExpressProviderWithdrawLifecycleHint`
+
+Transaction-scoped bridge for provider events that are emitted before the core request entity exists. The id combines core, user, request id, and transaction hash. It carries provider acceptance metadata, acceleration, debt, and provider-processing values until `WithdrawInitiated` creates the `WithdrawRequest`; consumption validates every identity component, applies the values once, and removes the hint. Provider processing remains metadata only—the core request stays active until a core terminal event.
+
+## `WithdrawCoreLifecycleHint`
+
+Transaction-scoped bridge for core `WithdrawAccepted`, `WithdrawRejected`, and `WithdrawAdvanced` events emitted by a synchronous provider callback before the outer `WithdrawInitiated` event. It preserves the latest core status and cumulative advanced amount, then `WithdrawInitiated` consumes it after creating the request and pending aggregates. A hinted rejection immediately removes that request from pending accounting and active lookups.
 
 ## `ExpressProviderSource`
 
@@ -237,15 +252,13 @@ Provider metadata used by the dynamic provider template and debt handlers.
 
 ## `ExpressProviderSourceByCore`
 
-Lookup row used to know that a core source has provider debt data available without scanning provider metadata rows.
+Core-scoped marker used to know that a source has provider debt data available without scanning provider metadata rows. Perps-core permits multiple registered providers per core, so this row deliberately contains no singular provider field. Every provider remains available as its own `ExpressProviderSource` row and can be queried by `source`.
 
-| Field            | Meaning                                  | How it is populated                                  |
-| ---------------- | ---------------------------------------- | ---------------------------------------------------- |
-| `id`             | Deterministic core lookup id.            | Built as `source.toHexString()`.                     |
-| `providerSource` | Link to the provider metadata row.       | Set to the corresponding `ExpressProviderSource.id`. |
-| `source`         | Symmio core address.                     | Copied from `ExpressProviderSource.source`.          |
-| `provider`       | Provider contract address.               | Copied from `ExpressProviderSource.provider`.        |
-| `collateral`     | Collateral token address.                | Copied from `ExpressProviderSource.collateral`.      |
-| `deploymentId`   | Human-readable deployment id when known. | Copied from `ExpressProviderSource.deploymentId`.    |
-| `timestamp`      | Last lookup write timestamp.             | Set when provider metadata is written.               |
-| `blockNumber`    | Last lookup write block.                 | Set when provider metadata is written.               |
+| Field          | Meaning                                  | How it is populated                               |
+| -------------- | ---------------------------------------- | ------------------------------------------------- |
+| `id`           | Deterministic core lookup id.            | Built as `source.toHexString()`.                  |
+| `source`       | Symmio core address.                     | Copied from `ExpressProviderSource.source`.       |
+| `collateral`   | Collateral token address.                | Copied from `ExpressProviderSource.collateral`.   |
+| `deploymentId` | Human-readable deployment id when known. | Copied from `ExpressProviderSource.deploymentId`. |
+| `timestamp`    | Last lookup write timestamp.             | Set when provider metadata is written.            |
+| `blockNumber`  | Last lookup write block.                 | Set when provider metadata is written.            |

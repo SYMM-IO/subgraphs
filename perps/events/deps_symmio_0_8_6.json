@@ -1,0 +1,135 @@
+{
+	"__extends": "deps_symmio_0_8_5.json",
+	"Deposit": [
+		"Deposit(address,address,uint256,bool)"
+	],
+	"SendQuote": [
+		"SendQuote(address,uint256,address[],address,bytes,bytes)"
+	],
+	"OpenPosition": [
+		"OpenPosition(uint256,address,address,uint256,uint256,(uint256,uint256,uint256,uint256))"
+	],
+	"FillCloseRequest": [
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256,(uint256,uint256,uint256,uint256))"
+	],
+	"LiquidatePositionsPartyA": [
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],uint256[],bytes)"
+	],
+	"LiquidatePositionsPartyB": [
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[],uint256[])"
+	],
+	"SettlePartyBUpnlForLiquidation": [
+		"SettlePartyBUpnlForLiquidation"
+	],
+	"AccumulatedFundingStateUpdated": [
+		"AccumulatedFundingStateUpdated"
+	],
+	"CancelAffiliateShutdown": [
+		"CancelAffiliateShutdown"
+	],
+	"CloseAffiliatePositions": [
+		"CloseAffiliatePositions"
+	],
+	"CloseSolverFeeCharged": [
+		"CloseSolverFeeCharged(uint256,address,address,address,uint256,uint256)"
+	],
+	"DistributeFromLiquidationEscrow": [
+		"DistributeFromLiquidationEscrow"
+	],
+	"LiquidationEscrowCreated": [
+		"LiquidationEscrowCreated"
+	],
+	"OpenSolverFeeCharged": [
+		"OpenSolverFeeCharged(uint256,address,address,address,uint256,uint256)"
+	],
+	"OperationalFeeAllowanceReductionRequested": [
+		"OperationalFeeAllowanceReductionRequested"
+	],
+	"OperationalFeeAllowanceSet": [
+		"OperationalFeeAllowanceSet"
+	],
+	"OperationalFeeCharged": [
+		"OperationalFeeCharged"
+	],
+	"OperationalFeeChargerRegistered": [
+		"OperationalFeeChargerRegistered"
+	],
+	"OperationalFeeChargerUnregistered": [
+		"OperationalFeeChargerUnregistered"
+	],
+	"OperationalFeeMultiplierSet": [
+		"OperationalFeeMultiplierSet"
+	],
+	"OperationalFeeReductionDelaySet": [
+		"OperationalFeeReductionDelaySet"
+	],
+	"PauseWithdrawAdvance": [
+		"PauseWithdrawAdvance"
+	],
+	"ScheduleAffiliateShutdown": [
+		"ScheduleAffiliateShutdown"
+	],
+	"SendQuoteSolverFeeCaps": [
+		"SendQuoteSolverFeeCaps"
+	],
+	"SetDeactiveInstantActionModeCooldown": [
+		"SetDeactiveInstantActionModeCooldown"
+	],
+	"SetLegacyPartyALiquidationDeprecated": [
+		"SetLegacyPartyALiquidationDeprecated"
+	],
+	"SetMuonFunctionUpnlValidTime": [
+		"SetMuonFunctionUpnlValidTime"
+	],
+	"SetOperationalFeeReceiver": [
+		"SetOperationalFeeReceiver"
+	],
+	"SetPartyALiquidationSnapshot": [
+		"SetPartyALiquidationSnapshot"
+	],
+	"SetPartyBOpenPositionsPausedForPartyB": [
+		"SetPartyBOpenPositionsPausedForPartyB"
+	],
+	"UnpauseWithdrawAdvance": [
+		"UnpauseWithdrawAdvance"
+	],
+	"WithdrawAdvanced": [
+		"WithdrawAdvanced"
+	],
+	"AdjustmentScheduled": [
+		"AdjustmentScheduled"
+	],
+	"AdjustmentCancelled": [
+		"AdjustmentCancelled"
+	],
+	"PriceAdjustmentConfirmed": [
+		"PriceAdjustmentConfirmed"
+	],
+	"RestatementStarted": [
+		"RestatementStarted"
+	],
+	"RestatementAborted": [
+		"RestatementAborted"
+	],
+	"QuoteAdjusted": [
+		"QuoteAdjusted"
+	],
+	"PendingQuoteCancelledByAdjustment": [
+		"PendingQuoteCancelledByAdjustment"
+	],
+	"RestatementFinalized": [
+		"RestatementFinalized"
+	],
+	"PartyAReimbursementChange": [
+		"PartyAReimbursementChange"
+	],
+	"SetPartyBStrictDeallocation": [
+		"SetPartyBStrictDeallocation"
+	],
+	"SetSolverFeeReceiver": [
+		"SetSolverFeeReceiver"
+	],
+	"SettlePartyALiquidation": [
+		"SettlePartyALiquidation(address,address[],address[],int256[],uint256[],bytes)"
+	]
+}

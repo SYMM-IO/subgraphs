@@ -231,6 +231,14 @@ type Quote @entity(immutable: false) {
 	Last funding payment timestamp from quote storage.
 	"""
 	lastFundingPaymentTimestamp: BigInt
+	"""
+	Latest symbol-adjustment restatement epoch applied to this quote.
+	"""
+	lastAdjustmentEpoch: BigInt
+	"""
+	Latest 1e18-scaled symbol-adjustment factor applied to this quote.
+	"""
+	lastAdjustmentFactor: BigInt
 
 	"""
 	Block timestamp of the last event that updated this quote.

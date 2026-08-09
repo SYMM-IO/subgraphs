@@ -1,9 +1,6 @@
 import { BaseHandler, Version } from "../../BaseHandler"
-import { Bytes, ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { LiquidationDetail } from "../../../../generated/schema"
-import { FullyLiquidatedPartyA as FullyLiquidatedPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { FullyLiquidatedPartyA as FullyLiquidatedPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { FullyLiquidatedPartyA as FullyLiquidatedPartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 import { getLiquidationStateData } from "../../VersionedQuoteLoader"
 
 export class FullyLiquidatedPartyAHandler<T> extends BaseHandler {
@@ -15,20 +12,10 @@ export class FullyLiquidatedPartyAHandler<T> extends BaseHandler {
 
 		let liquidationId: Bytes
 
-		if (version >= Version.v_0_8_3) {
-			if (version == Version.v_0_8_5) {
-				// @ts-ignore
-				const e = changetype<FullyLiquidatedPartyA_0_8_5>(_event)
-				liquidationId = e.params.liquidationId
-			} else if (version == Version.v_0_8_4) {
-				// @ts-ignore
-				const e = changetype<FullyLiquidatedPartyA_0_8_4>(_event)
-				liquidationId = e.params.liquidationId
-			} else {
-				// @ts-ignore
-				const e = changetype<FullyLiquidatedPartyA_0_8_3>(_event)
-				liquidationId = e.params.liquidationId
-			}
+		if (_event.parameters.length >= 2) {
+			// v0.8.3+ appends liquidationId. Positional access keeps this
+			// handler compatible with the older generated event shape.
+			liquidationId = _event.parameters[1].value.toBytes()
 		} else {
 			// v0.8.1-v0.8.2: get from struct
 			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)
@@ -40,7 +27,9 @@ export class FullyLiquidatedPartyAHandler<T> extends BaseHandler {
 		let entity = LiquidationDetail.load(entityId)
 		if (!entity) return
 
+		entity.settled = true
 		entity.fullyLiquidated = true
+		entity.involvedPartyBCounts = BigInt.zero()
 		entity.fullyLiquidatedTimestamp = _event.block.timestamp
 		entity.save()
 	}

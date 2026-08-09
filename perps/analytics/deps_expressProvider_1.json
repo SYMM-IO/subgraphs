@@ -8,12 +8,32 @@
 		"DebtSettled",
 		"RequestDebtCleared"
 	],
+	"ExpressProviderWithdrawLifecycleHint": [
+		"DebtActivated",
+		"DebtReserved",
+		"WithdrawAccepted",
+		"WithdrawAccelerated",
+		"WithdrawCancelled",
+		"WithdrawFinalized",
+		"WithdrawLocked",
+		"WithdrawProcessed",
+		"WithdrawSuspended",
+		"WithdrawUnlockedAndProcessed"
+	],
 	"WithdrawRequest": [
 		"BadDebtAccrued",
 		"DebtActivated",
 		"DebtCancelled",
 		"DebtReserved",
 		"DebtSettled",
-		"RequestDebtCleared"
+		"RequestDebtCleared",
+		"WithdrawAccepted",
+		"WithdrawAccelerated",
+		"WithdrawCancelled",
+		"WithdrawFinalized",
+		"WithdrawLocked",
+		"WithdrawProcessed",
+		"WithdrawSuspended",
+		"WithdrawUnlockedAndProcessed"
 	]
 }

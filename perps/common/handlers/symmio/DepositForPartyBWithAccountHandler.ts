@@ -12,8 +12,7 @@ export class DepositForPartyBWithAccountHandler<T> extends DepositForPartyBHandl
 		const event = changetype<T>(_event)
 		const globalCounter = super.handleGlobalCounter()
 
-		createNewAccountIfNotExists(event.params.partyB, event.params.partyB, null, AccountType.SOLVER, event.block, event.transaction)
-		let account = Account.load(event.params.partyB.toHexString())!
+		let account = createNewAccountIfNotExists(event.params.partyB, event.params.partyB, null, AccountType.SOLVER, event.block, event.transaction)
 		account.source = event.address
 		account.deposit = account.deposit.plus(event.params.amount)
 		account.globalCounter = globalCounter

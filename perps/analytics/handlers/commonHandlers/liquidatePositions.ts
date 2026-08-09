@@ -1,12 +1,12 @@
 import { ethereum } from "@graphprotocol/graph-ts/chain/ethereum"
 import { Version } from "../../../common/BaseHandler"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { Account, Quote } from "../../../../generated/schema"
+import { Account, DebugEntity, Quote } from "../../../../generated/schema"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
-import { onPositionClose } from "../../utils/aggregatedPosition"
+import { onFundingSettlementAndPositionClose } from "../../utils/aggregatedPosition"
 import { syncFundingFeeState } from "../../utils/fundingFeeState"
 import { FundingSettlementContext, getQuoteFundingSignedAmount, recordQuoteFundingSettlement } from "../../utils/fundingHistory"
 
@@ -16,6 +16,7 @@ export function handleLiquidatePosition<T>(
 	qId: BigInt,
 	closeType: string,
 	fundingContext: FundingSettlementContext | null,
+	fundingSignedAmountOverride: BigInt | null,
 ): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
@@ -24,24 +25,49 @@ export function handleLiquidatePosition<T>(
 
 	// Use pre-computed values from the common handler (which already updated closedAmount = quantity)
 	if (!quote.liquidateAmount || !quote.liquidatePrice) return
+	if (quote.partyB === null || quote.symbolId === null || quote.openedPrice === null || quote.initialOpenedPrice === null) {
+		let db = new DebugEntity("handleLiquidatePosition-nullFields-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
+		db.message =
+			`quoteId ${qId.toString()} has null fields — partyB=` +
+			(quote.partyB === null ? "null" : "set") +
+			", symbolId=" +
+			(quote.symbolId === null ? "null" : "set") +
+			", openedPrice=" +
+			(quote.openedPrice === null ? "null" : "set") +
+			", initialOpenedPrice=" +
+			(quote.initialOpenedPrice === null ? "null" : "set")
+		db.save()
+		return
+	}
 	let liquidAmount = quote.liquidateAmount!
 	let liquidPrice = quote.liquidatePrice!
 	const additionalVolume = liquidAmount.times(liquidPrice).div(BigInt.fromString("10").pow(18))
 
-	onPositionClose(
+	let newFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
+	let previousFunding = newFunding
+	let preCloseOpenAmount = liquidAmount
+	if (fundingContext !== null && fundingContext.found) {
+		previousFunding = fundingContext.previousAccumulatedPaidFunding
+		preCloseOpenAmount = fundingContext.openAmount
+	}
+	onFundingSettlementAndPositionClose(
 		_event,
 		version,
 		changetype<Address>(quote.partyA),
 		changetype<Address>(quote.partyB!),
 		quote.symbolId!,
 		quote.positionType,
+		preCloseOpenAmount,
 		liquidAmount,
 		quote.openedPrice!,
-		quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
+		previousFunding,
+		newFunding,
 		true,
 	)
-	if (fundingContext !== null) recordQuoteFundingSettlement(_event, version, qId, closeType, fundingContext, true)
-	if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
+	if (fundingContext !== null && fundingSignedAmountOverride === null) {
+		recordQuoteFundingSettlement(_event, version, qId, closeType, fundingContext, true)
+	}
+	if (version >= Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 	createQuoteEvent(
 		_event,
@@ -71,7 +97,7 @@ export function handleLiquidatePosition<T>(
 
 	let fundingPaid = BigInt.zero()
 	let fundingReceived = BigInt.zero()
-	let fundingSignedAmount = getQuoteFundingSignedAmount(quote, fundingContext)
+	let fundingSignedAmount = fundingSignedAmountOverride === null ? getQuoteFundingSignedAmount(quote, fundingContext) : fundingSignedAmountOverride
 	if (fundingSignedAmount.gt(BigInt.zero())) fundingPaid = fundingSignedAmount
 	else if (fundingSignedAmount.lt(BigInt.zero())) fundingReceived = fundingSignedAmount.abs()
 

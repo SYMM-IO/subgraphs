@@ -69,7 +69,8 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 		sub.legacyImported = true
 		sub.legacyImportedTimestamp = event.block.timestamp
 
-		if (version == AccountLayerVersion.v_1) {
+		// v2-v3 preserve the v1 getter selector and tuple layout.
+		if (version == AccountLayerVersion.v_1 || version == AccountLayerVersion.v_2 || version == AccountLayerVersion.v_3) {
 			let contract = accountLayer_1.bind(_event.address)
 			let subAccountData = contract.try_getSubAccount(event.params.account)
 			if (!subAccountData.reverted) {

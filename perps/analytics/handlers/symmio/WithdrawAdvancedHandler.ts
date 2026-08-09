@@ -12,6 +12,7 @@ export class WithdrawAdvancedHandler<T> extends BaseHandler {
 			event.params.user,
 			event.params.requestId,
 			event.params.amount,
+			_event.transaction.hash,
 			_event.block.timestamp,
 			_event.block.number,
 		)

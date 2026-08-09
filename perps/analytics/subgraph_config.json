@@ -11,6 +11,7 @@
 		"SubAccount",
 		"VirtualAccount",
 		"MarginTransfer",
-		"FeeClaim"
+		"FeeClaim",
+		"ClearingHouseLiquidationContext"
 	]
 }

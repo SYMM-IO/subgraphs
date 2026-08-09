@@ -6,7 +6,7 @@ import { createPartyALiquidationEvent, createPartyALiquidationEventFromState } f
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
-import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_6 } from "../../../../generated/symmio_0_8_6/symmio_0_8_6"
+import { SettlePartyALiquidation1 as SettlePartyALiquidation_0_8_6 } from "../../../../generated/symmio_0_8_6/symmio_0_8_6"
 
 export class SettlePartyALiquidationHandler<T> extends CommonSettlePartyALiquidationHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {

@@ -9,10 +9,17 @@ test("actual close quote events include openedPrice in metadata", () => {
 	const liquidationHandler = read("perps/analytics/handlers/commonHandlers/liquidatePositions.ts");
 	const adlCloseHandler = read("perps/analytics/handlers/symmio/ADLCloseHandler.ts");
 
+	// openedPrice is snapshotted null-safely: force-unwrapping a null openedPrice aborts the
+	// whole mapping in graph-ts, so metadata either uses addNullable or sits behind a null guard.
 	assert.match(
 		closeHandler,
-		/\.add\("openedPrice", quote\.openedPrice!\.toString\(\)\)/,
-		"fill/force/emergency close metadata must snapshot openedPrice",
+		/\.addNullable\("openedPrice", quote\.openedPrice === null \? null : quote\.openedPrice!\.toString\(\)\)/,
+		"fill/force/emergency close metadata must snapshot openedPrice null-safely",
+	);
+	assert.match(
+		liquidationHandler,
+		/quote\.openedPrice === null/,
+		"liquidation close must guard null openedPrice before snapshotting",
 	);
 	assert.match(
 		liquidationHandler,
@@ -21,7 +28,7 @@ test("actual close quote events include openedPrice in metadata", () => {
 	);
 	assert.match(
 		adlCloseHandler,
-		/\.add\("openedPrice", quote\.openedPrice!\.toString\(\)\)/,
-		"ADL close metadata must snapshot openedPrice",
+		/\.addNullable\("openedPrice", quote\.openedPrice === null \? null : quote\.openedPrice!\.toString\(\)\)/,
+		"ADL close metadata must snapshot openedPrice null-safely",
 	);
 });

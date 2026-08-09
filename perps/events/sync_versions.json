@@ -2,6 +2,10 @@
   "global": "2026-04-30-001",
   "entities": {
     "allocate_party_a": "v1",
+    "buyback": "v1",
+    "buyback_day": "v1",
+    "buyback_deposit": "v1",
+    "buyback_gateway_stats": "v1",
     "deallocate_party_a": "v1",
     "deposit": "v1",
     "force_close_position": "v1",

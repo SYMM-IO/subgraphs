@@ -3,7 +3,7 @@ import { BaseHandler, Version } from "../../../common/BaseHandler"
 import { Account } from "../../../../generated/schema"
 import { BalanceChangePartyB } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { getConfiguration } from "../../utils/builders"
-import { balanceChangeTypes } from "../../utils/constants"
+import { balanceChangeTypeName } from "../../utils/constants"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 import { newBalanceChange, setBalanceChangeContext } from "../../utils/balanceChange"
 
@@ -16,7 +16,7 @@ export class BalanceChangePartyBHandler<T> extends BaseHandler {
 		bc.amount = event.params.amount
 		bc.account = event.params.partyB
 		bc.sideAccount = event.params.partyA
-		bc.type = balanceChangeTypes.get(event.params._type)
+		bc.type = balanceChangeTypeName(event.params._type)
 		bc.collateral = getConfiguration(event).collateral
 		setBalanceChangeContext(bc, Account.load(event.params.partyB.toHexString()), event.address, _event.transaction.input)
 		bc.timestamp = event.block.timestamp

@@ -1,0 +1,28 @@
+{
+	"__extends": "deps_accountLayer_1.json",
+	"Account": [
+		"SubAccountCreated",
+		"VirtualAccountCreated",
+		"VirtualAccountDeleted",
+		"VirtualAccountReused",
+		"EditAccountName",
+		"LegacyAccountImported",
+		"SingleVAModeChanged",
+		"SubAccountDeleted",
+		"SubAccountOwnershipTransferred"
+	],
+	"SubAccount": [
+		"SubAccountCreated",
+		"SubAccountDeleted",
+		"LegacyAccountImported",
+		"EditAccountName",
+		"SingleVAModeChanged",
+		"SubAccountOwnershipTransferred"
+	],
+	"VirtualAccount": [
+		"VirtualAccountCreated",
+		"VirtualAccountDeleted",
+		"VirtualAccountReused",
+		"SubAccountOwnershipTransferred"
+	]
+}

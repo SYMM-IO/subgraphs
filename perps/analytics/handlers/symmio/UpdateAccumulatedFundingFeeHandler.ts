@@ -31,7 +31,7 @@ export class UpdateAccumulatedFundingFeeHandler<T> extends BaseHandler {
 			let state = getOrCreateFundingFeeState(_event, version, symbolId, partyB)
 			applyUpdateAccumulatedFundingFeeToFundingFeeState(state, longRate, shortRate, marketPrice, event.block.timestamp)
 			state.updateTimestamp = event.block.timestamp
-			enrichFundingFeeState(state, event.address)
+			enrichFundingFeeState(state, event.address, version)
 			state.save()
 			createFundingIndexCheckpoint(_event, symbolId, partyB, "UPDATE", longRate, shortRate, marketPrice, state, i)
 		}

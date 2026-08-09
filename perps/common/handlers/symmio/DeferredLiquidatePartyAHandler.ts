@@ -3,7 +3,12 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Account, LiquidationDetail } from "../../../../generated/schema"
 import { getGlobalCounterAndInc } from "../../utils"
 import { getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
-import { calculateDeferredBalanceAtStart, calculateFreeMarginAtStart, calculateLossRestsAt } from "../../utils/liquidationDetail"
+import {
+	calculateFreeMarginAtStart,
+	calculateLossRestsAt,
+	classifyPartyALiquidationAtStart,
+	PARTY_A_LIQUIDATION_TYPE_OVERDUE,
+} from "../../utils/liquidationDetail"
 import { setLiquidationDetailProfileRefs } from "../../utils/profile"
 
 export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
@@ -30,6 +35,8 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.liquidationTimestamp = event.params.liquidationTimestamp
 		entity.liquidator = event.params.liquidator
 		entity.allocatedBalance = event.params.allocatedBalance
+		entity.liquidationAllocatedBalance = event.params.liquidationAllocatedBalance
+		entity.liquidationStartTransaction = event.transaction.hash
 		let balanceInfo = getPartyABalanceInfoData(version, event.address, event.params.partyA)
 		if (balanceInfo) {
 			let allocatedBalanceAtStart = event.params.liquidationAllocatedBalance
@@ -43,8 +50,18 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		}
 		if (version >= Version.v_0_8_5) entity.reimbursement = BigInt.zero()
 		if (version >= Version.v_0_8_6) {
-			entity.deferredBalance = calculateDeferredBalanceAtStart(event.params.allocatedBalance, event.params.liquidationAllocatedBalance)
+			// The exact value is supplied by the preceding
+			// DEFERRED_BALANCE_OUT event when one was emitted.
+			entity.deferredBalance = BigInt.zero()
 			entity.liquidationEscrow = BigInt.zero()
+		}
+		// OVERDUE is provable from the signed allocation and uPNL alone. This
+		// preserves the correct type even when a v0.8.6 single-step liquidation
+		// has no open positions and end-of-transaction contract reads are cleared.
+		let classification = classifyPartyALiquidationAtStart(event.params.liquidationAllocatedBalance, event.params.upnl, BigInt.zero())
+		if (classification.liquidationType == PARTY_A_LIQUIDATION_TYPE_OVERDUE) {
+			entity.liquidationType = classification.liquidationType
+			entity.deficit = classification.deficit
 		}
 		entity.settled = false
 		entity.fullyLiquidated = false

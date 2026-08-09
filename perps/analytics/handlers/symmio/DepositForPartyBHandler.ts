@@ -7,6 +7,8 @@ import { getConfiguration } from "../../utils/builders"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
 import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { newBalanceChange, setBalanceChangeContext } from "../../utils/balanceChange"
+import { updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
+import { Address } from "@graphprotocol/graph-ts"
 
 export class DepositForPartyBHandler<T> extends CommonDepositForPartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -32,5 +34,6 @@ export class DepositForPartyBHandler<T> extends CommonDepositForPartyBHandler<T>
 		setBalanceChangeContext(deposit, account, event.address, _event.transaction.input)
 		deposit.save()
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).deposit(event.params.amount))
+		updatePartyBLatestBalance(_event, version, event.params.partyB, Address.zero())
 	}
 }

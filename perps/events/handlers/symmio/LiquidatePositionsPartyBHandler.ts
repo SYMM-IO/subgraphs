@@ -2,9 +2,6 @@ import { LiquidatePositionsPartyB as LiquidatePositionsPartyBEntity } from "../.
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { LiquidatePositionsPartyB as LiquidatePositionsPartyB_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { LiquidatePositionsPartyB as LiquidatePositionsPartyB_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { LiquidatePositionsPartyB as LiquidatePositionsPartyB_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class LiquidatePositionsPartyBHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -22,32 +19,17 @@ export class LiquidatePositionsPartyBHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<LiquidatePositionsPartyB_8_5>(_event)
-				entity.liquidatedAmounts = e.params.liquidatedAmounts
-				// New variant has averageClosedPrices
-				if (_event.parameters.length >= 7) {
-					entity.averageClosedPrices = _event.parameters[6].value.toBigIntArray()
-				}
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<LiquidatePositionsPartyB_8_4>(_event)
-				entity.liquidatedAmounts = e.params.liquidatedAmounts
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<LiquidatePositionsPartyB_8_3>(_event)
-				entity.liquidatedAmounts = e.params.liquidatedAmounts
-				break
-			}
-			default: {
-				entity.liquidatedAmounts = []
-				break
+		entity.liquidatedAmounts = []
+		entity.closeIds = []
+		entity.averageClosedPrices = []
+
+		// v0.8.3+ emit amounts and close ids; the canonical overload appends
+		// averageClosedPrices.
+		if (_event.parameters.length >= 6) {
+			entity.liquidatedAmounts = _event.parameters[4].value.toBigIntArray()
+			entity.closeIds = _event.parameters[5].value.toBigIntArray()
+			if (_event.parameters.length >= 7) {
+				entity.averageClosedPrices = _event.parameters[6].value.toBigIntArray()
 			}
 		}
 

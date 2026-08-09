@@ -16,7 +16,7 @@
 			"abi": "symmio",
 			"version": "0_8_3",
 			"startBlock": "41900351",
-			"endBlock": "44807119",
+			"endBlock": "44807118",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
@@ -27,7 +27,7 @@
 			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "34693893",
-			"endBlock": "41900351",
+			"endBlock": "41900350",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
@@ -38,7 +38,7 @@
 			"abi": "symmio",
 			"version": "0_8_1",
 			"startBlock": "34345963",
-			"endBlock": "34693893",
+			"endBlock": "34693892",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"

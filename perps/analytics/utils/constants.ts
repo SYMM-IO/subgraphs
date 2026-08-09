@@ -43,8 +43,8 @@ export enum QuoteStatus {
 	LIQUIDATED_PENDING,
 }
 
-// Mirrors SharedEvents.BalanceChangeType in perps-core v0.8.5.
-// v0.8.0-v0.8.3 only emit values 0-9 (LF_OUT); v0.8.4 adds 10-11; v0.8.5 adds 12-13.
+// Mirrors SharedEvents.BalanceChangeType in perps-core v0.8.6.
+// v0.8.0-v0.8.2 emit no BalanceChange events; v0.8.3 emits 0-9 (LF_OUT); v0.8.4 adds 10-11; v0.8.5 adds 12-13; v0.8.6 adds 14-19.
 export enum BalanceChangeType {
 	ALLOCATE,
 	DEALLOCATE,
@@ -60,6 +60,12 @@ export enum BalanceChangeType {
 	FUNDING_FEE_OUT,
 	DEFERRED_BALANCE_IN,
 	DEFERRED_BALANCE_OUT,
+	REIMBURSEMENT_IN,
+	OPERATIONAL_FEE_OUT,
+	OPEN_SOLVER_FEE_OUT,
+	CLOSE_SOLVER_FEE_OUT,
+	SETTLEMENT_PNL_IN,
+	SETTLEMENT_PNL_OUT,
 }
 
 // @ts-ignore
@@ -78,6 +84,18 @@ balanceChangeTypes.set(BalanceChangeType.FUNDING_FEE_IN, "FUNDING_FEE_IN")
 balanceChangeTypes.set(BalanceChangeType.FUNDING_FEE_OUT, "FUNDING_FEE_OUT")
 balanceChangeTypes.set(BalanceChangeType.DEFERRED_BALANCE_IN, "DEFERRED_BALANCE_IN")
 balanceChangeTypes.set(BalanceChangeType.DEFERRED_BALANCE_OUT, "DEFERRED_BALANCE_OUT")
+balanceChangeTypes.set(BalanceChangeType.REIMBURSEMENT_IN, "REIMBURSEMENT_IN")
+balanceChangeTypes.set(BalanceChangeType.OPERATIONAL_FEE_OUT, "OPERATIONAL_FEE_OUT")
+balanceChangeTypes.set(BalanceChangeType.OPEN_SOLVER_FEE_OUT, "OPEN_SOLVER_FEE_OUT")
+balanceChangeTypes.set(BalanceChangeType.CLOSE_SOLVER_FEE_OUT, "CLOSE_SOLVER_FEE_OUT")
+balanceChangeTypes.set(BalanceChangeType.SETTLEMENT_PNL_IN, "SETTLEMENT_PNL_IN")
+balanceChangeTypes.set(BalanceChangeType.SETTLEMENT_PNL_OUT, "SETTLEMENT_PNL_OUT")
+
+// Contracts newer than the mapped enum may emit types we don't know yet; never let Map.get trap the handler.
+export function balanceChangeTypeName(_type: i32): string {
+	if (balanceChangeTypes.has(_type)) return balanceChangeTypes.get(_type)
+	return "UNKNOWN_" + _type.toString()
+}
 
 export const SOLVERS = new Map<string, string>()
 // arbitrum

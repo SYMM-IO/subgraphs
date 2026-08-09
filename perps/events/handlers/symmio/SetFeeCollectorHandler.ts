@@ -2,9 +2,6 @@ import { SetFeeCollector as SetFeeCollectorEntity } from "../../../../generated/
 import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { SetFeeCollector as SetFeeCollector_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { SetFeeCollector as SetFeeCollector_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { SetFeeCollector as SetFeeCollector_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class SetFeeCollectorHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,30 +17,8 @@ export class SetFeeCollectorHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<SetFeeCollector_8_5>(_event)
-				entity.affiliate = e.params.affiliate
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<SetFeeCollector_8_4>(_event)
-				entity.affiliate = e.params.affiliate
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<SetFeeCollector_8_3>(_event)
-				entity.affiliate = e.params.affiliate
-				break
-			}
-			default: {
-				entity.affiliate = Bytes.empty()
-				break
-			}
-		}
+		entity.affiliate = Bytes.empty()
+		if (_event.parameters.length >= 3) entity.affiliate = _event.parameters[0].value.toAddress()
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

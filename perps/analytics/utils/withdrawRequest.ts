@@ -1,5 +1,11 @@
 import { Address, BigInt, Bytes, store } from "@graphprotocol/graph-ts"
-import { WithdrawFinalizationHint, WithdrawRequest, WithdrawRequestAccountLookup, WithdrawRequestLookup } from "../../../generated/schema"
+import {
+	WithdrawCoreLifecycleHint,
+	WithdrawFinalizationHint,
+	WithdrawRequest,
+	WithdrawRequestAccountLookup,
+	WithdrawRequestLookup,
+} from "../../../generated/schema"
 
 const FINALIZE_WITHDRAW_REQUEST_SELECTOR = "0x1531b3c8"
 
@@ -23,6 +29,10 @@ function withdrawFinalizationHintId(source: Address, transaction: Bytes, sender:
 	return source.toHexString() + "-" + transaction.toHexString() + "-" + sender.toHexString()
 }
 
+function withdrawCoreLifecycleHintId(source: Address, user: Address, requestId: BigInt, transaction: Bytes): string {
+	return source.toHexString() + "-" + user.toHexString() + "-" + requestId.toString() + "-" + transaction.toHexString()
+}
+
 function addString(ids: Array<string>, id: string): Array<string> {
 	let next = ids.slice(0)
 	for (let i = 0; i < next.length; i++) {
@@ -41,6 +51,13 @@ function removeString(ids: Array<string>, id: string): Array<string> {
 }
 
 function isCompletableWithdrawRequest(wr: WithdrawRequest): boolean {
+	return isActiveWithdrawRequest(wr)
+}
+
+// Requests still counted in pending amounts/active counts. Terminal handlers must only
+// decrement when transitioning out of one of these states, or a duplicated terminal
+// event would double-decrement the aggregates.
+export function isActiveWithdrawRequest(wr: WithdrawRequest): boolean {
 	return wr.status == "PENDING" || wr.status == "PROVIDER_ACCEPTED" || wr.status == "CANCEL_REQUESTED"
 }
 
@@ -52,6 +69,80 @@ export function loadWithdrawRequest(user: Address, requestId: BigInt, source: Ad
 	let wr = WithdrawRequest.load(withdrawRequestId(user, requestId, source))
 	if (wr) return wr
 	return WithdrawRequest.load(legacyWithdrawRequestId(requestId, source))
+}
+
+function loadOrCreateWithdrawCoreLifecycleHint(
+	source: Address,
+	user: Address,
+	requestId: BigInt,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): WithdrawCoreLifecycleHint {
+	let id = withdrawCoreLifecycleHintId(source, user, requestId, transaction)
+	let hint = WithdrawCoreLifecycleHint.load(id)
+	if (!hint) {
+		hint = new WithdrawCoreLifecycleHint(id)
+		hint.source = source
+		hint.user = user
+		hint.requestId = requestId
+		hint.transaction = transaction
+		hint.advancedAmount = BigInt.zero()
+	}
+	hint.updateTimestamp = timestamp
+	hint.blockNumber = blockNumber
+	return hint
+}
+
+export function recordWithdrawCoreStatusHint(
+	source: Address,
+	user: Address,
+	requestId: BigInt,
+	status: string,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	let hint = loadOrCreateWithdrawCoreLifecycleHint(source, user, requestId, transaction, timestamp, blockNumber)
+	hint.status = status
+	hint.save()
+}
+
+export function recordWithdrawCoreAdvanceHint(
+	source: Address,
+	user: Address,
+	requestId: BigInt,
+	amount: BigInt,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	let hint = loadOrCreateWithdrawCoreLifecycleHint(source, user, requestId, transaction, timestamp, blockNumber)
+	hint.advancedAmount = hint.advancedAmount.plus(amount)
+	hint.save()
+}
+
+export function consumeWithdrawCoreLifecycleHint(request: WithdrawRequest, transaction: Bytes): BigInt {
+	let source = changetype<Address>(request.source)
+	let user = changetype<Address>(request.user)
+	let id = withdrawCoreLifecycleHintId(source, user, request.requestId, transaction)
+	let hint = WithdrawCoreLifecycleHint.load(id)
+	if (!hint) return BigInt.zero()
+	if (
+		hint.source.toHexString() != request.source.toHexString() ||
+		hint.user.toHexString() != request.user.toHexString() ||
+		!hint.requestId.equals(request.requestId) ||
+		hint.transaction.toHexString() != transaction.toHexString()
+	) {
+		return BigInt.zero()
+	}
+	if (hint.status !== null) request.status = hint.status!
+	request.advancedAmount = request.advancedAmount.plus(hint.advancedAmount)
+	request.updateTimestamp = hint.updateTimestamp
+	request.blockNumber = hint.blockNumber
+	request.save()
+	store.remove("WithdrawCoreLifecycleHint", id)
+	return hint.advancedAmount
 }
 
 export function addWithdrawRequestToLookup(wr: WithdrawRequest): void {

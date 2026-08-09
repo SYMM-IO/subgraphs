@@ -5,6 +5,7 @@ import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_2 } from "../../
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { SettlePartyALiquidation as SettlePartyALiquidation_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
+import { SettlePartyALiquidation1 as SettlePartyALiquidation_0_8_6 } from "../../../../generated/symmio_0_8_6/symmio_0_8_6"
 import { getLiquidationStateData, getPartyASettlementBalanceData, getPartyBSettlementMode } from "../../VersionedQuoteLoader"
 import { applyPartyASettlementBalanceData, upsertSettlementSnapshot } from "../../utils/liquidationDetail"
 
@@ -17,9 +18,20 @@ export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 
 		let liquidationId: Bytes
 		let partyBs: Bytes[] = []
+		let allocationKeys: Bytes[] = []
+		let cvaAmounts: BigInt[] = []
 
 		if (version >= Version.v_0_8_3) {
-			if (version == Version.v_0_8_5) {
+			if (version == Version.v_0_8_6) {
+				// @ts-ignore
+				const e = changetype<SettlePartyALiquidation_0_8_6>(_event)
+				liquidationId = e.params.liquidationId
+				for (let i = 0; i < e.params.partyBs.length; i++) {
+					partyBs.push(e.params.partyBs[i])
+					allocationKeys.push(e.params.allocationKeys[i])
+					cvaAmounts.push(e.params.cvaAmounts[i])
+				}
+			} else if (version == Version.v_0_8_5) {
 				// @ts-ignore
 				const e = changetype<SettlePartyALiquidation_0_8_5>(_event)
 				liquidationId = e.params.liquidationId
@@ -60,7 +72,11 @@ export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 		if (!entity) return
 
 		let amounts: BigInt[] = []
-		if (version == Version.v_0_8_5) {
+		if (version == Version.v_0_8_6) {
+			// @ts-ignore
+			let a = changetype<SettlePartyALiquidation_0_8_6>(_event).params.amounts
+			for (let i = 0; i < a.length; i++) amounts.push(a[i])
+		} else if (version == Version.v_0_8_5) {
 			// @ts-ignore
 			let a = changetype<SettlePartyALiquidation_0_8_5>(_event).params.amounts
 			for (let i = 0; i < a.length; i++) amounts.push(a[i])
@@ -96,16 +112,31 @@ export class SettlePartyALiquidationHandler<T> extends BaseHandler {
 
 		for (let i = 0; i < partyBs.length; i++) {
 			let amount = i < amounts.length ? amounts[i] : BigInt.zero()
-			let mode = getPartyBSettlementMode(version, event.address, changetype<Address>(partyBs[i]))
-			upsertSettlementSnapshot(entity, partyBs[i], mode, BigInt.zero(), amount, BigInt.zero(), "settled", true)
+			let mode =
+				version == Version.v_0_8_6 && i < allocationKeys.length
+					? changetype<Address>(allocationKeys[i]).equals(Address.zero())
+						? "cross"
+						: "isolated"
+					: getPartyBSettlementMode(version, event.address, changetype<Address>(partyBs[i]))
+			let cvaReturned = i < cvaAmounts.length ? cvaAmounts[i] : BigInt.zero()
+			upsertSettlementSnapshot(version, entity, partyBs[i], mode, BigInt.zero(), amount, cvaReturned, "settled", true)
 		}
 
-		let settlementBalances = getPartyASettlementBalanceData(version, event.address, event.params.partyA)
-		if (settlementBalances) applyPartyASettlementBalanceData(entity, settlementBalances, true)
-
-		// Only mark fully settled when the on-chain involvedPartyBCounts hits 0.
 		let liqState = getLiquidationStateData(version, event.address, event.params.partyA)
-		if (liqState && liqState.involvedPartyBCounts.equals(BigInt.zero())) {
+		let stateMatchesEvent = liqState !== null && liqState.liquidationId.toHexString() == liquidationId.toHexString()
+
+		// v0.8.5 has no ID-scoped event for the transient reimbursement
+		// bucket. Read it only while the end-of-block state still belongs to
+		// this liquidation. v0.8.6 is fully event-sourced because its escrow
+		// getter is cumulative across liquidations.
+		if (version == Version.v_0_8_5 && stateMatchesEvent) {
+			let settlementBalances = getPartyASettlementBalanceData(version, event.address, event.params.partyA)
+			if (settlementBalances) applyPartyASettlementBalanceData(entity, settlementBalances, true)
+		}
+
+		// FullyLiquidatedPartyA is authoritative for v0.8.3+. This matching
+		// read remains useful for old versions whose final event has no keys.
+		if (stateMatchesEvent && liqState!.involvedPartyBCounts.equals(BigInt.zero())) {
 			entity.settled = true
 		}
 		entity.save()

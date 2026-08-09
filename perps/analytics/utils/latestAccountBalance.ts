@@ -2,9 +2,9 @@ import { Address, BigInt, ethereum, log, store } from "@graphprotocol/graph-ts"
 import { Version } from "../../common/BaseHandler"
 import {
 	LatestAccountBalance,
-	LatestAccountBalanceBlockRefresh,
-	LatestAccountBalanceBlockRefreshQueue,
+	LatestAccountBalanceRegistryNode,
 	LatestAccountBalanceRemovalGuard,
+	LatestAccountBalanceSweepMeta,
 } from "../../../generated/schema"
 import {
 	getBalanceInfoOfPartyA as getBalanceInfoOfPartyA_0_8_0,
@@ -95,16 +95,6 @@ function finalizeBalanceAtBlock(entity: LatestAccountBalance, block: ethereum.Bl
 	return true
 }
 
-function versionToInt(version: Version): i32 {
-	if (version == Version.v_0_8_6) return 6
-	if (version == Version.v_0_8_5) return 5
-	if (version == Version.v_0_8_4) return 4
-	if (version == Version.v_0_8_3) return 3
-	if (version == Version.v_0_8_2) return 2
-	if (version == Version.v_0_8_1) return 1
-	return 0
-}
-
 function isPartyALatestBalanceEmpty(entity: LatestAccountBalance): boolean {
 	return (
 		entity.freeBalance.isZero() &&
@@ -147,6 +137,102 @@ function resolvePartyBBalanceKey(event: ethereum.Event, version: Version, partyB
 	return partyA
 }
 
+// Sweep pacing: walk the registry at most every SWEEP_PERIOD_SECONDS, re-verify rows whose
+// last chain-state write or verification is older than VERIFY_MIN_AGE_SECONDS, and cap the
+// eth_call work per pass so a single block handler invocation stays bounded.
+const SWEEP_PERIOD_SECONDS: i32 = 1200
+const VERIFY_MIN_AGE_SECONDS: i32 = 86400
+const MAX_VERIFICATIONS_PER_SWEEP: i32 = 100
+
+function sweepMetaId(source: Address): string {
+	return source.toHexString()
+}
+
+function loadOrCreateSweepMeta(source: Address): LatestAccountBalanceSweepMeta {
+	let meta = LatestAccountBalanceSweepMeta.load(sweepMetaId(source))
+	if (meta == null) {
+		meta = new LatestAccountBalanceSweepMeta(sweepMetaId(source))
+		meta.head = null
+		meta.tail = null
+		meta.lastSweepTimestamp = BigInt.zero()
+	}
+	return meta
+}
+
+function unlinkLatestBalanceRegistryNode(node: LatestAccountBalanceRegistryNode, source: Address): void {
+	let prev = node.prev
+	let next = node.next
+	let meta = loadOrCreateSweepMeta(source)
+	if (prev != null) {
+		let prevNode = LatestAccountBalanceRegistryNode.load(prev!)
+		if (prevNode != null) {
+			prevNode.next = next
+			prevNode.save()
+		}
+	}
+	if (next != null) {
+		let nextNode = LatestAccountBalanceRegistryNode.load(next!)
+		if (nextNode != null) {
+			nextNode.prev = prev
+			nextNode.save()
+		}
+	}
+	if (meta.head == node.id) meta.head = next
+	if (meta.tail == node.id) meta.tail = prev
+	meta.save()
+	node.prev = null
+	node.next = null
+}
+
+// The registry list is kept in most-recently-verified-first order, so the sweep can start at
+// the tail and stop at the first fresh node instead of walking every live row.
+function touchLatestBalanceRegistryNode(id: string, source: Address, timestamp: BigInt): void {
+	let node = LatestAccountBalanceRegistryNode.load(id)
+	if (node == null) {
+		node = new LatestAccountBalanceRegistryNode(id)
+		node.source = source
+		node.prev = null
+		node.next = null
+	} else {
+		if (node.prev == null) {
+			let metaCheck = loadOrCreateSweepMeta(source)
+			if (metaCheck.head == id) {
+				// Already at the head; just refresh the stamp without relinking.
+				if (node.lastVerifiedTimestamp.lt(timestamp)) {
+					node.lastVerifiedTimestamp = timestamp
+					node.save()
+				}
+				return
+			}
+		}
+		unlinkLatestBalanceRegistryNode(node, source)
+	}
+	node.lastVerifiedTimestamp = timestamp
+	let meta = loadOrCreateSweepMeta(source)
+	let head = meta.head
+	node.next = head
+	if (head != null) {
+		let headNode = LatestAccountBalanceRegistryNode.load(head!)
+		if (headNode != null) {
+			headNode.prev = id
+			headNode.save()
+		}
+	}
+	meta.head = id
+	if (meta.tail == null) meta.tail = id
+	meta.save()
+	node.save()
+}
+
+function removeLatestAccountBalanceRow(id: string, source: Address): void {
+	let node = LatestAccountBalanceRegistryNode.load(id)
+	if (node != null) {
+		unlinkLatestBalanceRegistryNode(node, source)
+		store.remove("LatestAccountBalanceRegistryNode", id)
+	}
+	store.remove("LatestAccountBalance", id)
+}
+
 function markLatestBalanceRemoval(id: string, event: ethereum.Event): void {
 	let guard = LatestAccountBalanceRemovalGuard.load(id)
 	if (guard == null) guard = new LatestAccountBalanceRemovalGuard(id)
@@ -162,43 +248,6 @@ function shouldSkipStaleLatestBalanceWrite(id: string, event: ethereum.Event): b
 	if (!guard.blockNumber.equals(event.block.number)) return false
 	if (!guard.transaction.equals(event.transaction.hash)) return false
 	return guard.logIndex.gt(event.logIndex) || guard.logIndex.equals(event.logIndex)
-}
-
-function blockRefreshQueueId(blockNumber: BigInt, source: Address): string {
-	return blockNumber.toString() + "-" + source.toHexString()
-}
-
-function enqueueLatestBalanceBlockRefresh(
-	event: ethereum.Event,
-	version: Version,
-	source: Address,
-	id: string,
-	account: Address,
-	counterParty: Address,
-	accountType: string,
-): void {
-	let refresh = LatestAccountBalanceBlockRefresh.load(id)
-	if (refresh == null) refresh = new LatestAccountBalanceBlockRefresh(id)
-	refresh.source = source
-	refresh.account = account
-	refresh.counterParty = counterParty
-	refresh.accountType = accountType
-	refresh.version = versionToInt(version)
-	refresh.transaction = event.transaction.hash
-	refresh.save()
-
-	let queueId = blockRefreshQueueId(event.block.number, source)
-	let queue = LatestAccountBalanceBlockRefreshQueue.load(queueId)
-	if (queue == null) {
-		queue = new LatestAccountBalanceBlockRefreshQueue(queueId)
-		queue.source = source
-		queue.blockNumber = event.block.number
-		queue.ids = []
-	}
-	let ids = queue.ids
-	ids.push(id)
-	queue.ids = ids
-	queue.save()
 }
 
 function applyPartyABalanceInfo(entity: LatestAccountBalance, version: Version, source: Address, partyA: Address): boolean {
@@ -286,17 +335,20 @@ function applyPartyABalanceInfo(entity: LatestAccountBalance, version: Version, 
 		entity.pendingLockedPartyBmm = info.value8
 		return true
 	}
+	// v0.8.0 predates the mm -> partyAmm/partyBmm split; the 9 values are
+	// (allocated, cva, mm, lf, total, pendingCva, pendingMm, pendingLf, pendingTotal).
+	// Map mm to partyAmm, zero partyBmm, and skip the totals so sums don't double count.
 	let info = getBalanceInfoOfPartyA_0_8_0(source, partyA)
 	if (!info) return false
 	entity.allocatedBalance = info.value0
 	entity.lockedCva = info.value1
-	entity.lockedLf = info.value2
-	entity.lockedPartyAmm = info.value3
-	entity.lockedPartyBmm = info.value4
+	entity.lockedPartyAmm = info.value2
+	entity.lockedLf = info.value3
+	entity.lockedPartyBmm = BigInt.zero()
 	entity.pendingLockedCva = info.value5
-	entity.pendingLockedLf = info.value6
-	entity.pendingLockedPartyAmm = info.value7
-	entity.pendingLockedPartyBmm = info.value8
+	entity.pendingLockedPartyAmm = info.value6
+	entity.pendingLockedLf = info.value7
+	entity.pendingLockedPartyBmm = BigInt.zero()
 	return true
 }
 
@@ -385,87 +437,122 @@ function applyPartyBBalanceInfo(entity: LatestAccountBalance, version: Version, 
 		entity.pendingLockedPartyBmm = info.value8
 		return true
 	}
+	// v0.8.0 pre-split layout: (allocated, cva, mm, lf, total, pendingCva, pendingMm, pendingLf, pendingTotal).
 	let info = getBalanceInfoOfPartyB_0_8_0(source, balanceKey, partyB)
 	if (!info) return false
 	entity.allocatedBalance = info.value0
 	entity.lockedCva = info.value1
-	entity.lockedLf = info.value2
-	entity.lockedPartyAmm = info.value3
-	entity.lockedPartyBmm = info.value4
+	entity.lockedPartyBmm = info.value2
+	entity.lockedLf = info.value3
+	entity.lockedPartyAmm = BigInt.zero()
 	entity.pendingLockedCva = info.value5
-	entity.pendingLockedLf = info.value6
-	entity.pendingLockedPartyAmm = info.value7
-	entity.pendingLockedPartyBmm = info.value8
+	entity.pendingLockedPartyBmm = info.value6
+	entity.pendingLockedLf = info.value7
+	entity.pendingLockedPartyAmm = BigInt.zero()
 	return true
 }
 
-export function flushLatestAccountBalanceBlockRefreshes(block: ethereum.Block, source: Address, sourceVersion: Version): void {
-	let queueId = blockRefreshQueueId(block.number, source)
-	let queue = LatestAccountBalanceBlockRefreshQueue.load(queueId)
-	if (queue == null) return
+// Periodic reconciliation pass. Event-driven updates go stale permanently when the indexer's
+// trigger stream drops a block range (observed on HyperEVM: the deallocate that emptied a
+// bucket was never delivered, leaving its LatestAccountBalance row frozen). The sweep walks
+// the registry from the least-recently-verified tail, re-reads aged rows from chain state,
+// removes buckets that emptied unseen, and refreshes values that drifted.
+export function sweepLatestAccountBalances(block: ethereum.Block, source: Address, sourceVersion: Version): void {
+	let meta = LatestAccountBalanceSweepMeta.load(sweepMetaId(source))
+	if (meta == null) return
+	if (block.timestamp.minus(meta.lastSweepTimestamp).lt(BigInt.fromI32(SWEEP_PERIOD_SECONDS))) return
+	meta.lastSweepTimestamp = block.timestamp
+	meta.save()
 
-	let ids = queue.ids
-	for (let i = 0; i < ids.length; i++) {
-		let refresh = LatestAccountBalanceBlockRefresh.load(ids[i])
-		if (refresh == null) continue
-		if (!changetype<Address>(refresh.source).equals(source)) continue
+	let verifications: i32 = 0
+	let cursor = meta.tail
+	while (cursor != null && verifications < MAX_VERIFICATIONS_PER_SWEEP) {
+		let id = cursor!
+		let node = LatestAccountBalanceRegistryNode.load(id)
+		if (node == null) break
+		// Tail-first order means the first fresh node ends the eligible segment.
+		if (block.timestamp.minus(node.lastVerifiedTimestamp).lt(BigInt.fromI32(VERIFY_MIN_AGE_SECONDS))) break
+		cursor = node.prev
 
-		let account = changetype<Address>(refresh.account)
+		let entity = LatestAccountBalance.load(id)
+		if (entity == null) {
+			unlinkLatestBalanceRegistryNode(node, source)
+			store.remove("LatestAccountBalanceRegistryNode", id)
+			continue
+		}
 
-		if (refresh.accountType == "PARTY_A") {
-			let entity = LatestAccountBalance.load(refresh.id)
-			if (entity == null) {
-				entity = new LatestAccountBalance(refresh.id)
-				entity.source = source
-				entity.account = account
-				entity.accountRef = account.toHexString()
-				entity.counterParty = null
-				entity.counterPartyRef = null
-				entity.accountType = "PARTY_A"
-			}
-			if (!applyPartyABalanceInfo(entity, sourceVersion, source, account)) continue
-			if (!finalizeBalanceAtBlock(entity, block, sourceVersion, source, account)) continue
-			if (isPartyALatestBalanceEmpty(entity)) {
-				clearAffiliateExpressWithdrawBalanceSnapshot(account, source, block.timestamp, block.number)
-				store.remove("LatestAccountBalance", refresh.id)
-				store.remove("LatestAccountBalanceBlockRefresh", refresh.id)
+		let account = changetype<Address>(entity.account)
+		let prevAllocated = entity.allocatedBalance
+		let prevCva = entity.lockedCva
+		let prevLf = entity.lockedLf
+		let prevAmm = entity.lockedPartyAmm
+		let prevBmm = entity.lockedPartyBmm
+		let prevPendingCva = entity.pendingLockedCva
+		let prevPendingLf = entity.pendingLockedLf
+		let prevPendingAmm = entity.pendingLockedPartyAmm
+		let prevPendingBmm = entity.pendingLockedPartyBmm
+		let prevFree = entity.freeBalance
+		let prevTotal = entity.totalBalance
+
+		let applied = false
+		if (entity.accountType == "PARTY_A") {
+			verifications++
+			applied = applyPartyABalanceInfo(entity, sourceVersion, source, account)
+		} else {
+			let counterParty = entity.counterParty
+			if (counterParty === null) {
+				// A PARTY_B row without a balance key cannot be re-verified; re-stamp it so it
+				// stops occupying the stale end of the registry.
+				touchLatestBalanceRegistryNode(id, source, block.timestamp)
 				continue
 			}
+			verifications++
+			applied = applyPartyBBalanceInfo(entity, sourceVersion, source, account, changetype<Address>(counterParty))
+		}
+		// Back off a failed row by moving it to the fresh end of the registry. Leaving
+		// permanent failures at the tail lets the same MAX_VERIFICATIONS_PER_SWEEP rows
+		// consume every pass and starves all healthy rows behind them.
+		if (!applied) {
+			touchLatestBalanceRegistryNode(id, source, block.timestamp)
+			continue
+		}
+		if (!finalizeBalanceAtBlock(entity, block, sourceVersion, source, account)) {
+			touchLatestBalanceRegistryNode(id, source, block.timestamp)
+			continue
+		}
+
+		if (entity.accountType == "PARTY_A" ? isPartyALatestBalanceEmpty(entity) : isPartyBLatestBalanceBucketEmpty(entity)) {
+			if (entity.accountType == "PARTY_A") {
+				clearAffiliateExpressWithdrawBalanceSnapshot(account, source, block.timestamp, block.number)
+			}
+			removeLatestAccountBalanceRow(id, source)
+			continue
+		}
+
+		let changed =
+			!entity.allocatedBalance.equals(prevAllocated) ||
+			!entity.lockedCva.equals(prevCva) ||
+			!entity.lockedLf.equals(prevLf) ||
+			!entity.lockedPartyAmm.equals(prevAmm) ||
+			!entity.lockedPartyBmm.equals(prevBmm) ||
+			!entity.pendingLockedCva.equals(prevPendingCva) ||
+			!entity.pendingLockedLf.equals(prevPendingLf) ||
+			!entity.pendingLockedPartyAmm.equals(prevPendingAmm) ||
+			!entity.pendingLockedPartyBmm.equals(prevPendingBmm) ||
+			!entity.freeBalance.equals(prevFree) ||
+			!entity.totalBalance.equals(prevTotal)
+		if (changed) {
+			// The transaction hash is left as the last event-derived value: the write that
+			// actually changed this balance was never delivered to the subgraph.
 			entity.timestamp = block.timestamp
 			entity.blockNumber = block.number
-			entity.transaction = refresh.transaction
 			entity.save()
-			syncAffiliateExpressWithdrawBalanceSnapshot(entity, block.timestamp, block.number)
-			store.remove("LatestAccountBalanceBlockRefresh", refresh.id)
-			continue
+			if (entity.accountType == "PARTY_A") {
+				syncAffiliateExpressWithdrawBalanceSnapshot(entity, block.timestamp, block.number)
+			}
 		}
-
-		let balanceKey = changetype<Address>(refresh.counterParty)
-		let entity = LatestAccountBalance.load(refresh.id)
-		if (entity == null) {
-			entity = new LatestAccountBalance(refresh.id)
-			entity.source = source
-			entity.account = account
-			entity.accountRef = account.toHexString()
-			entity.counterParty = balanceKey
-			entity.counterPartyRef = balanceKey.toHexString()
-			entity.accountType = "PARTY_B"
-		}
-		if (!applyPartyBBalanceInfo(entity, sourceVersion, source, account, balanceKey)) continue
-		if (!finalizeBalanceAtBlock(entity, block, sourceVersion, source, account)) continue
-		if (isPartyBLatestBalanceBucketEmpty(entity)) {
-			store.remove("LatestAccountBalance", refresh.id)
-			store.remove("LatestAccountBalanceBlockRefresh", refresh.id)
-			continue
-		}
-		entity.timestamp = block.timestamp
-		entity.blockNumber = block.number
-		entity.transaction = refresh.transaction
-		entity.save()
-		store.remove("LatestAccountBalanceBlockRefresh", refresh.id)
+		touchLatestBalanceRegistryNode(id, source, block.timestamp)
 	}
-
-	store.remove("LatestAccountBalanceBlockRefreshQueue", queueId)
 }
 
 export function updatePartyALatestBalance(event: ethereum.Event, version: Version, partyA: Address): void {
@@ -474,7 +561,6 @@ export function updatePartyALatestBalance(event: ethereum.Event, version: Versio
 
 export function updatePartyALatestBalanceForSource(event: ethereum.Event, version: Version, source: Address, partyA: Address): void {
 	let id = partyA.toHexString() + "-" + source.toHexString()
-	enqueueLatestBalanceBlockRefresh(event, version, source, id, partyA, Address.zero(), "PARTY_A")
 	let isNew = false
 	let entity = LatestAccountBalance.load(id)
 	if (!entity) {
@@ -488,130 +574,17 @@ export function updatePartyALatestBalanceForSource(event: ethereum.Event, versio
 		entity.accountType = "PARTY_A"
 	}
 
-	if (version == Version.v_0_8_6) {
-		let info = getBalanceInfoOfPartyA_0_8_6(source, partyA)
-		if (!info) {
-			log.warning("Failed to get balance info of partyA {} for version 0.8.6", [partyA.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_5) {
-		let info = getBalanceInfoOfPartyA_0_8_5(source, partyA)
-		if (!info) {
-			log.warning("Failed to get balance info of partyA {} for version 0.8.5", [partyA.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_4) {
-		let info = getBalanceInfoOfPartyA_0_8_4(source, partyA)
-		if (!info) {
-			log.warning("Failed to get balance info of partyA {} for version 0.8.4", [partyA.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_3) {
-		let info = getBalanceInfoOfPartyA_0_8_3(source, partyA)
-		if (!info) {
-			log.warning("Failed to get balance info of partyA {} for version 0.8.3", [partyA.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_2) {
-		let info = getBalanceInfoOfPartyA_0_8_2(source, partyA)
-		if (!info) {
-			log.warning("Failed to get balance info of partyA {} for version 0.8.2", [partyA.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_1) {
-		let info = getBalanceInfoOfPartyA_0_8_1(source, partyA)
-		if (!info) {
-			log.warning("Failed to get balance info of partyA {} for version 0.8.1", [partyA.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_0) {
-		let info = getBalanceInfoOfPartyA_0_8_0(source, partyA)
-		if (!info) {
-			log.warning("Failed to get balance info of partyA {} for version 0.8.0", [partyA.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
+	if (!applyPartyABalanceInfo(entity, version, source, partyA)) {
+		log.warning("Failed to get balance info of partyA {}", [partyA.toHexString()])
+		return
 	}
 
 	if (!finalizeBalance(entity, event, version, source, partyA)) return
 
-	if (
-		entity.freeBalance.isZero() &&
-		entity.allocatedBalance.isZero() &&
-		entity.lockedCva.isZero() &&
-		entity.lockedLf.isZero() &&
-		entity.lockedPartyAmm.isZero() &&
-		entity.lockedPartyBmm.isZero() &&
-		entity.pendingLockedCva.isZero() &&
-		entity.pendingLockedLf.isZero() &&
-		entity.pendingLockedPartyAmm.isZero() &&
-		entity.pendingLockedPartyBmm.isZero()
-	) {
+	if (isPartyALatestBalanceEmpty(entity)) {
 		clearAffiliateExpressWithdrawBalanceSnapshot(partyA, source, event.block.timestamp, event.block.number)
 		markLatestBalanceRemoval(id, event)
-		if (!isNew) store.remove("LatestAccountBalance", id)
+		if (!isNew) removeLatestAccountBalanceRow(id, source)
 		return
 	}
 
@@ -620,6 +593,7 @@ export function updatePartyALatestBalanceForSource(event: ethereum.Event, versio
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash
 	entity.save()
+	touchLatestBalanceRegistryNode(id, source, event.block.timestamp)
 	syncAffiliateExpressWithdrawBalanceSnapshot(entity, event.block.timestamp, event.block.number)
 }
 
@@ -628,11 +602,10 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 	if (!balanceKey.equals(partyA)) {
 		let staleId = partyB.toHexString() + "-" + partyA.toHexString() + "-" + event.address.toHexString()
 		markLatestBalanceRemoval(staleId, event)
-		store.remove("LatestAccountBalance", staleId)
+		removeLatestAccountBalanceRow(staleId, event.address)
 	}
 
 	let id = partyB.toHexString() + "-" + balanceKey.toHexString() + "-" + event.address.toHexString()
-	enqueueLatestBalanceBlockRefresh(event, version, event.address, id, partyB, balanceKey, "PARTY_B")
 	let isNew = false
 	let entity = LatestAccountBalance.load(id)
 	if (!entity) {
@@ -646,128 +619,16 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 		entity.accountType = "PARTY_B"
 	}
 
-	if (version == Version.v_0_8_6) {
-		let info = getBalanceInfoOfPartyB_0_8_6(event.address, balanceKey, partyB)
-		if (!info) {
-			log.warning("Failed to get balance info of partyB {} for version 0.8.6", [partyB.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_5) {
-		let info = getBalanceInfoOfPartyB_0_8_5(event.address, balanceKey, partyB)
-		if (!info) {
-			log.warning("Failed to get balance info of partyB {} for version 0.8.5", [partyB.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_4) {
-		let info = getBalanceInfoOfPartyB_0_8_4(event.address, balanceKey, partyB)
-		if (!info) {
-			log.warning("Failed to get balance info of partyB {} for version 0.8.4", [partyB.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_3) {
-		let info = getBalanceInfoOfPartyB_0_8_3(event.address, balanceKey, partyB)
-		if (!info) {
-			log.warning("Failed to get balance info of partyB {} for version 0.8.3", [partyB.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_2) {
-		let info = getBalanceInfoOfPartyB_0_8_2(event.address, balanceKey, partyB)
-		if (!info) {
-			log.warning("Failed to get balance info of partyB {} for version 0.8.2", [partyB.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_1) {
-		let info = getBalanceInfoOfPartyB_0_8_1(event.address, balanceKey, partyB)
-		if (!info) {
-			log.warning("Failed to get balance info of partyB {} for version 0.8.1", [partyB.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
-	} else if (version == Version.v_0_8_0) {
-		let info = getBalanceInfoOfPartyB_0_8_0(event.address, balanceKey, partyB)
-		if (!info) {
-			log.warning("Failed to get balance info of partyB {} for version 0.8.0", [partyB.toHexString()])
-			return
-		}
-		entity.allocatedBalance = info.value0
-		entity.lockedCva = info.value1
-		entity.lockedLf = info.value2
-		entity.lockedPartyAmm = info.value3
-		entity.lockedPartyBmm = info.value4
-		entity.pendingLockedCva = info.value5
-		entity.pendingLockedLf = info.value6
-		entity.pendingLockedPartyAmm = info.value7
-		entity.pendingLockedPartyBmm = info.value8
+	if (!applyPartyBBalanceInfo(entity, version, event.address, partyB, balanceKey)) {
+		log.warning("Failed to get balance info of partyB {}", [partyB.toHexString()])
+		return
 	}
 
 	if (!finalizeBalance(entity, event, version, event.address, partyB)) return
 
-	if (
-		entity.allocatedBalance.isZero() &&
-		entity.lockedCva.isZero() &&
-		entity.lockedLf.isZero() &&
-		entity.lockedPartyAmm.isZero() &&
-		entity.lockedPartyBmm.isZero() &&
-		entity.pendingLockedCva.isZero() &&
-		entity.pendingLockedLf.isZero() &&
-		entity.pendingLockedPartyAmm.isZero() &&
-		entity.pendingLockedPartyBmm.isZero()
-	) {
+	if (isPartyBLatestBalanceBucketEmpty(entity)) {
 		markLatestBalanceRemoval(id, event)
-		if (!isNew) store.remove("LatestAccountBalance", id)
+		if (!isNew) removeLatestAccountBalanceRow(id, event.address)
 		return
 	}
 
@@ -776,4 +637,5 @@ export function updatePartyBLatestBalance(event: ethereum.Event, version: Versio
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash
 	entity.save()
+	touchLatestBalanceRegistryNode(id, event.address, event.block.timestamp)
 }

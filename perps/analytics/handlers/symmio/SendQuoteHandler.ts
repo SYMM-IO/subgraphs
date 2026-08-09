@@ -33,7 +33,7 @@ export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 		if (quote.quantity) builder.add("quantity", quote.quantity!.toString())
 		if (quote.requestedOpenPrice) builder.add("requestedOpenPrice", quote.requestedOpenPrice!.toString())
 		builder.add("positionType", quote.positionType.toString())
-		builder.addNullable("orderType", quote.orderTypeOpen ? quote.orderTypeOpen!.toString() : null)
+		builder.addNullable("orderType", quote.orderTypeOpen ? quote.orderTypeOpen.toString() : null)
 		builder.addNullable("cva", quote.cva ? quote.cva!.toString() : null)
 		builder.addNullable("lf", quote.lf ? quote.lf!.toString() : null)
 		builder.addNullable("partyAmm", quote.partyAmm ? quote.partyAmm!.toString() : null)

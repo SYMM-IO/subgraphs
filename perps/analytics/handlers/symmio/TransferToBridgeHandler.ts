@@ -4,6 +4,7 @@ import { Account } from "../../../../generated/schema"
 import { TransferToBridge } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { getConfiguration } from "../../utils/builders"
 import { newBalanceChange, setBalanceChangeContext } from "../../utils/balanceChange"
+import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 
 export class TransferToBridgeHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,5 +21,6 @@ export class TransferToBridgeHandler<T> extends BaseHandler {
 		bridge.blockNumber = event.block.number
 		bridge.transaction = event.transaction.hash
 		bridge.save()
+		updatePartyALatestBalance(_event, version, event.params.user)
 	}
 }

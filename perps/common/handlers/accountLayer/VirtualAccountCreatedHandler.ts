@@ -54,7 +54,8 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		va.reuseCount = BigInt.zero()
 		initializeVirtualAccountCounters(va)
 
-		if (version == AccountLayerVersion.v_1) {
+		// v2-v3 preserve the v1 getter selector and tuple layout.
+		if (version == AccountLayerVersion.v_1 || version == AccountLayerVersion.v_2 || version == AccountLayerVersion.v_3) {
 			let contract = accountLayer_1.bind(_event.address)
 			let virtualAccountData = contract.try_getVirtualAccount(event.params.account)
 			if (!virtualAccountData.reverted) {

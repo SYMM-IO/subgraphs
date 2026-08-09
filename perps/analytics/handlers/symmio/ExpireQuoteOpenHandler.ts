@@ -4,6 +4,7 @@ import { Version } from "../../../common/BaseHandler"
 import { Quote } from "../../../../generated/schema"
 import { createQuoteEvent } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
+import { markSymbolRestatementMutation } from "../../utils/symbolAdjustment"
 
 export class ExpireQuoteOpenHandler<T> extends CommonExpireQuoteOpenHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -15,6 +16,7 @@ export class ExpireQuoteOpenHandler<T> extends CommonExpireQuoteOpenHandler<T> {
 		super.handleAccount(_event, version)
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return
+		if (quote.symbolId !== null) markSymbolRestatementMutation(_event, quote.symbolId!)
 		createQuoteEvent(_event, event.params.quoteId, "EXPIRE_QUOTE_OPEN", null)
 		updatePartyALatestBalance(_event, version, changetype<Address>(quote.partyA))
 	}

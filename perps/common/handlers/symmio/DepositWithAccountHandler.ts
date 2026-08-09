@@ -14,15 +14,23 @@ export class DepositWithAccountHandler<T> extends DepositHandler<T> {
 		const globalCounter = super.handleGlobalCounter()
 
 		let accountSource = resolveAccountSourceFromAccountLayer(event.address, event.params.user)
-		let account = createNewAccountIfNotExists(event.params.user, event.params.user, accountSource, AccountType.UNKNOWN, event.block, event.transaction)
+		let account = createNewAccountIfNotExists(
+			event.params.user,
+			event.params.user,
+			accountSource,
+			AccountType.UNKNOWN,
+			event.block,
+			event.transaction,
+		)
 		account.source = event.address
-		// v0.8.5 adds an `isVirtual` flag on Deposit. Skip virtual deposits (virtualDepositFor) —
+		// v0.8.5+ adds an `isVirtual` flag on Deposit. Skip virtual deposits (virtualDepositFor) —
 		// no external tokens enter, the Deposit event is reused purely for bookkeeping.
 		// `depositFor` keeps isVirtual=false and IS a real external deposit.
 		// `internalTransferToBalance` also emits Deposit with isVirtual=false; that path can't be
 		// distinguished from the event alone and remains an over-count limitation.
 		// Older versions (v0.8.0-v0.8.4) have no isVirtual field — all such emissions are external.
-		if (version == Version.v_0_8_5) {
+		// v0.8.6 sources wire the 4-param overload, which shares the 0_8_5 layout, so the cast holds.
+		if (version >= Version.v_0_8_5) {
 			// @ts-ignore
 			let e = changetype<Deposit_0_8_5>(_event)
 			if (e.params.isVirtual) {

@@ -1,0 +1,9 @@
+{
+	"__extends": "deps_accountLayer_1.json",
+	"SubAccountOwnershipTransferred": [
+		"SubAccountOwnershipTransferred"
+	],
+	"SymmioCoreAddedToAffiliate": [
+		"SymmioCoreAddedToAffiliate"
+	]
+}

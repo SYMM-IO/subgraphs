@@ -28,6 +28,7 @@ import {
 } from "../../../generated/schema"
 import { getDayNumber, startOfDay, startOfMonth, startOfWeek } from "./time"
 import { Version } from "../../common/BaseHandler"
+import { getCollateral as getCollateral_0_8_6 } from "../../common/contract_utils_0_8_6"
 import { getCollateral as getCollateral_0_8_5 } from "../../common/contract_utils_0_8_5"
 import { getCollateral as getCollateral_0_8_4 } from "../../common/contract_utils_0_8_4"
 import { getCollateral as getCollateral_0_8_3 } from "../../common/contract_utils_0_8_3"
@@ -759,10 +760,14 @@ export function getConfiguration(event: ethereum.Event): Configuration {
 }
 
 export function getAlreadyCreatedConfiguration(event: ethereum.Event, version: Version): Configuration {
-	let conf = Configuration.load("0")!
+	let conf = getConfiguration(event)
 	if (conf.collateral == event.address) {
 		let collateral: Bytes | null = null
 		switch (version) {
+			case Version.v_0_8_6: {
+				collateral = getCollateral_0_8_6(event.address)
+				break
+			}
 			case Version.v_0_8_5: {
 				collateral = getCollateral_0_8_5(event.address)
 				break

@@ -76,7 +76,49 @@ export function onPositionOpen(
 	entity.save()
 }
 
-// Called when a position is partially or fully closed / liquidated
+// Applies the core's funding-index update and partial/full close as one transition.
+// Keeping both contribution changes together prevents fully closed buckets from
+// retaining a funding residue while preserving Solidity's per-operation rounding.
+export function onFundingSettlementAndPositionClose(
+	event: ethereum.Event,
+	version: Version,
+	partyA: Address,
+	partyB: Address,
+	symbolId: BigInt,
+	positionType: i32,
+	preCloseOpenAmount: BigInt,
+	closedAmount: BigInt,
+	openedPrice: BigInt,
+	previousFunding: BigInt,
+	newFunding: BigInt,
+	isFullyClose: boolean,
+): void {
+	let entity = getOrCreate(event, version, partyA, partyB, symbolId, positionType)
+	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) return
+	entity.aggregatedAmount = entity.aggregatedAmount.minus(closedAmount)
+	entity.aggregatedNotional = entity.aggregatedNotional.minus(closedAmount.times(openedPrice))
+	let previousContribution = preCloseOpenAmount.times(previousFunding).div(FACTOR)
+	let updatedContribution = preCloseOpenAmount.times(newFunding).div(FACTOR)
+	let closedContribution = closedAmount.times(newFunding).div(FACTOR)
+	// Match the core's two sequential operations exactly: first update funding for
+	// the whole pre-close amount, then subtract the closed amount at the new index.
+	// Collapsing these into one remaining-amount multiplication can drift by one
+	// wei because each Solidity division truncates independently.
+	entity.weightedPaidFunding = entity.weightedPaidFunding.minus(previousContribution).plus(updatedContribution).minus(closedContribution)
+	if (isFullyClose) entity.openPositionsCount -= 1
+	entity.timestamp = event.block.timestamp
+	entity.blockNumber = event.block.number
+	entity.transaction = event.transaction.hash
+	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) {
+		entity.isActive = false
+		entity.closedTimestamp = event.block.timestamp
+		entity.closedBlockNumber = event.block.number
+		entity.closedTransaction = event.transaction.hash
+	}
+	save(entity)
+}
+
+// Called when a close does not update the quote's accumulated funding index.
 export function onPositionClose(
 	event: ethereum.Event,
 	version: Version,
@@ -89,22 +131,20 @@ export function onPositionClose(
 	accumulatedPaidFunding: BigInt,
 	isFullyClose: boolean,
 ): void {
-	let entity = getOrCreate(event, version, partyA, partyB, symbolId, positionType)
-	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) return
-	entity.aggregatedAmount = entity.aggregatedAmount.minus(closedAmount)
-	entity.aggregatedNotional = entity.aggregatedNotional.minus(closedAmount.times(openedPrice))
-	entity.weightedPaidFunding = entity.weightedPaidFunding.minus(closedAmount.times(accumulatedPaidFunding).div(FACTOR))
-	if (isFullyClose) entity.openPositionsCount -= 1
-	entity.timestamp = event.block.timestamp
-	entity.blockNumber = event.block.number
-	entity.transaction = event.transaction.hash
-	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) {
-		entity.isActive = false
-		entity.closedTimestamp = event.block.timestamp
-		entity.closedBlockNumber = event.block.number
-		entity.closedTransaction = event.transaction.hash
-	}
-	save(entity)
+	onFundingSettlementAndPositionClose(
+		event,
+		version,
+		partyA,
+		partyB,
+		symbolId,
+		positionType,
+		closedAmount,
+		closedAmount,
+		openedPrice,
+		accumulatedPaidFunding,
+		accumulatedPaidFunding,
+		isFullyClose,
+	)
 }
 
 // Called when openedPrice changes (settlement, ChargeFundingRate)
@@ -125,6 +165,37 @@ export function onPriceUpdate(
 	// notional delta = openAmount * (newPrice - prevPrice)
 	let delta = openAmount.times(newPrice.minus(prevPrice))
 	entity.aggregatedNotional = entity.aggregatedNotional.plus(delta)
+	entity.timestamp = event.block.timestamp
+	entity.blockNumber = event.block.number
+	entity.transaction = event.transaction.hash
+	entity.save()
+}
+
+// Called when SymbolAdjustment rewrites a quote's physical amount/price basis.
+// The contract removes the old aggregate contribution and then adds the new one,
+// so mirror both amount and weighted-funding changes instead of treating this as
+// a price-only settlement.
+export function onQuoteAdjustment(
+	event: ethereum.Event,
+	version: Version,
+	partyA: Address,
+	partyB: Address,
+	symbolId: BigInt,
+	positionType: i32,
+	oldOpenAmount: BigInt,
+	newOpenAmount: BigInt,
+	oldOpenedPrice: BigInt,
+	newOpenedPrice: BigInt,
+	accumulatedPaidFunding: BigInt,
+): void {
+	let entity = getOrCreate(event, version, partyA, partyB, symbolId, positionType)
+	if (entity.aggregatedAmount.isZero() && entity.openPositionsCount == 0) return
+
+	entity.aggregatedAmount = entity.aggregatedAmount.minus(oldOpenAmount).plus(newOpenAmount)
+	entity.aggregatedNotional = entity.aggregatedNotional.minus(oldOpenAmount.times(oldOpenedPrice)).plus(newOpenAmount.times(newOpenedPrice))
+	let oldFundingContribution = oldOpenAmount.times(accumulatedPaidFunding).div(FACTOR)
+	let newFundingContribution = newOpenAmount.times(accumulatedPaidFunding).div(FACTOR)
+	entity.weightedPaidFunding = entity.weightedPaidFunding.minus(oldFundingContribution).plus(newFundingContribution)
 	entity.timestamp = event.block.timestamp
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash

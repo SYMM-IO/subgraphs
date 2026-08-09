@@ -93,315 +93,315 @@ import {ensureSyncMeta} from './src_sync_meta'
 
 
 export function handleAccountManagerDeployed(event: AccountManagerDeployed): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AccountManagerDeployedHandler<AccountManagerDeployed>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAccountManagerImplementationUpdated(event: AccountManagerImplementationUpdated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AccountManagerImplementationUpdatedHandler<AccountManagerImplementationUpdated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAddMargin(event: AddMargin): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AddMarginHandler<AddMargin>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAdminTransferCancelled(event: AdminTransferCancelled): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AdminTransferCancelledHandler<AdminTransferCancelled>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAdminTransferCompleted(event: AdminTransferCompleted): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AdminTransferCompletedHandler<AdminTransferCompleted>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAdminTransferProposed(event: AdminTransferProposed): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AdminTransferProposedHandler<AdminTransferProposed>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAffiliateApproved(event: AffiliateApproved): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AffiliateApprovedHandler<AffiliateApproved>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAffiliatePaused(event: AffiliatePaused): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AffiliatePausedHandler<AffiliatePaused>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAffiliateRegistered(event: AffiliateRegistered): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AffiliateRegisteredHandler<AffiliateRegistered>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAffiliateUnpaused(event: AffiliateUnpaused): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AffiliateUnpausedHandler<AffiliateUnpaused>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleAffiliateUpdated(event: AffiliateUpdated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new AffiliateUpdatedHandler<AffiliateUpdated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleCall(event: Call): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new CallHandler<Call>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleCallAllowedSelectorsSet(event: CallAllowedSelectorsSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new CallAllowedSelectorsSetHandler<CallAllowedSelectorsSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleEditAccountName(event: EditAccountName): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new EditAccountNameHandler<EditAccountName>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleEmergencyMarginRecovered(event: EmergencyMarginRecovered): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new EmergencyMarginRecoveredHandler<EmergencyMarginRecovered>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleExpressRateSet(event: ExpressRateSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new ExpressRateSetHandler<ExpressRateSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleFeeUpdateCancelled(event: FeeUpdateCancelled): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new FeeUpdateCancelledHandler<FeeUpdateCancelled>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleFeesClaimed(event: FeesClaimed): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new FeesClaimedHandler<FeesClaimed>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleFeesDistributed(event: FeesDistributed): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new FeesDistributedHandler<FeesDistributed>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleHookActionExecuted(event: HookActionExecuted): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new HookActionExecutedHandler<HookActionExecuted>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleHookAllowedSelectorsSet(event: HookAllowedSelectorsSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new HookAllowedSelectorsSetHandler<HookAllowedSelectorsSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleHookRemoved(event: HookRemoved): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new HookRemovedHandler<HookRemoved>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleHookSet(event: HookSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new HookSetHandler<HookSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleLegacyAccountImported(event: LegacyAccountImported): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new LegacyAccountImportedHandler<LegacyAccountImported>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleOperatorSet(event: OperatorSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new OperatorSetHandler<OperatorSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handlePaused(event: Paused): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new PausedHandler<Paused>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleRegistrationCancelled(event: RegistrationCancelled): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new RegistrationCancelledHandler<RegistrationCancelled>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleRegistrationRejected(event: RegistrationRejected): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new RegistrationRejectedHandler<RegistrationRejected>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleRemoveMargin(event: RemoveMargin): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new RemoveMarginHandler<RemoveMargin>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleRoleAdminSet(event: RoleAdminSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new RoleAdminSetHandler<RoleAdminSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleRoleGranted(event: RoleGranted): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new RoleGrantedHandler<RoleGranted>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleRoleRevoked(event: RoleRevoked): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new RoleRevokedHandler<RoleRevoked>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleSignerUpdated(event: SignerUpdated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new SignerUpdatedHandler<SignerUpdated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleSingleVAModeChanged(event: SingleVAModeChanged): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new SingleVAModeChangedHandler<SingleVAModeChanged>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleStakeholdersUpdateRequested(event: StakeholdersUpdateRequested): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new StakeholdersUpdateRequestedHandler<StakeholdersUpdateRequested>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleStakeholdersUpdated(event: StakeholdersUpdated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new StakeholdersUpdatedHandler<StakeholdersUpdated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleSubAccountCreated(event: SubAccountCreated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new SubAccountCreatedHandler<SubAccountCreated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleSubAccountDeleted(event: SubAccountDeleted): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new SubAccountDeletedHandler<SubAccountDeleted>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleSymmioFeeReceiverUpdated(event: SymmioFeeReceiverUpdated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new SymmioFeeReceiverUpdatedHandler<SymmioFeeReceiverUpdated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleUnpaused(event: Unpaused): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new UnpausedHandler<Unpaused>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleVirtualAccountCreated(event: VirtualAccountCreated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new VirtualAccountCreatedHandler<VirtualAccountCreated>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleVirtualAccountDeleted(event: VirtualAccountDeleted): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new VirtualAccountDeletedHandler<VirtualAccountDeleted>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleVirtualAccountReused(event: VirtualAccountReused): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new VirtualAccountReusedHandler<VirtualAccountReused>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleVirtualProviderSet(event: VirtualProviderSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new VirtualProviderSetHandler<VirtualProviderSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }
 
 
 export function handleWhitelistedSymmioCoreSet(event: WhitelistedSymmioCoreSet): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new WhitelistedSymmioCoreSetHandler<WhitelistedSymmioCoreSet>()
     handler.handle(event, AccountLayerVersion.v_1)
 }

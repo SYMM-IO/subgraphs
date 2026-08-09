@@ -1,16 +1,17 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { Account, DebugEntity, LiquidationDetail, Quote, SubAccount, VirtualAccount } from "../../../../generated/schema"
 import { getGlobalCounterAndInc } from "../../utils"
-import { BigInt, ethereum, log } from "@graphprotocol/graph-ts"
-import { getQuoteData, getLiquidationStateData, getPartyABalanceInfoData } from "../../VersionedQuoteLoader"
+import { BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts"
+import { getQuoteData, getLiquidationStateData } from "../../VersionedQuoteLoader"
 import { setEventTimestampAndTransactionHashAndAction } from "../../utils/quote"
 import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { setLiquidationDetailProfileRefs, updateQuoteHierarchyCounters } from "../../utils/profile"
-import { calculateFreeMarginAtStart, calculateLossRestsAt } from "../../utils/liquidationDetail"
+import { PARTY_A_LIQUIDATION_TYPE_NONE } from "../../utils/liquidationDetail"
 import { updateQuoteBucketHierarchyHistoriesForQuote } from "../../../analytics/utils/historyHelpers"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
+import { LiquidatePositionsPartyA as LiquidatePositionsPartyA_0_8_6 } from "../../../../generated/symmio_0_8_6/symmio_0_8_6"
 
 export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 	handleAccount(_event: ethereum.Event, version: Version): void {
@@ -32,6 +33,29 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 	handleQuote(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
+		let liqState = version >= Version.v_0_8_1 ? getLiquidationStateData(version, event.address, event.params.partyA) : null
+		let liquidationId: Bytes | null = null
+		if (version == Version.v_0_8_6) {
+			// @ts-ignore
+			liquidationId = changetype<LiquidatePositionsPartyA_0_8_6>(event).params.liquidationId
+		} else if (version == Version.v_0_8_5) {
+			// @ts-ignore
+			liquidationId = changetype<LiquidatePositionsPartyA_0_8_5>(event).params.liquidationId
+		} else if (version == Version.v_0_8_4) {
+			// @ts-ignore
+			liquidationId = changetype<LiquidatePositionsPartyA_0_8_4>(event).params.liquidationId
+		} else if (version == Version.v_0_8_3) {
+			// @ts-ignore
+			liquidationId = changetype<LiquidatePositionsPartyA_0_8_3>(event).params.liquidationId
+		} else if (liqState !== null) {
+			liquidationId = liqState.liquidationId
+		}
+
+		let stateMatchesEvent = false
+		if (liqState !== null && liquidationId !== null) {
+			stateMatchesEvent = liqState.liquidationId.toHexString() == liquidationId.toHexString()
+		}
+
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
@@ -57,87 +81,60 @@ export class LiquidatePositionsPartyAHandler<T> extends BaseHandler {
 			quote.accumulatedPaidFunding = data.accumulatedPaidFunding
 			quote.lastFundingPaymentTimestamp = data.lastFundingPaymentTimestamp
 
-			if (version >= Version.v_0_8_1) {
-				let liqState = getLiquidationStateData(version, event.address, event.params.partyA)
-				if (liqState) {
-					// Get liquidationId: from event params in v0.8.3+, from struct in v0.8.1-v0.8.2
-					let liquidationId = liqState.liquidationId
-					if (version == Version.v_0_8_5) {
-						// @ts-ignore
-						let e = changetype<LiquidatePositionsPartyA_0_8_5>(event)
-						quote.liquidationId = e.params.liquidationId
-						liquidationId = e.params.liquidationId
-					} else if (version == Version.v_0_8_4) {
-						// @ts-ignore
-						let e = changetype<LiquidatePositionsPartyA_0_8_4>(event)
-						quote.liquidationId = e.params.liquidationId
-						liquidationId = e.params.liquidationId
-					} else if (version == Version.v_0_8_3) {
-						// @ts-ignore
-						let e = changetype<LiquidatePositionsPartyA_0_8_3>(event)
-						quote.liquidationId = e.params.liquidationId
-						liquidationId = e.params.liquidationId
-					}
+			if (liquidationId !== null) quote.liquidationId = liquidationId
 
-					let entityId = event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString()
-					let entity = LiquidationDetail.load(entityId)
-					if (!entity) {
-						entity = new LiquidationDetail(entityId)
-						entity.globalCounter = getGlobalCounterAndInc()
-						entity.settled = false
-						entity.fullyLiquidated = false
-						entity.takeover = false
-						entity.autoTakeover = false
-						entity.takeoverSettled = false
-						entity.totalPnl = BigInt.zero()
-						entity.paidCva = BigInt.zero()
-						entity.paidLf = BigInt.zero()
-						entity.potentialLf = BigInt.zero()
-						if (version >= Version.v_0_8_5) entity.reimbursement = BigInt.zero()
-						if (version >= Version.v_0_8_6) {
-							entity.deferredBalance = BigInt.zero()
-							entity.liquidationEscrow = BigInt.zero()
-						}
-						entity.settlementPartyBs = []
-						entity.settlementModes = []
-						entity.settlementExpectedAmounts = []
-						entity.settlementActualAmounts = []
-						entity.settlementCvaReturned = []
-						entity.settlementReserveContributions = []
-						entity.settlementStates = []
-						let partyAAccount = Account.load(event.params.partyA.toHexString())
-						if (partyAAccount) {
-							entity.affiliate = partyAAccount.accountSource
-						}
+			if (stateMatchesEvent) {
+				let entityId = event.params.partyA.toHexString() + "-" + liquidationId!.toHexString() + "-" + event.address.toHexString()
+				let entity = LiquidationDetail.load(entityId)
+				let isNew = entity === null
+				if (!entity) {
+					entity = new LiquidationDetail(entityId)
+					entity.globalCounter = getGlobalCounterAndInc()
+					entity.settled = false
+					entity.fullyLiquidated = false
+					entity.takeover = false
+					entity.autoTakeover = false
+					entity.takeoverSettled = false
+					entity.totalPnl = BigInt.zero()
+					entity.paidCva = BigInt.zero()
+					entity.paidLf = BigInt.zero()
+					entity.potentialLf = BigInt.zero()
+					if (version >= Version.v_0_8_5) entity.reimbursement = BigInt.zero()
+					if (version >= Version.v_0_8_6) {
+						entity.deferredBalance = BigInt.zero()
+						entity.liquidationEscrow = BigInt.zero()
 					}
-					entity.source = event.address
-					entity.partyA = event.params.partyA
-					entity.partyAAccount = event.params.partyA.toHexString()
-					entity.liquidationId = liqState.liquidationId
-					entity.liquidationType = liqState.liquidationType
-					entity.upnl = liqState.upnl
-					entity.totalUnrealizedLoss = liqState.totalUnrealizedLoss
-					entity.deficit = liqState.deficit
-					entity.liquidationFee = liqState.liquidationFee
-					entity.timestamp = liqState.timestamp
-					entity.involvedPartyBCounts = liqState.involvedPartyBCounts
-					entity.partyAAccumulatedUpnl = liqState.partyAAccumulatedUpnl
-					entity.disputed = liqState.disputed
-					entity.liquidationTimestamp = liqState.liquidationTimestamp
-					let balanceInfo = getPartyABalanceInfoData(version, event.address, event.params.partyA)
-					if (balanceInfo) {
-						let allocatedBalance = entity.allocatedBalance ? entity.allocatedBalance! : balanceInfo.allocatedBalance
-						entity.freeBalance = balanceInfo.freeBalance
-						entity.freeMarginAtStart = calculateFreeMarginAtStart(allocatedBalance, balanceInfo.lockedCva, balanceInfo.lockedLf)
-						entity.lockedCva = balanceInfo.lockedCva
-						entity.lockedLf = balanceInfo.lockedLf
-						entity.lockedPartyAmm = balanceInfo.lockedPartyAmm
-						entity.lockedPartyBmm = balanceInfo.lockedPartyBmm
-						entity.lossRestsAt = calculateLossRestsAt(allocatedBalance, balanceInfo.lockedCva, balanceInfo.lockedLf, liqState.upnl)
-					}
-					setLiquidationDetailProfileRefs(entity, Account.load(event.params.partyA.toHexString()), event.address)
-					entity.save()
+					entity.settlementPartyBs = []
+					entity.settlementModes = []
+					entity.settlementExpectedAmounts = []
+					entity.settlementActualAmounts = []
+					entity.settlementCvaReturned = []
+					entity.settlementReserveContributions = []
+					entity.settlementStates = []
+					let partyAAccount = Account.load(event.params.partyA.toHexString())
+					if (partyAAccount) entity.affiliate = partyAAccount.accountSource
 				}
+				entity.source = event.address
+				entity.partyA = event.params.partyA
+				entity.partyAAccount = event.params.partyA.toHexString()
+				entity.liquidationId = liquidationId!
+				// NONE is an end-of-block artifact for a fully settled v0.8.6
+				// liquidation. Preserve the event-sourced classification and
+				// immutable start buckets; analytics resolves them cumulatively.
+				if (isNew || liqState!.liquidationType != PARTY_A_LIQUIDATION_TYPE_NONE) {
+					entity.liquidationType = liqState!.liquidationType
+					entity.deficit = liqState!.deficit
+				}
+				entity.upnl = liqState!.upnl
+				entity.totalUnrealizedLoss = liqState!.totalUnrealizedLoss
+				entity.liquidationFee = liqState!.liquidationFee
+				entity.timestamp = liqState!.timestamp
+				entity.involvedPartyBCounts = liqState!.involvedPartyBCounts
+				entity.partyAAccumulatedUpnl = liqState!.partyAAccumulatedUpnl
+				entity.disputed = liqState!.disputed
+				entity.liquidationTimestamp = liqState!.liquidationTimestamp
+				setLiquidationDetailProfileRefs(entity, Account.load(event.params.partyA.toHexString()), event.address)
+				entity.save()
 			}
 
 			quote.liquidateAmount = quote.quantity!.minus(quote.closedAmount!)

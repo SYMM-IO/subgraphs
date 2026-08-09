@@ -1,3 +1,441 @@
+"""Immutable tracked deposit into the SYMMIO BuyBack Gateway."""
+type BuybackDeposit @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this deposit."""
+	id: ID!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""BuyBack Gateway proxy that received the deposit."""
+	gateway: Bytes!
+	"""Account that transferred the funds into the gateway."""
+	depositor: Bytes!
+	"""ERC-20 token deposited into the gateway."""
+	token: Bytes!
+	"""Raw deposited token amount in the token's smallest unit."""
+	amount: BigInt!
+	"""Human-readable attribution supplied to the gateway deposit call."""
+	depositSource: String!
+	"""UTC day number computed as blockTimestamp divided by 86,400."""
+	dayId: BigInt!
+	"""Block number that included this deposit."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this deposit."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this deposit."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this deposit."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `AdjustmentScheduled` event."""
+type AdjustmentScheduled @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Symbol whose price adjustment was scheduled."""
+	symbolId: BigInt!
+	"""Sequence number assigned to the scheduled adjustment."""
+	adjustmentIndex: BigInt!
+	"""Fixed-point quantity and inverse-price adjustment factor."""
+	factor: BigInt!
+	"""Timestamp at which the adjustment becomes effective."""
+	effectiveTimestamp: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `AdjustmentCancelled` event."""
+type AdjustmentCancelled @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Symbol whose scheduled adjustment was cancelled."""
+	symbolId: BigInt!
+	"""Sequence number of the cancelled adjustment."""
+	adjustmentIndex: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `PriceAdjustmentConfirmed` event."""
+type PriceAdjustmentConfirmed @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Symbol whose price adjustment was confirmed."""
+	symbolId: BigInt!
+	"""Sequence number of the confirmed adjustment."""
+	adjustmentIndex: BigInt!
+	"""Cumulative fixed-point factor after applying the adjustment."""
+	newCumulativeFactor: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `RestatementStarted` event."""
+type RestatementStarted @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Symbol whose quote restatement started."""
+	symbolId: BigInt!
+	"""Restatement epoch assigned by the core contract."""
+	epoch: BigInt!
+	"""Fixed-point factor applied during this restatement."""
+	restatementFactor: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `RestatementAborted` event."""
+type RestatementAborted @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Symbol whose quote restatement was aborted."""
+	symbolId: BigInt!
+	"""Restatement epoch that was aborted."""
+	epoch: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `QuoteAdjusted` event."""
+type QuoteAdjusted @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Protocol quote id rewritten by the restatement."""
+	quoteId: BigInt!
+	"""Symbol associated with the rewritten quote."""
+	symbolId: BigInt!
+	"""Restatement epoch that rewrote the quote."""
+	epoch: BigInt!
+	"""Fixed-point factor applied to the quote."""
+	factor: BigInt!
+	"""Quote quantity before the restatement."""
+	oldQuantity: BigInt!
+	"""Quote quantity after the restatement."""
+	newQuantity: BigInt!
+	"""Opened price before the restatement."""
+	oldOpenedPrice: BigInt!
+	"""Opened price after the restatement."""
+	newOpenedPrice: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `PendingQuoteCancelledByAdjustment` event."""
+type PendingQuoteCancelledByAdjustment @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Protocol quote id cancelled by the adjustment workflow."""
+	quoteId: BigInt!
+	"""Symbol associated with the cancelled pending quote."""
+	symbolId: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `RestatementFinalized` event."""
+type RestatementFinalized @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Symbol whose quote restatement was finalized."""
+	symbolId: BigInt!
+	"""Restatement epoch that completed."""
+	epoch: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `PartyAReimbursementChange` event."""
+type PartyAReimbursementChange @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""PartyA whose liquidation reimbursement changed."""
+	partyA: Bytes!
+	"""Magnitude of the reimbursement change."""
+	amount: BigInt!
+	"""Authoritative reimbursement balance after this change."""
+	newBalance: BigInt!
+	"""Core reimbursement-change direction ordinal."""
+	_type: Int!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetPartyBStrictDeallocation` event."""
+type SetPartyBStrictDeallocation @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""PartyB whose strict-deallocation policy changed."""
+	partyB: Bytes!
+	"""Whether strict deallocation is enabled for the PartyB."""
+	enabled: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetSolverFeeReceiver` event."""
+type SetSolverFeeReceiver @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""PartyB whose solver-fee routing changed."""
+	partyB: Bytes!
+	"""Account that will receive subsequent solver fees."""
+	receiver: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable V2 buyback executed by the SYMMIO BuyBack Gateway."""
+type Buyback @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this buyback."""
+	id: ID!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""BuyBack Gateway proxy that executed the swap."""
+	gateway: Bytes!
+	"""Operator that submitted the V2 buyback."""
+	operator: Bytes!
+	"""ERC-20 token spent by the buyback when it can be resolved."""
+	inputToken: Bytes
+	"""ERC-20 token bought by the buyback when it can be resolved."""
+	outputToken: Bytes
+	"""DEX or aggregator contract called by the V2 buyback."""
+	callTarget: Bytes!
+	"""Contract given the temporary input-token allowance by the V2 buyback."""
+	allowanceTarget: Bytes!
+	"""Raw input-token amount spent in the swap."""
+	amountIn: BigInt!
+	"""Operator-specified minimum output for the V2 buyback."""
+	minAmountOut: BigInt!
+	"""Raw output-token amount purchased and settled."""
+	amountOut: BigInt!
+	"""Settlement-mode ordinal: 0 for staking or 1 for burn."""
+	settlementMode: Int!
+	"""Cumulative input spend for the contract's UTC day."""
+	dayTotal: BigInt!
+	"""UTC day number computed as blockTimestamp divided by 86,400."""
+	dayId: BigInt!
+	"""Block number that included this buyback."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this buyback."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this buyback."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this buyback."""
+	blockHash: Bytes!
+}
+
+"""Cumulative funnel totals for one SYMMIO BuyBack Gateway proxy."""
+type BuybackGatewayStats @entity(immutable: false) {
+	"""Lowercase gateway address used as the stable aggregate id."""
+	id: ID!
+	"""BuyBack Gateway proxy summarized by this row."""
+	gateway: Bytes!
+	"""Total funds observed through the tracked deposit entrypoint."""
+	totalDeposited: BigInt!
+	"""Total input-token amount spent across V2 buybacks."""
+	totalAmountIn: BigInt!
+	"""Total output-token amount bought across V2 buybacks."""
+	totalAmountOut: BigInt!
+	"""Number of tracked deposit events."""
+	depositCount: BigInt!
+	"""Number of V2 buybacks."""
+	buybackCount: BigInt!
+	"""Most recently resolved input-token address."""
+	inputToken: Bytes
+	"""Most recently resolved output-token address."""
+	outputToken: Bytes
+	"""Timestamp of the first indexed deposit or buyback."""
+	firstActivityAt: BigInt!
+	"""Timestamp of the latest indexed deposit or buyback."""
+	lastActivityAt: BigInt!
+	"""Block number of the latest indexed deposit or buyback."""
+	lastActivityBlock: BigInt!
+}
+
+"""UTC-day funnel totals for one SYMMIO BuyBack Gateway proxy."""
+type BuybackDay @entity(immutable: false) {
+	"""Gateway address and UTC day number joined as the aggregate id."""
+	id: ID!
+	"""BuyBack Gateway proxy summarized by this row."""
+	gateway: Bytes!
+	"""UTC day number computed as timestamp divided by 86,400."""
+	dayId: BigInt!
+	"""UTC timestamp at the start of this day."""
+	dayStart: BigInt!
+	"""Tracked amount deposited during this UTC day."""
+	depositedAmount: BigInt!
+	"""Input-token amount spent by buybacks during this UTC day."""
+	amountIn: BigInt!
+	"""Output-token amount bought during this UTC day."""
+	amountOut: BigInt!
+	"""Number of tracked deposits during this UTC day."""
+	depositCount: BigInt!
+	"""Number of V2 buybacks during this UTC day."""
+	buybackCount: BigInt!
+	"""Timestamp of the latest deposit or buyback in this UTC day."""
+	lastActivityAt: BigInt!
+}
+
 """Immutable event snapshot for the `AcceptCancelCloseRequest` event."""
 type AcceptCancelCloseRequest @entity(immutable: true) {
 	"""Subgraph entity id for this event record."""
@@ -2478,6 +2916,10 @@ type SettlePartyALiquidation @entity(immutable: true) {
 	partyA: Bytes!
 	"""Indexed field `partyBs` from the `SettlePartyALiquidation` event or its handler-normalized payload."""
 	partyBs: [Bytes!]
+	"""Exact PartyB allocation key for each `partyBs` entry; zero address means cross mode."""
+	allocationKeys: [Bytes!]
+	"""Exact CVA returned for each `partyBs` entry by the v0.8.6 extended event."""
+	cvaAmounts: [BigInt!]
 	"""Block number that included this event."""
 	blockNumber: BigInt!
 	"""Block timestamp that included this event."""
@@ -5414,6 +5856,8 @@ type WithdrawAccepted @entity(immutable: true) {
 	requestId: BigInt!
 	"""User or wallet address associated with this row."""
 	user: Bytes!
+	"""Express-provider option ordinal; absent on the core event variant."""
+	optionType: Int
 	"""Block number that included this event."""
 	blockNumber: BigInt!
 	"""Block timestamp that included this event."""
@@ -5650,7 +6094,1893 @@ type WithdrawSuspendedUser @entity(immutable: true) {
 	blockHash: Bytes!
 }
 
+# Symmio v0.8.6 Events
+
+"""Immutable event snapshot for the `AccumulatedFundingStateUpdated` event."""
+type AccumulatedFundingStateUpdated @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `symbolId` value from the `AccumulatedFundingStateUpdated` event."""
+	symbolId: BigInt!
+	"""Raw `partyB` value from the `AccumulatedFundingStateUpdated` event."""
+	partyB: Bytes!
+	"""Raw `currentLongRate` value from the `AccumulatedFundingStateUpdated` event."""
+	currentLongRate: BigInt!
+	"""Raw `currentShortRate` value from the `AccumulatedFundingStateUpdated` event."""
+	currentShortRate: BigInt!
+	"""Raw `accumulatedLongRate` value from the `AccumulatedFundingStateUpdated` event."""
+	accumulatedLongRate: BigInt!
+	"""Raw `accumulatedShortRate` value from the `AccumulatedFundingStateUpdated` event."""
+	accumulatedShortRate: BigInt!
+	"""Raw `lastUpdatedEpoch` value from the `AccumulatedFundingStateUpdated` event."""
+	lastUpdatedEpoch: BigInt!
+	"""Raw `lastUpdatedTimeStamp` value from the `AccumulatedFundingStateUpdated` event."""
+	lastUpdatedTimeStamp: BigInt!
+	"""Raw `startEpochTimeStamp` value from the `AccumulatedFundingStateUpdated` event."""
+	startEpochTimeStamp: BigInt!
+	"""Raw `startEpoch` value from the `AccumulatedFundingStateUpdated` event."""
+	startEpoch: BigInt!
+	"""Raw `epochDuration` value from the `AccumulatedFundingStateUpdated` event."""
+	epochDuration: BigInt!
+	"""Raw `snapshotLongFee` value from the `AccumulatedFundingStateUpdated` event."""
+	snapshotLongFee: BigInt!
+	"""Raw `snapshotShortFee` value from the `AccumulatedFundingStateUpdated` event."""
+	snapshotShortFee: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `CancelAffiliateShutdown` event."""
+type CancelAffiliateShutdown @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `affiliate` value from the `CancelAffiliateShutdown` event."""
+	affiliate: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `CloseAffiliatePositions` event."""
+type CloseAffiliatePositions @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `affiliate` value from the `CloseAffiliatePositions` event."""
+	affiliate: Bytes!
+	"""Raw `quoteIds` value from the `CloseAffiliatePositions` event."""
+	quoteIds: [BigInt!]!
+	"""Raw `closedAmounts` value from the `CloseAffiliatePositions` event."""
+	closedAmounts: [BigInt!]!
+	"""Raw `prices` value from the `CloseAffiliatePositions` event."""
+	prices: [BigInt!]!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `CloseSolverFeeCharged` event."""
+type CloseSolverFeeCharged @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `quoteId` value from the `CloseSolverFeeCharged` event."""
+	quoteId: BigInt!
+	"""Raw `partyA` value from the `CloseSolverFeeCharged` event."""
+	partyA: Bytes!
+	"""Raw `partyB` value from the `CloseSolverFeeCharged` event."""
+	partyB: Bytes!
+	"""Account actually credited with the solver fee."""
+	receiver: Bytes!
+	"""Raw `symbolId` value from the `CloseSolverFeeCharged` event."""
+	symbolId: BigInt!
+	"""Raw `amount` value from the `CloseSolverFeeCharged` event."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `DistributeFromLiquidationEscrow` event."""
+type DistributeFromLiquidationEscrow @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `partyA` value from the `DistributeFromLiquidationEscrow` event."""
+	partyA: Bytes!
+	"""Raw `receivers` value from the `DistributeFromLiquidationEscrow` event."""
+	receivers: [Bytes!]!
+	"""Raw `allocationKeys` value from the `DistributeFromLiquidationEscrow` event."""
+	allocationKeys: [Bytes!]!
+	"""Raw `amounts` value from the `DistributeFromLiquidationEscrow` event."""
+	amounts: [BigInt!]!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `LiquidationEscrowCreated` event."""
+type LiquidationEscrowCreated @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `partyA` value from the `LiquidationEscrowCreated` event."""
+	partyA: Bytes!
+	"""Raw `liquidationId` value from the `LiquidationEscrowCreated` event."""
+	liquidationId: Bytes!
+	"""Raw `amount` value from the `LiquidationEscrowCreated` event."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OpenSolverFeeCharged` event."""
+type OpenSolverFeeCharged @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `quoteId` value from the `OpenSolverFeeCharged` event."""
+	quoteId: BigInt!
+	"""Raw `partyA` value from the `OpenSolverFeeCharged` event."""
+	partyA: Bytes!
+	"""Raw `partyB` value from the `OpenSolverFeeCharged` event."""
+	partyB: Bytes!
+	"""Account actually credited with the solver fee."""
+	receiver: Bytes!
+	"""Raw `symbolId` value from the `OpenSolverFeeCharged` event."""
+	symbolId: BigInt!
+	"""Raw `amount` value from the `OpenSolverFeeCharged` event."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OperationalFeeAllowanceReductionRequested` event."""
+type OperationalFeeAllowanceReductionRequested @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `payer` value from the `OperationalFeeAllowanceReductionRequested` event."""
+	payer: Bytes!
+	"""Raw `charger` value from the `OperationalFeeAllowanceReductionRequested` event."""
+	charger: Bytes!
+	"""Raw `newAllowance` value from the `OperationalFeeAllowanceReductionRequested` event."""
+	newAllowance: BigInt!
+	"""Raw `readyAt` value from the `OperationalFeeAllowanceReductionRequested` event."""
+	readyAt: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OperationalFeeAllowanceSet` event."""
+type OperationalFeeAllowanceSet @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `payer` value from the `OperationalFeeAllowanceSet` event."""
+	payer: Bytes!
+	"""Raw `charger` value from the `OperationalFeeAllowanceSet` event."""
+	charger: Bytes!
+	"""Raw `newAllowance` value from the `OperationalFeeAllowanceSet` event."""
+	newAllowance: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OperationalFeeCharged` event."""
+type OperationalFeeCharged @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `payer` value from the `OperationalFeeCharged` event."""
+	payer: Bytes!
+	"""Raw `charger` value from the `OperationalFeeCharged` event."""
+	charger: Bytes!
+	"""Raw `receiver` value from the `OperationalFeeCharged` event."""
+	receiver: Bytes!
+	"""Raw `amount` value from the `OperationalFeeCharged` event."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OperationalFeeChargerRegistered` event."""
+type OperationalFeeChargerRegistered @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `charger` value from the `OperationalFeeChargerRegistered` event."""
+	charger: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OperationalFeeChargerUnregistered` event."""
+type OperationalFeeChargerUnregistered @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `charger` value from the `OperationalFeeChargerUnregistered` event."""
+	charger: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OperationalFeeMultiplierSet` event."""
+type OperationalFeeMultiplierSet @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `payer` value from the `OperationalFeeMultiplierSet` event."""
+	payer: Bytes!
+	"""Raw `charger` value from the `OperationalFeeMultiplierSet` event."""
+	charger: Bytes!
+	"""Raw `feeMultiplier` value from the `OperationalFeeMultiplierSet` event."""
+	feeMultiplier: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `OperationalFeeReductionDelaySet` event."""
+type OperationalFeeReductionDelaySet @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `oldDelay` value from the `OperationalFeeReductionDelaySet` event."""
+	oldDelay: BigInt!
+	"""Raw `newDelay` value from the `OperationalFeeReductionDelaySet` event."""
+	newDelay: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `PauseWithdrawAdvance` event."""
+type PauseWithdrawAdvance @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `ScheduleAffiliateShutdown` event."""
+type ScheduleAffiliateShutdown @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `affiliate` value from the `ScheduleAffiliateShutdown` event."""
+	affiliate: Bytes!
+	"""Raw `shutdownTime` value from the `ScheduleAffiliateShutdown` event."""
+	shutdownTime: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SendQuoteSolverFeeCaps` event."""
+type SendQuoteSolverFeeCaps @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `partyA` value from the `SendQuoteSolverFeeCaps` event."""
+	partyA: Bytes!
+	"""Raw `quoteId` value from the `SendQuoteSolverFeeCaps` event."""
+	quoteId: BigInt!
+	"""Raw `openRateCap` value from the `SendQuoteSolverFeeCaps` event."""
+	openRateCap: BigInt!
+	"""Raw `closeRateCap` value from the `SendQuoteSolverFeeCaps` event."""
+	closeRateCap: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetDeactiveInstantActionModeCooldown` event."""
+type SetDeactiveInstantActionModeCooldown @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `oldCooldown` value from the `SetDeactiveInstantActionModeCooldown` event."""
+	oldCooldown: BigInt!
+	"""Raw `newCooldown` value from the `SetDeactiveInstantActionModeCooldown` event."""
+	newCooldown: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetLegacyPartyALiquidationDeprecated` event."""
+type SetLegacyPartyALiquidationDeprecated @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `oldValue` value from the `SetLegacyPartyALiquidationDeprecated` event."""
+	oldValue: Boolean!
+	"""Raw `newValue` value from the `SetLegacyPartyALiquidationDeprecated` event."""
+	newValue: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetMuonFunctionUpnlValidTime` event."""
+type SetMuonFunctionUpnlValidTime @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `func` value from the `SetMuonFunctionUpnlValidTime` event."""
+	func: Int!
+	"""Raw `enabled` value from the `SetMuonFunctionUpnlValidTime` event."""
+	enabled: Boolean!
+	"""Raw `upnlValidTime` value from the `SetMuonFunctionUpnlValidTime` event."""
+	upnlValidTime: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetOperationalFeeReceiver` event."""
+type SetOperationalFeeReceiver @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `charger` value from the `SetOperationalFeeReceiver` event."""
+	charger: Bytes!
+	"""Raw `receiver` value from the `SetOperationalFeeReceiver` event."""
+	receiver: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetPartyALiquidationSnapshot` event."""
+type SetPartyALiquidationSnapshot @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `liquidator` value from the `SetPartyALiquidationSnapshot` event."""
+	liquidator: Bytes!
+	"""Raw `partyA` value from the `SetPartyALiquidationSnapshot` event."""
+	partyA: Bytes!
+	"""Raw `partyBs` value from the `SetPartyALiquidationSnapshot` event."""
+	partyBs: [Bytes!]!
+	"""Raw `symbolIds` value from the `SetPartyALiquidationSnapshot` event."""
+	symbolIds: [BigInt!]!
+	"""Raw `prices` value from the `SetPartyALiquidationSnapshot` event."""
+	prices: [BigInt!]!
+	"""Raw `cumulativeLongFees` value from the `SetPartyALiquidationSnapshot` event."""
+	cumulativeLongFees: [BigInt!]!
+	"""Raw `cumulativeShortFees` value from the `SetPartyALiquidationSnapshot` event."""
+	cumulativeShortFees: [BigInt!]!
+	"""Raw `liquidationId` value from the `SetPartyALiquidationSnapshot` event."""
+	liquidationId: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SetPartyBOpenPositionsPausedForPartyB` event."""
+type SetPartyBOpenPositionsPausedForPartyB @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `partyB` value from the `SetPartyBOpenPositionsPausedForPartyB` event."""
+	partyB: Bytes!
+	"""Raw `status` value from the `SetPartyBOpenPositionsPausedForPartyB` event."""
+	status: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable Party B quote-settlement payload row."""
+type PartyBQuoteSettlementData @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Stored `quoteId` value for this row."""
+	quoteId: BigInt!
+	"""Stored `accountSource` value for this row."""
+	accountSource: Bytes!
+	"""Stored `currentPrice` value for this row."""
+	currentPrice: BigInt!
+	"""Stored `partyAIndex` value for this row."""
+	partyAIndex: Int!
+}
+
+"""Immutable event snapshot for the `SettlePartyBUpnlForLiquidation` event."""
+type SettlePartyBUpnlForLiquidation @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `liquidatedPartyA` value from the `SettlePartyBUpnlForLiquidation` event."""
+	liquidatedPartyA: Bytes!
+	"""Raw `partyB` value from the `SettlePartyBUpnlForLiquidation` event."""
+	partyB: Bytes!
+	"""Raw `settlementId` value from the `SettlePartyBUpnlForLiquidation` event."""
+	settlementId: Bytes!
+	"""Raw `settlementData` value from the `SettlePartyBUpnlForLiquidation` event."""
+	settlementData: [PartyBQuoteSettlementData!]!
+	"""Raw `updatedPrices` value from the `SettlePartyBUpnlForLiquidation` event."""
+	updatedPrices: [BigInt!]!
+	"""Raw `partyAs` value from the `SettlePartyBUpnlForLiquidation` event."""
+	partyAs: [Bytes!]!
+	"""Raw `newPartyAsAllocatedBalances` value from the `SettlePartyBUpnlForLiquidation` event."""
+	newPartyAsAllocatedBalances: [BigInt!]!
+	"""Raw `newPartyBAllocatedBalance` value from the `SettlePartyBUpnlForLiquidation` event."""
+	newPartyBAllocatedBalance: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `UnpauseWithdrawAdvance` event."""
+type UnpauseWithdrawAdvance @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `WithdrawAdvanced` event."""
+type WithdrawAdvanced @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `requestId` value from the `WithdrawAdvanced` event."""
+	requestId: BigInt!
+	"""Raw `user` value from the `WithdrawAdvanced` event."""
+	user: Bytes!
+	"""Raw `amount` value from the `WithdrawAdvanced` event."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `AffiliateConfigUpdated` event."""
+type AffiliateConfigUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `feeRate` emitted by the Express Provider."""
+	feeRate: BigInt!
+	"""Raw numeric parameter `operatorFee` emitted by the Express Provider."""
+	operatorFee: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `AffiliateDeposit` event."""
+type AffiliateDeposit @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `AffiliateWithdraw` event."""
+type AffiliateWithdraw @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `BadDebtAccrued` event."""
+type BadDebtAccrued @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CapChangeFeeConfigUpdated` event."""
+type CapChangeFeeConfigUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `feeToken` emitted by the Express Provider."""
+	feeToken: Bytes!
+	"""Raw numeric parameter `feeAmount` emitted by the Express Provider."""
+	feeAmount: BigInt!
+	"""Raw address parameter `feeReceiver` emitted by the Express Provider."""
+	feeReceiver: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CapChangeQuotaConfigUpdated` event."""
+type CapChangeQuotaConfigUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw numeric parameter `maxFreePerWindow` emitted by the Express Provider."""
+	maxFreePerWindow: BigInt!
+	"""Raw numeric parameter `windowDuration` emitted by the Express Provider."""
+	windowDuration: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CreditBadDebtRepaid` event."""
+type CreditBadDebtRepaid @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `payer` emitted by the Express Provider."""
+	payer: Bytes!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CreditLineAffiliateConfigSelfUpdated` event."""
+type CreditLineAffiliateConfigSelfUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `maxDebt` emitted by the Express Provider."""
+	maxDebt: BigInt!
+	"""Raw numeric parameter `maxDebtBps` emitted by the Express Provider."""
+	maxDebtBps: BigInt!
+	"""Raw boolean parameter `wasDecrease` emitted by the Express Provider."""
+	wasDecrease: Boolean!
+	"""Raw numeric parameter `feePaid` emitted by the Express Provider."""
+	feePaid: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CreditLineAffiliateConfigUpdated` event."""
+type CreditLineAffiliateConfigUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `maxDebt` emitted by the Express Provider."""
+	maxDebt: BigInt!
+	"""Raw numeric parameter `maxDebtBps` emitted by the Express Provider."""
+	maxDebtBps: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CreditLineMuonConfigUpdated` event."""
+type CreditLineMuonConfigUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `signatureVerifier` emitted by the Express Provider."""
+	signatureVerifier: Bytes!
+	"""Raw numeric parameter `muonAppId` emitted by the Express Provider."""
+	muonAppId: BigInt!
+	"""Raw numeric parameter `muonFreshnessWindow` emitted by the Express Provider."""
+	muonFreshnessWindow: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CreditLinePausedUpdated` event."""
+type CreditLinePausedUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw boolean parameter `paused` emitted by the Express Provider."""
+	paused: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CreditLineProtocolConfigUpdated` event."""
+type CreditLineProtocolConfigUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `maxDebt` emitted by the Express Provider."""
+	maxDebt: BigInt!
+	"""Raw numeric parameter `maxDebtBps` emitted by the Express Provider."""
+	maxDebtBps: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `CreditLineUserBlacklistUpdated` event."""
+type CreditLineUserBlacklistUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw boolean parameter `blacklisted` emitted by the Express Provider."""
+	blacklisted: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `DebtActivated` event."""
+type DebtActivated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `DebtCancelled` event."""
+type DebtCancelled @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `DebtReserved` event."""
+type DebtReserved @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `DebtSettled` event."""
+type DebtSettled @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `GeneralBadDebtAccrued` event."""
+type GeneralBadDebtAccrued @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `GeneralDeposit` event."""
+type GeneralDeposit @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `GeneralWithdraw` event."""
+type GeneralWithdraw @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `MinValidatorSignaturesUpdated` event."""
+type MinValidatorSignaturesUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `minValidatorSignatures` emitted by the Express Provider."""
+	minValidatorSignatures: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `OperatorFeesClaimed` event."""
+type OperatorFeesClaimed @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `OwnershipTransferCanceled` event."""
+type OwnershipTransferCanceled @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Pending owner whose transfer was canceled."""
+	pendingOwner: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `OwnershipTransferStarted` event."""
+type OwnershipTransferStarted @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Current owner that initiated the transfer."""
+	currentOwner: Bytes!
+	"""Pending owner nominated by the current owner."""
+	pendingOwner: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `OwnershipTransferred` event."""
+type OwnershipTransferred @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Owner before the transfer completed."""
+	previousOwner: Bytes!
+	"""Owner after the transfer completed."""
+	newOwner: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `PausedUpdated` event."""
+type PausedUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw boolean parameter `paused` emitted by the Express Provider."""
+	paused: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `RequestDebtCleared` event."""
+type RequestDebtCleared @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Raw boolean parameter `wasActivated` emitted by the Express Provider."""
+	wasActivated: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `SponsorConfigUpdated` event."""
+type SponsorConfigUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `maxFeePerWithdraw` emitted by the Express Provider."""
+	maxFeePerWithdraw: BigInt!
+	"""Raw numeric parameter `maxWithdrawAmount` emitted by the Express Provider."""
+	maxWithdrawAmount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `SponsorCoverageRestored` event."""
+type SponsorCoverageRestored @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `user` emitted by the Express Provider."""
+	user: Bytes!
+	"""Raw numeric parameter `requestId` emitted by the Express Provider."""
+	requestId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `restored` emitted by the Express Provider."""
+	restored: BigInt!
+	"""Raw numeric parameter `shortfall` emitted by the Express Provider."""
+	shortfall: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `SponsorDeposit` event."""
+type SponsorDeposit @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `SponsorWithdraw` event."""
+type SponsorWithdraw @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `TokensRescued` event."""
+type TokensRescued @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `token` emitted by the Express Provider."""
+	token: Bytes!
+	"""Raw address parameter `to` emitted by the Express Provider."""
+	to: Bytes!
+	"""Raw numeric parameter `amount` emitted by the Express Provider."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `ValidatorApprovalTimeoutUpdated` event."""
+type ValidatorApprovalTimeoutUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw numeric parameter `timeout` emitted by the Express Provider."""
+	timeout: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable raw Express Provider snapshot for the `ValidatorUpdated` event."""
+type ValidatorUpdated @entity(immutable: true) {
+	"""Transaction-hash and log-index identifier for this event."""
+	id: ID!
+	"""Express Provider contract that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id."""
+	counterId: BigInt!
+	"""Raw address parameter `affiliate` emitted by the Express Provider."""
+	affiliate: Bytes!
+	"""Raw address parameter `validator` emitted by the Express Provider."""
+	validator: Bytes!
+	"""Raw boolean parameter `enabled` emitted by the Express Provider."""
+	enabled: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `WithdrawAccelerated` event."""
+type WithdrawAccelerated @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `user` value from the `WithdrawAccelerated` event."""
+	user: Bytes!
+	"""Raw `requestId` value from the `WithdrawAccelerated` event."""
+	requestId: BigInt!
+	"""Raw `affiliate` value from the `WithdrawAccelerated` event."""
+	affiliate: Bytes!
+	"""Raw `affiliateAmount` value from the `WithdrawAccelerated` event."""
+	affiliateAmount: BigInt!
+	"""Raw `creditAmount` value from the `WithdrawAccelerated` event."""
+	creditAmount: BigInt!
+	"""Raw `generalAmount` value from the `WithdrawAccelerated` event."""
+	generalAmount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `WithdrawProcessed` event."""
+type WithdrawProcessed @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `user` value from the `WithdrawProcessed` event."""
+	user: Bytes!
+	"""Raw `requestId` value from the `WithdrawProcessed` event."""
+	requestId: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `WithdrawUnlockedAndProcessed` event."""
+type WithdrawUnlockedAndProcessed @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `user` value from the `WithdrawUnlockedAndProcessed` event."""
+	user: Bytes!
+	"""Raw `requestId` value from the `WithdrawUnlockedAndProcessed` event."""
+	requestId: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `WithdrawLocked` event."""
+type WithdrawLocked @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `user` value from the `WithdrawLocked` event."""
+	user: Bytes!
+	"""Raw `requestId` value from the `WithdrawLocked` event."""
+	requestId: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Deduplicates dynamic express-provider templates across unregister/re-register cycles."""
+type ExpressProviderTemplateRegistration @entity(immutable: false) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Stored `provider` value for this row."""
+	provider: Bytes!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Stored `timestamp` value for this row."""
+	timestamp: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+}
+
 # AccountLayer Events
+
+"""Immutable event snapshot for the `SubAccountOwnershipTransferred` event."""
+type SubAccountOwnershipTransferred @entity(immutable: true) {
+	"""Subgraph entity id for this row."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Raw `account` value from the `SubAccountOwnershipTransferred` event."""
+	account: Bytes!
+	"""Raw `oldOwner` value from the `SubAccountOwnershipTransferred` event."""
+	oldOwner: Bytes!
+	"""Raw `newOwner` value from the `SubAccountOwnershipTransferred` event."""
+	newOwner: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SymmioCoreAddedToAffiliate` event."""
+type SymmioCoreAddedToAffiliate @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes!
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Affiliate that accepted the SYMMIO core."""
+	affiliate: Bytes!
+	"""SYMMIO core added to the affiliate."""
+	core: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
 
 """Immutable event snapshot for the `Call` event."""
 type Call @entity(immutable: true) {
@@ -6239,13 +8569,13 @@ type FeesClaimed @entity(immutable: true) {
 	"""Subgraph entity id for this event record."""
 	id: ID!
 	"""Contract address that emitted this event."""
-	source: Bytes
+	source: Bytes!
 	"""Subgraph-side monotonically increasing ordering id for this event."""
 	counterId: BigInt!
 	"""Affiliate or account-source address associated with this row."""
 	affiliate: Bytes!
-	"""Indexed field `symmio` from the `FeesClaimed` event or its handler-normalized payload."""
-	symmio: Bytes!
+	"""SYMMIO core emitted by the Account Layer variant; absent on the Express Provider variant."""
+	symmio: Bytes
 	"""Raw amount associated with this row."""
 	amount: BigInt!
 	"""Block number that included this event."""
@@ -6730,6 +9060,32 @@ type SignerUpdated @entity(immutable: true) {
 	oldSigner: Bytes!
 	"""Indexed field `newSigner` from the `SignerUpdated` event or its handler-normalized payload."""
 	newSigner: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Transaction hash that emitted this event."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Log index of this event within the transaction receipt."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Immutable event snapshot for the `SignerScopeUpdated` event."""
+type SignerScopeUpdated @entity(immutable: true) {
+	"""Subgraph entity id for this event record."""
+	id: ID!
+	"""Contract address that emitted this event."""
+	source: Bytes
+	"""Subgraph-side monotonically increasing ordering id for this event."""
+	counterId: BigInt!
+	"""Signer whose transaction-scoped account scope changed."""
+	signer: Bytes!
+	"""Canonical sub-account scope, or the zero address when unconfined."""
+	scope: Bytes!
 	"""Block number that included this event."""
 	blockNumber: BigInt!
 	"""Block timestamp that included this event."""

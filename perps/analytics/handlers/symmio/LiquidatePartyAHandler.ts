@@ -2,7 +2,8 @@ import { LiquidatePartyAHandlerWithAccount as CommonLiquidatePartyAHandler } fro
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
-import { createPartyALiquidationEventFromState } from "../../utils/liquidationEvent"
+import { createPartyALiquidationEvent, createPartyALiquidationEventFromState } from "../../utils/liquidationEvent"
+import { startPartyALiquidationTracking } from "../../utils/partyALiquidation"
 
 export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -12,7 +13,13 @@ export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
 		super.handleAccount(_event, version)
-		createPartyALiquidationEventFromState(_event, version, event.params.partyA, "LIQUIDATE_PARTY_A", null)
+		if (version >= Version.v_0_8_3) {
+			let liquidationId = _event.parameters[5].value.toBytes()
+			if (version == Version.v_0_8_6) startPartyALiquidationTracking(_event, event.params.partyA, liquidationId)
+			createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "LIQUIDATE_PARTY_A", null)
+		} else {
+			createPartyALiquidationEventFromState(_event, version, event.params.partyA, "LIQUIDATE_PARTY_A", null)
+		}
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 	}
 }

@@ -1,4 +1,11 @@
 {
+	"ClearingHouseLiquidationContext": [
+		"LiquidateCrossPartyB",
+		"TakeoverPartyALiquidation",
+		"AutoTakeoverPartyALiquidation",
+		"SettleCrossPartyBLiquidation",
+		"SettlePartyATakeover"
+	],
 	"UserActivity": [
 		"SendQuote",
 		"RequestToClosePosition",
@@ -10,7 +17,13 @@
 		"RequestToCancelCloseRequest",
 		"RequestToCancelQuote"
 	],
-	"BalanceChange": ["Deposit", "Withdraw", "BalanceChangePartyA", "BalanceChangePartyB", "TransferToBridge"],
+	"BalanceChange": [
+		"Deposit",
+		"Withdraw",
+		"BalanceChangePartyA",
+		"BalanceChangePartyB",
+		"TransferToBridge"
+	],
 	"QuoteEvent": [
 		"SendQuote",
 		"LockQuote",
@@ -54,7 +67,6 @@
 		"Deposit",
 		"Withdraw",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"LiquidatePendingPositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
@@ -73,7 +85,6 @@
 		"Deposit",
 		"Withdraw",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"LiquidatePendingPositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
@@ -87,7 +98,6 @@
 		"EmergencyClosePosition",
 		"ForceClosePosition",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse"
 	],
 	"OpenInterest": [
@@ -98,7 +108,6 @@
 		"EmergencyClosePosition",
 		"ForceClosePosition",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse"
 	],
 	"DailySymbolTradesHistory": [
@@ -114,7 +123,6 @@
 		"Deposit",
 		"Withdraw",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"LiquidatePendingPositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
@@ -133,7 +141,6 @@
 		"Deposit",
 		"Withdraw",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"LiquidatePendingPositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
@@ -154,7 +161,6 @@
 		"SendQuote",
 		"SettlePartyALiquidation",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
 		"TradingFeeCharged"
@@ -173,7 +179,6 @@
 		"Withdraw",
 		"SendQuote",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"ChargeAccumulatedFundingFee",
 		"TradingFeeCharged"
@@ -348,9 +353,17 @@
 		"WithdrawRejected",
 		"WithdrawSuspended"
 	],
-	"Configuration": ["SetCollateral"],
-	"GrantedRole": ["RoleGranted", "RoleRevoked"],
-	"Account": ["RequestToCancelCloseRequest", "RequestToCancelQuote"],
+	"Configuration": [
+		"SetCollateral"
+	],
+	"GrantedRole": [
+		"RoleGranted",
+		"RoleRevoked"
+	],
+	"Account": [
+		"RequestToCancelCloseRequest",
+		"RequestToCancelQuote"
+	],
 	"AffiliateFeeCollector": [
 		"SetFeeCollector",
 		"LiquidatePositionsPartyA",
@@ -367,11 +380,13 @@
 		"OpenPosition",
 		"SettlePartyALiquidation",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"LiquidatePositionsForClearingHouse",
 		"TradingFeeCharged"
 	],
-	"CvaLf": ["BalanceChangePartyA", "SettlePartyALiquidation"],
+	"CvaLf": [
+		"BalanceChangePartyA",
+		"SettlePartyALiquidation"
+	],
 	"LiquidationDetail": [
 		"DeferredLiquidatePartyA",
 		"SetSymbolsPrices",
@@ -385,8 +400,17 @@
 		"SettlePartyATakeover",
 		"FullyLiquidatedPartyA"
 	],
-	"FundingRateSnapshot": ["SetLongFundingFee", "SetShortFundingFee", "UpdateAccumulatedFundingFee"],
-	"FundingIndexCheckpoint": ["SetLongFundingFee", "SetShortFundingFee", "UpdateAccumulatedFundingFee", "SetEpochDuration"],
+	"FundingRateSnapshot": [
+		"SetLongFundingFee",
+		"SetShortFundingFee",
+		"UpdateAccumulatedFundingFee"
+	],
+	"FundingIndexCheckpoint": [
+		"SetLongFundingFee",
+		"SetShortFundingFee",
+		"UpdateAccumulatedFundingFee",
+		"SetEpochDuration"
+	],
 	"FundingFeeState": [
 		"OpenPosition",
 		"FillCloseRequest",
@@ -411,6 +435,11 @@
 		"WithdrawRejected",
 		"WithdrawSuspended",
 		"WithdrawSpeedUpAccepted"
+	],
+	"WithdrawCoreLifecycleHint": [
+		"WithdrawAccepted",
+		"WithdrawRejected",
+		"WithdrawInitiated"
 	],
 	"WithdrawRequestAccountLookup": [
 		"WithdrawInitiated",
@@ -450,7 +479,6 @@
 		"LiquidatePendingPositionsForClearingHouse",
 		"LiquidatePendingPositionsPartyA",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"RequestToCancelQuote",
 		"DeferredLiquidatePartyA"
 	],
@@ -490,7 +518,6 @@
 		"LiquidatePendingPositionsForClearingHouse",
 		"LiquidatePendingPositionsPartyA",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"RequestToCancelQuote",
 		"DeferredLiquidatePartyA"
 	],
@@ -530,7 +557,6 @@
 		"LiquidatePendingPositionsForClearingHouse",
 		"LiquidatePendingPositionsPartyA",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"RequestToCancelQuote",
 		"DeferredLiquidatePartyA"
 	],
@@ -564,7 +590,6 @@
 		"LiquidatePendingPositionsForClearingHouse",
 		"LiquidatePendingPositionsPartyA",
 		"ADLClose",
-		"ForceClosePartyBInsolvent",
 		"RequestToCancelQuote",
 		"DeferredLiquidatePartyA"
 	],
@@ -592,5 +617,11 @@
 		"LiquidatePositionsPartyA",
 		"LiquidatePositionsPartyB",
 		"LiquidatePositionsForClearingHouse"
+	],
+	"ExpressProviderSource": [
+		"RegisterExpressProvider"
+	],
+	"ExpressProviderSourceByCore": [
+		"RegisterExpressProvider"
 	]
 }

@@ -117,11 +117,15 @@ function collectLiquidatableQuoteIdsFromIndex(id: string, source: Address): Arra
 	return quoteIds
 }
 
-export function getLiquidatablePendingQuoteIds(subject: Address, counterparties: Array<Address>, source: Address): Array<BigInt> {
+export function getClearingHouseLiquidatablePendingQuoteIds(
+	subject: Address,
+	counterparties: Array<Address>,
+	source: Address,
+	partyATakeover: bool,
+): Array<BigInt> {
 	let quoteIds: Array<BigInt> = []
-	if (counterparties.length == 0) {
-		return collectLiquidatableQuoteIdsFromIndex(partyAPendingIndexId(subject, source), source)
-	}
+	if (partyATakeover) return collectLiquidatableQuoteIdsFromIndex(partyAPendingIndexId(subject, source), source)
+	if (counterparties.length == 0) return quoteIds
 
 	for (let i = 0; i < counterparties.length; i++) {
 		let ids = collectLiquidatableQuoteIdsFromIndex(partyBPendingIndexId(counterparties[i], subject, source), source)

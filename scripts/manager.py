@@ -8,7 +8,7 @@ import sys
 import textwrap
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 import yaml
 
@@ -124,11 +124,28 @@ class Config:
     network: str
     contracts: List[Contract]
     deploy_urls: Dict[str, Any]
+    latestAccountBalanceSweepActivationBlock: str = "0"
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Config":
         contracts = [Contract(**c) for c in data["contracts"]]
-        return cls(data["network"], contracts, data["deploy_urls"])
+        raw_activation_block = data.get("latestAccountBalanceSweepActivationBlock", "0")
+        if isinstance(raw_activation_block, bool):
+            raise ValueError("latestAccountBalanceSweepActivationBlock must be a non-negative integer")
+        if isinstance(raw_activation_block, int):
+            activation_block = raw_activation_block
+        elif isinstance(raw_activation_block, str) and raw_activation_block.isdigit():
+            activation_block = int(raw_activation_block)
+        else:
+            raise ValueError("latestAccountBalanceSweepActivationBlock must be a non-negative integer")
+        if activation_block < 0:
+            raise ValueError("latestAccountBalanceSweepActivationBlock must be a non-negative integer")
+        return cls(
+            data["network"],
+            contracts,
+            data["deploy_urls"],
+            latestAccountBalanceSweepActivationBlock=str(activation_block),
+        )
 
     def get_deploy_url(self, module_name: str, provider: str = "goldsky") -> str:
         url = self.deploy_urls.get(module_name)
@@ -149,8 +166,9 @@ abi_versions = {
     "options": ["1"],
     "optionsMultiAccount": ["1"],
     "feeCollector": ["1"],
-    "accountLayer": ["1"],
+    "accountLayer": ["1", "2", "3"],
     "expressProvider": ["1"],
+    "buybackGateway": ["1"],
 }
 
 # Maps ABI name → version enum name used in BaseHandler.ts
@@ -160,9 +178,25 @@ abi_version_enums: Dict[str, str] = {
     "feeCollector": "FeeCollectorVersion",
     "accountLayer": "AccountLayerVersion",
     "expressProvider": "ExpressProviderVersion",
+    "buybackGateway": "BuybackGatewayVersion",
     "options": "Version",
     "optionsMultiAccount": "MultiAccountVersion",
 }
+
+# Shared handlers may deliberately call a prior ABI binding when a newer
+# contract preserves the exact selector and return layout. Graph requires that
+# binding name to be declared on the event data source even though codegen and
+# compilation succeed without it.
+HANDLER_ABI_DEPENDENCIES: Dict[tuple[str, str], List[str]] = {
+    ("accountLayer", "2"): ["accountLayer_1"],
+    ("accountLayer", "3"): ["accountLayer_1", "accountLayer_2"],
+    ("symmio", "0_8_6"): ["symmio_0_8_5"],
+}
+
+
+def get_handler_abi_dependencies(contract: Contract) -> List[str]:
+    return HANDLER_ABI_DEPENDENCIES.get((contract.abi, contract.version), [])
+
 
 SYNC_META_SCHEMA = """
 type SyncMeta @entity(immutable: false) {
@@ -209,7 +243,7 @@ def create_schema_file(target_module: str, target_config: Dict[str, Any]):
         dest_file.write("# Imported Models\n")
         common_models = []
         if os.path.exists(common_models_dir):
-            common_models = os.listdir(common_models_dir)
+            common_models = sorted(os.listdir(common_models_dir))
         for model in common_models:
             model_name = model.split(".")[0]
             if model_name in target_config["importModels"]:
@@ -389,6 +423,21 @@ def generate_template_src_ts(target_module: str, contract: Contract, template_na
         src_file.write("\n".join(handlers_code))
 
 
+def generate_module_src_files(target_module: str, contracts: Iterable[Contract]):
+    generated_paths: Set[str] = set()
+    for contract in contracts:
+        if not contract.events or contract.path() in generated_paths:
+            continue
+        if contract.fake and contract.abi != "expressProvider":
+            continue
+
+        if contract.abi == "expressProvider":
+            generate_template_src_ts(target_module, contract, "ExpressProvider")
+        else:
+            generate_src_ts(target_module, contract)
+        generated_paths.add(contract.path())
+
+
 def get_event_inputs(event_name: str, abi_file_path: str) -> List[Dict[str, Any]]:
     with open(abi_file_path, "r") as file:
         abi = json.load(file)
@@ -473,13 +522,50 @@ def get_scheme_models():
     return [match[0] for match in pattern.findall(schema_content)]
 
 
-def load_dependencies(file_path: str) -> Dict[str, List[str]]:
+DEPENDENCY_EXTENDS_KEY = "__extends"
+
+
+def load_dependencies(file_path: str, resolution_stack: Optional[List[str]] = None) -> Dict[str, List[str]]:
+    """Load dependency files with cycle-safe, child-replaces-parent inheritance."""
+    resolved_path = os.path.realpath(file_path)
+    stack = [] if resolution_stack is None else resolution_stack
+    if resolved_path in stack:
+        cycle = " -> ".join([*stack, resolved_path])
+        raise ValueError(f"Dependency inheritance cycle detected: {cycle}")
+
     try:
-        with open(file_path, "r") as deps_file:
-            return json.load(deps_file)
+        with open(resolved_path, "r") as deps_file:
+            dependency_data = json.load(deps_file)
     except FileNotFoundError:
         warn(f"Dependencies file not found: {file_path}")
         return {}
+
+    if not isinstance(dependency_data, dict):
+        raise ValueError(f"Dependencies file must contain a JSON object: {file_path}")
+
+    extends = dependency_data.get(DEPENDENCY_EXTENDS_KEY, [])
+    if isinstance(extends, str):
+        parent_refs = [extends]
+    elif isinstance(extends, list) and all(isinstance(parent_ref, str) for parent_ref in extends):
+        parent_refs = extends
+    else:
+        raise ValueError(f"{DEPENDENCY_EXTENDS_KEY} must be a path or list of paths in {file_path}")
+
+    dependencies: Dict[str, List[str]] = {}
+    next_stack = [*stack, resolved_path]
+    for parent_ref in parent_refs:
+        parent_path = parent_ref if os.path.isabs(parent_ref) else os.path.join(os.path.dirname(resolved_path), parent_ref)
+        if not os.path.exists(parent_path):
+            raise FileNotFoundError(f"Inherited dependencies file not found: {parent_path} (from {file_path})")
+        dependencies.update(load_dependencies(parent_path, next_stack))
+
+    for model, events in dependency_data.items():
+        if model == DEPENDENCY_EXTENDS_KEY:
+            continue
+        if not isinstance(events, list) or not all(isinstance(event_ref, str) for event_ref in events):
+            raise ValueError(f"Dependency list for model '{model}' must contain only strings in {file_path}")
+        dependencies[model] = events
+    return dependencies
 
 
 def get_needed_events_for(models: List[str], target_module: str, contract: Contract) -> List[str]:
@@ -491,7 +577,45 @@ def get_needed_events_for(models: List[str], target_module: str, contract: Contr
     for model in models:
         events.extend(common_dependencies.get(model, []))
         events.extend(target_dependencies.get(model, []))
-    return list(set(events))
+    return ordered_unique(events)
+
+
+def ordered_unique(values: Iterable[str]) -> List[str]:
+    return list(dict.fromkeys(values))
+
+
+def express_provider_template_entities(target_module: str) -> List[str]:
+    if target_module == "perps/analytics":
+        return [
+            "AffiliateExpressWithdrawComponents",
+            "ExpressProviderSource",
+            "ExpressProviderSourceByCore",
+            "ExpressProviderWithdrawLifecycleHint",
+            "WithdrawRequest",
+        ]
+    if target_module == "perps/events":
+        return list(load_dependencies(os.path.join(target_module, "deps_expressProvider_1.json")))
+    raise ValueError(f"Unsupported ExpressProvider template module: {target_module}")
+
+
+def contract_requires_event_source(contract: Contract, target_module: str) -> bool:
+    """Return whether omitting this real contract from the manifest is unsafe."""
+    product = target_module.split("/", 1)[0]
+    primary_abi = {"perps": "symmio", "options": "options"}.get(product)
+    if contract.abi == primary_abi:
+        return True
+
+    dependency_file = os.path.join(target_module, f"deps_{contract.path()}.json")
+    source_file = os.path.join(target_module, f"src_{contract.path()}.ts")
+    return os.path.exists(dependency_file) or os.path.exists(source_file)
+
+
+def validate_contract_event_source(contract: Contract, target_module: str) -> None:
+    if not contract.fake and not contract.events and contract_requires_event_source(contract, target_module):
+        raise ValueError(
+            f"Configured contract {contract.path()} at {contract.address} resolved zero events for {target_module}; "
+            "refusing to omit a real data source"
+        )
 
 
 def get_event_signature(event_name: str, abi_file_path: str) -> List[str]:
@@ -548,7 +672,7 @@ def get_event_signature_entries(event_ref: str, abi_file_path: str) -> List[Dict
     return signatures
 
 
-def get_events_with_signatures(needed_events: Set[str], contract: Contract) -> List[Event]:
+def get_events_with_signatures(needed_events: Iterable[str], contract: Contract) -> List[Event]:
     events = []
     source = contract.path()
     abi_file = f"./configs/abis/{source}.json"
@@ -565,9 +689,11 @@ def get_events_with_signatures(needed_events: Set[str], contract: Contract) -> L
             event_name = entry["name"]
             overload_index = entry["overload_index"]
             numbered_name = event_name if overload_index == 0 else f"{event_name}{overload_index}"
-            handler_name = (
-                f"handle{numbered_name}" if not contract.fake else "handleIgnoredEvent"
-            )
+            # Auto-detected dynamic templates use a placeholder address and are
+            # marked fake, but their runtime-created instances must still call
+            # the real exported handlers.
+            uses_real_handler = not contract.fake or contract.abi == "expressProvider"
+            handler_name = f"handle{numbered_name}" if uses_real_handler else "handleIgnoredEvent"
             events.append(
                 Event(
                     source=source,
@@ -581,7 +707,7 @@ def get_events_with_signatures(needed_events: Set[str], contract: Contract) -> L
     return events
 
 
-def prepare_module(config: Config, target_module: str):
+def prepare_module(config: Config, target_module: str) -> List[Contract]:
     target_config = {}
     if os.path.exists(os.path.join(target_module, "subgraph_config.json")):
         with open(os.path.join(target_module, "subgraph_config.json"), "r") as target_config_file:
@@ -590,8 +716,8 @@ def prepare_module(config: Config, target_module: str):
     create_schema_file(target_module, target_config)
     models = get_scheme_models()
 
-    # Create a set of all unique ABIs from config
-    unique_abis = set(contract.abi for contract in config.contracts)
+    # Preserve config and registry order so generated manifests are reproducible.
+    unique_abis = ordered_unique(contract.abi for contract in config.contracts)
     config_abis = set(unique_abis)  # snapshot before auto-detection
 
     # Also detect ABIs needed by the module (deps/src files exist) but not in config
@@ -606,7 +732,7 @@ def prepare_module(config: Config, target_module: str):
                 or os.path.exists(os.path.join(common_dir, f"deps_{abi}_{version}.json"))
                 or os.path.exists(os.path.join(target_module, f"src_{abi}_{version}.ts"))
             ):
-                unique_abis.add(abi)
+                unique_abis.append(abi)
                 break
 
     # Create a list to store all contracts, including the new versions
@@ -654,7 +780,9 @@ def prepare_module(config: Config, target_module: str):
 
     # Process events for all contracts
     for contract in all_contracts:
-        contract.events = get_events_with_signatures(set(all_needed_events.get(contract.path(), [])), contract)
+        needed_events = ordered_unique(all_needed_events.get(contract.path(), []))
+        contract.events = get_events_with_signatures(needed_events, contract)
+        validate_contract_event_source(contract, target_module)
 
     subgraph_config = {
         "specVersion": "1.2.0",
@@ -684,12 +812,7 @@ def prepare_module(config: Config, target_module: str):
                         "kind": "ethereum/events",
                         "apiVersion": "0.0.6",
                         "language": "wasm/assemblyscript",
-                        "entities": [
-                            "AffiliateExpressWithdrawComponents",
-                            "ExpressProviderSource",
-                            "ExpressProviderSourceByCore",
-                            "WithdrawRequest",
-                        ],
+                        "entities": express_provider_template_entities(target_module),
                         "abis": [{"name": contract.path(), "file": f"./abis/{contract.path()}.json"}],
                         "eventHandlers": [{"event": event.signature, "handler": event.handler_name} for event in contract.events],
                         "file": f"./{target_module}/src_{contract.path()}.ts",
@@ -724,10 +847,20 @@ def prepare_module(config: Config, target_module: str):
             source_config["source"]["endBlock"] = int(contract.endBlock)
 
         if target_module == "perps/analytics" and contract.abi == "symmio" and not contract.fake:
-            source_config["mapping"]["blockHandlers"] = [{"handler": "handleLatestAccountBalanceBlock", "filter": {"kind": "polling", "every": 1}}]
+            source_config["context"] = {
+                "latestAccountBalanceSweepActivationBlock": {
+                    "type": "BigInt",
+                    "data": config.latestAccountBalanceSweepActivationBlock,
+                }
+            }
+            source_config["mapping"]["blockHandlers"] = [{"handler": "handleLatestAccountBalanceBlock", "filter": {"kind": "polling", "every": 1000}}]
 
         if len(contract.dependencies) > 0:
             source_config["mapping"]["abis"] += [{"name": dep, "file": f"./abis/{dep}.json"} for dep in contract.dependencies]
+
+        for dependency in get_handler_abi_dependencies(contract):
+            if not any(abi_ref["name"] == dependency for abi_ref in source_config["mapping"]["abis"]):
+                source_config["mapping"]["abis"].append({"name": dependency, "file": f"./abis/{dependency}.json"})
 
         # symmio handlers (Allocate/Deposit/Withdraw) call accountLayer_1.bind() via the resolver
         # to fix the activeUsers ordering bug. Every symmio data source on chains using accountLayer
@@ -769,6 +902,7 @@ def prepare_module(config: Config, target_module: str):
     yaml_content = json_to_yaml(subgraph_config)
     with open("./subgraph.yaml", "w") as yaml_file:
         yaml_file.write(yaml_content)
+    return all_contracts
 
 
 # New function to convert Solidity types to GraphQL types
@@ -1064,7 +1198,7 @@ def main():
 
         current_step += 1
         step(current_step, build_steps, "Preparing module...")
-        prepare_module(config, args.module_name)
+        prepared_contracts = prepare_module(config, args.module_name)
         generate_sync_meta_ts(args.module_name)
         success("Module prepared")
 
@@ -1079,9 +1213,7 @@ def main():
         if args.create_src:
             current_step += 1
             step(current_step, build_steps, "Generating src entry files...")
-            for contract in config.contracts:
-                if contract.events:
-                    generate_src_ts(args.module_name, contract)
+            generate_module_src_files(args.module_name, prepared_contracts)
             success("Src files generated")
 
         if args.create_handlers:

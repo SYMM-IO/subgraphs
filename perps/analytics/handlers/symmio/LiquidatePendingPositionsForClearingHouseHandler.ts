@@ -1,12 +1,11 @@
 import {
-	isPartyATakeoverSubject,
 	LiquidatePendingPositionsForClearingHouseHandler as CommonLiquidatePendingPositionsForClearingHouseHandler,
+	resolveClearingHousePendingQuoteIds,
 } from "../../../common/handlers/symmio/LiquidatePendingPositionsForClearingHouseHandler"
 import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { Quote } from "../../../../generated/schema"
 import { QuoteStatus } from "../../utils/constants"
-import { getLiquidatablePendingQuoteIds } from "../../../common/utils/quote"
 import { createQuoteEvent } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 
@@ -14,11 +13,14 @@ export class LiquidatePendingPositionsForClearingHouseHandler<T> extends CommonL
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		let counterparties: Address[] = isPartyATakeoverSubject(version, event.address, event.params.subject)
-			? new Array<Address>()
-			: event.params.counterparties
-		let quoteIds = getLiquidatablePendingQuoteIds(event.params.subject, counterparties, event.address)
-		super.handle(_event, version)
+		let quoteIds = resolveClearingHousePendingQuoteIds(
+			version,
+			event.address,
+			event.params.subject,
+			event.params.counterparties,
+			event.params.liquidatedAmounts.length,
+		)
+		super.handleQuoteIds(_event, quoteIds)
 
 		let seenPairs: Array<string> = []
 		for (let i = 0; i < quoteIds.length; i++) {

@@ -1,6 +1,7 @@
 import { BaseHandler, Version } from "../../BaseHandler"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { LiquidationDetail } from "../../../../generated/schema"
+import { clearPendingSettlementSnapshotsForTakeover } from "../../utils/liquidationDetail"
 
 export class SettlePartyATakeoverHandler<T> extends BaseHandler {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -10,6 +11,7 @@ export class SettlePartyATakeoverHandler<T> extends BaseHandler {
 		let entityId = event.params.partyA.toHexString() + "-" + event.params.liquidationId.toHexString() + "-" + event.address.toHexString()
 		let entity = LiquidationDetail.load(entityId)
 		if (!entity) return
+		clearPendingSettlementSnapshotsForTakeover(entity)
 		entity.takeover = true
 		entity.settled = true
 		entity.fullyLiquidated = true

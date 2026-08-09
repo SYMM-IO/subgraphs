@@ -2,7 +2,7 @@ import { OpenPosition as OpenPositionEntity } from "../../../../generated/schema
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { findAccountSourceForQuote } from "../../utils/account_utils";
+import { findAccountSourceForQuote } from "../../utils/account_utils"
 
 export class OpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -19,8 +19,9 @@ export class OpenPositionHandler<T> {
 		entity.filledAmount = event.params.filledAmount
 		entity.openedPrice = event.params.openedPrice
 
-		// New variant (0.8.5) has lockedValues tuple as 6th param
-		if (_event.parameters.length >= 6) {
+		// New variant (0.8.5) has lockedValues tuple as 6th param. Legacy 0.8.0
+		// also has six parameters, but its final value is the uint8 quote status.
+		if (_event.parameters.length >= 6 && _event.parameters[5].value.kind == ethereum.ValueKind.TUPLE) {
 			let lockedValuesTuple = _event.parameters[5].value.toTuple()
 			entity.lockedValuesCva = lockedValuesTuple[0].toBigInt()
 			entity.lockedValuesLf = lockedValuesTuple[1].toBigInt()

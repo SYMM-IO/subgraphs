@@ -8,6 +8,7 @@ import { LiquidatePartyA as LiquidatePartyA_0_8_2 } from "../../../../generated/
 import { LiquidatePartyA as LiquidatePartyA_0_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
 import { LiquidatePartyA as LiquidatePartyA_0_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
 import { LiquidatePartyA as LiquidatePartyA_0_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
+import { LiquidatePartyA as LiquidatePartyA_0_8_6 } from "../../../../generated/symmio_0_8_6/symmio_0_8_6"
 import { setLiquidationDetailProfileRefs } from "../../utils/profile"
 import { calculateFreeMarginAtStart, calculateLossRestsAt } from "../../utils/liquidationDetail"
 
@@ -23,7 +24,13 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 
 		if (version >= Version.v_0_8_3) {
 			// v0.8.3+ has liquidationId, upnl, totalUnrealizedLoss on event
-			if (version == Version.v_0_8_5) {
+			if (version == Version.v_0_8_6) {
+				// @ts-ignore
+				const event_ = changetype<LiquidatePartyA_0_8_6>(_event)
+				liquidationId = event_.params.liquidationId
+				upnl = event_.params.upnl
+				totalUnrealizedLoss = event_.params.totalUnrealizedLoss
+			} else if (version == Version.v_0_8_5) {
 				// @ts-ignore
 				const event_ = changetype<LiquidatePartyA_0_8_5>(_event)
 				liquidationId = event_.params.liquidationId
@@ -43,9 +50,17 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 				totalUnrealizedLoss = event_.params.totalUnrealizedLoss
 			}
 			const liqState = getLiquidationStateData(version, event.address, event.params.partyA)
-			if (!liqState) return
-			timestamp = liqState.timestamp
-			liquidationTimestamp = liqState.liquidationTimestamp
+			if (liqState && liqState.liquidationId.toHexString() == liquidationId.toHexString()) {
+				timestamp = liqState.timestamp
+				liquidationTimestamp = liqState.liquidationTimestamp
+			} else if (version == Version.v_0_8_6) {
+				// A later same-block liquidation may be visible to eth_call.
+				// Keep this event keyed correctly instead of importing its state.
+				timestamp = event.block.timestamp
+				liquidationTimestamp = event.block.timestamp
+			} else {
+				return
+			}
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore
 			const event_ = changetype<LiquidatePartyA_0_8_2>(_event)
@@ -84,7 +99,15 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 		entity.disputed = false
 		entity.liquidationTimestamp = liquidationTimestamp
 		entity.liquidator = event.params.liquidator
-		if (version == Version.v_0_8_5) {
+		entity.liquidationStartTransaction = event.transaction.hash
+		if (version == Version.v_0_8_6) {
+			// @ts-ignore
+			let allocatedBalance = changetype<LiquidatePartyA_0_8_6>(_event).params.allocatedBalance
+			entity.allocatedBalance = allocatedBalance
+			// The live liquidation flow classifies against the current allocation,
+			// which is the allocation carried by this successful start event.
+			entity.liquidationAllocatedBalance = allocatedBalance
+		} else if (version == Version.v_0_8_5) {
 			// @ts-ignore
 			entity.allocatedBalance = changetype<LiquidatePartyA_0_8_5>(_event).params.allocatedBalance
 		} else if (version == Version.v_0_8_4) {

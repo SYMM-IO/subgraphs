@@ -14,6 +14,7 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			const rate = event.params.rates[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
+			if (quote.quantity === null || quote.closedAmount === null) continue
 			let prevOpenedPrice = quote.openedPrice ? quote.openedPrice! : BigInt.zero()
 			const openAmount = quote.quantity!.minus(quote.closedAmount!)
 
@@ -32,8 +33,8 @@ export class ChargeFundingRateHandler<T> extends BaseHandler {
 			if (paid) fundingPaid = funding
 			else fundingReceived = funding
 
-			quote.userPaidFunding = quote.userPaidFunding!.plus(fundingPaid)
-			quote.userReceivedFunding = quote.userReceivedFunding!.plus(fundingReceived)
+			quote.userPaidFunding = (quote.userPaidFunding ? quote.userPaidFunding! : BigInt.zero()).plus(fundingPaid)
+			quote.userReceivedFunding = (quote.userReceivedFunding ? quote.userReceivedFunding! : BigInt.zero()).plus(fundingReceived)
 			quote.save()
 
 			let globalEntity = GlobalFee.load("GlobalEntity")

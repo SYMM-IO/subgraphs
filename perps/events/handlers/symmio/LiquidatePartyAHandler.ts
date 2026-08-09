@@ -2,10 +2,6 @@ import { LiquidatePartyA as LiquidatePartyAEntity } from "../../../../generated/
 import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { LiquidatePartyA as LiquidatePartyA_8_2 } from "../../../../generated/symmio_0_8_2/symmio_0_8_2"
-import { LiquidatePartyA as LiquidatePartyA_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { LiquidatePartyA as LiquidatePartyA_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { LiquidatePartyA as LiquidatePartyA_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class LiquidatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -21,50 +17,15 @@ export class LiquidatePartyAHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<LiquidatePartyA_8_5>(_event)
-				entity.allocatedBalance = e.params.allocatedBalance
-				entity.upnl = e.params.upnl
-				entity.totalUnrealizedLoss = e.params.totalUnrealizedLoss
-				entity.liquidationId = e.params.liquidationId
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<LiquidatePartyA_8_4>(_event)
-				entity.allocatedBalance = e.params.allocatedBalance
-				entity.upnl = e.params.upnl
-				entity.totalUnrealizedLoss = e.params.totalUnrealizedLoss
-				entity.liquidationId = e.params.liquidationId
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<LiquidatePartyA_8_3>(_event)
-				entity.allocatedBalance = e.params.allocatedBalance
-				entity.upnl = e.params.upnl
-				entity.totalUnrealizedLoss = e.params.totalUnrealizedLoss
-				entity.liquidationId = e.params.liquidationId
-				break
-			}
-			case Version.v_0_8_2: {
-				// @ts-ignore
-				const e = changetype<LiquidatePartyA_8_2>(_event)
-				entity.allocatedBalance = e.params.allocatedBalance
-				entity.upnl = e.params.upnl
-				entity.totalUnrealizedLoss = e.params.totalUnrealizedLoss
-				entity.liquidationId = Bytes.empty()
-				break
-			}
-			default: {
-				entity.allocatedBalance = BigInt.zero()
-				entity.upnl = BigInt.zero()
-				entity.totalUnrealizedLoss = BigInt.zero()
-				entity.liquidationId = Bytes.empty()
-				break
-			}
+		entity.allocatedBalance = BigInt.zero()
+		entity.upnl = BigInt.zero()
+		entity.totalUnrealizedLoss = BigInt.zero()
+		entity.liquidationId = Bytes.empty()
+		if (_event.parameters.length >= 5) {
+			entity.allocatedBalance = _event.parameters[2].value.toBigInt()
+			entity.upnl = _event.parameters[3].value.toBigInt()
+			entity.totalUnrealizedLoss = _event.parameters[4].value.toBigInt()
+			if (_event.parameters.length >= 6) entity.liquidationId = _event.parameters[5].value.toBytes()
 		}
 
 		entity.blockTimestamp = event.block.timestamp

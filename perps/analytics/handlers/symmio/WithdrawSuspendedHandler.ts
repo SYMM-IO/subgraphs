@@ -4,7 +4,7 @@ import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
-import { loadWithdrawRequest, removeWithdrawRequestFromLookup } from "../../utils/withdrawRequest"
+import { isActiveWithdrawRequest, loadWithdrawRequest, removeWithdrawRequestFromLookup } from "../../utils/withdrawRequest"
 import { removeWithdrawRequestFromAffiliateExpressWithdrawComponents } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class WithdrawSuspendedHandler<T> extends CommonWithdrawSuspendedHandler<T> {
@@ -15,6 +15,7 @@ export class WithdrawSuspendedHandler<T> extends CommonWithdrawSuspendedHandler<
 
 		let wr = loadWithdrawRequest(event.params.user, event.params.requestId, _event.address)
 		if (!wr) return
+		if (!isActiveWithdrawRequest(wr)) return
 		wr.status = "SUSPENDED"
 		wr.updateTimestamp = _event.block.timestamp
 		let account = Account.load(wr.user.toHexString())

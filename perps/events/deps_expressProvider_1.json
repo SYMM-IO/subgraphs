@@ -1,0 +1,131 @@
+{
+	"AffiliateConfigUpdated": [
+		"AffiliateConfigUpdated"
+	],
+	"AffiliateDeposit": [
+		"AffiliateDeposit"
+	],
+	"AffiliateWithdraw": [
+		"AffiliateWithdraw"
+	],
+	"BadDebtAccrued": [
+		"BadDebtAccrued"
+	],
+	"CapChangeFeeConfigUpdated": [
+		"CapChangeFeeConfigUpdated"
+	],
+	"CapChangeQuotaConfigUpdated": [
+		"CapChangeQuotaConfigUpdated"
+	],
+	"CreditBadDebtRepaid": [
+		"CreditBadDebtRepaid"
+	],
+	"CreditLineAffiliateConfigSelfUpdated": [
+		"CreditLineAffiliateConfigSelfUpdated"
+	],
+	"CreditLineAffiliateConfigUpdated": [
+		"CreditLineAffiliateConfigUpdated"
+	],
+	"CreditLineMuonConfigUpdated": [
+		"CreditLineMuonConfigUpdated"
+	],
+	"CreditLinePausedUpdated": [
+		"CreditLinePausedUpdated"
+	],
+	"CreditLineProtocolConfigUpdated": [
+		"CreditLineProtocolConfigUpdated"
+	],
+	"CreditLineUserBlacklistUpdated": [
+		"CreditLineUserBlacklistUpdated"
+	],
+	"DebtActivated": [
+		"DebtActivated"
+	],
+	"DebtCancelled": [
+		"DebtCancelled"
+	],
+	"DebtReserved": [
+		"DebtReserved"
+	],
+	"DebtSettled": [
+		"DebtSettled"
+	],
+	"FeesClaimed": [
+		"FeesClaimed"
+	],
+	"GeneralBadDebtAccrued": [
+		"GeneralBadDebtAccrued"
+	],
+	"GeneralDeposit": [
+		"GeneralDeposit"
+	],
+	"GeneralWithdraw": [
+		"GeneralWithdraw"
+	],
+	"MinValidatorSignaturesUpdated": [
+		"MinValidatorSignaturesUpdated"
+	],
+	"OperatorFeesClaimed": [
+		"OperatorFeesClaimed"
+	],
+	"OwnershipTransferCanceled": [
+		"OwnershipTransferCanceled"
+	],
+	"OwnershipTransferStarted": [
+		"OwnershipTransferStarted"
+	],
+	"OwnershipTransferred": [
+		"OwnershipTransferred"
+	],
+	"PausedUpdated": [
+		"PausedUpdated"
+	],
+	"RequestDebtCleared": [
+		"RequestDebtCleared"
+	],
+	"SponsorConfigUpdated": [
+		"SponsorConfigUpdated"
+	],
+	"SponsorCoverageRestored": [
+		"SponsorCoverageRestored"
+	],
+	"SponsorDeposit": [
+		"SponsorDeposit"
+	],
+	"SponsorWithdraw": [
+		"SponsorWithdraw"
+	],
+	"TokensRescued": [
+		"TokensRescued"
+	],
+	"ValidatorApprovalTimeoutUpdated": [
+		"ValidatorApprovalTimeoutUpdated"
+	],
+	"ValidatorUpdated": [
+		"ValidatorUpdated"
+	],
+	"WithdrawAccepted": [
+		"WithdrawAccepted"
+	],
+	"WithdrawAccelerated": [
+		"WithdrawAccelerated"
+	],
+	"WithdrawCancelled": [
+		"WithdrawCancelled"
+	],
+	"WithdrawFinalized": [
+		"WithdrawFinalized"
+	],
+	"WithdrawLocked": [
+		"WithdrawLocked"
+	],
+	"WithdrawProcessed": [
+		"WithdrawProcessed"
+	],
+	"WithdrawSuspended": [
+		"WithdrawSuspended"
+	],
+	"WithdrawUnlockedAndProcessed": [
+		"WithdrawUnlockedAndProcessed"
+	]
+}

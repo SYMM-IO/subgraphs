@@ -7,6 +7,7 @@ import {
 	Configuration,
 	ExpressProviderSource,
 	ExpressProviderSourceByCore,
+	ExpressProviderWithdrawLifecycleHint,
 	LatestAccountBalance,
 	SubAccount,
 	WithdrawRequest,
@@ -21,7 +22,7 @@ import {
 	deploymentIdForSource,
 } from "../../common/utils/profile"
 import { ZERO_ADDRESS_BYTES } from "./constants"
-import { loadWithdrawRequest, loadWithdrawRequestAccountLookup } from "./withdrawRequest"
+import { isActiveWithdrawRequest, loadWithdrawRequest, loadWithdrawRequestAccountLookup, recordWithdrawCoreAdvanceHint } from "./withdrawRequest"
 
 const BUCKET_LEGACY = "LEGACY"
 const BUCKET_IMPORTED_LEGACY = "IMPORTED_LEGACY"
@@ -66,6 +67,10 @@ function providerSourceByCoreId(source: Bytes): string {
 
 function providerSourceId(provider: Bytes): string {
 	return provider.toHexString()
+}
+
+function providerWithdrawLifecycleHintId(source: Bytes, user: Bytes, requestId: BigInt, transaction: Bytes): string {
+	return source.toHexString() + "-" + user.toHexString() + "-" + requestId.toString() + "-" + transaction.toHexString()
 }
 
 function bucketId(componentsId: string, bucket: string): string {
@@ -116,10 +121,6 @@ function isUnresolvedLegacy(account: Account, bucket: string): boolean {
 
 function isUnknownAccount(bucket: string): boolean {
 	return bucket == BUCKET_UNKNOWN
-}
-
-function isOpenWithdrawRequest(request: WithdrawRequest): boolean {
-	return request.status == "PENDING" || request.status == "PROVIDER_ACCEPTED" || request.status == "CANCEL_REQUESTED"
 }
 
 function newComponents(
@@ -453,9 +454,7 @@ export function ensureExpressProviderSource(provider: Bytes, source: Bytes, coll
 
 	let byCore = ExpressProviderSourceByCore.load(providerSourceByCoreId(source))
 	if (!byCore) byCore = new ExpressProviderSourceByCore(providerSourceByCoreId(source))
-	byCore.providerSource = providerSource.id
 	byCore.source = source
-	byCore.provider = provider
 	byCore.collateral = collateral
 	byCore.deploymentId = providerSource.deploymentId
 	byCore.timestamp = timestamp
@@ -477,6 +476,33 @@ function loadExpressProviderSourceFromProvider(provider: Bytes, timestamp: BigIn
 
 	ensureExpressProviderSource(provider, sourceResult.value, collateralResult.value, timestamp, blockNumber)
 	return ExpressProviderSource.load(providerSourceId(provider))
+}
+
+function loadOrCreateProviderWithdrawLifecycleHint(
+	providerSource: ExpressProviderSource,
+	user: Bytes,
+	requestId: BigInt,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): ExpressProviderWithdrawLifecycleHint {
+	let id = providerWithdrawLifecycleHintId(providerSource.source, user, requestId, transaction)
+	let hint = ExpressProviderWithdrawLifecycleHint.load(id)
+	if (!hint) {
+		hint = new ExpressProviderWithdrawLifecycleHint(id)
+		hint.provider = providerSource.provider
+		hint.source = providerSource.source
+		hint.user = user
+		hint.requestId = requestId
+		hint.transaction = transaction
+		hint.accepted = false
+		hint.processed = false
+		hint.reservedDebtAmount = BigInt.zero()
+		hint.activeDebtAmount = BigInt.zero()
+	}
+	hint.updateTimestamp = timestamp
+	hint.blockNumber = blockNumber
+	return hint
 }
 
 function syncSnapshot(
@@ -503,12 +529,16 @@ function syncSnapshot(
 	let brokenHierarchy = isBrokenHierarchy(account, sub)
 	let unresolvedLegacy = isUnresolvedLegacy(account, bucket)
 	let unknownAccount = isUnknownAccount(bucket)
-	let components = loadComponents(aggregateSource, account.accountSource!, collateral, account, timestamp, blockNumber)
-	let bucketEntity = loadBucket(components, bucket, timestamp, blockNumber)
 
+	// Remove the previous snapshot BEFORE loading components/bucket: removeSnapshot saves its own
+	// loaded copies, so applying the new delta to copies loaded earlier would overwrite that
+	// subtraction and re-add the previous balances on every re-sync.
 	if (previous) {
 		removeSnapshot(previous, timestamp, blockNumber)
 	}
+
+	let components = loadComponents(aggregateSource, account.accountSource!, collateral, account, timestamp, blockNumber)
+	let bucketEntity = loadBucket(components, bucket, timestamp, blockNumber)
 
 	let snapshot = previous ? previous : new AffiliateExpressWithdrawAccountSnapshot(id)
 	snapshot.components = components.id
@@ -681,14 +711,228 @@ export function applyWithdrawAdvancedToAffiliateExpressWithdrawComponents(
 	applyWithdrawRequestRecordDelta(request, BigInt.zero(), BigInt.zero(), BigInt.zero(), amount, timestamp, blockNumber)
 }
 
-export function recordWithdrawAdvanced(source: Bytes, user: Bytes, requestId: BigInt, amount: BigInt, timestamp: BigInt, blockNumber: BigInt): void {
+export function recordWithdrawAdvanced(
+	source: Bytes,
+	user: Bytes,
+	requestId: BigInt,
+	amount: BigInt,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
 	let request = loadWithdrawRequest(changetype<Address>(user), requestId, changetype<Address>(source))
-	if (!request) return
+	if (!request) {
+		recordWithdrawCoreAdvanceHint(changetype<Address>(source), changetype<Address>(user), requestId, amount, transaction, timestamp, blockNumber)
+		return
+	}
 	request.advancedAmount = request.advancedAmount.plus(amount)
 	request.updateTimestamp = timestamp
 	request.blockNumber = blockNumber
 	request.save()
 	applyWithdrawAdvancedToAffiliateExpressWithdrawComponents(request, amount, timestamp, blockNumber)
+}
+
+function applyExpressProviderAcceleration(
+	request: WithdrawRequest,
+	affiliate: Bytes,
+	affiliateAmount: BigInt,
+	creditAmount: BigInt,
+	generalAmount: BigInt,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	request.acceleratedAt = timestamp
+	request.accelerationAffiliate = affiliate
+	request.accelerationAffiliateAmount = affiliateAmount
+	request.accelerationCreditAmount = creditAmount
+	request.accelerationGeneralAmount = generalAmount
+	request.updateTimestamp = timestamp
+	request.blockNumber = blockNumber
+}
+
+function applyExpressProviderProcessing(
+	request: WithdrawRequest,
+	processingEvent: string,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	applyExpressProviderStatus(request, "PROCESSED", transaction, timestamp, blockNumber)
+	request.providerProcessedAt = timestamp
+	request.providerProcessedBlockNumber = blockNumber
+	request.providerProcessedTransaction = transaction
+	request.providerProcessingEvent = processingEvent
+}
+
+function applyExpressProviderStatus(request: WithdrawRequest, status: string, transaction: Bytes, timestamp: BigInt, blockNumber: BigInt): void {
+	request.providerStatus = status
+	request.providerStatusUpdatedAt = timestamp
+	request.providerStatusBlockNumber = blockNumber
+	request.providerStatusTransaction = transaction
+	request.updateTimestamp = timestamp
+	request.blockNumber = blockNumber
+}
+
+export function recordExpressProviderWithdrawAccepted(
+	provider: Bytes,
+	user: Bytes,
+	requestId: BigInt,
+	optionType: i32,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	let providerSource = loadExpressProviderSourceFromProvider(provider, timestamp, blockNumber)
+	if (!providerSource) return
+
+	let request = loadWithdrawRequest(changetype<Address>(user), requestId, changetype<Address>(providerSource.source))
+	if (request) {
+		request.providerOptionType = optionType
+		applyExpressProviderStatus(request, "ACCEPTED", transaction, timestamp, blockNumber)
+		if (request.status == "PENDING") request.status = "PROVIDER_ACCEPTED"
+		request.save()
+		return
+	}
+
+	let hint = loadOrCreateProviderWithdrawLifecycleHint(providerSource, user, requestId, transaction, timestamp, blockNumber)
+	hint.accepted = true
+	hint.providerOptionType = optionType
+	hint.providerStatus = "ACCEPTED"
+	hint.save()
+}
+
+export function recordExpressProviderWithdrawAccelerated(
+	provider: Bytes,
+	user: Bytes,
+	requestId: BigInt,
+	affiliate: Bytes,
+	affiliateAmount: BigInt,
+	creditAmount: BigInt,
+	generalAmount: BigInt,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	let providerSource = loadExpressProviderSourceFromProvider(provider, timestamp, blockNumber)
+	if (!providerSource) return
+
+	let request = loadWithdrawRequest(changetype<Address>(user), requestId, changetype<Address>(providerSource.source))
+	if (request) {
+		if (!isActiveWithdrawRequest(request)) return
+		applyExpressProviderAcceleration(request, affiliate, affiliateAmount, creditAmount, generalAmount, timestamp, blockNumber)
+		request.save()
+		return
+	}
+
+	let hint = loadOrCreateProviderWithdrawLifecycleHint(providerSource, user, requestId, transaction, timestamp, blockNumber)
+	hint.acceleratedAt = timestamp
+	hint.accelerationAffiliate = affiliate
+	hint.accelerationAffiliateAmount = affiliateAmount
+	hint.accelerationCreditAmount = creditAmount
+	hint.accelerationGeneralAmount = generalAmount
+	hint.save()
+}
+
+export function recordExpressProviderWithdrawProcessed(
+	provider: Bytes,
+	user: Bytes,
+	requestId: BigInt,
+	processingEvent: string,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	let providerSource = loadExpressProviderSourceFromProvider(provider, timestamp, blockNumber)
+	if (!providerSource) return
+
+	let request = loadWithdrawRequest(changetype<Address>(user), requestId, changetype<Address>(providerSource.source))
+	if (request) {
+		applyExpressProviderProcessing(request, processingEvent, transaction, timestamp, blockNumber)
+		request.save()
+		return
+	}
+
+	let hint = loadOrCreateProviderWithdrawLifecycleHint(providerSource, user, requestId, transaction, timestamp, blockNumber)
+	hint.processed = true
+	hint.processingEvent = processingEvent
+	hint.providerStatus = "PROCESSED"
+	hint.save()
+}
+
+export function recordExpressProviderWithdrawStatus(
+	provider: Bytes,
+	user: Bytes,
+	requestId: BigInt,
+	status: string,
+	transaction: Bytes,
+	timestamp: BigInt,
+	blockNumber: BigInt,
+): void {
+	let providerSource = loadExpressProviderSourceFromProvider(provider, timestamp, blockNumber)
+	if (!providerSource) return
+
+	let request = loadWithdrawRequest(changetype<Address>(user), requestId, changetype<Address>(providerSource.source))
+	if (request) {
+		applyExpressProviderStatus(request, status, transaction, timestamp, blockNumber)
+		request.save()
+		return
+	}
+
+	let hint = loadOrCreateProviderWithdrawLifecycleHint(providerSource, user, requestId, transaction, timestamp, blockNumber)
+	hint.providerStatus = status
+	hint.save()
+}
+
+export function consumeExpressProviderWithdrawLifecycleHint(request: WithdrawRequest, provider: Bytes, transaction: Bytes): void {
+	let id = providerWithdrawLifecycleHintId(request.source, request.user, request.requestId, transaction)
+	let hint = ExpressProviderWithdrawLifecycleHint.load(id)
+	if (!hint) return
+
+	if (
+		hint.provider.toHexString() != provider.toHexString() ||
+		hint.source.toHexString() != request.source.toHexString() ||
+		hint.user.toHexString() != request.user.toHexString() ||
+		!hint.requestId.equals(request.requestId) ||
+		hint.transaction.toHexString() != transaction.toHexString()
+	) {
+		return
+	}
+
+	if (hint.accepted && request.status == "PENDING") {
+		request.status = "PROVIDER_ACCEPTED"
+		request.updateTimestamp = hint.updateTimestamp
+		request.blockNumber = hint.blockNumber
+	}
+	if (hint.accepted) request.providerOptionType = hint.providerOptionType
+	if (hint.providerStatus !== null) {
+		applyExpressProviderStatus(request, hint.providerStatus!, hint.transaction, hint.updateTimestamp, hint.blockNumber)
+	}
+	if (
+		hint.acceleratedAt !== null &&
+		hint.accelerationAffiliate !== null &&
+		hint.accelerationAffiliateAmount !== null &&
+		hint.accelerationCreditAmount !== null &&
+		hint.accelerationGeneralAmount !== null
+	) {
+		applyExpressProviderAcceleration(
+			request,
+			hint.accelerationAffiliate!,
+			hint.accelerationAffiliateAmount!,
+			hint.accelerationCreditAmount!,
+			hint.accelerationGeneralAmount!,
+			hint.acceleratedAt!,
+			hint.blockNumber,
+		)
+	}
+	request.reservedDebtAmount = request.reservedDebtAmount.plus(hint.reservedDebtAmount)
+	request.activeDebtAmount = request.activeDebtAmount.plus(hint.activeDebtAmount)
+
+	if (hint.processed) {
+		let processingEvent = hint.processingEvent === null ? "WithdrawProcessed" : hint.processingEvent!
+		applyExpressProviderProcessing(request, processingEvent, hint.transaction, hint.updateTimestamp, hint.blockNumber)
+	}
+	request.save()
+	store.remove("ExpressProviderWithdrawLifecycleHint", id)
 }
 
 export function recordReservedCreditLineDebt(
@@ -697,6 +941,7 @@ export function recordReservedCreditLineDebt(
 	user: Bytes,
 	requestId: BigInt,
 	amount: BigInt,
+	transaction: Bytes,
 	timestamp: BigInt,
 	blockNumber: BigInt,
 ): void {
@@ -706,7 +951,13 @@ export function recordReservedCreditLineDebt(
 	applyDebtDelta(components, amount, BigInt.zero(), BigInt.zero(), timestamp, blockNumber)
 
 	let request = loadWithdrawRequest(changetype<Address>(user), requestId, changetype<Address>(providerSource.source))
-	if (request) applyRequestDebtDelta(request, amount, BigInt.zero(), BigInt.zero(), timestamp, blockNumber)
+	if (request) {
+		applyRequestDebtDelta(request, amount, BigInt.zero(), BigInt.zero(), timestamp, blockNumber)
+	} else {
+		let hint = loadOrCreateProviderWithdrawLifecycleHint(providerSource, user, requestId, transaction, timestamp, blockNumber)
+		hint.reservedDebtAmount = hint.reservedDebtAmount.plus(amount)
+		hint.save()
+	}
 }
 
 export function recordActivatedCreditLineDebt(
@@ -715,6 +966,7 @@ export function recordActivatedCreditLineDebt(
 	user: Bytes,
 	requestId: BigInt,
 	amount: BigInt,
+	transaction: Bytes,
 	timestamp: BigInt,
 	blockNumber: BigInt,
 ): void {
@@ -724,7 +976,14 @@ export function recordActivatedCreditLineDebt(
 	applyDebtDelta(components, amount.neg(), amount, BigInt.zero(), timestamp, blockNumber)
 
 	let request = loadWithdrawRequest(changetype<Address>(user), requestId, changetype<Address>(providerSource.source))
-	if (request) applyRequestDebtDelta(request, amount.neg(), amount, BigInt.zero(), timestamp, blockNumber)
+	if (request) {
+		applyRequestDebtDelta(request, amount.neg(), amount, BigInt.zero(), timestamp, blockNumber)
+	} else {
+		let hint = loadOrCreateProviderWithdrawLifecycleHint(providerSource, user, requestId, transaction, timestamp, blockNumber)
+		hint.reservedDebtAmount = hint.reservedDebtAmount.minus(amount)
+		hint.activeDebtAmount = hint.activeDebtAmount.plus(amount)
+		hint.save()
+	}
 }
 
 export function recordSettledCreditLineDebt(
@@ -817,7 +1076,7 @@ export function recordRepaidBadCreditLineDebt(provider: Bytes, affiliate: Bytes,
 }
 
 function resyncPendingRequestForAccount(request: WithdrawRequest, account: Account, timestamp: BigInt, blockNumber: BigInt): void {
-	if (!isOpenWithdrawRequest(request)) return
+	if (!isActiveWithdrawRequest(request)) return
 
 	let classicAmount = zeroIfNull(request.classicAmount)
 	let expressAmount = zeroIfNull(request.expressAmount)

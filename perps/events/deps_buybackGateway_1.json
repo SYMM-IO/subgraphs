@@ -1,0 +1,6 @@
+{
+	"Buyback": ["BuybackExecuted"],
+	"BuybackDay": ["BuybackExecuted", "Deposited"],
+	"BuybackDeposit": ["Deposited"],
+	"BuybackGatewayStats": ["BuybackExecuted", "Deposited"]
+}

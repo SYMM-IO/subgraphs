@@ -2,11 +2,23 @@ import { ChargeFundingRate as ChargeFundingRateEntity } from "../../../../genera
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { FACTOR, getGlobalCounterAndInc, unDecimal } from "../../../common/utils"
+import { getQuote as getQuote_0_8_6 } from "../../../common/contract_utils_0_8_6"
+import { getQuote as getQuote_0_8_5 } from "../../../common/contract_utils_0_8_5"
 import { getQuote as getQuote_0_8_4 } from "../../../common/contract_utils_0_8_4"
 import { getQuote as getQuote_0_8_3 } from "../../../common/contract_utils_0_8_3"
 import { getQuote as getQuote_0_8_2 } from "../../../common/contract_utils_0_8_2"
 import { getQuote as getQuote_0_8_1 } from "../../../common/contract_utils_0_8_1"
-import { getQuote as getQuote_0_8_0 } from "../../../common/contract_utils_0_8_0"
+
+function calculateFundingAmount(updatedPrice: BigInt, quantity: BigInt, closedAmount: BigInt, positionType: i32, rate: BigInt): BigInt {
+	// LONG prices move by (1 + rate); SHORT prices move by (1 - rate).
+	const denominator = positionType == 0 ? FACTOR.plus(rate) : FACTOR.minus(rate)
+	if (denominator.le(BigInt.zero())) return BigInt.zero()
+
+	const originalPrice = updatedPrice.times(FACTOR).div(denominator)
+	const priceDelta = updatedPrice.minus(originalPrice).abs()
+	const openAmount = quantity.minus(closedAmount)
+	return unDecimal(priceDelta.times(openAmount))
+}
 
 export class ChargeFundingRateHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -27,54 +39,58 @@ export class ChargeFundingRateHandler<T> {
 			const rate: BigInt = entity.rates![i]
 
 			switch (version) {
+				case Version.v_0_8_6: {
+					const chainQuote = getQuote_0_8_6(event.address, quoteId)
+					if (chainQuote == null) {
+						amounts.push(BigInt.zero())
+						break
+					}
+					amounts.push(calculateFundingAmount(chainQuote.openedPrice, chainQuote.quantity, chainQuote.closedAmount, chainQuote.positionType, rate))
+					break
+				}
+				case Version.v_0_8_5: {
+					const chainQuote = getQuote_0_8_5(event.address, quoteId)
+					if (chainQuote == null) {
+						amounts.push(BigInt.zero())
+						break
+					}
+					amounts.push(calculateFundingAmount(chainQuote.openedPrice, chainQuote.quantity, chainQuote.closedAmount, chainQuote.positionType, rate))
+					break
+				}
 				case Version.v_0_8_4: {
 					const chainQuote = getQuote_0_8_4(event.address, quoteId)
-					if (chainQuote == null) return
-					const updatedPrice = chainQuote.openedPrice
-					// Reverse the rate application to get original price
-					// If rate is 0.001 (0.1%), then original = current / 1.001
-					const originalPrice = updatedPrice.times(FACTOR).div(rate.plus(FACTOR))
-					const priceDiff = updatedPrice.minus(originalPrice)
-					amounts.push(unDecimal(priceDiff.times(chainQuote.quantity)))
+					if (chainQuote == null) {
+						amounts.push(BigInt.zero())
+						break
+					}
+					amounts.push(calculateFundingAmount(chainQuote.openedPrice, chainQuote.quantity, chainQuote.closedAmount, chainQuote.positionType, rate))
 					break
 				}
 				case Version.v_0_8_3: {
-					let chainQuote = getQuote_0_8_3(event.address, quoteId)!
-					if (chainQuote == null) return
-					const updatedPrice = chainQuote.openedPrice
-					// Reverse the rate application to get original price
-					// If rate is 0.001 (0.1%), then original = current / 1.001
-					const originalPrice = updatedPrice.times(FACTOR).div(rate.plus(FACTOR))
-					const priceDiff = updatedPrice.minus(originalPrice)
-					amounts.push(unDecimal(priceDiff.times(chainQuote.quantity)))
+					const chainQuote = getQuote_0_8_3(event.address, quoteId)
+					if (chainQuote == null) {
+						amounts.push(BigInt.zero())
+						break
+					}
+					amounts.push(calculateFundingAmount(chainQuote.openedPrice, chainQuote.quantity, chainQuote.closedAmount, chainQuote.positionType, rate))
 					break
 				}
 				case Version.v_0_8_2: {
-					let chainQuote = getQuote_0_8_2(event.address, quoteId)!
-					if (chainQuote == null) return
-					const updatedPrice = chainQuote.openedPrice
-					// Reverse the rate application to get original price
-					// If rate is 0.001 (0.1%), then original = current / 1.001
-					const originalPrice = updatedPrice.times(FACTOR).div(rate.plus(FACTOR))
-					const priceDiff = updatedPrice.minus(originalPrice)
-					amounts.push(unDecimal(priceDiff.times(chainQuote.quantity)))
+					const chainQuote = getQuote_0_8_2(event.address, quoteId)
+					if (chainQuote == null) {
+						amounts.push(BigInt.zero())
+						break
+					}
+					amounts.push(calculateFundingAmount(chainQuote.openedPrice, chainQuote.quantity, chainQuote.closedAmount, chainQuote.positionType, rate))
 					break
 				}
 				case Version.v_0_8_1: {
-					let chainQuote = getQuote_0_8_1(event.address, quoteId)!
-					if (chainQuote == null) return
-					const updatedPrice = chainQuote.openedPrice
-					// Reverse the rate application to get original price
-					// If rate is 0.001 (0.1%), then original = current / 1.001
-					const originalPrice = updatedPrice.times(FACTOR).div(rate.plus(FACTOR))
-					const priceDiff = updatedPrice.minus(originalPrice)
-					amounts.push(unDecimal(priceDiff.times(chainQuote.quantity)))
-					break
-				}
-				case Version.v_0_8_0: {
-					let chainQuote = getQuote_0_8_0(event.address, quoteId)!
-					if (chainQuote == null) return
-					amounts.push(BigInt.zero())
+					const chainQuote = getQuote_0_8_1(event.address, quoteId)
+					if (chainQuote == null) {
+						amounts.push(BigInt.zero())
+						break
+					}
+					amounts.push(calculateFundingAmount(chainQuote.openedPrice, chainQuote.quantity, chainQuote.closedAmount, chainQuote.positionType, rate))
 					break
 				}
 			}

@@ -69,16 +69,21 @@ export class QuoteData {
 	partyAmm: BigInt
 	partyBmm: BigInt
 	avgClosedPrice: BigInt
+	closedAmount: BigInt
 	openedPrice: BigInt
+	initialOpenedPrice: BigInt
 	maxFundingRate: BigInt
 	orderType: i32
 	partyA: Bytes
+	partyB: Bytes
 	symbolId: BigInt
 	tradingFee: BigInt
 	closeFee: BigInt
 	positionType: i32
 	requestedOpenPrice: BigInt
+	requestedClosePrice: BigInt
 	quantity: BigInt
+	quantityToClose: BigInt
 	deadline: BigInt
 	quoteStatus: i32
 	marketPrice: BigInt
@@ -93,16 +98,21 @@ export class QuoteData {
 		this.partyAmm = BigInt.zero()
 		this.partyBmm = BigInt.zero()
 		this.avgClosedPrice = BigInt.zero()
+		this.closedAmount = BigInt.zero()
 		this.openedPrice = BigInt.zero()
+		this.initialOpenedPrice = BigInt.zero()
 		this.maxFundingRate = BigInt.zero()
 		this.orderType = 0
 		this.partyA = Address.zero()
+		this.partyB = Address.zero()
 		this.symbolId = BigInt.zero()
 		this.tradingFee = BigInt.zero()
 		this.closeFee = BigInt.zero()
 		this.positionType = 0
 		this.requestedOpenPrice = BigInt.zero()
+		this.requestedClosePrice = BigInt.zero()
 		this.quantity = BigInt.zero()
+		this.quantityToClose = BigInt.zero()
 		this.deadline = BigInt.zero()
 		this.quoteStatus = 0
 		this.marketPrice = BigInt.zero()
@@ -212,6 +222,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.maxFundingRate = q.maxInterestRate
 			data.orderType = q.orderType
 			data.partyA = q.partyA
+			data.partyB = q.partyB
 			data.symbolId = q.symbolId
 			data.tradingFee = BigInt.zero()
 			data.positionType = q.positionType
@@ -231,15 +242,20 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.partyAmm = q.lockedValues.partyAmm
 			data.partyBmm = q.lockedValues.partyBmm
 			data.avgClosedPrice = q.avgClosedPrice
+			data.closedAmount = q.closedAmount
 			data.openedPrice = q.openedPrice
+			data.initialOpenedPrice = q.initialOpenedPrice
 			data.maxFundingRate = q.maxFundingRate
 			data.orderType = q.orderType
 			data.partyA = q.partyA
+			data.partyB = q.partyB
 			data.symbolId = q.symbolId
 			data.tradingFee = q.tradingFee
 			data.positionType = q.positionType
 			data.requestedOpenPrice = q.requestedOpenPrice
+			data.requestedClosePrice = q.requestedClosePrice
 			data.quantity = q.quantity
+			data.quantityToClose = q.quantityToClose
 			data.deadline = q.deadline
 			data.quoteStatus = q.quoteStatus
 			data.marketPrice = q.marketPrice
@@ -259,6 +275,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.maxFundingRate = q.maxFundingRate
 			data.orderType = q.orderType
 			data.partyA = q.partyA
+			data.partyB = q.partyB
 			data.symbolId = q.symbolId
 			data.tradingFee = q.tradingFee
 			data.positionType = q.positionType
@@ -283,6 +300,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.maxFundingRate = q.maxFundingRate
 			data.orderType = q.orderType
 			data.partyA = q.partyA
+			data.partyB = q.partyB
 			data.symbolId = q.symbolId
 			data.tradingFee = q.tradingFee
 			data.positionType = q.positionType
@@ -308,6 +326,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.maxFundingRate = q.maxFundingRate
 			data.orderType = q.orderType
 			data.partyA = q.partyA
+			data.partyB = q.partyB
 			data.symbolId = q.symbolId
 			data.tradingFee = q.tradingFee
 			data.positionType = q.positionType
@@ -333,6 +352,7 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.maxFundingRate = q.maxFundingRate
 			data.orderType = q.orderType
 			data.partyA = q.partyA
+			data.partyB = q.partyB
 			data.symbolId = q.symbolId
 			data.tradingFee = q.tradingFee
 			data.closeFee = q.closeFee
@@ -356,16 +376,21 @@ export function getQuoteData(version: Version, address: Address, id: BigInt): Qu
 			data.partyAmm = q.lockedValues.partyAmm
 			data.partyBmm = q.lockedValues.partyBmm
 			data.avgClosedPrice = q.avgClosedPrice
+			data.closedAmount = q.closedAmount
 			data.openedPrice = q.openedPrice
+			data.initialOpenedPrice = q.initialOpenedPrice
 			data.maxFundingRate = q.maxFundingRate
 			data.orderType = q.orderType
 			data.partyA = q.partyA
+			data.partyB = q.partyB
 			data.symbolId = q.symbolId
 			data.tradingFee = q.tradingFee
 			data.closeFee = q.closeFee
 			data.positionType = q.positionType
 			data.requestedOpenPrice = q.requestedOpenPrice
+			data.requestedClosePrice = q.requestedClosePrice
 			data.quantity = q.quantity
+			data.quantityToClose = q.quantityToClose
 			data.deadline = q.deadline
 			data.quoteStatus = q.quoteStatus
 			data.marketPrice = q.marketPrice

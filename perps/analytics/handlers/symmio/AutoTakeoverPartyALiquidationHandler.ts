@@ -1,6 +1,7 @@
 import { AutoTakeoverPartyALiquidationHandler as CommonAutoTakeoverPartyALiquidationHandler } from "../../../common/handlers/symmio/AutoTakeoverPartyALiquidationHandler"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
+import { activatePartyATakeover } from "../../../common/utils/clearingHouseLiquidation"
 import { createPartyALiquidationEvent } from "../../utils/liquidationEvent"
 
 export class AutoTakeoverPartyALiquidationHandler<T> extends CommonAutoTakeoverPartyALiquidationHandler<T> {
@@ -8,6 +9,9 @@ export class AutoTakeoverPartyALiquidationHandler<T> extends CommonAutoTakeoverP
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
-		if (version >= Version.v_0_8_5) createPartyALiquidationEvent(_event, event.params.partyA, event.params.liquidationId, "AUTO_TAKEOVER", null)
+		if (version >= Version.v_0_8_5) {
+			activatePartyATakeover(event.address, event.params.partyA)
+			createPartyALiquidationEvent(_event, event.params.partyA, event.params.liquidationId, "AUTO_TAKEOVER", null)
+		}
 	}
 }

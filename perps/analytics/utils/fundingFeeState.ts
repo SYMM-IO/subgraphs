@@ -1,6 +1,7 @@
 import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts"
 import { FundingFeeState } from "../../../generated/schema"
-import { getFundingFeesOfPartyB } from "../../common/contract_utils_0_8_5"
+import { getFundingFeesOfPartyB as getFundingFeesOfPartyB_0_8_5 } from "../../common/contract_utils_0_8_5"
+import { getFundingFeesOfPartyB as getFundingFeesOfPartyB_0_8_6 } from "../../common/contract_utils_0_8_6"
 import { Version } from "../../common/BaseHandler"
 import { resolveSymbolName } from "./symbol"
 
@@ -40,8 +41,28 @@ export function getOrCreateFundingFeeState(event: ethereum.Event, version: Versi
 	return state
 }
 
-export function enrichFundingFeeState(state: FundingFeeState, contractAddress: Address): boolean {
-	let info = getFundingFeesOfPartyB(contractAddress, state.symbolId, Address.fromBytes(state.partyB))
+export function enrichFundingFeeState(state: FundingFeeState, contractAddress: Address, version: Version): boolean {
+	// Bind via the dispatching data source's own version so the ABI is always declared on it.
+	if (version >= Version.v_0_8_6) {
+		let info = getFundingFeesOfPartyB_0_8_6(contractAddress, state.symbolId, Address.fromBytes(state.partyB))
+		if (!info) {
+			log.warning("Failed to get funding fees for symbol {} partyB {}", [state.symbolId.toString(), state.partyB.toHexString()])
+			return false
+		}
+		state.currentLongRate = info.currentLongRate
+		state.currentShortRate = info.currentShortRate
+		state.accumulatedLongRate = info.accumulatedLongRate
+		state.accumulatedShortRate = info.accumulatedShortRate
+		state.epochDuration = info.epochDuration
+		state.lastUpdatedEpoch = info.lastUpdatedEpoch
+		state.startEpoch = info.startEpoch
+		state.startEpochTimestamp = info.startEpochTimeStamp
+		state.lastUpdatedTimestamp = info.lastUpdatedTimeStamp
+		state.snapshotLongFee = info.snapshotLongFee
+		state.snapshotShortFee = info.snapshotShortFee
+		return true
+	}
+	let info = getFundingFeesOfPartyB_0_8_5(contractAddress, state.symbolId, Address.fromBytes(state.partyB))
 	if (!info) {
 		log.warning("Failed to get funding fees for symbol {} partyB {}", [state.symbolId.toString(), state.partyB.toHexString()])
 		return false
@@ -150,7 +171,7 @@ export function isActiveFundingFeeState(state: FundingFeeState): boolean {
 
 export function syncFundingFeeState(event: ethereum.Event, version: Version, symbolId: BigInt, partyB: Address): void {
 	let state = getOrCreateFundingFeeState(event, version, symbolId, partyB)
-	if (!enrichFundingFeeState(state, event.address)) return
+	if (!enrichFundingFeeState(state, event.address, version)) return
 	if (!isActiveFundingFeeState(state)) return
 	state.updateTimestamp = event.block.timestamp
 	state.save()

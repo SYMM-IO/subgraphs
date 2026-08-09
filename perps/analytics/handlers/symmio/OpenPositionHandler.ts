@@ -26,11 +26,13 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return
+		if (quote.symbolId === null || quote.openedPrice === null) return
 		const symbol = Symbol.load(quote.symbolId!.toString() + "-" + event.address.toHexString())
 		if (!symbol) return
 
 		let tradingFee = BigInt.zero()
-		if (version != Version.v_0_8_5) {
+		if (version < Version.v_0_8_5) {
+			// 0.8.5+ emits TradingFeeCharged, which feeds openFee directly; synthesize only where the event doesn't exist.
 			tradingFee = event.params.filledAmount.times(quote.openedPrice!).times(symbol.tradingFee).div(BigInt.fromString("10").pow(36))
 		}
 
@@ -76,7 +78,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 			event.params.openedPrice,
 			quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
 		)
-		if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, event.params.partyB)
+		if (version >= Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, event.params.partyB)
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 		updatePartyBLatestBalance(_event, version, event.params.partyB, event.params.partyA)
 	}

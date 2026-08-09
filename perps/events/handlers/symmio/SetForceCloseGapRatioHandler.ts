@@ -2,9 +2,6 @@ import { SetForceCloseGapRatio as SetForceCloseGapRatioEntity } from "../../../.
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { SetForceCloseGapRatio as SetForceCloseGapRatio_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { SetForceCloseGapRatio as SetForceCloseGapRatio_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { SetForceCloseGapRatio as SetForceCloseGapRatio_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class SetForceCloseGapRatioHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,30 +17,7 @@ export class SetForceCloseGapRatioHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<SetForceCloseGapRatio_8_5>(_event)
-				entity.symbolId = e.params.symbolId
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<SetForceCloseGapRatio_8_4>(_event)
-				entity.symbolId = e.params.symbolId
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<SetForceCloseGapRatio_8_3>(_event)
-				entity.symbolId = e.params.symbolId
-				break
-			}
-			default: {
-				entity.symbolId = BigInt.zero()
-				break
-			}
-		}
+		entity.symbolId = _event.parameters.length >= 3 ? _event.parameters[0].value.toBigInt() : BigInt.zero()
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

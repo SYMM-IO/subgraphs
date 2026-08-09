@@ -5,7 +5,7 @@ import {ensureSyncMeta} from './src_sync_meta'
 
 
 export function handleSymmioStakeholderUpdated(event: SymmioStakeholderUpdated): void {
-	ensureSyncMeta(event.block)
+    ensureSyncMeta(event.block)
     let handler = new SymmioStakeholderUpdatedHandler<SymmioStakeholderUpdated>()
     handler.handle(event, FeeCollectorVersion.v_1)
 }

@@ -1,5 +1,6 @@
 {
 	"network": "base",
+	"latestAccountBalanceSweepActivationBlock": "49127992",
 	"contracts": [
 		{
 			"address": "0xC6a7cc26fd84aE573b705423b7d1831139793025",
@@ -26,7 +27,7 @@
 			"abi": "symmio",
 			"version": "0_8_3",
 			"startBlock": "19458660",
-			"endBlock": "24730204",
+			"endBlock": "24730203",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
@@ -37,7 +38,7 @@
 			"abi": "symmio",
 			"version": "0_8_2",
 			"startBlock": "8443806",
-			"endBlock": "19458660",
+			"endBlock": "19458659",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
@@ -269,6 +270,13 @@
 			"version": "1",
 			"startBlock": "36225201",
 			"name": "treble"
+		},
+		{
+			"address": "0x9EB845715461832eF9b063e47187dE9312dD6550",
+			"abi": "buybackGateway",
+			"version": "1",
+			"startBlock": "48786721",
+			"name": "symmio_buyback_gateway"
 		}
 	],
 	"deploy_urls": {

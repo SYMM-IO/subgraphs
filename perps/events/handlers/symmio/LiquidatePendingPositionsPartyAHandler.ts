@@ -2,9 +2,6 @@ import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyAEntit
 import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { LiquidatePendingPositionsPartyA as LiquidatePendingPositionsPartyA_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
 
 export class LiquidatePendingPositionsPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -20,36 +17,13 @@ export class LiquidatePendingPositionsPartyAHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<LiquidatePendingPositionsPartyA_8_5>(_event)
-				entity.liquidationId = e.params.liquidationId
-				entity.liquidatedAmounts = e.params.liquidatedAmounts
-				entity.quoteIds = e.params.quoteIds
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<LiquidatePendingPositionsPartyA_8_4>(_event)
-				entity.liquidationId = e.params.liquidationId
-				entity.liquidatedAmounts = e.params.liquidatedAmounts
-				entity.quoteIds = e.params.quoteIds
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<LiquidatePendingPositionsPartyA_8_3>(_event)
-				entity.liquidationId = e.params.liquidationId
-				entity.liquidatedAmounts = e.params.liquidatedAmounts
-				entity.quoteIds = e.params.quoteIds
-				break
-			}
-			default: {
-				entity.liquidationId = Bytes.empty()
-				entity.liquidatedAmounts = []
-				break
-			}
+		entity.quoteIds = []
+		entity.liquidatedAmounts = []
+		entity.liquidationId = Bytes.empty()
+		if (_event.parameters.length >= 5) {
+			entity.quoteIds = _event.parameters[2].value.toBigIntArray()
+			entity.liquidatedAmounts = _event.parameters[3].value.toBigIntArray()
+			entity.liquidationId = _event.parameters[4].value.toBytes()
 		}
 
 		entity.blockTimestamp = event.block.timestamp

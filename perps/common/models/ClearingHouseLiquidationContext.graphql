@@ -1,0 +1,25 @@
+"""
+Event-sourced discriminator for an active clearing-house liquidation subject.
+"""
+type ClearingHouseLiquidationContext @entity(immutable: false) {
+	"""
+	Core-address and liquidation-subject composite id.
+	"""
+	id: ID!
+	"""
+	Symmio core contract that emitted the clearing-house lifecycle.
+	"""
+	source: Bytes!
+	"""
+	Address interpreted by the core as either a cross PartyB or a PartyA takeover subject.
+	"""
+	subject: Bytes!
+	"""
+	Whether a cross-margin PartyB clearing-house liquidation is active for this subject.
+	"""
+	crossPartyBInProgress: Boolean!
+	"""
+	Whether a PartyA clearing-house takeover is active for this subject.
+	"""
+	partyATakeoverInProgress: Boolean!
+}

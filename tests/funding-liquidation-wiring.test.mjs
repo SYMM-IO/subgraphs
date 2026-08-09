@@ -50,12 +50,14 @@ test("liquidations record funding settlements and funding deltas in analytics", 
 		assert.match(source, /captureQuoteFundingContext/, `${name} must capture funding context before quote mutation`);
 		assert.match(
 			source,
-			/handleLiquidatePosition<T>\(_event, version, event\.params\.quoteIds\[i\], .*fundingContexts\[i\]\)/s,
+			/handleLiquidatePosition<T>\(_event, version, .*fundingContexts\[i\], /s,
 			`${name} must pass funding context into shared liquidation analytics`,
 		);
 	}
 
-	assert.match(partyA, /getQuoteFundingSignedAmount/);
+	assert.match(partyA, /getPartyALiquidationFundingSettlement/);
+	assert.match(partyA, /recordTransientQuoteFundingSettlement/);
+	assert.match(partyA, /fundingAmounts\[i\]/);
 	assert.match(partyA, /accPnl = accPnl\.plus\(pnl\.minus\(fundingAmount\)\)/);
 });
 

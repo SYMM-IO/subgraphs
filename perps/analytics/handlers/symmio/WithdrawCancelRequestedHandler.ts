@@ -4,7 +4,7 @@ import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
-import { loadWithdrawRequest, removeWithdrawRequestFromLookup } from "../../utils/withdrawRequest"
+import { isActiveWithdrawRequest, loadWithdrawRequest, removeWithdrawRequestFromLookup } from "../../utils/withdrawRequest"
 import { removeWithdrawRequestFromAffiliateExpressWithdrawComponents } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class WithdrawCancelRequestedHandler<T> extends CommonWithdrawCancelRequestedHandler<T> {
@@ -15,6 +15,7 @@ export class WithdrawCancelRequestedHandler<T> extends CommonWithdrawCancelReque
 
 		let wr = loadWithdrawRequest(event.params.user, event.params.requestId, _event.address)
 		if (!wr) return
+		if (!isActiveWithdrawRequest(wr)) return
 		let immediateCancel = wr.status == "PENDING" || (wr.status == "PROVIDER_ACCEPTED" && wr.isPureVirtual)
 		wr.status = immediateCancel ? "CANCELLED" : "CANCEL_REQUESTED"
 		wr.updateTimestamp = _event.block.timestamp

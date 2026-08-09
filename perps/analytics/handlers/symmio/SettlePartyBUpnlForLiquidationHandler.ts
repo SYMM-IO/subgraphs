@@ -15,7 +15,7 @@ export class SettlePartyBUpnlForLiquidationHandler<T> extends CommonSettlePartyB
 		for (let i = 0; i < event.params.settlementData.length; i++) {
 			let data = event.params.settlementData[i]
 			let quote = Quote.load(data.quoteId.toString() + "-" + event.address.toHexString())
-			prevPrices.push(quote ? quote.openedPrice! : BigInt.zero())
+			prevPrices.push(quote !== null && quote.openedPrice !== null ? quote.openedPrice! : BigInt.zero())
 		}
 
 		this.handleQuote(_event, version)
@@ -24,6 +24,7 @@ export class SettlePartyBUpnlForLiquidationHandler<T> extends CommonSettlePartyB
 			let data = event.params.settlementData[i]
 			let quote = Quote.load(data.quoteId.toString() + "-" + event.address.toHexString())
 			if (!quote) continue
+			if (quote.quantity === null || quote.closedAmount === null || quote.symbolId === null) continue
 
 			let openAmount = quote.quantity!.minus(quote.closedAmount!)
 			onPriceUpdate(

@@ -1,0 +1,19 @@
+{
+	"__extends": "deps_accountLayer_2.json",
+	"Affiliate": [
+		"AffiliateRegistered",
+		"AffiliateApproved",
+		"AffiliateUpdated",
+		"AffiliatePaused",
+		"AffiliateUnpaused",
+		"AdminTransferCompleted",
+		"AdminTransferProposed",
+		"AdminTransferCancelled",
+		"RegistrationCancelled",
+		"RegistrationRejected",
+		"StakeholdersUpdateRequested",
+		"StakeholdersUpdated",
+		"FeeUpdateCancelled",
+		"AccountManagerDeployed"
+	]
+}

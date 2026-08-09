@@ -470,6 +470,9 @@
   "SettlePartyATakeover": [
     "SettlePartyATakeover"
   ],
+  "SettlePartyBUpnlForLiquidation": [
+    "SettlePartyBUpnlForLiquidation"
+  ],
   "SettleUpnl": [
     "SettleUpnl"
   ],

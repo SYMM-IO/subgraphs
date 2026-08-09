@@ -5,7 +5,7 @@ import { Version } from "../../../common/BaseHandler"
 import { updateDailyOpenInterest } from "../../utils/openInterestHelpers"
 import { unDecimal } from "../../utils/common"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
-import { onPositionClose } from "../../utils/aggregatedPosition"
+import { onFundingSettlementAndPositionClose } from "../../utils/aggregatedPosition"
 import { syncFundingFeeState } from "../../utils/fundingFeeState"
 import { FundingSettlementContext, recordQuoteFundingSettlement } from "../../utils/fundingHistory"
 
@@ -68,20 +68,29 @@ export function handleClose<T>(
 		return
 	}
 
-	onPositionClose(
+	let newFunding = quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero()
+	let previousFunding = newFunding
+	let preCloseOpenAmount = event.params.filledAmount
+	if (fundingContext !== null && fundingContext.found) {
+		previousFunding = fundingContext.previousAccumulatedPaidFunding
+		preCloseOpenAmount = fundingContext.openAmount
+	}
+	onFundingSettlementAndPositionClose(
 		_event,
 		version,
 		changetype<Address>(quote.partyA),
 		changetype<Address>(quote.partyB!),
 		quote.symbolId!,
 		quote.positionType,
+		preCloseOpenAmount,
 		event.params.filledAmount,
 		quote.openedPrice!,
-		quote.accumulatedPaidFunding ? quote.accumulatedPaidFunding! : BigInt.zero(),
+		previousFunding,
+		newFunding,
 		quote.closedAmount!.equals(quote.quantity!),
 	)
 	if (fundingContext) recordQuoteFundingSettlement(_event, version, event.params.quoteId, closeType, fundingContext, true)
-	if (version == Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
+	if (version >= Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
 	let account = Account.load(event.params.partyA.toHexString())
 	if (!account) return

@@ -4,7 +4,12 @@ import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
-import { loadWithdrawRequest, removeWithdrawRequestFromLookup } from "../../utils/withdrawRequest"
+import {
+	isActiveWithdrawRequest,
+	loadWithdrawRequest,
+	recordWithdrawCoreStatusHint,
+	removeWithdrawRequestFromLookup,
+} from "../../utils/withdrawRequest"
 import { removeWithdrawRequestFromAffiliateExpressWithdrawComponents } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class WithdrawRejectedHandler<T> extends CommonWithdrawRejectedHandler<T> {
@@ -14,7 +19,19 @@ export class WithdrawRejectedHandler<T> extends CommonWithdrawRejectedHandler<T>
 		super.handle(_event, version)
 
 		let wr = loadWithdrawRequest(event.params.user, event.params.requestId, _event.address)
-		if (!wr) return
+		if (!wr) {
+			recordWithdrawCoreStatusHint(
+				_event.address,
+				event.params.user,
+				event.params.requestId,
+				"PROVIDER_REJECTED",
+				_event.transaction.hash,
+				_event.block.timestamp,
+				_event.block.number,
+			)
+			return
+		}
+		if (!isActiveWithdrawRequest(wr)) return
 		wr.status = "PROVIDER_REJECTED"
 		wr.updateTimestamp = _event.block.timestamp
 		let account = Account.load(wr.user.toHexString())

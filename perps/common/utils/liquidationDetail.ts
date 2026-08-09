@@ -1,6 +1,22 @@
 import { BigInt, Bytes } from "@graphprotocol/graph-ts"
 import { LiquidationDetail } from "../../../generated/schema"
 import { PartyASettlementBalanceData } from "../VersionedQuoteLoader"
+import { Version } from "../BaseHandler"
+
+export const PARTY_A_LIQUIDATION_TYPE_NONE = 0
+export const PARTY_A_LIQUIDATION_TYPE_NORMAL = 1
+export const PARTY_A_LIQUIDATION_TYPE_LATE = 2
+export const PARTY_A_LIQUIDATION_TYPE_OVERDUE = 3
+
+export class PartyALiquidationClassification {
+	liquidationType: i32
+	deficit: BigInt
+
+	constructor(liquidationType: i32, deficit: BigInt) {
+		this.liquidationType = liquidationType
+		this.deficit = deficit
+	}
+}
 
 function copyBytesArray(values: Bytes[] | null): Bytes[] {
 	let result: Bytes[] = []
@@ -47,9 +63,39 @@ export function calculateLossRestsAt(allocatedBalance: BigInt, lockedCva: BigInt
 	return calculateFreeMarginAtStart(allocatedBalance, lockedCva, lockedLf).plus(upnl)
 }
 
-export function calculateDeferredBalanceAtStart(allocatedBalance: BigInt, liquidationAllocatedBalance: BigInt): BigInt {
-	if (allocatedBalance.le(liquidationAllocatedBalance)) return BigInt.zero()
-	return allocatedBalance.minus(liquidationAllocatedBalance)
+/**
+ * Mirrors LibPartyALiquidationShared.startPartyALiquidation.
+ *
+ * The core's available balance is allocation + uPNL - locked CVA - locked LF.
+ * Removing locked LF from the severity boundaries leaves:
+ *   allocation + uPNL < 0             => OVERDUE
+ *   allocation + uPNL <= locked CVA  => LATE
+ *   otherwise                         => NORMAL
+ *
+ * Callers must provide the complete PartyA open-position CVA total.
+ */
+export function classifyPartyALiquidationAtStart(
+	liquidationAllocatedBalance: BigInt,
+	upnl: BigInt,
+	lockedCva: BigInt,
+): PartyALiquidationClassification {
+	let netBalance = liquidationAllocatedBalance.plus(upnl)
+	if (netBalance.lt(BigInt.zero())) {
+		return new PartyALiquidationClassification(PARTY_A_LIQUIDATION_TYPE_OVERDUE, netBalance.neg())
+	}
+	if (netBalance.le(lockedCva)) {
+		return new PartyALiquidationClassification(PARTY_A_LIQUIDATION_TYPE_LATE, lockedCva.minus(netBalance))
+	}
+	return new PartyALiquidationClassification(PARTY_A_LIQUIDATION_TYPE_NORMAL, BigInt.zero())
+}
+
+export function calculatePartyALiquidationReturnedCva(liquidationType: i32, deficit: BigInt, lockedCva: BigInt, quoteCva: BigInt): BigInt {
+	if (liquidationType == PARTY_A_LIQUIDATION_TYPE_LATE) {
+		if (lockedCva.isZero()) return quoteCva
+		return quoteCva.minus(quoteCva.times(deficit).div(lockedCva))
+	}
+	if (liquidationType == PARTY_A_LIQUIDATION_TYPE_OVERDUE) return BigInt.zero()
+	return quoteCva
 }
 
 function shouldWriteSettlementBalance(current: BigInt | null, next: BigInt, preserveExistingNonZero: boolean): boolean {
@@ -74,12 +120,67 @@ export function applyPartyASettlementBalanceData(
 	}
 }
 
-export function getPositiveCrossReserveContribution(mode: string, actualAmount: BigInt): BigInt {
-	if (mode != "cross" || actualAmount.le(BigInt.zero())) return BigInt.zero()
-	return actualAmount
+export function getPositiveSettlementReserveContribution(version: Version, mode: string, actualAmount: BigInt): BigInt {
+	if (actualAmount.le(BigInt.zero())) return BigInt.zero()
+	if (version >= Version.v_0_8_6 || mode == "cross") return actualAmount
+	return BigInt.zero()
+}
+
+export function clearPendingSettlementSnapshotsForTakeover(entity: LiquidationDetail): void {
+	let partyBs = copyBytesArray(entity.settlementPartyBs)
+	let actualAmounts = copyBigIntArray(entity.settlementActualAmounts)
+	let cvaReturnedAmounts = copyBigIntArray(entity.settlementCvaReturned)
+	let reserveContributions = copyBigIntArray(entity.settlementReserveContributions)
+	let states = copyStringArray(entity.settlementStates)
+
+	let length = partyBs.length
+	ensureBigIntLength(actualAmounts, length)
+	ensureBigIntLength(cvaReturnedAmounts, length)
+	ensureBigIntLength(reserveContributions, length)
+	ensureStringLength(states, length, "pending")
+
+	let paidCva = BigInt.zero()
+	for (let i = 0; i < length; i++) {
+		reserveContributions[i] = BigInt.zero()
+		if (states[i] == "pending" || states[i] == "takeover-cleared") {
+			actualAmounts[i] = BigInt.zero()
+			cvaReturnedAmounts[i] = BigInt.zero()
+			states[i] = "takeover-cleared"
+		} else if (states[i] == "settled") {
+			paidCva = paidCva.plus(cvaReturnedAmounts[i])
+		}
+	}
+
+	entity.settlementActualAmounts = actualAmounts
+	entity.settlementCvaReturned = cvaReturnedAmounts
+	entity.settlementReserveContributions = reserveContributions
+	entity.settlementStates = states
+	entity.paidCva = paidCva
+	entity.involvedPartyBCounts = BigInt.zero()
+}
+
+export function overrideSettlementAmount(version: Version, entity: LiquidationDetail, partyB: Bytes, actualAmount: BigInt): void {
+	let partyBs = copyBytesArray(entity.settlementPartyBs)
+	let index = findSettlementIndex(partyBs, partyB)
+	if (index == -1) return
+
+	let modes = copyStringArray(entity.settlementModes)
+	let actualAmounts = copyBigIntArray(entity.settlementActualAmounts)
+	let reserveContributions = copyBigIntArray(entity.settlementReserveContributions)
+	let length = partyBs.length
+	ensureStringLength(modes, length, "isolated")
+	ensureBigIntLength(actualAmounts, length)
+	ensureBigIntLength(reserveContributions, length)
+
+	actualAmounts[index] = actualAmount
+	reserveContributions[index] = getPositiveSettlementReserveContribution(version, modes[index], actualAmount)
+
+	entity.settlementActualAmounts = actualAmounts
+	entity.settlementReserveContributions = reserveContributions
 }
 
 export function upsertSettlementSnapshot(
+	version: Version,
 	entity: LiquidationDetail,
 	partyB: Bytes,
 	mode: string,
@@ -114,12 +215,13 @@ export function upsertSettlementSnapshot(
 	modes[index] = mode
 	if (replaceActual) {
 		actualAmounts[index] = actualAmount
+		if (version >= Version.v_0_8_6) cvaReturnedAmounts[index] = cvaReturned
 	} else {
 		expectedAmounts[index] = expectedAmounts[index].plus(expectedAmount)
 		actualAmounts[index] = actualAmounts[index].plus(actualAmount)
 		cvaReturnedAmounts[index] = cvaReturnedAmounts[index].plus(cvaReturned)
 	}
-	reserveContributions[index] = getPositiveCrossReserveContribution(mode, actualAmounts[index])
+	reserveContributions[index] = state == "pending" ? getPositiveSettlementReserveContribution(version, mode, actualAmounts[index]) : BigInt.zero()
 	states[index] = state
 
 	entity.settlementPartyBs = partyBs

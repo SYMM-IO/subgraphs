@@ -30,7 +30,7 @@ export class SetShortFundingFeeHandler<T> extends BaseHandler {
 			let state = getOrCreateFundingFeeState(_event, version, symbolId, partyB)
 			applySetShortFundingFeeToFundingFeeState(state, fee, marketPrice, event.block.timestamp)
 			state.updateTimestamp = event.block.timestamp
-			enrichFundingFeeState(state, event.address)
+			enrichFundingFeeState(state, event.address, version)
 			state.save()
 			createFundingIndexCheckpoint(_event, symbolId, partyB, "SET_SHORT", null, fee, marketPrice, state, i)
 		}

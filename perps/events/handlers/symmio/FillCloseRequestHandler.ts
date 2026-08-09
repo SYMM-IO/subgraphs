@@ -2,10 +2,7 @@ import { FillCloseRequest as FillCloseRequestEntity } from "../../../../generate
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { FillCloseRequest as FillCloseRequest_8_3 } from "../../../../generated/symmio_0_8_3/symmio_0_8_3"
-import { FillCloseRequest as FillCloseRequest_8_4 } from "../../../../generated/symmio_0_8_4/symmio_0_8_4"
-import { FillCloseRequest as FillCloseRequest_8_5 } from "../../../../generated/symmio_0_8_5/symmio_0_8_5"
-import { findAccountSourceForQuote } from "../../utils/account_utils";
+import { findAccountSourceForQuote } from "../../utils/account_utils"
 
 export class FillCloseRequestHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -26,34 +23,12 @@ export class FillCloseRequestHandler<T> {
 		entity.logIndex = event.logIndex
 		entity.blockHash = event.block.hash
 
-		switch (version) {
-			case Version.v_0_8_5: {
-				// @ts-ignore
-				const e = changetype<FillCloseRequest_8_5>(_event)
-				entity.closeId = e.params.closeId
-				break
-			}
-			case Version.v_0_8_4: {
-				// @ts-ignore
-				const e = changetype<FillCloseRequest_8_4>(_event)
-				entity.closeId = e.params.closeId
-				break
-			}
-			case Version.v_0_8_3: {
-				// @ts-ignore
-				const e = changetype<FillCloseRequest_8_3>(_event)
-				entity.closeId = e.params.closeId
-				break
-			}
-			default: {
-				entity.closeId = BigInt.zero()
-				break
-			}
-		}
+		// closeId is the seventh parameter in every event variant that emits it.
+		entity.closeId = _event.parameters.length >= 7 ? _event.parameters[6].value.toBigInt() : BigInt.zero()
 
-		// New variant (0.8.5) has lockedValues tuple as 8th param
+		// The canonical overload adds lockedValues as the eighth parameter.
 		if (_event.parameters.length >= 8) {
-			let lockedValuesTuple = _event.parameters[7].value.toTuple()
+			const lockedValuesTuple = _event.parameters[7].value.toTuple()
 			entity.lockedValuesCva = lockedValuesTuple[0].toBigInt()
 			entity.lockedValuesLf = lockedValuesTuple[1].toBigInt()
 			entity.lockedValuesPartyAmm = lockedValuesTuple[2].toBigInt()

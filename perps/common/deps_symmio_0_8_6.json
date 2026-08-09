@@ -1,1 +1,71 @@
-{}
+{
+	"__extends": "deps_symmio_0_8_5.json",
+	"Quote": [
+		"AcceptCancelRequest",
+		"AcceptCancelCloseRequest",
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"LockQuote",
+		"UnlockQuote",
+		"ChargeFundingRate",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"RequestToClosePosition",
+		"ExpireQuoteClose",
+		"ExpireQuoteOpen",
+		"ForceCancelCloseRequest",
+		"ForceClosePosition",
+		"EmergencyClosePosition",
+		"FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"SettleUpnl",
+		"ADLClose",
+		"SettleUpnlUnified",
+		"SettlePartyBUpnlForLiquidation",
+		"ForceClosePartyBInsolvent",
+		"LiquidatePositionsForClearingHouse",
+		"LiquidatePendingPositionsForClearingHouse",
+		"ChargeAccumulatedFundingFee",
+		"QuoteAdjusted",
+		"PendingQuoteCancelledByAdjustment"
+	],
+	"Symbol": [
+		"AddSymbol",
+		"SetSymbolTradingFee",
+		"SetSymbolValidationState",
+		"SetSymbolFundingState",
+		"AdjustmentScheduled",
+		"AdjustmentCancelled",
+		"PriceAdjustmentConfirmed",
+		"RestatementStarted",
+		"RestatementAborted",
+		"RestatementFinalized"
+	],
+	"User": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"AddAccount"
+	],
+	"Account": [
+		"AllocatePartyA",
+		"DeallocatePartyA",
+		"Deposit(address,address,uint256,bool)",
+		"Withdraw",
+		"AllocateForPartyB",
+		"DeallocateForPartyB",
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"OpenPosition(uint256,address,address,uint256,uint256)",
+		"RequestToClosePosition",
+		"RequestToClosePosition",
+		"LiquidatePartyA",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)",
+		"LiquidatePendingPositionsPartyA",
+		"LiquidatePartyB",
+		"LiquidatePositionsPartyB(address,address,address,uint256[],uint256[],uint256[])",
+		"RegisterPartyB",
+		"AddBridge"
+	],
+	"SymmioEntity": [
+		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+		"RegisterPartyB",
+		"SetEntityMetadata"
+	]
+}

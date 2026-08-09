@@ -2,6 +2,7 @@ import { FullyLiquidatedPartyAHandler as CommonFullyLiquidatedPartyAHandler } fr
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { createPartyALiquidationEvent, createPartyALiquidationEventFromState } from "../../utils/liquidationEvent"
+import { clearPartyALiquidationTracking, reconcileCompletedPartyALiquidation } from "../../utils/partyALiquidation"
 
 export class FullyLiquidatedPartyAHandler<T> extends CommonFullyLiquidatedPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -12,6 +13,10 @@ export class FullyLiquidatedPartyAHandler<T> extends CommonFullyLiquidatedPartyA
 			createPartyALiquidationEvent(_event, event.params.partyA, event.params.liquidationId, "FULLY_LIQUIDATED", null)
 		} else {
 			createPartyALiquidationEventFromState(_event, version, event.params.partyA, "FULLY_LIQUIDATED", null)
+		}
+		if (version == Version.v_0_8_6) {
+			reconcileCompletedPartyALiquidation(event.address, event.params.partyA, event.params.liquidationId)
+			clearPartyALiquidationTracking(event.address, event.params.partyA)
 		}
 	}
 }
