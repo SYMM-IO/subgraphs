@@ -427,52 +427,309 @@
 					white-space: normal;
 				}
 			}
+
+			/* Diagnostic workspace refresh */
+			body {
+				background: #f2f5f4;
+				color: #172321;
+			}
+
+			header {
+				padding: 28px 24px 32px;
+			}
+
+			.header-inner {
+				width: min(1180px, 100%);
+				margin: 0 auto;
+			}
+
+			header h1 {
+				margin-bottom: 6px;
+				letter-spacing: -0.025em;
+			}
+
+			.header-copy {
+				max-width: 720px;
+				margin: 0;
+				color: #b9ceca;
+			}
+
+			main {
+				width: min(1180px, 100%);
+				padding-bottom: 44px;
+			}
+
+			main > *,
+			.panel-head > *,
+			.table-header > * {
+				min-width: 0;
+			}
+
+			.title-row,
+			.panel-head,
+			.table-header {
+				flex-wrap: wrap;
+			}
+
+			#quote-subtitle {
+				max-width: 100%;
+				overflow-wrap: anywhere;
+			}
+
+			.panel {
+				border-radius: 12px;
+			}
+
+			.lookup-row {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: 10px;
+				align-items: end;
+			}
+
+			.lookup-row input {
+				min-height: 44px;
+			}
+
+			.advanced-settings {
+				border-top: 1px solid var(--line);
+				padding-top: 11px;
+			}
+
+			.advanced-settings summary {
+				width: fit-content;
+				cursor: pointer;
+				color: var(--teal);
+				font-weight: 730;
+			}
+
+			.advanced-settings[open] summary {
+				margin-bottom: 12px;
+			}
+
+			.advanced-settings .form-grid {
+				grid-template-columns: minmax(260px, 1.4fr) minmax(240px, 1.1fr) minmax(170px, 0.65fr) minmax(130px, 0.45fr);
+			}
+
+			button:focus-visible,
+			input:focus-visible,
+			summary:focus-visible {
+				outline: 3px solid rgba(15, 118, 110, 0.25);
+				outline-offset: 2px;
+			}
+
+			.funding-summary {
+				padding: 17px;
+			}
+
+			.funding-summary h2 {
+				margin: 3px 0 0;
+				font-size: 19px;
+				letter-spacing: -0.015em;
+			}
+
+			.eyebrow.dark {
+				color: var(--teal);
+			}
+
+			.section-copy {
+				margin: 5px 0 0;
+				color: var(--muted);
+				font-size: 13px;
+			}
+
+			.funding-summary .summary-grid {
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				margin-top: 14px;
+			}
+
+			.reconstruction-strip {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px 18px;
+				margin-top: 13px;
+				padding-top: 12px;
+				border-top: 1px solid var(--line);
+				color: var(--muted);
+				font-size: 12px;
+			}
+
+			.reconstruction-strip strong {
+				color: var(--text);
+				font-weight: 760;
+			}
+
+			.metric strong,
+			.mono {
+				font-variant-numeric: tabular-nums;
+			}
+
+			.status.settled {
+				background: var(--amber-soft);
+				color: var(--amber);
+			}
+
+			.details-panel h3 {
+				margin: 18px 0 8px;
+				font-size: 14px;
+			}
+
+			@media (max-width: 1300px) {
+				.lookup-row {
+					grid-template-columns: 1fr;
+				}
+
+				.lookup-row button {
+					width: 100%;
+				}
+
+				.panel-head,
+				.table-header {
+					align-items: flex-start;
+					flex-direction: column;
+				}
+			}
+
+			@media (max-width: 980px) {
+				.advanced-settings .form-grid,
+				.funding-summary .summary-grid,
+				.upnl-results {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+				}
+
+				.upnl-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			@media (max-width: 680px) {
+				header {
+					padding: 20px 16px 24px;
+				}
+
+				main {
+					padding: 12px 10px 32px;
+				}
+
+				.lookup-row,
+				.advanced-settings .form-grid,
+				.meta-grid,
+				.funding-summary .summary-grid,
+				.upnl-results {
+					grid-template-columns: 1fr;
+				}
+
+				.lookup-row button {
+					width: 100%;
+				}
+
+				.accrual-table {
+					min-width: 0;
+				}
+
+				.accrual-table thead {
+					display: none;
+				}
+
+				.accrual-table tbody {
+					display: grid;
+					gap: 10px;
+					padding: 10px;
+					background: #f2f5f4;
+				}
+
+				.accrual-table tr {
+					display: grid;
+					padding: 6px 10px;
+					border: 1px solid var(--line);
+					border-radius: 10px;
+					background: white;
+				}
+
+				.accrual-table td {
+					display: grid;
+					grid-template-columns: minmax(105px, 0.72fr) minmax(0, 1.28fr);
+					gap: 8px;
+					padding: 7px 0;
+					white-space: normal;
+				}
+
+				.accrual-table td::before {
+					content: attr(data-label);
+					color: var(--muted);
+					font-size: 11px;
+					font-weight: 760;
+					text-transform: uppercase;
+				}
+
+				.accrual-table td small {
+					grid-column: 2;
+					margin-top: -3px;
+				}
+
+				.accrual-table .status {
+					justify-self: start;
+				}
+
+				.accrual-table .empty-state {
+					display: block;
+					padding: 26px 8px;
+					border: 0;
+				}
+
+				.accrual-table .empty-state::before {
+					display: none;
+				}
+			}
 		</style>
 	</head>
 	<body>
 		<header>
-			<div class="title-row">
-				<div>
-					<p class="eyebrow">HyperEVM / SYMMIO 0.8.5</p>
-					<h1>Quote Funding History</h1>
+			<div class="header-inner">
+				<div class="title-row">
+					<div>
+						<p class="eyebrow">HyperEVM / SYMMIO 0.8.5</p>
+						<h1>Quote funding ledger</h1>
+						<p class="header-copy">Verify realized funding from settlements and inspect the virtual epoch accruals that explain it.</p>
+					</div>
 				</div>
-				<div class="network-pill">Vibe affiliate / Enigma solver / analytics subgraph</div>
 			</div>
 		</header>
 
 		<main>
 			<section class="panel controls">
 				<form id="lookup-form">
-					<div class="form-grid">
+					<div class="lookup-row">
 						<label>
-							Quote id
-							<input id="quote-id" autocomplete="off" inputmode="numeric" placeholder="Example: 12345" required />
+							Quote ID or full entity ID
+							<input id="quote-id" autocomplete="off" inputmode="text" placeholder="Example: 7076" required />
 						</label>
-						<label>
-							Analytics subgraph endpoint
-							<input id="endpoint" autocomplete="off" />
-						</label>
-						<label>
-							SYMMIO address
-							<input id="source-address" autocomplete="off" />
-						</label>
+						<button id="load-button" type="submit">Load funding ledger</button>
 					</div>
 
-					<div class="form-grid compact">
-						<label>
-							As-of unix timestamp
-							<input id="as-of" type="number" min="0" placeholder="Blank means now" />
-						</label>
-						<label>
-							Max epoch rows
-							<input id="max-rows" type="number" min="1" max="5000" value="500" />
-						</label>
-						<div class="actions">
-							<button id="load-button" type="submit">Load quote</button>
+					<details class="advanced-settings">
+						<summary>Advanced query settings</summary>
+						<div class="form-grid">
+							<label>
+								Analytics subgraph endpoint
+								<input id="endpoint" autocomplete="off" />
+							</label>
+							<label>
+								SYMMIO address
+								<input id="source-address" autocomplete="off" />
+							</label>
+							<label>
+								As-of unix timestamp
+								<input id="as-of" type="number" min="0" placeholder="Blank means now" />
+							</label>
+							<label>
+								Latest epoch rows
+								<input id="max-rows" type="number" min="1" max="5000" value="500" />
+							</label>
 						</div>
-					</div>
+					</details>
 				</form>
-				<div id="message" class="message hidden"></div>
+				<div id="message" class="message hidden" role="status" aria-live="polite"></div>
 			</section>
 
 			<section id="quote-panel" class="panel quote-panel hidden">
@@ -483,7 +740,13 @@
 				<div id="quote-meta" class="meta-grid"></div>
 			</section>
 
-			<section id="summary" class="summary-grid hidden"></section>
+			<section id="summary" class="panel funding-summary hidden">
+				<p class="eyebrow dark">Authoritative ledger</p>
+				<h2>Funding at the selected time</h2>
+				<p class="section-copy">Realized values come directly from settlement amounts. Current debt uses the cumulative funding index, independent of displayed rows.</p>
+				<div id="summary-metrics" class="summary-grid"></div>
+				<div id="reconstruction-meta" class="reconstruction-strip"></div>
+			</section>
 
 			<section id="upnl-calculator" class="panel quote-panel hidden">
 				<div class="panel-head">
@@ -501,14 +764,18 @@
 
 			<section class="panel table-section">
 				<div class="table-header row-between">
-					<h2>Funding Accruals</h2>
+					<div>
+						<h2>Virtual funding accruals</h2>
+						<p class="section-copy">Duration-aware explanatory rows. These rows do not drive the authoritative totals above.</p>
+					</div>
 					<div id="table-caption" class="mono"></div>
 				</div>
 				<div class="table-wrap">
-					<table>
+					<table class="accrual-table">
 						<thead>
 							<tr>
 								<th>Epoch</th>
+								<th>Duration</th>
 								<th>Epoch window</th>
 								<th>Side</th>
 								<th>Open amount</th>
@@ -522,7 +789,7 @@
 						</thead>
 						<tbody id="rows-body">
 							<tr>
-								<td class="empty-state" colspan="10">Enter a quote id and load funding rows.</td>
+								<td class="empty-state" colspan="11">Enter a quote ID to inspect its funding ledger.</td>
 							</tr>
 						</tbody>
 					</table>
@@ -531,7 +798,7 @@
 
 			<section id="details" class="panel details-panel hidden">
 				<details>
-					<summary>Settlement events and loaded checkpoints</summary>
+					<summary>Raw evidence: settlements, checkpoints, and quote events</summary>
 					<div id="details-content"></div>
 				</details>
 			</section>
@@ -541,10 +808,20 @@
 			const DEFAULT_ENDPOINT = "https://api.goldsky.com/api/public/project_cm1hfr4527p0f01u85mz499u8/subgraphs/hyperevm_analytics/latest/gn";
 			const DEFAULT_SYMMIO = "0x99641E06d38F327166b3a48f86Ca2cbB3B4fB7EB";
 			const FACTOR = 10n ** 18n;
-			const CLOSE_EVENT_TYPES = new Set(["FILL_CLOSE", "FORCE_CLOSE", "EMERGENCY_CLOSE", "ADL_CLOSE"]);
+			const PAGE_SIZE = 1000;
+			const MAX_PAGES = 50;
+			const CLOSE_EVENT_TYPES = new Set([
+				"FILL_CLOSE",
+				"FORCE_CLOSE",
+				"EMERGENCY_CLOSE",
+				"ADL_CLOSE",
+				"LIQUIDATE_PARTY_A",
+				"LIQUIDATE_PARTY_B",
+				"LIQUIDATE_CLEARING_HOUSE",
+			]);
 
 			const QUOTE_QUERY = `
-				query QuoteFunding($id: ID!, $quoteFilterId: String!) {
+				query QuoteFunding($id: ID!) {
 					quote(id: $id) {
 						id
 						source
@@ -569,12 +846,12 @@
 						timestamp
 						blockNumber
 					}
-					quoteFundingSettlements(
-						first: 1000
-						orderBy: timestamp
-						orderDirection: asc
-						where: { quote: $quoteFilterId }
-					) {
+				}
+			`;
+
+			const SETTLEMENT_PAGE_QUERY = `
+				query QuoteFundingSettlements($quoteFilterId: String!, $cursor: ID!) {
+					items: quoteFundingSettlements(first: 1000, orderBy: id, orderDirection: asc, where: { quote: $quoteFilterId, id_gt: $cursor }) {
 						id
 						trigger
 						openAmount
@@ -593,12 +870,12 @@
 						blockNumber
 						transaction
 					}
-					quoteEvents(
-						first: 1000
-						orderBy: timestamp
-						orderDirection: asc
-						where: { quote: $quoteFilterId }
-					) {
+				}
+			`;
+
+			const QUOTE_EVENT_PAGE_QUERY = `
+				query QuoteEvents($quoteFilterId: String!, $cursor: ID!) {
+					items: quoteEvents(first: 1000, orderBy: id, orderDirection: asc, where: { quote: $quoteFilterId, id_gt: $cursor }) {
 						id
 						type
 						metadata
@@ -609,8 +886,8 @@
 				}
 			`;
 
-			const CHECKPOINT_QUERY = `
-				query FundingCheckpoints(
+			const CHECKPOINT_BEFORE_QUERY = `
+				query FundingCheckpointBefore(
 					$source: Bytes!
 					$symbolId: BigInt!
 					$partyB: Bytes!
@@ -641,19 +918,35 @@
 						startEpoch
 						startEpochTimestamp
 						lastUpdatedTimestamp
+						snapshotLongFee
+						snapshotShortFee
 						timestamp
 						blockNumber
 						transaction
 					}
-					afterOpen: fundingIndexCheckpoints(
+				}
+			`;
+
+			const CHECKPOINT_PAGE_QUERY = `
+				query FundingCheckpointPage(
+					$source: Bytes!
+					$symbolId: BigInt!
+					$partyB: Bytes!
+					$openTimestamp: BigInt!
+					$asOfTimestamp: BigInt!
+					$cursor: ID!
+				) {
+					items: fundingIndexCheckpoints(
 						first: 1000
-						orderBy: timestamp
+						orderBy: id
 						orderDirection: asc
 						where: {
 							source: $source
 							symbolId: $symbolId
 							partyB: $partyB
 							timestamp_gte: $openTimestamp
+							timestamp_lte: $asOfTimestamp
+							id_gt: $cursor
 						}
 					) {
 						id
@@ -670,6 +963,8 @@
 						startEpoch
 						startEpochTimestamp
 						lastUpdatedTimestamp
+						snapshotLongFee
+						snapshotShortFee
 						timestamp
 						blockNumber
 						transaction
@@ -689,6 +984,8 @@
 			const quoteSubtitle = document.getElementById("quote-subtitle");
 			const quoteMeta = document.getElementById("quote-meta");
 			const summaryEl = document.getElementById("summary");
+			const summaryMetrics = document.getElementById("summary-metrics");
+			const reconstructionMeta = document.getElementById("reconstruction-meta");
 			const upnlCalculator = document.getElementById("upnl-calculator");
 			const upnlSubtitle = document.getElementById("upnl-subtitle");
 			const symbolPriceInput = document.getElementById("symbol-price");
@@ -717,7 +1014,6 @@
 					const input = readInputs();
 					const quotePayload = await graphQL(input.endpoint, QUOTE_QUERY, {
 						id: input.entityId,
-						quoteFilterId: input.entityId,
 					});
 
 					const quote = quotePayload.quote;
@@ -736,21 +1032,31 @@
 						throw new Error("This quote has no open/send timestamp.");
 					}
 
-					const checkpointPayload = await graphQL(input.endpoint, CHECKPOINT_QUERY, {
+					const checkpointVariables = {
 						source: String(quote.source).toLowerCase(),
 						symbolId: quote.symbolId,
 						partyB: String(quote.partyB).toLowerCase(),
 						openTimestamp,
-					});
+						asOfTimestamp: effectiveAsOfTimestamp(quote, input.asOfTimestamp).toString(),
+					};
+					const [settlementPage, quoteEventPage, checkpointBefore, checkpointPage] = await Promise.all([
+						loadPagedEntities(input.endpoint, SETTLEMENT_PAGE_QUERY, { quoteFilterId: input.entityId }),
+						loadPagedEntities(input.endpoint, QUOTE_EVENT_PAGE_QUERY, { quoteFilterId: input.entityId }),
+						graphQL(input.endpoint, CHECKPOINT_BEFORE_QUERY, checkpointVariables),
+						loadPagedEntities(input.endpoint, CHECKPOINT_PAGE_QUERY, checkpointVariables),
+					]);
 
-					const checkpoints = mergeCheckpoints(checkpointPayload.beforeOpen || [], checkpointPayload.afterOpen || []);
+					const settlements = settlementPage.items.slice().sort(sortByChainPosition);
+					const quoteEvents = quoteEventPage.items.slice().sort(sortByChainPosition);
+					const checkpoints = mergeCheckpoints(checkpointBefore.beforeOpen || [], checkpointPage.items);
 					const build = buildFundingRows({
 						quote,
-						settlements: quotePayload.quoteFundingSettlements || [],
-						quoteEvents: quotePayload.quoteEvents || [],
+						settlements,
+						quoteEvents,
 						checkpoints,
 						asOfTimestamp: input.asOfTimestamp,
 						maxRows: input.maxRows,
+						dataComplete: settlementPage.complete && quoteEventPage.complete && checkpointPage.complete,
 					});
 
 					renderQuote(quote, input.entityId);
@@ -758,15 +1064,15 @@
 					renderUpnlCalculator(quote, build);
 					renderRows(build.rows);
 					renderDetails({
-						settlements: quotePayload.quoteFundingSettlements || [],
+						settlements,
 						checkpoints,
-						quoteEvents: quotePayload.quoteEvents || [],
+						quoteEvents,
 					});
 
 					const parts = [
-						`${build.rows.length} epoch rows`,
+						`${build.rows.length} of ${build.totalRowCount} rows`,
 						`${checkpoints.length} checkpoints`,
-						`${(quotePayload.quoteFundingSettlements || []).length} settlements`,
+						`${settlements.length} settlements`,
 					];
 					tableCaption.textContent = parts.join(" / ");
 
@@ -781,6 +1087,19 @@
 				} finally {
 					setLoading(false);
 				}
+			}
+
+			async function loadPagedEntities(endpoint, query, variables) {
+				const items = [];
+				let cursor = "";
+				for (let page = 0; page < MAX_PAGES; page++) {
+					const payload = await graphQL(endpoint, query, { ...variables, cursor });
+					const batch = payload.items || [];
+					items.push(...batch);
+					if (batch.length < PAGE_SIZE) return { items, complete: true };
+					cursor = String(batch[batch.length - 1].id);
+				}
+				return { items, complete: false };
 			}
 
 			function readInputs() {
@@ -809,6 +1128,9 @@
 				const asOfTimestamp = asOfInput.value ? Number.parseInt(asOfInput.value, 10) : Math.floor(Date.now() / 1000);
 				if (!Number.isFinite(asOfTimestamp) || asOfTimestamp <= 0) {
 					throw new Error("As-of timestamp must be a positive unix timestamp.");
+				}
+				if (asOfTimestamp > Math.floor(Date.now() / 1000)) {
+					throw new Error("As-of timestamp cannot be in the future.");
 				}
 
 				const maxRows = Number.parseInt(maxRowsInput.value || "500", 10);
@@ -844,180 +1166,190 @@
 				return payload.data;
 			}
 
-			function buildFundingRows({ quote, settlements, quoteEvents, checkpoints, asOfTimestamp, maxRows }) {
+			function buildFundingRows({ quote, settlements, quoteEvents, checkpoints, asOfTimestamp, maxRows, dataComplete = true }) {
 				const warnings = [];
-				if (checkpoints.length === 0) {
-					warnings.push("No FundingIndexCheckpoint rows were found for this quote's source, symbolId, and partyB.");
-					return emptyBuild(warnings);
-				}
-
-				const sortedCheckpoints = checkpoints.slice().sort(sortByChainPosition);
-				const epochDuration = firstPresentBigInt(
-					sortedCheckpoints
-						.slice()
-						.reverse()
-						.map(item => item.epochDuration),
-				);
-				if (epochDuration <= 0n) {
-					warnings.push("Funding checkpoints did not include a usable epochDuration.");
-					return emptyBuild(warnings);
-				}
-
 				const openTimestamp = toBigInt(quote.timestampOpenPosition || quote.timestampSendQuote || quote.timestamp);
-				const openEpoch = openTimestamp / epochDuration;
-				const currentEpoch = BigInt(Math.floor(asOfTimestamp / Number(epochDuration)));
-				let stopEpoch = currentEpoch;
+				const stopTimestamp = effectiveAsOfTimestamp(quote, asOfTimestamp);
+				const eligibleSettlements = settlements.filter(item => toBigInt(item.timestamp) <= stopTimestamp).sort(sortByChainPosition);
+				const sortedCheckpoints = checkpoints
+					.filter(item => toBigInt(item.timestamp) <= stopTimestamp)
+					.slice()
+					.sort(sortByChainPosition);
+				const positionEvents = parsePositionEvents(quoteEvents);
+				const totals = computeAuthoritativeTotals({
+					quote,
+					settlements,
+					quoteEvents,
+					checkpoints: sortedCheckpoints,
+					asOfTimestamp: stopTimestamp,
+				});
+				totals.exactCurrent = totals.exactCurrent && dataComplete;
 
-				const settlementRanges = buildSettlementRanges(settlements, epochDuration);
-				const largestPaidThrough = settlementRanges.reduce((max, item) => (item.toEpoch > max ? item.toEpoch : max), 0n);
-
-				if (quote.timestampFullyClose && quote.timestampFullyClose !== "0") {
-					const closeEpoch = toBigInt(quote.timestampFullyClose) / epochDuration;
-					stopEpoch = minBigInt(stopEpoch, largestPaidThrough > 0n ? largestPaidThrough : closeEpoch);
+				if (!dataComplete) {
+					warnings.push(`A history query reached the safety limit (${MAX_PAGES * PAGE_SIZE} rows); current debt and evidence may be incomplete.`);
 				}
 
-				if (stopEpoch <= openEpoch) {
-					warnings.push("No completed funding epochs exist in the selected quote/as-of window.");
-					return {
-						rows: [],
-						warnings,
-						epochDuration,
-						openEpoch,
-						currentEpoch,
-						stopEpoch,
-						totals: zeroTotals(),
-					};
-				}
-
-				const firstCheckpointEpoch = checkpointEpoch(sortedCheckpoints[0], epochDuration);
-				if (firstCheckpointEpoch > openEpoch) {
-					warnings.push(
-						`The first loaded checkpoint starts at epoch ${firstCheckpointEpoch}; earlier quote epochs cannot be reconstructed from this response.`,
-					);
-				}
-				if (checkpoints.length >= 1001) {
-					warnings.push("The checkpoint query hit its limit. Very long histories may need pagination.");
-				}
-
-				const closeEvents = parseCloseEvents(quoteEvents, epochDuration);
-				const parsedClosed = closeEvents.reduce((sum, item) => sum + item.amount, 0n);
+				const parsedClosed = positionEvents.filter(item => item.kind === "close").reduce((sum, item) => sum + item.amount, 0n);
 				const quoteClosed = toBigInt(quote.closedAmount || "0");
-				if (quoteClosed > 0n && parsedClosed !== quoteClosed) {
-					warnings.push("Close event metadata does not exactly match quote.closedAmount, so rows after partial closes may be approximate.");
+				if (stopTimestamp >= toBigInt(quote.timestamp || "0") && quoteClosed > 0n && parsedClosed !== quoteClosed) {
+					warnings.push("Close and liquidation event metadata does not match quote.closedAmount, so reconstructed row sizes may be approximate.");
 				}
 
+				if (sortedCheckpoints.length === 0) {
+					warnings.push("No FundingIndexCheckpoint rows were found for this quote's source, symbolId, partyB, and selected time.");
+					return emptyBuild(warnings, totals, stopTimestamp);
+				}
+
+				if (hasAmbiguousSameBlockOrder(sortedCheckpoints)) {
+					warnings.push("Multiple funding checkpoints from different transactions share a block; this deployed schema has no transaction index, so their within-block display order cannot be proven.");
+				}
+
+				const segments = buildRateSegments(sortedCheckpoints, openTimestamp, stopTimestamp);
+				const durationRegimes = Array.from(new Set(segments.map(item => item.epochDuration.toString())));
+				const totalRowCount = segments.reduce((sum, item) => sum + (item.toEpoch - item.fromEpoch), 0n);
+				const settlementRanges = buildSettlementRanges(eligibleSettlements);
 				const rows = [];
-				let truncated = false;
+				let rowsToSkip = totalRowCount > BigInt(maxRows) ? totalRowCount - BigInt(maxRows) : 0n;
 
-				for (let i = 0; i < sortedCheckpoints.length; i++) {
-					const checkpoint = sortedCheckpoints[i];
-					const fromEpoch = maxBigInt(checkpointEpoch(checkpoint, epochDuration), openEpoch);
-					const nextEpoch = i + 1 < sortedCheckpoints.length ? checkpointEpoch(sortedCheckpoints[i + 1], epochDuration) : stopEpoch;
-					const toEpoch = minBigInt(nextEpoch, stopEpoch);
-					if (toEpoch <= fromEpoch) continue;
+				for (const segment of segments) {
+					const segmentCount = segment.toEpoch - segment.fromEpoch;
+					if (rowsToSkip >= segmentCount) {
+						rowsToSkip -= segmentCount;
+						continue;
+					}
 
-					let epoch = fromEpoch;
-					while (epoch < toEpoch) {
-						if (rows.length >= maxRows) {
-							truncated = true;
-							break;
-						}
-						const openAmount = openAmountForEpoch(quote, closeEvents, epoch);
-						const rate = rateForQuoteSide(quote, checkpoint);
+					let epoch = segment.fromEpoch + rowsToSkip;
+					rowsToSkip = 0n;
+					while (epoch < segment.toEpoch) {
+						const endTimestamp = (epoch + 1n) * segment.epochDuration;
+						const openAmount = openAmountAtTimestamp(quote, quoteEvents, endTimestamp, false);
+						const rate = rateForQuoteSide(quote, segment.checkpoint);
 						const signedAmount = (openAmount * rate) / FACTOR;
-						const settlement = settlementForEpoch(settlementRanges, epoch);
-						const status = statusForRow(signedAmount, settlement);
+						const settlement = settlementForTimestamp(settlementRanges, endTimestamp);
 
 						rows.push({
 							epoch,
-							startTimestamp: epoch * epochDuration,
-							endTimestamp: (epoch + 1n) * epochDuration,
+							epochDuration: segment.epochDuration,
+							startTimestamp: epoch * segment.epochDuration,
+							endTimestamp,
 							side: sideName(quote.positionType),
 							openAmount,
 							rate,
 							signedAmount,
-							status,
+							status: statusForRow(signedAmount, settlement),
 							settlement,
-							checkpoint,
+							checkpoint: segment.checkpoint,
 						});
-
 						epoch += 1n;
 					}
-					if (truncated) break;
 				}
 
-				if (truncated) {
-					warnings.push(`Rows were truncated at the max row setting (${maxRows}).`);
+				if (segments.length === 0) {
+					warnings.push("No completed funding epochs exist in the selected quote/as-of window.");
+				}
+				if (!totals.exactCurrent && totals.openAmount > 0n) {
+					warnings.push("Exact current funding debt could not be reconstructed from the loaded checkpoint state.");
 				}
 
 				return {
 					rows,
 					warnings,
-					epochDuration,
-					openEpoch,
-					currentEpoch,
-					stopEpoch,
-					totals: computeTotals(rows),
+					totalRowCount,
+					durationRegimes,
+					stopTimestamp,
+					settlementCount: eligibleSettlements.length,
+					totals,
 				};
 			}
 
-			function emptyBuild(warnings) {
+			function emptyBuild(warnings, totals = zeroTotals(), stopTimestamp = 0n) {
 				return {
 					rows: [],
 					warnings,
-					epochDuration: 0n,
-					openEpoch: 0n,
-					currentEpoch: 0n,
-					stopEpoch: 0n,
-					totals: zeroTotals(),
+					totalRowCount: 0n,
+					durationRegimes: [],
+					stopTimestamp,
+					settlementCount: 0,
+					totals,
 				};
 			}
 
-			function buildSettlementRanges(settlements, epochDuration) {
-				return settlements
-					.map(settlement => {
-						const fromEpoch =
-							settlement.previousPaidThroughEpoch !== null && settlement.previousPaidThroughEpoch !== undefined
-								? toBigInt(settlement.previousPaidThroughEpoch)
-								: toBigInt(settlement.previousLastFundingPaymentTimestamp || "0") / epochDuration;
-						const toEpoch =
-							settlement.newPaidThroughEpoch !== null && settlement.newPaidThroughEpoch !== undefined
-								? toBigInt(settlement.newPaidThroughEpoch)
-								: toBigInt(settlement.newLastFundingPaymentTimestamp || "0") / epochDuration;
-						return { ...settlement, fromEpoch, toEpoch };
-					})
-					.filter(settlement => settlement.toEpoch > settlement.fromEpoch)
-					.sort((a, b) => compareBigInt(a.fromEpoch, b.fromEpoch) || sortByChainPosition(a, b));
+			function buildRateSegments(checkpoints, openTimestamp, stopTimestamp) {
+				const segments = [];
+				for (let i = 0; i < checkpoints.length; i++) {
+					const checkpoint = checkpoints[i];
+					const epochDuration = toBigInt(checkpoint.epochDuration || "0");
+					if (epochDuration <= 0n || toBigInt(checkpoint.timestamp) > stopTimestamp) continue;
+					const fromEpoch = maxBigInt(checkpointEpoch(checkpoint, epochDuration), openTimestamp / epochDuration);
+					const nextTimestamp = i + 1 < checkpoints.length ? toBigInt(checkpoints[i + 1].timestamp) : stopTimestamp;
+					const segmentStopTimestamp = minBigInt(nextTimestamp, stopTimestamp);
+					const toEpoch = segmentStopTimestamp / epochDuration;
+					if (toEpoch <= fromEpoch) continue;
+					segments.push({ checkpoint, epochDuration, fromEpoch, toEpoch });
+				}
+				return segments;
 			}
 
-			function parseCloseEvents(events, epochDuration) {
+			function buildSettlementRanges(settlements) {
+				return settlements
+					.map(settlement => {
+						const fromTimestamp = toBigInt(settlement.previousLastFundingPaymentTimestamp || "0");
+						const updatedTimestamp = toBigInt(settlement.newLastFundingPaymentTimestamp || "0");
+						const eventTimestamp = toBigInt(settlement.timestamp || "0");
+						const toTimestamp = updatedTimestamp > fromTimestamp ? updatedTimestamp : eventTimestamp;
+						return { ...settlement, fromTimestamp, toTimestamp };
+					})
+					.filter(settlement => settlement.toTimestamp > settlement.fromTimestamp)
+					.sort((a, b) => compareBigInt(a.toTimestamp, b.toTimestamp) || sortByChainPosition(a, b));
+			}
+
+			function parsePositionEvents(events) {
 				return events
-					.filter(event => CLOSE_EVENT_TYPES.has(event.type))
 					.map(event => {
 						const metadata = parseMetadata(event.metadata);
-						const amount = toBigInt(metadata.amount || metadata.filledAmount || "0");
-						return {
-							type: event.type,
-							amount,
-							timestamp: toBigInt(event.timestamp),
-							epoch: toBigInt(event.timestamp) / epochDuration,
-							transaction: event.transaction,
-						};
+						if (CLOSE_EVENT_TYPES.has(event.type)) {
+							return {
+								kind: "close",
+								type: event.type,
+								amount: toBigInt(metadata.amount || metadata.filledAmount || "0"),
+								timestamp: toBigInt(event.timestamp),
+								transaction: event.transaction,
+							};
+						}
+						if (event.type === "QUOTE_ADJUSTED") {
+							return {
+								kind: "adjustment",
+								type: event.type,
+								oldQuantity: toBigInt(metadata.oldQuantity || "0"),
+								newQuantity: toBigInt(metadata.newQuantity || "0"),
+								timestamp: toBigInt(event.timestamp),
+								transaction: event.transaction,
+							};
+						}
+						return null;
 					})
-					.filter(event => event.amount > 0n)
+					.filter(item => item !== null && (item.kind !== "close" || item.amount > 0n))
 					.sort((a, b) => compareBigInt(a.timestamp, b.timestamp));
 			}
 
-			function openAmountForEpoch(quote, closeEvents, epoch) {
-				let amount = toBigInt(quote.quantity || quote.fillAmount || "0");
-				for (const closeEvent of closeEvents) {
-					if (epoch >= closeEvent.epoch) amount -= closeEvent.amount;
+			function openAmountAtTimestamp(quote, quoteEvents, timestamp, inclusive = true) {
+				const openedAt = toBigInt(quote.timestampOpenPosition || quote.timestampSendQuote || quote.timestamp || "0");
+				if (toBigInt(timestamp) < openedAt) return 0n;
+				const events = parsePositionEvents(quoteEvents);
+				const firstAdjustment = events.find(item => item.kind === "adjustment" && item.oldQuantity > 0n);
+				let quantity = firstAdjustment ? firstAdjustment.oldQuantity : toBigInt(quote.quantity || quote.fillAmount || "0");
+				let closedAmount = 0n;
+				for (const event of events) {
+					if (event.timestamp > timestamp || (!inclusive && event.timestamp === timestamp)) continue;
+					if (event.kind === "adjustment" && event.newQuantity > 0n) quantity = event.newQuantity;
+					if (event.kind === "close") closedAmount += event.amount;
 				}
-				return amount > 0n ? amount : 0n;
+				const openAmount = quantity - closedAmount;
+				return openAmount > 0n ? openAmount : 0n;
 			}
 
-			function settlementForEpoch(settlementRanges, epoch) {
-				return settlementRanges.find(settlement => epoch >= settlement.fromEpoch && epoch < settlement.toEpoch);
+			function settlementForTimestamp(settlementRanges, endTimestamp) {
+				return settlementRanges.find(settlement => endTimestamp > settlement.fromTimestamp && endTimestamp <= settlement.toTimestamp);
 			}
 
 			function statusForRow(signedAmount, settlement) {
@@ -1031,19 +1363,20 @@
 
 			function rateForQuoteSide(quote, checkpoint) {
 				if (Number(quote.positionType) === 0) {
-					return effectiveFundingRate(checkpoint.rawLongRate, checkpoint.currentLongRate, checkpoint.marketPrice);
+					return effectiveFundingRate(checkpoint.currentLongRate, checkpoint.rawLongRate, checkpoint.marketPrice);
 				}
 				if (Number(quote.positionType) === 1) {
-					return effectiveFundingRate(checkpoint.rawShortRate, checkpoint.currentShortRate, checkpoint.marketPrice);
+					return effectiveFundingRate(checkpoint.currentShortRate, checkpoint.rawShortRate, checkpoint.marketPrice);
 				}
 				return 0n;
 			}
 
-			function effectiveFundingRate(rawRate, currentRate, marketPrice) {
+			function effectiveFundingRate(currentRate, rawRate, marketPrice) {
+				if (hasValue(currentRate)) return toBigInt(currentRate);
 				if (hasValue(rawRate) && hasValue(marketPrice)) {
 					return (toBigInt(rawRate) * toBigInt(marketPrice)) / FACTOR;
 				}
-				return toBigInt(currentRate || "0");
+				return 0n;
 			}
 
 			function checkpointEpoch(checkpoint, epochDuration) {
@@ -1059,19 +1392,107 @@
 				return Array.from(byId.values());
 			}
 
-			function computeTotals(rows) {
+			function computeAuthoritativeTotals({ quote, settlements, quoteEvents, checkpoints, asOfTimestamp }) {
 				const totals = zeroTotals();
-				for (const row of rows) {
-					if (row.status === "PAID") {
-						if (row.signedAmount > 0n) totals.paid += row.signedAmount;
-						if (row.signedAmount < 0n) totals.received += -row.signedAmount;
-					} else if (row.status === "UNPAID_DEBT") {
-						totals.unpaidDebt += row.signedAmount;
-					} else if (row.status === "UNPAID_RECEIVABLE") {
-						totals.unpaidReceivable += -row.signedAmount;
-					}
+				const selectedTimestamp = toBigInt(asOfTimestamp);
+				const eligibleSettlements = settlements.filter(item => toBigInt(item.timestamp) <= selectedTimestamp).sort(sortByChainPosition);
+				for (const settlement of eligibleSettlements) {
+					const signedAmount = toBigInt(settlement.signedAmount || "0");
+					if (signedAmount > 0n) totals.paid += signedAmount;
+					if (signedAmount < 0n) totals.received += -signedAmount;
 				}
+
+				totals.openAmount = openAmountAtTimestamp(quote, quoteEvents, selectedTimestamp, true);
+				if (totals.openAmount === 0n) {
+					totals.exactCurrent = true;
+					totals.net = totals.received - totals.paid;
+					return totals;
+				}
+
+				const baseline = fundingBaselineAtTimestamp(quote, settlements, selectedTimestamp);
+				if (selectedTimestamp <= baseline.lastFundingPaymentTimestamp) {
+					totals.exactCurrent = true;
+					totals.net = totals.received - totals.paid;
+					return totals;
+				}
+
+				const checkpoint = checkpoints
+					.filter(item => toBigInt(item.timestamp) <= selectedTimestamp)
+					.slice()
+					.sort(sortByChainPosition)
+					.pop();
+				const cumulativeFunding = checkpoint ? cumulativeFundingAtTimestamp(quote, checkpoint, selectedTimestamp) : null;
+				if (cumulativeFunding !== null) {
+					const signedDebt = (totals.openAmount * (cumulativeFunding - baseline.accumulatedPaidFunding)) / FACTOR;
+					if (signedDebt > 0n) totals.unpaidDebt = signedDebt;
+					if (signedDebt < 0n) totals.unpaidReceivable = -signedDebt;
+					totals.exactCurrent = true;
+				}
+				totals.net = totals.received + totals.unpaidReceivable - totals.paid - totals.unpaidDebt;
 				return totals;
+			}
+
+			function fundingBaselineAtTimestamp(quote, settlements, asOfTimestamp) {
+				const sorted = settlements.slice().sort(sortByChainPosition);
+				const eligible = sorted.filter(item => toBigInt(item.timestamp) <= asOfTimestamp);
+				if (eligible.length > 0) {
+					const latest = eligible[eligible.length - 1];
+					return {
+						accumulatedPaidFunding: toBigInt(latest.newAccumulatedPaidFunding || latest.previousAccumulatedPaidFunding || "0"),
+						lastFundingPaymentTimestamp: toBigInt(
+							latest.newLastFundingPaymentTimestamp || latest.previousLastFundingPaymentTimestamp || "0",
+						),
+					};
+				}
+				const firstFuture = sorted.find(item => toBigInt(item.timestamp) > asOfTimestamp);
+				if (firstFuture) {
+					return {
+						accumulatedPaidFunding: toBigInt(firstFuture.previousAccumulatedPaidFunding || "0"),
+						lastFundingPaymentTimestamp: toBigInt(firstFuture.previousLastFundingPaymentTimestamp || "0"),
+					};
+				}
+				return {
+					accumulatedPaidFunding: toBigInt(quote.accumulatedPaidFunding || "0"),
+					lastFundingPaymentTimestamp: toBigInt(quote.lastFundingPaymentTimestamp || "0"),
+				};
+			}
+
+			function cumulativeFundingAtTimestamp(quote, checkpoint, asOfTimestamp) {
+				const epochDuration = toBigInt(checkpoint.epochDuration || "0");
+				if (epochDuration <= 0n) return null;
+				const lastUpdatedEpoch = toBigInt(checkpoint.lastUpdatedEpoch || "0");
+				const startEpoch = toBigInt(checkpoint.startEpoch || "0");
+				const currentEpoch = toBigInt(asOfTimestamp) / epochDuration;
+				if (currentEpoch < lastUpdatedEpoch || lastUpdatedEpoch < startEpoch) return null;
+				const isLong = Number(quote.positionType) === 0;
+				const isShort = Number(quote.positionType) === 1;
+				if (!isLong && !isShort) return null;
+				const snapshot = isLong ? checkpoint.snapshotLongFee : checkpoint.snapshotShortFee;
+				const accumulatedRate = isLong ? checkpoint.accumulatedLongRate : checkpoint.accumulatedShortRate;
+				const currentRate = isLong ? checkpoint.currentLongRate : checkpoint.currentShortRate;
+				if (!hasValue(snapshot) || !hasValue(accumulatedRate) || !hasValue(currentRate)) return null;
+				return (
+					toBigInt(snapshot) +
+					toBigInt(accumulatedRate) * (lastUpdatedEpoch - startEpoch) +
+					toBigInt(currentRate) * (currentEpoch - lastUpdatedEpoch)
+				);
+			}
+
+			function effectiveAsOfTimestamp(quote, asOfTimestamp) {
+				let selected = toBigInt(asOfTimestamp);
+				const closeTimestamp = toBigInt(quote.timestampFullyClose || "0");
+				if (closeTimestamp > 0n && closeTimestamp < selected) selected = closeTimestamp;
+				return selected;
+			}
+
+			function hasAmbiguousSameBlockOrder(checkpoints) {
+				const transactionsByBlock = new Map();
+				for (const checkpoint of checkpoints) {
+					const key = `${checkpoint.blockNumber || "0"}-${checkpoint.timestamp || "0"}`;
+					if (!transactionsByBlock.has(key)) transactionsByBlock.set(key, new Set());
+					transactionsByBlock.get(key).add(String(checkpoint.transaction || ""));
+				}
+				return Array.from(transactionsByBlock.values()).some(transactions => transactions.size > 1);
 			}
 
 			function zeroTotals() {
@@ -1080,6 +1501,9 @@
 					received: 0n,
 					unpaidDebt: 0n,
 					unpaidReceivable: 0n,
+					openAmount: 0n,
+					net: 0n,
+					exactCurrent: false,
 				};
 			}
 
@@ -1090,12 +1514,12 @@
 					meta("Quote id", quote.quoteId),
 					meta("Symbol", `${quote.symbol || "Unknown"} / ${quote.symbolId || "-"}`),
 					meta("Side", sideName(quote.positionType)),
-					meta("Status", quote.quoteStatus ?? "-"),
+					meta("Status", quoteStatusName(quote.quoteStatus), quote.quoteStatus),
 					meta("PartyA", shortHex(quote.partyA), quote.partyA),
 					meta("PartyB", shortHex(quote.partyB), quote.partyB),
 					meta("Quantity", formatUnits(toBigInt(quote.quantity || "0")), quote.quantity),
 					meta("Closed amount", formatUnits(toBigInt(quote.closedAmount || "0")), quote.closedAmount),
-					meta("Funding baseline", formatUnits(toBigInt(quote.accumulatedPaidFunding || "0")), quote.accumulatedPaidFunding),
+					meta("Funding baseline / unit", formatUnits(toBigInt(quote.accumulatedPaidFunding || "0")), quote.accumulatedPaidFunding),
 					meta("Last funding timestamp", formatTimestamp(quote.lastFundingPaymentTimestamp), quote.lastFundingPaymentTimestamp),
 					meta("Opened", formatTimestamp(quote.timestampOpenPosition), quote.timestampOpenPosition),
 					meta(
@@ -1108,22 +1532,37 @@
 
 			function renderSummary(build) {
 				summaryEl.classList.remove("hidden");
-				const items = [
-					metric("Displayed rows", String(build.rows.length)),
-					metric("Epoch duration", build.epochDuration > 0n ? `${build.epochDuration}s` : "-"),
-					metric("Open epoch", build.openEpoch > 0n ? build.openEpoch.toString() : "-"),
-					metric("Stop epoch", build.stopEpoch > 0n ? build.stopEpoch.toString() : "-"),
-					metric("Paid by PartyA", formatUnits(build.totals.paid), build.totals.paid.toString()),
-					metric("Received by PartyA", formatUnits(build.totals.received), build.totals.received.toString()),
-					metric("Unpaid debt", formatUnits(build.totals.unpaidDebt), build.totals.unpaidDebt.toString()),
-					metric("Unpaid receivable", formatUnits(build.totals.unpaidReceivable), build.totals.unpaidReceivable.toString()),
-				];
-				summaryEl.innerHTML = items.join("");
+				const currentDebt = build.totals.exactCurrent
+					? metric("Current unpaid debt", formatFundingAmount(build.totals.unpaidDebt), exactFundingAmount(build.totals.unpaidDebt))
+					: metric("Current unpaid debt", "Unavailable", "Checkpoint state was incomplete");
+				const currentReceivable = build.totals.exactCurrent
+					? metric("Current receivable", formatFundingAmount(build.totals.unpaidReceivable), exactFundingAmount(build.totals.unpaidReceivable))
+					: metric("Current receivable", "Unavailable", "Checkpoint state was incomplete");
+				summaryMetrics.innerHTML = [
+					metric("Realized paid by PartyA", formatFundingAmount(build.totals.paid), exactFundingAmount(build.totals.paid), "featured"),
+					metric("Realized received by PartyA", formatFundingAmount(build.totals.received), exactFundingAmount(build.totals.received), "featured"),
+					currentDebt,
+					currentReceivable,
+				].join("");
+				const durationText = build.durationRegimes.length > 0 ? build.durationRegimes.map(value => formatDuration(toBigInt(value))).join(" · ") : "-";
+				const netText = build.totals.exactCurrent ? formatFundingAmount(build.totals.net) : "Unavailable";
+				reconstructionMeta.innerHTML = [
+					`<span>Selected time <strong>${escapeHtml(formatTimestamp(build.stopTimestamp))}</strong></span>`,
+					`<span>PartyA net funding <strong>${escapeHtml(netText)}</strong></span>`,
+					`<span>Open amount <strong>${escapeHtml(formatUnits(build.totals.openAmount))}</strong></span>`,
+					`<span>Settlements <strong>${build.settlementCount}</strong></span>`,
+					`<span>Duration regimes <strong>${escapeHtml(durationText)}</strong></span>`,
+					`<span>Virtual rows <strong>${build.rows.length} shown / ${build.totalRowCount.toString()} total</strong></span>`,
+				].join("");
 			}
 
 			function renderUpnlCalculator(quote, build) {
 				activeQuote = quote;
 				activeBuild = build;
+				if (build.totals.openAmount === 0n || !build.totals.exactCurrent) {
+					upnlCalculator.classList.add("hidden");
+					return;
+				}
 				upnlCalculator.classList.remove("hidden");
 				upnlSubtitle.textContent = `${quote.symbol || "Symbol"} / ${sideName(quote.positionType)}`;
 				symbolPriceInput.placeholder = quote.openedPrice ? formatUnits(toBigInt(quote.openedPrice), 18, 8) : "0.00";
@@ -1133,7 +1572,7 @@
 			function updateUpnlCalculator() {
 				if (!activeQuote || !activeBuild) return;
 
-				const openAmount = quoteOpenAmount(activeQuote);
+				const openAmount = activeBuild.totals.openAmount;
 				const openedPrice = toBigInt(activeQuote.openedPrice || "0");
 				const fundingAdjustment = activeBuild.totals.unpaidReceivable - activeBuild.totals.unpaidDebt;
 				const priceText = symbolPriceInput.value.trim();
@@ -1169,7 +1608,7 @@
 
 			function renderRows(rows) {
 				if (rows.length === 0) {
-					rowsBody.innerHTML = `<tr><td class="empty-state" colspan="10">No funding rows to show.</td></tr>`;
+					rowsBody.innerHTML = `<tr><td class="empty-state" colspan="11">No completed virtual funding epochs to show.</td></tr>`;
 					return;
 				}
 
@@ -1179,21 +1618,22 @@
 						const tx = settlement ? settlement.transaction : "";
 						return `
 							<tr>
-								<td class="mono">${row.epoch.toString()}</td>
-								<td>
+								<td class="mono" data-label="Epoch">${row.epoch.toString()}</td>
+								<td data-label="Duration">${escapeHtml(formatDuration(row.epochDuration))}</td>
+								<td data-label="Epoch window">
 									${escapeHtml(formatTimestamp(row.startTimestamp))}
 									<small>${escapeHtml(formatTimestamp(row.endTimestamp))}</small>
 								</td>
-								<td>${escapeHtml(row.side)}</td>
-								<td title="${row.openAmount.toString()}">${escapeHtml(formatUnits(row.openAmount))}</td>
-								<td class="mono" title="${row.rate.toString()}">${escapeHtml(formatUnits(row.rate, 18, 10))}</td>
-								<td class="${amountClass(row.signedAmount)}" title="${row.signedAmount.toString()}">
+								<td data-label="Side">${escapeHtml(row.side)}</td>
+								<td data-label="Open amount" title="${row.openAmount.toString()}">${escapeHtml(formatUnits(row.openAmount))}</td>
+								<td data-label="Funding per unit" class="mono" title="${row.rate.toString()}">${escapeHtml(formatUnits(row.rate, 18, 10))}</td>
+								<td data-label="Amount" class="${amountClass(row.signedAmount)}" title="${row.signedAmount.toString()}">
 									${escapeHtml(formatUnits(row.signedAmount))}
 								</td>
-								<td>${statusBadge(row.status)}</td>
-								<td>${settlement ? escapeHtml(settlement.trigger) : "-"}</td>
-								<td class="mono">${tx ? escapeHtml(shortHex(tx)) : "-"}</td>
-								<td>
+								<td data-label="Status">${statusBadge(row.status)}</td>
+								<td data-label="Trigger">${settlement ? escapeHtml(settlement.trigger) : "-"}</td>
+								<td data-label="Realized tx" class="mono">${tx ? escapeHtml(shortHex(tx)) : "-"}</td>
+								<td data-label="Checkpoint">
 									${escapeHtml(row.checkpoint.eventType || "-")}
 									<small class="mono">${escapeHtml(shortHex(row.checkpoint.transaction))}</small>
 								</td>
@@ -1235,6 +1675,7 @@
 								.join("");
 
 				return `
+					<h3>Settlements (${settlements.length})</h3>
 					<div class="table-wrap">
 						<table>
 							<thead>
@@ -1283,6 +1724,7 @@
 								.join("");
 
 				return `
+					<h3>Funding index checkpoints (${checkpoints.length})</h3>
 					<div class="table-wrap">
 						<table>
 							<thead>
@@ -1325,6 +1767,7 @@
 								.join("");
 
 				return `
+					<h3>Quote events (${events.length})</h3>
 					<div class="table-wrap">
 						<table>
 							<thead>
@@ -1385,6 +1828,7 @@
 				if (status === "PAID") cls = "paid";
 				if (status === "UNPAID_DEBT") cls = "debt";
 				if (status === "UNPAID_RECEIVABLE") cls = "receivable";
+				if (status === "SETTLED_WITHOUT_BALANCE_CHANGE") cls = "settled";
 				return `<span class="status ${cls}">${escapeHtml(status)}</span>`;
 			}
 
@@ -1396,7 +1840,7 @@
 
 			function setLoading(isLoading) {
 				loadButton.disabled = isLoading;
-				loadButton.textContent = isLoading ? "Loading..." : "Load quote";
+				loadButton.textContent = isLoading ? "Loading ledger..." : "Load funding ledger";
 			}
 
 			function showMessage(message, type) {
@@ -1464,7 +1908,7 @@
 			}
 
 			function calculateQuoteUpnl(quote, totals, markPrice) {
-				const openAmount = quoteOpenAmount(quote);
+				const openAmount = hasValue(totals.openAmount) ? toBigInt(totals.openAmount) : quoteOpenAmount(quote);
 				const openedPrice = toBigInt(quote.openedPrice || "0");
 				let priceDelta = markPrice - openedPrice;
 				if (Number(quote.positionType) === 1) priceDelta = openedPrice - markPrice;
@@ -1503,6 +1947,16 @@
 				return `${negative ? "-" : ""}${wholeText}${fraction ? "." + fraction : ""}`;
 			}
 
+			function formatFundingAmount(value) {
+				const full = formatUnits(value, 18, 18);
+				const compact = formatUnits(value, 18, 12);
+				return compact === full ? full : `${compact}…`;
+			}
+
+			function exactFundingAmount(value) {
+				return `${formatUnits(value, 18, 18)} (${toBigInt(value).toString()} raw)`;
+			}
+
 			function formatTimestamp(value) {
 				if (value === null || value === undefined || value === "" || toBigInt(value) === 0n) return "-";
 				const seconds = Number(toBigInt(value));
@@ -1510,10 +1964,36 @@
 				return new Date(seconds * 1000).toLocaleString();
 			}
 
+			function formatDuration(value) {
+				const seconds = toBigInt(value);
+				if (seconds > 0n && seconds % 86400n === 0n) return `${seconds / 86400n}d`;
+				if (seconds > 0n && seconds % 3600n === 0n) return `${seconds / 3600n}h`;
+				if (seconds > 0n && seconds % 60n === 0n) return `${seconds / 60n}m`;
+				return `${seconds}s`;
+			}
+
 			function sideName(positionType) {
 				if (Number(positionType) === 0) return "LONG";
 				if (Number(positionType) === 1) return "SHORT";
 				return `UNKNOWN(${positionType ?? "-"})`;
+			}
+
+			function quoteStatusName(value) {
+				const names = [
+					"PENDING",
+					"LOCKED",
+					"CANCEL_PENDING",
+					"CANCELED",
+					"OPENED",
+					"CLOSE_PENDING",
+					"CANCEL_CLOSE_PENDING",
+					"CLOSED",
+					"LIQUIDATED",
+					"EXPIRED",
+					"LIQUIDATED_PENDING",
+				];
+				const index = Number(value);
+				return Number.isInteger(index) && names[index] ? `${names[index]} (${index})` : valueOrDash(value);
 			}
 
 			function shortHex(value) {
@@ -1537,11 +2017,27 @@
 			}
 
 			function sortByChainPosition(a, b) {
-				return (
-					compareBigInt(toBigInt(a.blockNumber || "0"), toBigInt(b.blockNumber || "0")) ||
-					compareBigInt(toBigInt(a.timestamp || "0"), toBigInt(b.timestamp || "0")) ||
-					String(a.id || "").localeCompare(String(b.id || ""))
-				);
+				const blockOrder = compareBigInt(toBigInt(a.blockNumber || "0"), toBigInt(b.blockNumber || "0"));
+				if (blockOrder !== 0) return blockOrder;
+				const timestampOrder = compareBigInt(toBigInt(a.timestamp || "0"), toBigInt(b.timestamp || "0"));
+				if (timestampOrder !== 0) return timestampOrder;
+				if (String(a.transaction || "") === String(b.transaction || "")) {
+					const aOrder = eventOrderFromId(a.id);
+					const bOrder = eventOrderFromId(b.id);
+					const logOrder = compareBigInt(aOrder.logIndex, bOrder.logIndex);
+					if (logOrder !== 0) return logOrder;
+					const itemOrder = compareBigInt(aOrder.itemIndex, bOrder.itemIndex);
+					if (itemOrder !== 0) return itemOrder;
+				}
+				return String(a.id || "").localeCompare(String(b.id || ""));
+			}
+
+			function eventOrderFromId(value) {
+				const pieces = String(value || "").split("-");
+				return {
+					logIndex: /^\d+$/.test(pieces[1] || "") ? toBigInt(pieces[1]) : 0n,
+					itemIndex: /^\d+$/.test(pieces[2] || "") ? toBigInt(pieces[2]) : 0n,
+				};
 			}
 
 			function compareBigInt(a, b) {
