@@ -1828,7 +1828,7 @@ type LatestAccountBalance @entity(immutable: false) {
 	pendingLockedPartyBmm: BigInt!
 	"""Free balance from the latest balance snapshot."""
 	freeBalance: BigInt!
-	"""Free plus allocated, locked, and pending locked balance components from the latest snapshot."""
+	"""Free plus allocated collateral; locked and pending locked values are already backed by allocated balance."""
 	totalBalance: BigInt!
 	"""Block timestamp associated with this row."""
 	timestamp: BigInt!
@@ -1961,7 +1961,7 @@ type AffiliateExpressWithdrawComponents @entity(immutable: false) {
 	pendingLockedPartyAmm18: BigInt!
 	"""Pending locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyBmm18: BigInt!
-	"""Total balance component scaled to 18 decimals by the subgraph."""
+	"""Free plus allocated balance component scaled to 18 decimals by the subgraph."""
 	totalBalance18: BigInt!
 	"""Pending withdraw amount in collateral token units."""
 	pendingWithdrawAmountCollateral: BigInt!
@@ -2050,7 +2050,7 @@ type AffiliateExpressWithdrawComponentBucket @entity(immutable: false) {
 	pendingLockedPartyAmm18: BigInt!
 	"""Pending locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyBmm18: BigInt!
-	"""Total balance component scaled to 18 decimals by the subgraph."""
+	"""Free plus allocated balance component scaled to 18 decimals by the subgraph."""
 	totalBalance18: BigInt!
 	"""Pending withdraw amount in collateral token units."""
 	pendingWithdrawAmountCollateral: BigInt!
@@ -2147,7 +2147,7 @@ type AffiliateExpressWithdrawAccountSnapshot @entity(immutable: false) {
 	pendingLockedPartyAmm18: BigInt!
 	"""Pending locked PartyB maintenance-margin component scaled to 18 decimals by the subgraph."""
 	pendingLockedPartyBmm18: BigInt!
-	"""Total balance component scaled to 18 decimals by the subgraph."""
+	"""Free plus allocated balance component scaled to 18 decimals by the subgraph."""
 	totalBalance18: BigInt!
 	"""Whether this account snapshot is classified as having broken hierarchy context."""
 	brokenHierarchy: Boolean!

@@ -8,6 +8,18 @@ const schema = readFileSync("perps/analytics/schema.graphql", "utf8");
 const manager = readFileSync("scripts/manager.py", "utf8");
 const baseConfig = JSON.parse(readFileSync("configs/perps/base.json", "utf8"));
 
+test("total balance counts free and allocated collateral without counting lock reservations twice", () => {
+	const eventFinalizer = source.slice(source.indexOf("function finalizeBalance("), source.indexOf("function finalizeBalanceAtBlock("));
+	const blockFinalizer = source.slice(source.indexOf("function finalizeBalanceAtBlock("), source.indexOf("function isPartyALatestBalanceEmpty("));
+
+	for (const finalizer of [eventFinalizer, blockFinalizer]) {
+		assert.match(finalizer, /entity\.totalBalance = entity\.freeBalance\.plus\(entity\.allocatedBalance\)/);
+		assert.doesNotMatch(finalizer, /\.plus\(entity\.(?:locked|pendingLocked)/);
+	}
+
+	assert.match(schema, /Free plus allocated collateral; locked and pending locked values are already backed by allocated balance\./);
+});
+
 test("PartyB counterparty buckets are cleared when bucket-specific balances are zero", () => {
 	const partyBUpdate = source.slice(source.indexOf("export function updatePartyBLatestBalance"));
 	const removalPredicate = source.slice(

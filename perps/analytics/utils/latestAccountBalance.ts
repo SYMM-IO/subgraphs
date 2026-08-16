@@ -62,16 +62,9 @@ function finalizeBalance(entity: LatestAccountBalance, event: ethereum.Event, ve
 		return false
 	}
 	entity.freeBalance = free
-	entity.totalBalance = entity.freeBalance
-		.plus(entity.allocatedBalance)
-		.plus(entity.lockedCva)
-		.plus(entity.lockedLf)
-		.plus(entity.lockedPartyAmm)
-		.plus(entity.lockedPartyBmm)
-		.plus(entity.pendingLockedCva)
-		.plus(entity.pendingLockedLf)
-		.plus(entity.pendingLockedPartyAmm)
-		.plus(entity.pendingLockedPartyBmm)
+	// Locked and pending-locked values are reservations backed by allocatedBalance,
+	// not additional collateral. Including them here would count those funds twice.
+	entity.totalBalance = entity.freeBalance.plus(entity.allocatedBalance)
 	return true
 }
 
@@ -82,16 +75,9 @@ function finalizeBalanceAtBlock(entity: LatestAccountBalance, block: ethereum.Bl
 		return false
 	}
 	entity.freeBalance = free
-	entity.totalBalance = entity.freeBalance
-		.plus(entity.allocatedBalance)
-		.plus(entity.lockedCva)
-		.plus(entity.lockedLf)
-		.plus(entity.lockedPartyAmm)
-		.plus(entity.lockedPartyBmm)
-		.plus(entity.pendingLockedCva)
-		.plus(entity.pendingLockedLf)
-		.plus(entity.pendingLockedPartyAmm)
-		.plus(entity.pendingLockedPartyBmm)
+	// Locked and pending-locked values are reservations backed by allocatedBalance,
+	// not additional collateral. Including them here would count those funds twice.
+	entity.totalBalance = entity.freeBalance.plus(entity.allocatedBalance)
 	return true
 }
 
