@@ -20,6 +20,24 @@ sources:
       - name: arbitrum_analytics
         version: v0.2.10
     name: latest_account_balance
+  funding_fee_state_vibe_stage:
+    type: subgraph_entity
+    subgraphs:
+      - name: arbitrum-vibe-analytics
+        version: v0.0.2
+    name: funding_fee_state
+  aggregated_position_vibe_stage:
+    type: subgraph_entity
+    subgraphs:
+      - name: arbitrum-vibe-analytics
+        version: v0.0.2
+    name: aggregated_position
+  latest_account_balance_vibe_stage:
+    type: subgraph_entity
+    subgraphs:
+      - name: arbitrum-vibe-analytics
+        version: v0.0.2
+    name: latest_account_balance
 transforms:
   liquidator_funding_state:
     type: sql
@@ -82,26 +100,129 @@ transforms:
         transaction
       FROM latest_account_balance
       WHERE account_type = 'PARTY_A'
+  liquidator_funding_state_vibe_stage:
+    type: sql
+    primary_key: id
+    sql: |-
+      SELECT
+        id,
+        source,
+        symbol_id,
+        symbol_name,
+        party_b,
+        current_long_rate,
+        current_short_rate,
+        accumulated_long_rate,
+        accumulated_short_rate,
+        epoch_duration,
+        last_updated_epoch,
+        start_epoch,
+        start_epoch_timestamp,
+        last_updated_timestamp,
+        snapshot_long_fee,
+        snapshot_short_fee,
+        update_timestamp
+      FROM funding_fee_state_vibe_stage
+  liquidator_position_state_vibe_stage:
+    type: sql
+    primary_key: id
+    sql: |-
+      SELECT
+        id,
+        source,
+        party_a,
+        party_b,
+        symbol_id,
+        symbol_name,
+        position_type,
+        aggregated_amount,
+        aggregated_notional,
+        weighted_paid_funding,
+        open_positions_count,
+        is_active,
+        closed_timestamp,
+        closed_block_number,
+        closed_transaction,
+        block_number,
+        transaction
+      FROM aggregated_position_vibe_stage
+  liquidator_party_a_balance_state_vibe_stage:
+    type: sql
+    primary_key: id
+    sql: |-
+      SELECT
+        id,
+        source,
+        account,
+        allocated_balance,
+        locked_cva,
+        locked_lf,
+        block_number,
+        transaction
+      FROM latest_account_balance_vibe_stage
+      WHERE account_type = 'PARTY_A'
 sinks:
-  liquidator_funding_state_kafka:
+  liquidator_funding_state_to_prod:
     type: kafka
-    topic: arbitrum_liquidator_funding_state
+    topic: solvencyq.state.arbitrum-42161.canonical.funding.v1
+    data_format: json
+    secret_name: KAFKA_SECRET_PROD
+    upsert_mode: false
+    from: liquidator_funding_state
+  liquidator_funding_state_to_stage:
+    type: kafka
+    topic: solvencyq.state.arbitrum-42161.canonical.funding.v1
     data_format: json
     secret_name: KAFKA_SECRET_STAGE
     upsert_mode: false
     from: liquidator_funding_state
-  liquidator_position_state_kafka:
+  liquidator_position_state_to_prod:
     type: kafka
-    topic: arbitrum_liquidator_position_state
+    topic: solvencyq.state.arbitrum-42161.canonical.position.v1
+    data_format: json
+    secret_name: KAFKA_SECRET_PROD
+    upsert_mode: false
+    from: liquidator_position_state
+  liquidator_position_state_to_stage:
+    type: kafka
+    topic: solvencyq.state.arbitrum-42161.canonical.position.v1
     data_format: json
     secret_name: KAFKA_SECRET_STAGE
     upsert_mode: false
     from: liquidator_position_state
-  liquidator_party_a_balance_state_kafka:
+  liquidator_party_a_balance_state_to_prod:
     type: kafka
-    topic: arbitrum_liquidator_party_a_balance_state
+    topic: solvencyq.state.arbitrum-42161.canonical.party-a-balance.v1
+    data_format: json
+    secret_name: KAFKA_SECRET_PROD
+    upsert_mode: false
+    from: liquidator_party_a_balance_state
+  liquidator_party_a_balance_state_to_stage:
+    type: kafka
+    topic: solvencyq.state.arbitrum-42161.canonical.party-a-balance.v1
     data_format: json
     secret_name: KAFKA_SECRET_STAGE
     upsert_mode: false
     from: liquidator_party_a_balance_state
+  liquidator_funding_state_vibe_stage_to_stage:
+    type: kafka
+    topic: solvencyq.state.arbitrum-42161.vibe-stage.funding.v1
+    data_format: json
+    secret_name: KAFKA_SECRET_STAGE
+    upsert_mode: false
+    from: liquidator_funding_state_vibe_stage
+  liquidator_position_state_vibe_stage_to_stage:
+    type: kafka
+    topic: solvencyq.state.arbitrum-42161.vibe-stage.position.v1
+    data_format: json
+    secret_name: KAFKA_SECRET_STAGE
+    upsert_mode: false
+    from: liquidator_position_state_vibe_stage
+  liquidator_party_a_balance_state_vibe_stage_to_stage:
+    type: kafka
+    topic: solvencyq.state.arbitrum-42161.vibe-stage.party-a-balance.v1
+    data_format: json
+    secret_name: KAFKA_SECRET_STAGE
+    upsert_mode: false
+    from: liquidator_party_a_balance_state_vibe_stage
 use_dedicated_ip: false
