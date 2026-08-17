@@ -6,7 +6,8 @@ import { useEffect } from "react";
 import type { PropsWithChildren, ReactNode } from "react";
 import type { ApiToast } from "../types/fleet";
 
-const TOAST_DURATION_MS = 4200;
+const SUCCESS_TOAST_DURATION_MS = 5200;
+const PERSISTENT_TOAST_DURATION_MS = 24 * 60 * 60 * 1000;
 
 export function Button({
   children,
@@ -19,7 +20,7 @@ export function Button({
   size?: "sm" | "md" | "icon";
 }) {
   return (
-    <button className={clsx("btn", `btn-${variant}`, `btn-${size}`, className)} {...props}>
+    <button type="button" className={clsx("btn", `btn-${variant}`, `btn-${size}`, className)} {...props}>
       {children}
     </button>
   );
@@ -42,6 +43,7 @@ export function Modal({
   children,
   footer,
   className,
+  closeDisabled = false,
 }: PropsWithChildren<{
   title: string;
   description?: string;
@@ -50,6 +52,7 @@ export function Modal({
   onOpenChange: (open: boolean) => void;
   footer?: ReactNode;
   className?: string;
+  closeDisabled?: boolean;
 }>) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -63,8 +66,8 @@ export function Modal({
               {description ? <Dialog.Description className="dialog-description">{description}</Dialog.Description> : null}
             </div>
             <Dialog.Close asChild>
-              <Button variant="ghost" size="icon" className="dialog-close" aria-label="Close">
-                <X size={16} />
+              <Button variant="ghost" size="icon" className="dialog-close" aria-label="Close dialog" disabled={closeDisabled}>
+                <X size={16} aria-hidden="true" />
               </Button>
             </Dialog.Close>
           </header>
@@ -77,10 +80,12 @@ export function Modal({
 }
 
 export function ToastHost({ toast, onOpenChange }: { toast: ApiToast | null; onOpenChange: (open: boolean) => void }) {
-  useEffect(() => {
-    if (!toast) return;
+  const duration = toast?.kind === "err" ? PERSISTENT_TOAST_DURATION_MS : SUCCESS_TOAST_DURATION_MS;
 
-    const timer = window.setTimeout(() => onOpenChange(false), TOAST_DURATION_MS);
+  useEffect(() => {
+    if (!toast || toast.kind === "err") return;
+
+    const timer = window.setTimeout(() => onOpenChange(false), SUCCESS_TOAST_DURATION_MS);
     return () => window.clearTimeout(timer);
   }, [toast, onOpenChange]);
 
@@ -90,12 +95,12 @@ export function ToastHost({ toast, onOpenChange }: { toast: ApiToast | null; onO
         className={clsx("toast", toast?.kind === "err" ? "toast-err" : "toast-ok")}
         open={!!toast}
         onOpenChange={onOpenChange}
-        duration={TOAST_DURATION_MS}
+        duration={duration}
       >
         <Toast.Title className="toast-title">{toast?.title}</Toast.Title>
         {toast?.body ? <Toast.Description className="toast-body">{toast.body}</Toast.Description> : null}
-        <Toast.Close className="toast-close" aria-label="Dismiss">
-          <X size={14} />
+        <Toast.Close className="toast-close" aria-label="Dismiss notification">
+          <X size={14} aria-hidden="true" />
         </Toast.Close>
       </Toast.Root>
       <Toast.Viewport className="toast-viewport" />
@@ -103,12 +108,13 @@ export function ToastHost({ toast, onOpenChange }: { toast: ApiToast | null; onO
   );
 }
 
-export function Field({ label, children, hint }: PropsWithChildren<{ label: string; hint?: string }>) {
+export function Field({ label, children, hint, error, errorId }: PropsWithChildren<{ label: string; hint?: string; error?: string; errorId?: string }>) {
   return (
     <label className="field">
       <span className="field-label">{label}</span>
       {children}
       {hint ? <span className="field-hint">{hint}</span> : null}
+      {error ? <span className="field-error" id={errorId} role="alert">{error}</span> : null}
     </label>
   );
 }

@@ -1,7 +1,7 @@
 export function BrandLogo() {
   return (
     <div className="brand-mark" aria-hidden="true">
-      <svg viewBox="0 0 32 32" role="img">
+      <svg viewBox="0 0 32 32">
         <path className="brand-track" d="M8 9.5h10.7l5.3 5.3" />
         <path className="brand-track" d="M8 16h16" />
         <path className="brand-track" d="M8 22.5h10.7l5.3-5.3" />

@@ -1,6 +1,6 @@
-import { GitBranch, Rocket, Trash2, UploadCloud } from "lucide-react";
+import { GitBranch, LoaderCircle, Rocket, Trash2, UploadCloud } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { Selection } from "../types/fleet";
 import { Button, Field, Modal } from "./ui";
 
@@ -47,8 +47,9 @@ export function ActionDialogs(props: Props) {
         busy={props.busy}
         title="Delete deployment"
         description={`${state.base}/${state.version}`}
-        icon={<Trash2 size={18} />}
-        confirmLabel="Delete"
+        icon={<Trash2 size={18} aria-hidden="true" />}
+        confirmLabel="Delete deployment"
+        body="Permanently delete this version from Goldsky. Move or remove any tag pointers that still depend on it first."
         danger
         onClose={close}
         onConfirm={() => props.onDelete(state.base, state.version)}
@@ -63,8 +64,9 @@ export function ActionDialogs(props: Props) {
         busy={props.busy}
         title="Remove tag"
         description={`${state.tag} on ${state.base}/${state.version}`}
-        icon={<GitBranch size={18} />}
+        icon={<GitBranch size={18} aria-hidden="true" />}
         confirmLabel="Remove tag"
+        body={`Remove the ${state.tag} pointer from this subgraph. Requests to that tag will stop resolving until it is promoted again.`}
         onClose={close}
         onConfirm={() => props.onUntag(state.base, state.version, state.tag)}
       />
@@ -83,6 +85,7 @@ function ConfirmDialog({
   description,
   icon,
   confirmLabel,
+  body,
   danger,
   onClose,
   onConfirm,
@@ -93,6 +96,7 @@ function ConfirmDialog({
   description: string;
   icon: ReactNode;
   confirmLabel: string;
+  body: string;
   danger?: boolean;
   onClose?: () => void;
   onConfirm: () => void;
@@ -104,14 +108,17 @@ function ConfirmDialog({
       title={title}
       description={description}
       icon={icon}
+      closeDisabled={busy}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
-          <Button variant={danger ? "danger" : "primary"} onClick={onConfirm} disabled={busy}>{busy ? "Working..." : confirmLabel}</Button>
+          <Button variant="ghost" onClick={onClose} disabled={busy} autoFocus>Cancel</Button>
+          <Button variant={danger ? "danger" : "primary"} onClick={onConfirm} disabled={busy} aria-busy={busy}>
+            {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}{confirmLabel}
+          </Button>
         </>
       }
     >
-      <p className="dialog-copy">This changes Goldsky state immediately. Keep going only if the target looks correct.</p>
+      <p className="dialog-copy">{body}</p>
     </Modal>
   );
 }
@@ -130,24 +137,49 @@ function BulkDeployDialog({
   onSubmit: (version: string, selections: Selection[]) => void;
 }) {
   const [version, setVersion] = useState("");
+  const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const submit = () => {
+    if (!version.trim()) {
+      setError("Enter a version label, for example v0.2.13.");
+      inputRef.current?.focus();
+      return;
+    }
+    setError("");
+    onSubmit(version.trim(), selections);
+  };
   return (
     <Modal
       open={open}
       onOpenChange={(next) => !next && onClose?.()}
       title="Sequential batch deploy"
       description={`${selections.length} selected subgraph${selections.length === 1 ? "" : "s"}`}
-      icon={<UploadCloud size={18} />}
+      icon={<UploadCloud size={18} aria-hidden="true" />}
+      closeDisabled={busy}
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
-          <Button variant="primary" onClick={() => onSubmit(version, selections)} disabled={busy || !version.trim()}>
-            {busy ? "Queueing..." : "Queue deploy"}
+          <Button variant="primary" onClick={submit} disabled={busy} aria-busy={busy}>
+            {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}Queue deploy
           </Button>
         </>
       }
     >
-      <Field label="Version label" hint="Runs fully sequentially in the selected order.">
-        <input className="input" value={version} onChange={(event) => setVersion(event.currentTarget.value)} placeholder="v0.1.9" autoFocus />
+      <Field label="Version label" hint="Deployments run sequentially in the order shown below." error={error} errorId="bulk-deploy-version-error">
+        <input
+          ref={inputRef}
+          className="input"
+          value={version}
+          onChange={(event) => { setVersion(event.currentTarget.value); setError(""); }}
+          onKeyDown={(event) => { if (event.key === "Enter") submit(); }}
+          placeholder="v0.2.13"
+          aria-invalid={!!error}
+          aria-describedby={error ? "bulk-deploy-version-error" : undefined}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          autoFocus
+        />
       </Field>
       <SelectionPreview selections={selections} />
     </Modal>
@@ -173,42 +205,76 @@ function BulkPromoteDialog({
   const [stage, setStage] = useState(false);
   const [requireSynced, setRequireSynced] = useState(true);
   const [deleteDisplaced, setDeleteDisplaced] = useState(false);
+  const [error, setError] = useState("");
+  const versionRef = useRef<HTMLInputElement>(null);
+  const latestRef = useRef<HTMLInputElement>(null);
   const tags = useMemo(() => [latest && "latest", stage && "stage"].filter(Boolean) as string[], [latest, stage]);
+  const submit = () => {
+    if (!tags.length) {
+      setError("Select at least one tag to promote.");
+      latestRef.current?.focus();
+      return;
+    }
+    if (mode === "specific" && !version.trim()) {
+      setError("Enter the version label to promote, for example v0.2.13.");
+      versionRef.current?.focus();
+      return;
+    }
+    setError("");
+    onSubmit({ selections, tags, mode, version: version.trim(), requireSynced, deleteDisplaced });
+  };
   return (
     <Modal
       open={open}
       onOpenChange={(next) => !next && onClose?.()}
-      title="Bulk promote"
+      title="Promote selected subgraphs"
       description={`${selections.length} selected subgraph${selections.length === 1 ? "" : "s"}`}
-      icon={<Rocket size={18} />}
+      icon={<Rocket size={18} aria-hidden="true" />}
+      closeDisabled={busy}
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
           <Button
-            variant="primary"
-            onClick={() => onSubmit({ selections, tags, mode, version, requireSynced, deleteDisplaced })}
-            disabled={busy || tags.length === 0 || (mode === "specific" && !version.trim())}
+            variant={deleteDisplaced ? "danger" : "primary"}
+            onClick={submit}
+            disabled={busy}
+            aria-busy={busy}
           >
-            {busy ? "Promoting..." : "Promote"}
+            {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}
+            {deleteDisplaced ? "Promote and delete old versions" : "Promote selected"}
           </Button>
         </>
       }
     >
       <div className="option-grid">
-        <label><input type="checkbox" checked={latest} onChange={(e) => setLatest(e.currentTarget.checked)} /> latest</label>
-        <label><input type="checkbox" checked={stage} onChange={(e) => setStage(e.currentTarget.checked)} /> stage</label>
+        <label><input ref={latestRef} type="checkbox" checked={latest} onChange={(e) => { setLatest(e.currentTarget.checked); setError(""); }} /> latest</label>
+        <label><input type="checkbox" checked={stage} onChange={(e) => { setStage(e.currentTarget.checked); setError(""); }} /> stage</label>
       </div>
       <div className="radio-stack">
-        <label><input type="radio" checked={mode === "specific"} onChange={() => setMode("specific")} /> Specific version</label>
-        <label><input type="radio" checked={mode === "auto"} onChange={() => setMode("auto")} /> Auto: newest 100% synced per subgraph</label>
+        <label><input type="radio" name="promote-mode" checked={mode === "specific"} onChange={() => { setMode("specific"); setError(""); }} /> Specific version</label>
+        <label><input type="radio" name="promote-mode" checked={mode === "auto"} onChange={() => { setMode("auto"); setError(""); }} /> Newest fully synced version per subgraph</label>
       </div>
-      <Field label="Version" hint={mode === "auto" ? "Disabled in auto mode." : "The same version label is applied to every selected subgraph."}>
-        <input className="input" value={version} disabled={mode === "auto"} onChange={(event) => setVersion(event.currentTarget.value)} placeholder="v0.1.9" />
+      <Field label="Version" hint={mode === "auto" ? "Fleet chooses the newest 100% synced version for each subgraph." : "The same version label is promoted for every selected subgraph."} error={error} errorId="bulk-promote-error">
+        <input
+          ref={versionRef}
+          className="input"
+          value={version}
+          disabled={mode === "auto"}
+          onChange={(event) => { setVersion(event.currentTarget.value); setError(""); }}
+          onKeyDown={(event) => { if (event.key === "Enter") submit(); }}
+          placeholder="v0.2.13"
+          aria-invalid={!!error && mode === "specific"}
+          aria-describedby={error ? "bulk-promote-error" : undefined}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+        />
       </Field>
       <div className="option-grid stacked">
         <label><input type="checkbox" checked={requireSynced} onChange={(e) => setRequireSynced(e.currentTarget.checked)} /> Require 100% sync before tagging</label>
         <label className="danger-text"><input type="checkbox" checked={deleteDisplaced} onChange={(e) => setDeleteDisplaced(e.currentTarget.checked)} /> Delete displaced versions</label>
       </div>
+      {deleteDisplaced ? <p className="danger-callout">After moving the selected tags, Fleet will permanently delete the versions they previously pointed to.</p> : null}
       <SelectionPreview selections={selections} />
     </Modal>
   );
@@ -228,19 +294,31 @@ function RowPromoteDialog({
   onSubmit: Props["onRowPromote"];
 }) {
   const [selected, setSelected] = useState(() => new Set(state.tags));
+  const [error, setError] = useState("");
+  const firstTagRef = useRef<HTMLInputElement>(null);
   const tags = Array.from(selected);
+  const submit = () => {
+    if (!tags.length) {
+      setError("Select at least one tag to promote.");
+      firstTagRef.current?.focus();
+      return;
+    }
+    setError("");
+    onSubmit(state.base, state.version, tags);
+  };
   return (
     <Modal
       open={open}
       onOpenChange={(next) => !next && onClose?.()}
       title="Promote version"
       description={`${state.base}/${state.version}`}
-      icon={<Rocket size={18} />}
+      icon={<Rocket size={18} aria-hidden="true" />}
+      closeDisabled={busy}
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
-          <Button variant="primary" disabled={busy || tags.length === 0} onClick={() => onSubmit(state.base, state.version, tags)}>
-            {busy ? "Promoting..." : "Promote"}
+          <Button variant="primary" disabled={busy} onClick={submit} aria-busy={busy}>
+            {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}Promote tags
           </Button>
         </>
       }
@@ -249,6 +327,7 @@ function RowPromoteDialog({
         {state.tags.map((tag) => (
           <label key={tag}>
             <input
+              ref={tag === state.tags[0] ? firstTagRef : undefined}
               type="checkbox"
               checked={selected.has(tag)}
               onChange={(event) => {
@@ -256,12 +335,14 @@ function RowPromoteDialog({
                 if (event.currentTarget.checked) next.add(tag);
                 else next.delete(tag);
                 setSelected(next);
+                setError("");
               }}
             />
             {tag}
           </label>
         ))}
       </div>
+      {error ? <p className="field-error" role="alert">{error}</p> : null}
     </Modal>
   );
 }

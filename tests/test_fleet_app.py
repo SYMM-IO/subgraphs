@@ -1,6 +1,8 @@
 import json
+import sys
 import unittest
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 import scripts.fleet_app as fleet_app
 from scripts.fleet_identity import FLEET_HEALTH_PAYLOAD
@@ -58,6 +60,55 @@ class FleetReadinessTests(unittest.TestCase):
             patch.object(fleet_app, "_is_fleet_ready", return_value=True),
         ):
             self.assertIsNone(fleet_app._start_server("127.0.0.1", 8787))
+
+
+class _FakeEvent:
+    def __init__(self) -> None:
+        self.callbacks = []
+
+    def __iadd__(self, callback):
+        self.callbacks.append(callback)
+        return self
+
+
+class _FakeWindow:
+    def __init__(self) -> None:
+        self.events = SimpleNamespace(loaded=_FakeEvent())
+        self.scripts: list[str] = []
+
+    def run_js(self, script: str) -> None:
+        self.scripts.append(script)
+
+
+class FleetDesktopZoomTests(unittest.TestCase):
+    def test_webview_enables_zoom_shortcuts_and_persistent_storage(self) -> None:
+        window = _FakeWindow()
+        create_window = Mock(return_value=window)
+        start = Mock()
+        fake_webview = SimpleNamespace(create_window=create_window, start=start)
+
+        with (
+            patch.dict(sys.modules, {"webview": fake_webview}),
+            patch.object(fleet_app, "_set_dock_icon"),
+        ):
+            self.assertTrue(fleet_app._run_with_webview("http://127.0.0.1:8787/", fleet_app.DEFAULT_ICON))
+
+        self.assertTrue(create_window.call_args.kwargs["zoomable"])
+        self.assertFalse(start.call_args.kwargs["private_mode"])
+        self.assertEqual(start.call_args.kwargs["storage_path"], str(fleet_app.DEFAULT_WEBVIEW_STORAGE))
+
+        self.assertEqual(len(window.events.loaded.callbacks), 1)
+        window.events.loaded.callbacks[0]()
+        self.assertEqual(window.scripts, [fleet_app.NATIVE_ZOOM_SCRIPT])
+
+    def test_zoom_script_supports_standard_macos_shortcuts_and_reset(self) -> None:
+        script = fleet_app.NATIVE_ZOOM_SCRIPT
+        self.assertIn('event.metaKey', script)
+        self.assertIn('event.key === "+" || event.key === "="', script)
+        self.assertIn('event.key === "-" || event.key === "_"', script)
+        self.assertIn('event.key === "0"', script)
+        self.assertIn('window.localStorage.setItem(storageKey', script)
+        self.assertIn('status.setAttribute("role", "status")', script)
 
 
 if __name__ == "__main__":

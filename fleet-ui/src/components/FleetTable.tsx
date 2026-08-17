@@ -26,6 +26,7 @@ type TableProps = {
   onDelete: (base: string, version: string) => void;
   onRemoveTag: (base: string, version: string, tag: string) => void;
   onPromote: (base: string, version: string, tags: string[]) => void;
+  onClearFilters: () => void;
 };
 
 function rowVisible(group: FleetGroup, row: FleetModule, filters: Filters) {
@@ -48,10 +49,11 @@ export function visibleRows(groups: FleetGroup[], filters: Filters) {
 
 export function FleetTable(props: TableProps) {
   const rows = visibleRows(props.groups, props.filters);
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const allVisibleSelected = rows.length > 0 && rows.every((row) => props.selected.has(row.key));
+  const someVisibleSelected = !allVisibleSelected && rows.some((row) => props.selected.has(row.key));
   const toggleExpanded = (key: string) => {
-    setCollapsed((prev) => {
+    setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
       else next.add(key);
@@ -63,25 +65,29 @@ export function FleetTable(props: TableProps) {
     <section className="table-card">
       <div className="table-scroll">
         <table className="fleet-table">
+          <caption className="sr-only">Goldsky subgraphs, deployed versions, tag pointers, health, and actions</caption>
           <thead>
             <tr>
-              <th className="check-col">
+              <th className="check-col" scope="col">
                 <input
                   type="checkbox"
                   checked={allVisibleSelected}
                   onChange={(event) => props.onToggleAll(rows, event.currentTarget.checked)}
                   aria-label="Select all visible rows"
+                  ref={(node) => {
+                    if (node) node.indeterminate = someVisibleSelected;
+                  }}
                 />
               </th>
-              <th>Chain / module</th>
-              <th>Versions</th>
-              <th>Tags</th>
-              <th className="details-col">Details</th>
+              <th scope="col">Network / subgraph</th>
+              <th scope="col">Versions</th>
+              <th scope="col">Tags</th>
+              <th className="details-col" scope="col">Details</th>
             </tr>
           </thead>
           <tbody>
             {rows.map(({ group, row, key, selection }) => {
-              const isExpanded = !collapsed.has(key);
+              const isExpanded = expanded.has(key);
               const tagCount = Object.keys(row.tags).length;
               const showNetwork = group.network && group.network !== group.chain;
               return (
@@ -95,7 +101,7 @@ export function FleetTable(props: TableProps) {
                         aria-label={`Select ${group.chain} ${row.module}`}
                       />
                     </td>
-                    <td data-label="Chain / module">
+                    <td data-label="Network / subgraph">
                       <div className="fleet-identity">
                         <ChainLogo chain={group.chain} network={group.network} logoUrl={group.logo_url} />
                         <div className="identity-copy">
@@ -130,8 +136,8 @@ export function FleetTable(props: TableProps) {
                     </td>
                     <td data-label="Details" className="details-col">
                       <button className="expand-button" onClick={() => toggleExpanded(key)} aria-expanded={isExpanded} aria-label={`${isExpanded ? "Collapse" : "Open"} ${group.chain} ${row.module}`}>
-                        {isExpanded ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-                        <span>{isExpanded ? "collapse" : "open"}</span>
+                        {isExpanded ? <ChevronDown size={15} aria-hidden="true" /> : <ChevronRight size={15} aria-hidden="true" />}
+                        <span>{isExpanded ? "Hide details" : "View details"}</span>
                       </button>
                     </td>
                   </tr>
@@ -162,11 +168,11 @@ export function FleetTable(props: TableProps) {
                                       <div className="deployment-version">
                                         <span className="mono version">{deployment.version}</span>
                                         <div className="endpoint-actions">
-                                          <button className="icon-button" onClick={() => props.onCopy(row.base, deployment.version)} title="Copy GraphQL endpoint">
-                                            <Copy size={14} />
+                                          <button className="icon-button" onClick={() => props.onCopy(row.base, deployment.version)} aria-label={`Copy endpoint for ${row.base} ${deployment.version}`}>
+                                            <Copy size={15} aria-hidden="true" />
                                           </button>
-                                          <a className="icon-button" href={endpointUrl(props.project, row.base, deployment.version)} target="_blank" rel="noreferrer" title="Open GraphQL endpoint">
-                                            <ExternalLink size={14} />
+                                          <a className="icon-button" href={endpointUrl(props.project, row.base, deployment.version)} target="_blank" rel="noreferrer" aria-label={`Open endpoint for ${row.base} ${deployment.version} in a new tab`}>
+                                            <ExternalLink size={15} aria-hidden="true" />
                                           </a>
                                         </div>
                                       </div>
@@ -180,11 +186,11 @@ export function FleetTable(props: TableProps) {
                                       <div className="deployment-actions">
                                         {movableTags.length ? (
                                           <Button size="sm" variant="primary" onClick={() => props.onPromote(row.base, deployment.version, movableTags)}>
-                                            <Rocket size={13} /> promote
+                                            <Rocket size={14} aria-hidden="true" /> Promote
                                           </Button>
                                         ) : null}
-                                        <button className="icon-button danger" onClick={() => props.onDelete(row.base, deployment.version)} title="Delete version">
-                                          <Trash2 size={14} />
+                                        <button className="icon-button danger" onClick={() => props.onDelete(row.base, deployment.version)} aria-label={`Delete ${row.base} ${deployment.version}`}>
+                                          <Trash2 size={15} aria-hidden="true" />
                                         </button>
                                       </div>
                                     </div>
@@ -212,13 +218,13 @@ export function FleetTable(props: TableProps) {
                                       <span className="mono">{version}</span>
                                     </div>
                                     <div className="tag-actions">
-                                      <button className="icon-button" onClick={() => props.onCopy(row.base, tag)} title={`Copy ${tag} endpoint`}>
-                                        <Copy size={14} />
+                                      <button className="icon-button" onClick={() => props.onCopy(row.base, tag)} aria-label={`Copy ${tag} endpoint for ${row.base}`}>
+                                        <Copy size={15} aria-hidden="true" />
                                       </button>
-                                      <a className="icon-button" href={endpointUrl(props.project, row.base, tag)} target="_blank" rel="noreferrer" title={`Open ${tag} endpoint`}>
-                                        <ExternalLink size={14} />
+                                      <a className="icon-button" href={endpointUrl(props.project, row.base, tag)} target="_blank" rel="noreferrer" aria-label={`Open ${tag} endpoint for ${row.base} in a new tab`}>
+                                        <ExternalLink size={15} aria-hidden="true" />
                                       </a>
-                                      <Button size="sm" variant="ghost" onClick={() => props.onRemoveTag(row.base, version, tag)}>untag</Button>
+                                      <Button size="sm" variant="ghost" onClick={() => props.onRemoveTag(row.base, version, tag)}>Remove tag</Button>
                                     </div>
                                   </div>
                                 )) : <div className="tag-subrow empty-subrow"><span className="muted">No tag pointers found for this subgraph.</span></div>}
@@ -237,8 +243,9 @@ export function FleetTable(props: TableProps) {
       </div>
       {rows.length === 0 ? (
         <div className="empty-filter">
-          <strong>No rows match the current filters</strong>
-          <span>Clear search or widen the chain/module filters.</span>
+          <strong>No subgraphs match these filters</strong>
+          <span>Reset the filters to return to the complete fleet.</span>
+          <Button onClick={props.onClearFilters}>Reset filters</Button>
         </div>
       ) : null}
     </section>

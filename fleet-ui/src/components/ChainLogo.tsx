@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 type ChainLogoProps = {
   chain: string;
   network: string;
@@ -19,6 +21,11 @@ function isPlasmaLike(chain: string, network: string) {
 export function ChainLogo({ chain, network, logoUrl }: ChainLogoProps) {
   const baseLike = isBaseLike(chain, network);
   const effectiveLogoUrl = logoUrl ?? (baseLike ? BASE_LOGO_URL : null);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [effectiveLogoUrl]);
 
   if (isPlasmaLike(chain, network)) {
     return (
@@ -34,13 +41,13 @@ export function ChainLogo({ chain, network, logoUrl }: ChainLogoProps) {
     );
   }
 
-  if (effectiveLogoUrl) {
-    return <img src={effectiveLogoUrl} alt="" className={`chain-logo${baseLike ? " chain-logo-base-img" : ""}`} />;
+  if (effectiveLogoUrl && !imageFailed) {
+    return <img src={effectiveLogoUrl} alt="" className={`chain-logo${baseLike ? " chain-logo-base-img" : ""}`} onError={() => setImageFailed(true)} />;
   }
 
   if (baseLike) {
     return <div className="chain-logo chain-logo-base-fallback" aria-hidden="true">b</div>;
   }
 
-  return <div className="chain-logo fallback">{chain.slice(0, 2).toUpperCase()}</div>;
+  return <div className="chain-logo fallback" aria-hidden="true">{chain.slice(0, 2).toUpperCase()}</div>;
 }

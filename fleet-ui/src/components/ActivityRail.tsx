@@ -4,10 +4,10 @@ import type { JobView } from "../types/fleet";
 import { Pill } from "./ui";
 
 function statusIcon(status: JobView["status"]) {
-  if (status === "running") return <CircleDashed size={16} className="spin-slow" />;
-  if (status === "done") return <CheckCircle2 size={16} />;
-  if (status === "failed") return <XCircle size={16} />;
-  return <Activity size={16} />;
+  if (status === "running") return <CircleDashed size={16} className="spin-slow" aria-hidden="true" />;
+  if (status === "done") return <CheckCircle2 size={16} aria-hidden="true" />;
+  if (status === "failed") return <XCircle size={16} aria-hidden="true" />;
+  return <Activity size={16} aria-hidden="true" />;
 }
 
 export function ActivityRail({ jobs, compact = false }: { jobs: JobView[]; compact?: boolean }) {
@@ -24,9 +24,9 @@ export function ActivityRail({ jobs, compact = false }: { jobs: JobView[]; compa
       <div className="rail-list">
         {jobs.length === 0 ? (
           <div className="rail-empty">
-            <Activity size={22} />
+            <Activity size={22} aria-hidden="true" />
             <strong>No activity yet</strong>
-            <span>Batch deploy, tag, promote, and delete progress appears here.</span>
+            <span>Deployment, promotion, and cleanup progress will appear here.</span>
           </div>
         ) : (
           jobs.map((job) => (
@@ -47,7 +47,14 @@ export function ActivityRail({ jobs, compact = false }: { jobs: JobView[]; compa
                       <span>Step {job.step_current} of {job.step_total}</span>
                       <span>{job.completed_steps}/{job.step_total} done</span>
                     </div>
-                    <div className="job-progress-bar">
+                    <div
+                      className="job-progress-bar"
+                      role="progressbar"
+                      aria-label={`Progress for ${job.label}`}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={job.progress_percent}
+                    >
                       <div style={{ width: `${job.progress_percent}%` }} />
                     </div>
                     {job.current_step_label ? <div className="job-step">{job.current_step_label}</div> : null}

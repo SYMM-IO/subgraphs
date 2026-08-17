@@ -20,47 +20,56 @@ function updateSet(set: Set<string>, key: string, checked: boolean) {
 }
 
 export function Toolbar({ groups, filters, onChange, visibleCount, totalCount }: ToolbarProps) {
-  const selectedDeployments = filters.chains.size;
+  const selectedNetworks = filters.chains.size;
   return (
-    <section className="toolbar-card">
+    <section className="toolbar-card" aria-label="Fleet filters">
       <div className="toolbar-row">
-        <div className="segmented">
+        <div className="segmented" role="group" aria-label="Subgraph type">
           {["", "analytics", "events"].map((module) => (
             <button
+              type="button"
               key={module || "all"}
               className={clsx(filters.module === module && "active")}
               onClick={() => onChange({ ...filters, module })}
+              aria-pressed={filters.module === module}
             >
-              {module || "all"}
+              {module ? module[0].toUpperCase() + module.slice(1) : "All"}
             </button>
           ))}
         </div>
-        <div className="segmented">
+        <div className="segmented" role="group" aria-label="Environment">
           {(["all", "prod", "stage"] as const).map((preset) => (
-            <button key={preset} className={clsx(filters.preset === preset && "active")} onClick={() => onChange({ ...filters, preset })}>
-              {preset === "all" ? "show all" : `${preset} only`}
+            <button
+              type="button"
+              key={preset}
+              className={clsx(filters.preset === preset && "active")}
+              onClick={() => onChange({ ...filters, preset })}
+              aria-pressed={filters.preset === preset}
+            >
+              {preset === "all" ? "All networks" : preset === "prod" ? "Production" : "Staging"}
             </button>
           ))}
         </div>
         <label className="switch">
-          <input type="checkbox" checked={filters.multiOnly} onChange={(event) => onChange({ ...filters, multiOnly: event.currentTarget.checked })} />
-          <span />
-          2+ versions
+          <input className="control-input" type="checkbox" checked={filters.multiOnly} onChange={(event) => onChange({ ...filters, multiOnly: event.currentTarget.checked })} />
+          <span aria-hidden="true" />
+          Multiple versions
         </label>
         <details className="deployment-filter">
           <summary>
-            <span className="deployment-filter-title"><SlidersHorizontal size={14} /> Deployments</span>
-            <span className="deployment-filter-value">{selectedDeployments ? `${selectedDeployments} selected` : "All"}</span>
+            <span className="deployment-filter-title"><SlidersHorizontal size={14} aria-hidden="true" /> Networks</span>
+            <span className="deployment-filter-value">{selectedNetworks ? `${selectedNetworks} selected` : "All"}</span>
           </summary>
           <div className="deployment-filter-panel">
             <div className="deployment-filter-head">
-              <strong>Deployment groups</strong>
-              {selectedDeployments ? <button type="button" onClick={() => onChange({ ...filters, chains: new Set() })}>Clear</button> : null}
+              <strong>Filter by network</strong>
+              {selectedNetworks ? <button type="button" onClick={() => onChange({ ...filters, chains: new Set() })}>Clear networks</button> : null}
             </div>
             <div className="deployment-options">
               {groups.map((group) => (
                 <label className={clsx("deployment-option", group.is_orphan && "orphan", filters.chains.has(group.chain) && "active")} key={group.chain}>
                   <input
+                    className="control-input"
                     type="checkbox"
                     checked={filters.chains.has(group.chain)}
                     onChange={(event) => onChange({ ...filters, chains: updateSet(filters.chains, group.chain, event.currentTarget.checked) })}
@@ -73,14 +82,19 @@ export function Toolbar({ groups, filters, onChange, visibleCount, totalCount }:
           </div>
         </details>
         <label className="search-box">
-          <Search size={16} />
+          <span className="sr-only">Search the fleet</span>
+          <Search size={16} aria-hidden="true" />
           <input
+            type="search"
+            name="fleet-search"
             value={filters.query}
             onChange={(event) => onChange({ ...filters, query: event.currentTarget.value })}
-            placeholder="Search chain, module, version..."
+            placeholder="Search network, subgraph, or version…"
+            autoComplete="off"
+            spellCheck={false}
           />
         </label>
-        <span className="row-count">{visibleCount} / {totalCount} rows</span>
+        <span className="row-count" role="status" aria-live="polite">{visibleCount} of {totalCount} subgraphs</span>
       </div>
     </section>
   );

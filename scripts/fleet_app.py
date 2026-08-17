@@ -19,6 +19,7 @@ import sys
 import threading
 import time
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 
 try:
@@ -28,7 +29,60 @@ except ModuleNotFoundError:  # Direct execution places scripts/, not the reposit
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_ICON = REPO_ROOT / "assets" / "fleet-app" / "AppIcon.icns"
+DEFAULT_WEBVIEW_STORAGE = Path.home() / "Library" / "Application Support" / "SYMMIO Fleet" / "WebView"
 FLEET_HEALTH_PATH = "/healthz"
+NATIVE_ZOOM_SCRIPT = r"""
+(() => {
+    if (window.__symmioFleetZoom) return;
+
+    const levels = [0.75, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2];
+    const storageKey = "symmio-fleet-native-zoom";
+    const saved = Number.parseFloat(window.localStorage.getItem(storageKey) || "1");
+    let index = levels.reduce((best, level, candidate) =>
+        Math.abs(level - saved) < Math.abs(levels[best] - saved) ? candidate : best, 3);
+
+    let status = document.getElementById("fleet-native-zoom-status");
+    if (!status) {
+        status = document.createElement("div");
+        status.id = "fleet-native-zoom-status";
+        status.className = "sr-only";
+        status.setAttribute("role", "status");
+        status.setAttribute("aria-live", "polite");
+        document.body.appendChild(status);
+    }
+
+    const apply = (announce = true) => {
+        const zoom = levels[index];
+        const percent = Math.round(zoom * 100);
+        document.documentElement.style.zoom = String(zoom);
+        document.documentElement.dataset.nativeZoom = String(percent);
+        window.localStorage.setItem(storageKey, String(zoom));
+        if (announce) status.textContent = `Zoom ${percent}%`;
+        return percent;
+    };
+
+    const zoomIn = () => { index = Math.min(index + 1, levels.length - 1); return apply(); };
+    const zoomOut = () => { index = Math.max(index - 1, 0); return apply(); };
+    const actualSize = () => { index = levels.indexOf(1); return apply(); };
+
+    window.__symmioFleetZoom = { zoomIn, zoomOut, actualSize, current: () => Math.round(levels[index] * 100) };
+    window.addEventListener("keydown", (event) => {
+        if (!event.metaKey || event.ctrlKey || event.altKey) return;
+
+        let action = null;
+        if (event.key === "+" || event.key === "=") action = zoomIn;
+        else if (event.key === "-" || event.key === "_") action = zoomOut;
+        else if (event.key === "0") action = actualSize;
+        if (!action) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        action();
+    }, true);
+
+    apply(false);
+})();
+"""
 
 # fleet_web lives alongside this file.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -100,6 +154,59 @@ def _set_dock_icon(icon: Path) -> None:
         pass
 
 
+def _install_zoom_controls(window: object) -> None:
+    """Install browser-style zoom shortcuts after each page load."""
+    window.run_js(NATIVE_ZOOM_SCRIPT)  # type: ignore[attr-defined]
+
+
+def _install_macos_zoom_menu(window: object) -> None:
+    """Add standard zoom commands to pywebview's existing View menu."""
+    if sys.platform != "darwin":
+        return
+
+    try:
+        import AppKit  # type: ignore
+        from PyObjCTools import AppHelper  # type: ignore
+        from webview.platforms.cocoa import menu_handler  # type: ignore
+    except Exception:
+        return
+
+    actions: list[tuple[str, str, str, Callable[[], object]]] = [
+        ("Zoom In", "+", "fleet.zoom.in", lambda: window.run_js("window.__symmioFleetZoom?.zoomIn()")),  # type: ignore[attr-defined]
+        ("Zoom Out", "-", "fleet.zoom.out", lambda: window.run_js("window.__symmioFleetZoom?.zoomOut()")),  # type: ignore[attr-defined]
+        ("Actual Size", "0", "fleet.zoom.actual", lambda: window.run_js("window.__symmioFleetZoom?.actualSize()")),  # type: ignore[attr-defined]
+    ]
+    for _, _, action_id, action in actions:
+        menu_handler.register_action(action_id, action)
+
+    def add_menu_items() -> None:
+        main_menu = AppKit.NSApplication.sharedApplication().mainMenu()
+        if main_menu is None:
+            return
+
+        view_menu = None
+        for item in main_menu.itemArray():
+            submenu = item.submenu()
+            if submenu is not None and str(submenu.title()) == "View":
+                view_menu = submenu
+                break
+        if view_menu is None or view_menu.itemWithTitle_("Zoom In") is not None:
+            return
+
+        modifier = getattr(AppKit, "NSEventModifierFlagCommand", None)
+        if modifier is None:
+            modifier = AppKit.NSCommandKeyMask
+        view_menu.insertItem_atIndex_(AppKit.NSMenuItem.separatorItem(), 0)
+        for title, key, action_id, _ in reversed(actions):
+            item = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(title, "handleMenuAction:", key)
+            item.setKeyEquivalentModifierMask_(modifier)
+            item.setTarget_(menu_handler)
+            item.setRepresentedObject_(action_id)
+            view_menu.insertItem_atIndex_(item, 0)
+
+    AppHelper.callAfter(add_menu_items)
+
+
 def _run_with_webview(url: str, icon: Path) -> bool:
     try:
         import webview  # type: ignore
@@ -107,15 +214,25 @@ def _run_with_webview(url: str, icon: Path) -> bool:
         return False
 
     _set_dock_icon(icon)
-    webview.create_window(
+    window = webview.create_window(
         "SYMMIO Fleet",
         url,
         width=1320,
         height=860,
         min_size=(980, 640),
         background_color="#0a0f16",
+        zoomable=True,
     )
-    webview.start()
+    if window is None:
+        return False
+
+    window.events.loaded += lambda: _install_zoom_controls(window)
+    webview.start(
+        _install_macos_zoom_menu,
+        args=(window,),
+        private_mode=False,
+        storage_path=str(DEFAULT_WEBVIEW_STORAGE),
+    )
     return True
 
 

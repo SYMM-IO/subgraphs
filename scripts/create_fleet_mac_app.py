@@ -303,6 +303,10 @@ def create_app_bundle(
             stops the local server. If the window backend is unavailable it falls
             back to a Chrome app window, then the default browser.
 
+            Zoom with View > Zoom In / Zoom Out / Actual Size, Command-Plus,
+            Command-Minus, Command-0, or a trackpad pinch. The app remembers the
+            selected zoom level across launches.
+
             Server output is logged to:
             {repo_root / ".fleet-app" / "fleet-web.log"}
             """
