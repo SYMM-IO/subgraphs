@@ -1,9 +1,83 @@
+import json
+import os
 from pathlib import Path
+import sys
+import tempfile
 import time
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import scripts.fleet_web as fleet_web
+import scripts.manager as manager
+
+
+class HealthzTests(TestCase):
+    def test_healthz_is_static_readiness_probe(self) -> None:
+        response = fleet_web.healthz()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.body), fleet_web.FLEET_HEALTH_PAYLOAD)
+
+
+class ToolResolutionTests(TestCase):
+    def test_resolve_tool_uses_standard_mac_paths_when_path_lookup_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tool_path = Path(tmp) / "goldsky"
+            tool_path.write_text("#!/bin/sh\n", encoding="utf-8")
+            tool_path.chmod(0o755)
+
+            with patch.object(fleet_web.shutil, "which", return_value=None), patch.object(fleet_web, "COMMON_TOOL_DIRS", [tmp]):
+                self.assertEqual(fleet_web.resolve_tool("goldsky"), str(tool_path))
+
+    def test_run_goldsky_reports_checked_locations_when_missing(self) -> None:
+        with patch.object(fleet_web, "resolve_tool", return_value=None):
+            rc, out = fleet_web.run_goldsky(["subgraph", "list"])
+
+        self.assertEqual(rc, 127)
+        self.assertIn("/usr/local/bin", out)
+
+    def test_child_environment_augments_path_and_propagates_goldsky(self) -> None:
+        with patch.object(fleet_web, "resolve_tool", return_value="/custom/bin/goldsky"):
+            env = fleet_web.build_tool_env({"PATH": "/usr/bin", "KEEP_ME": "yes"})
+
+        self.assertEqual(env["KEEP_ME"], "yes")
+        self.assertEqual(env[fleet_web.GOLDSKY_BIN_ENV], "/custom/bin/goldsky")
+        self.assertEqual(env["PATH"].split(os.pathsep), [*fleet_web.COMMON_TOOL_DIRS, "/usr/bin"])
+
+    def test_manager_uses_propagated_goldsky_when_path_lookup_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tool_path = Path(tmp) / "goldsky"
+            tool_path.write_text("#!/bin/sh\n", encoding="utf-8")
+            tool_path.chmod(0o755)
+
+            with (
+                patch.dict(manager.os.environ, {manager.GOLDSKY_BIN_ENV: str(tool_path)}),
+                patch.object(manager.shutil, "which", return_value=None),
+                patch.object(manager, "COMMON_TOOL_DIRS", []),
+            ):
+                command = manager.goldsky_command("subgraph", "list")
+
+        self.assertEqual(command, [str(tool_path), "subgraph", "list"])
+
+    def test_job_process_receives_augmented_tool_environment(self) -> None:
+        process = MagicMock(stdout=[], returncode=0)
+        expected_env = {"PATH": "/custom/bin", fleet_web.GOLDSKY_BIN_ENV: "/custom/bin/goldsky"}
+        with (
+            patch.object(fleet_web, "build_tool_env", return_value=expected_env),
+            patch.object(fleet_web.subprocess, "Popen", return_value=process) as popen,
+        ):
+            rc = fleet_web.Job(label="test", cmd=["manager"])._run_command(["manager"])
+
+        self.assertEqual(rc, 0)
+        popen.assert_called_once_with(
+            ["manager"],
+            cwd=fleet_web.REPO_ROOT,
+            env=expected_env,
+            stdout=fleet_web.subprocess.PIPE,
+            stderr=fleet_web.subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
 
 
 class BulkDeploySequenceTests(TestCase):
@@ -49,11 +123,11 @@ class BulkDeploySequenceTests(TestCase):
             [
                 (
                     "hyperevm · perps/analytics v9.9.9",
-                    ["python3", "scripts/manager.py", "configs/perps/hyperevm.json", "perps/analytics", "v9.9.9", "--deploy"],
+                    [sys.executable, "scripts/manager.py", "configs/perps/hyperevm.json", "perps/analytics", "v9.9.9", "--deploy"],
                 ),
                 (
                     "arbitrum · perps/analytics v9.9.9",
-                    ["python3", "scripts/manager.py", "configs/perps/arbitrum.json", "perps/analytics", "v9.9.9", "--deploy"],
+                    [sys.executable, "scripts/manager.py", "configs/perps/arbitrum.json", "perps/analytics", "v9.9.9", "--deploy"],
                 ),
             ],
         )
@@ -154,11 +228,11 @@ class ActivityProgressRenderTests(TestCase):
             [
                 (
                     "arbitrum · perps/analytics v1.2.3",
-                    ["python3", "scripts/manager.py", "configs/perps/arbitrum.json", "perps/analytics", "v1.2.3", "--deploy"],
+                    [sys.executable, "scripts/manager.py", "configs/perps/arbitrum.json", "perps/analytics", "v1.2.3", "--deploy"],
                 ),
                 (
                     "hyperevm · perps/analytics v1.2.3",
-                    ["python3", "scripts/manager.py", "configs/perps/hyperevm.json", "perps/analytics", "v1.2.3", "--deploy"],
+                    [sys.executable, "scripts/manager.py", "configs/perps/hyperevm.json", "perps/analytics", "v1.2.3", "--deploy"],
                 ),
             ],
         )

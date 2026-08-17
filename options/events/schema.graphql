@@ -1,1371 +1,4479 @@
+"""
+A collateral deposit credited an options account and emitted its resulting balance.
+"""
 type Deposit @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    sender: Bytes!
-    user: Bytes!
-    collateral: Bytes!
-    amount: BigInt!
-    newBalance: BigInt!
-}
-
-type InternalTransfer @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    sender: Bytes!
-    user: Bytes!
-    collateral: Bytes!
-    amount: BigInt!
-    newBalance: BigInt!
-}
-
-type InitiateWithdraw @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    withdrawId: BigInt!
-    user: Bytes!
-    to: Bytes!
-    collateral: Bytes!
-    amount: BigInt!
-    newBalance: BigInt!
-}
-
-type CompleteWithdraw @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    withdrawId: BigInt!
-}
-
-type CancelWithdraw @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    withdrawId: BigInt!
-    user: Bytes!
-    newBalance: BigInt!
-}
-
-type ActivateInstantActionMode @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    user: Bytes!
-    timestamp: BigInt!
-}
-
-type ProposeToDeactivateInstantActionMode @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    user: Bytes!
-    timestamp: BigInt!
-}
-
-type DeactivateInstantActionMode @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    user: Bytes!
-    timestamp: BigInt!
-}
-
-type SyncBalances @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    collateral: Bytes!
-    partyA: Bytes!
-    partyBs: [Bytes!]
-}
-
-type BindToPartyB @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyA: Bytes!
-    partyB: Bytes!
-}
-
-type InitiateUnbindingFromPartyB @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyA: Bytes!
-    partyB: Bytes!
-    initiationTime: BigInt!
-}
-
-type CompleteUnbindingFromPartyB @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyA: Bytes!
-    partyB: Bytes!
-}
-
-type CancelUnbindingFromPartyB @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyA: Bytes!
-    partyB: Bytes!
-}
-
-type TransferToBridge @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    sender: Bytes!
-    receiver: Bytes!
-    collateral: Bytes!
-    amount: BigInt!
-    bridgeAddress: Bytes!
-    transactionId: BigInt!
-}
-
-type WithdrawReceivedBridgeValue @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    transactionId: BigInt!
-}
-
-type SuspendBridgeTransaction @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    transactionId: BigInt!
-}
-
-type RestoreBridgeTransaction @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    transactionId: BigInt!
-    validAmount: BigInt!
-}
-
-type WithdrawReceivedBridgeValues @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    transactionIds: [BigInt!]
-}
-
-type FlagLiquidation @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    operator: Bytes!
-    partyB: Bytes!
-    collateral: Bytes!
-}
-
-type UnflagLiquidation @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    operator: Bytes!
-    partyB: Bytes!
-    collateral: Bytes!
-}
-
-type Liquidate @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    liquidationId: Bytes!
-    liquidator: Bytes!
-    partyB: Bytes!
-    collateral: Bytes!
-    balance: BigInt!
-    upnl: BigInt!
-    collateralPrice: BigInt!
-}
-
-type ConfiscatePartyA @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-    partyA: Bytes!
-    collateral: Bytes!
-    amount: BigInt!
-}
-
-type ConfiscatePartyBWithdrawal @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-    withdrawId: BigInt!
-}
-
-type CloseTradesForLiquidation @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeIds: [BigInt!]
-    prices: [BigInt!]
-}
-
-type DistributeCollateral @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    liquidationId: BigInt!
-    partyB: Bytes!
-    collateral: Bytes!
-    partyAs: [Bytes!]
-    amounts: [BigInt!]
-}
-
-type FullyLiquidated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-    liquidationId: BigInt!
-}
-
-type CollateralWhitelisted @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    collateral: Bytes!
-}
-
-type CollateralRemovedFromWhitelist @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    collateral: Bytes!
-}
-
-type MaxCloseOrdersLengthUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    max: BigInt!
-}
-
-type MaxTradePerPartyAUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    max: BigInt!
-}
-
-type BalanceLimitPerUserUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    limit: BigInt!
-}
-
-type PartyADeallocateCooldownUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    cooldown: BigInt!
-}
-
-type PartyBDeallocateCooldownUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    cooldown: BigInt!
-}
-
-type ForceCancelOpenIntentTimeoutUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    timeout: BigInt!
-}
-
-type ForceCancelCloseIntentTimeoutUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    timeout: BigInt!
-}
-
-type DefaultFeeCollectorUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    collector: Bytes!
-}
-
-type GlobalPaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type DepositPaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type WithdrawPaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type PartyBActionsPaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type PartyAActionsPaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type LiquidatingPaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type GlobalUnpaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type DepositUnpaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type WithdrawUnpaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type PartyBActionsUnpaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type PartyAActionsUnpaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type LiquidatingUnpaused @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type EmergencyModeActivated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type EmergencyModeDeactivated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-
-}
-
-type PartyBEmergencyStatusActivated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-}
-
-type PartyBEmergencyStatusDeactivated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-}
-
-type AffiliateStatusUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    affiliate: Bytes!
-    status: Boolean!
-}
-
-type AffiliateFeeCollectorUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    affiliate: Bytes!
-    feeCollector: Bytes!
-}
-
-type RoleUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    account: Bytes!
-    role: Bytes!
-    granted: Boolean!
-}
-
-type PartyBConfig @entity(immutable: true) {
-    id: ID!
-
-    isActive: Boolean!
-    lossCoverage: BigInt!
-    oracleId: BigInt!
-    symbolType: BigInt!
-}
-
-type PartyBConfigUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-    config: [PartyBConfig!]
-}
-
-type SettlementPriceSigValidTimeUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    time: BigInt!
-}
-
-type LiquidationSigValidTimeUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    time: BigInt!
-}
-
-type LiquidationDetailUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-    collateral: Bytes!
-}
-
-type SymbolPriceUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-    symbolId: BigInt!
-}
-
-type RoleGranted @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    role: Bytes!
-    user: Bytes!
-}
-
-type RoleRevoked @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    role: Bytes!
-    user: Bytes!
-}
-
-type PartyBReleaseIntervalUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyB: Bytes!
-    interval: BigInt!
-}
-
-type MaxConnectedPartyBsUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    max: BigInt!
-}
-
-type UnbindingCooldownUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    cooldown: BigInt!
-}
-
-type AddressSuspended @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    user: Bytes!
-    status: Boolean!
-}
-
-type WithdrawalSuspended @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    withdrawId: BigInt!
-    status: Boolean!
-}
-
-type DeactiveInstantActionModeCooldownUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    cooldown: BigInt!
-}
-
-type InstantActionsModeUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    user: Bytes!
-    status: Boolean!
-}
-
-type InstantActionsModeDeactivateTimeUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    user: Bytes!
-    time: BigInt!
-}
-
-type OracleAdded @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    oracleId: BigInt!
-    name: String!
-    contractAddress: Bytes!
-}
-
-type SymbolAdded @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    symbolId: BigInt!
-    name: String!
-    optionType: Int!
-    collateral: Bytes!
-}
-
-type PriceOracleAddressUpdated @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    oracle: Bytes!
-}
-
-type ForceCancelOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-}
-
-type ForceCancelCloseIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-}
-
-type SendTransferIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-    sender: Bytes!
-    partyBWhitelist: [Bytes!]
-    price: BigInt!
-    deadline: BigInt!
-}
-
-type CancelTransferIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-}
-
-type LockTransferIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-    counterParty: Bytes!
-}
-
-type UnlockTransferIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-    counterParty: Bytes!
-}
-
-type AcceptCancelTransferIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-    counterParty: Bytes!
-}
-
-type FinalizeTransferIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-    fillPrice: BigInt!
-    counterParty: Bytes!
-    clearingHouseSignature: Bytes!
-}
-
-type SendCloseIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    tradeId: BigInt!
-    intentId: BigInt!
-    price: BigInt!
-    quantity: BigInt!
-    deadline: BigInt!
-}
-
-type CancelCloseIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-}
-
-type TransferTradeByPartyA @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    sender: Bytes!
-    receiver: Bytes!
-    tradeId: BigInt!
-}
-
-type CancelOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-    finalStatus: Int!
-}
-
-type AcceptCancelCloseIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-}
-
-type FillCloseIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-    quantity: BigInt!
-    price: BigInt!
-}
-
-type AcceptCancelOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-}
-
-type LockOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-    partyB: Bytes!
-}
-
-type UnlockOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-}
-
-type FillOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
-    tradeId: BigInt!
-    quantity: BigInt!
-    price: BigInt!
-}
-
-type ExpireTrade @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    operator: Bytes!
-    tradeId: BigInt!
-    settlementPrice: BigInt!
-}
-
-type ExerciseTrade @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    operator: Bytes!
-    tradeId: BigInt!
-    settlementPrice: BigInt!
-}
-
-type AddAccount @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
 	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
 	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
 	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
 	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
 	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
 	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
 	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
 	blockHash: Bytes!
-
-	account: Bytes!
+	"""
+	Address that initiated and funded the collateral deposit.
+	"""
+	sender: Bytes!
+	"""
+	Options account whose collateral balance was credited.
+	"""
 	user: Bytes!
+	"""
+	ERC-20 token credited to the user’s isolated collateral balance.
+	"""
+	collateral: Bytes!
+	"""
+	Deposited quantity in the collateral token’s native decimals.
+	"""
+	amount: BigInt!
+	"""
+	User’s resulting isolated balance for this collateral, in token-native decimals.
+	"""
+	newBalance: BigInt!
+}
+
+"""
+Collateral was moved internally for an options account without an ERC-20 withdrawal.
+"""
+type InternalTransfer @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address emitted as the initiator of the internal balance transfer; the configured ABI does not establish that it equals `transaction.from`.
+	"""
+	sender: Bytes!
+	"""
+	Account whose collateral balance is reported by this configured ABI version.
+	"""
+	user: Bytes!
+	"""
+	ERC-20 token denomination of the transferred balance.
+	"""
+	collateral: Bytes!
+	"""
+	Unsigned transfer quantity emitted by the configured ABI; its source/destination direction differs from current options-core and is unresolved for this ABI version.
+	"""
+	amount: BigInt!
+	"""
+	Resulting balance emitted for `user`; the configured historical ABI exposes only this one post-transfer balance.
+	"""
+	newBalance: BigInt!
+}
+
+"""
+A withdrawal request was created, debiting the user balance for the requested collateral.
+"""
+type InitiateWithdraw @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	User-scoped withdrawal identifier emitted as ABI parameter `id`.
+	"""
+	withdrawId: BigInt!
+	"""
+	Options account debited when the withdrawal was initiated.
+	"""
+	user: Bytes!
+	"""
+	Recipient address designated to receive the withdrawn collateral.
+	"""
+	to: Bytes!
+	"""
+	ERC-20 token requested for withdrawal.
+	"""
+	collateral: Bytes!
+	"""
+	Requested withdrawal quantity in the collateral token’s native decimals.
+	"""
+	amount: BigInt!
+	"""
+	User’s resulting collateral balance after the request was initiated, in token-native decimals.
+	"""
+	newBalance: BigInt!
+}
+
+"""
+A previously initiated withdrawal was completed by its user-scoped identifier.
+"""
+type CompleteWithdraw @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	User-scoped identifier of the withdrawal that completed, emitted as ABI parameter `id`.
+	"""
+	withdrawId: BigInt!
+}
+
+"""
+A pending withdrawal was cancelled and the emitted user balance reflects the returned collateral.
+"""
+type CancelWithdraw @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	User-scoped identifier of the withdrawal that was cancelled, emitted as ABI parameter `id`.
+	"""
+	withdrawId: BigInt!
+	"""
+	Options account to which the cancelled withdrawal balance belongs.
+	"""
+	user: Bytes!
+	"""
+	User’s resulting collateral balance after cancellation returned the reserved amount.
+	"""
+	newBalance: BigInt!
+}
+
+"""
+Instant-action mode was enabled for a user at the emitted activation time.
+"""
+type ActivateInstantActionMode @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Account for which instant-action mode became active.
+	"""
+	user: Bytes!
+	"""
+	Unix timestamp emitted for activation of the user’s instant-action mode.
+	"""
+	timestamp: BigInt!
+}
+
+"""
+A user requested deactivation of instant-action mode, starting the emitted waiting period timestamp.
+"""
+type ProposeToDeactivateInstantActionMode @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Account that requested deactivation of instant-action mode.
+	"""
+	user: Bytes!
+	"""
+	Unix timestamp emitted when the deactivation proposal was recorded.
+	"""
+	timestamp: BigInt!
+}
+
+"""
+Instant-action mode was disabled for a user at the emitted deactivation time.
+"""
+type DeactivateInstantActionMode @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Account for which instant-action mode became inactive.
+	"""
+	user: Bytes!
+	"""
+	Unix timestamp emitted for completion of instant-action-mode deactivation.
+	"""
+	timestamp: BigInt!
+}
+
+"""
+A PartyA collateral balance was synchronized against the emitted set of connected PartyBs.
+"""
+type SyncBalances @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	ERC-20 token whose PartyA/PartyB balances were synchronized.
+	"""
+	collateral: Bytes!
+	"""
+	PartyA account whose balances were synchronized.
+	"""
+	partyA: Bytes!
+	"""
+	PartyB addresses included in the synchronization, preserving configured-ABI order.
+	"""
+	partyBs: [Bytes!]
+}
+
+"""
+A PartyA account was bound to the selected PartyB.
+"""
+type BindToPartyB @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyA account whose counterparty binding was set.
+	"""
+	partyA: Bytes!
+	"""
+	PartyB address selected as the bound counterparty.
+	"""
+	partyB: Bytes!
+}
+
+"""
+A PartyA began the cooldown for unbinding from a PartyB.
+"""
+type InitiateUnbindingFromPartyB @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyA account that began unbinding.
+	"""
+	partyA: Bytes!
+	"""
+	PartyB counterparty from which PartyA requested unbinding.
+	"""
+	partyB: Bytes!
+	"""
+	Unix timestamp at which the unbinding cooldown began.
+	"""
+	initiationTime: BigInt!
+}
+
+"""
+A PartyA-to-PartyB binding was removed after its unbinding requirements were met.
+"""
+type CompleteUnbindingFromPartyB @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyA account whose binding was cleared.
+	"""
+	partyA: Bytes!
+	"""
+	PartyB counterparty removed from the PartyA binding.
+	"""
+	partyB: Bytes!
+}
+
+"""
+A pending PartyA-to-PartyB unbinding was cancelled, leaving the binding in place.
+"""
+type CancelUnbindingFromPartyB @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyA account whose pending unbinding was cancelled.
+	"""
+	partyA: Bytes!
+	"""
+	PartyB counterparty retained after cancellation.
+	"""
+	partyB: Bytes!
+}
+
+"""
+Collateral was sent through a bridge transaction from the emitted sender to receiver.
+"""
+type TransferToBridge @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address that initiated the bridge transfer.
+	"""
+	sender: Bytes!
+	"""
+	Destination account designated to receive the bridged collateral.
+	"""
+	receiver: Bytes!
+	"""
+	ERC-20 token sent through the bridge.
+	"""
+	collateral: Bytes!
+	"""
+	Token quantity sent through the bridge, in the collateral token’s native decimals.
+	"""
+	amount: BigInt!
+	"""
+	Bridge contract selected to process the transfer.
+	"""
+	bridgeAddress: Bytes!
+	"""
+	Protocol identifier assigned to this bridge transfer.
+	"""
+	transactionId: BigInt!
+}
+
+"""
+Received bridge value was withdrawn for one bridge transaction identifier.
+"""
+type WithdrawReceivedBridgeValue @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Bridge transaction whose received value was withdrawn.
+	"""
+	transactionId: BigInt!
+}
+
+"""
+Processing was suspended for one bridge transaction identifier.
+"""
+type SuspendBridgeTransaction @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Bridge transaction whose processing was suspended.
+	"""
+	transactionId: BigInt!
+}
+
+"""
+A suspended bridge transaction was restored with the emitted amount accepted as valid.
+"""
+type RestoreBridgeTransaction @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Suspended bridge transaction restored for processing.
+	"""
+	transactionId: BigInt!
+	"""
+	Portion of the bridge transaction amount accepted as valid; configured ABI provenance does not establish its decimals.
+	"""
+	validAmount: BigInt!
+}
+
+"""
+Received bridge values were withdrawn for the emitted bridge transaction identifiers.
+"""
+type WithdrawReceivedBridgeValues @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Bridge transaction identifiers whose received values were withdrawn, preserving configured-ABI order.
+	"""
+	transactionIds: [BigInt!]
+}
+
+"""
+An operator flagged a PartyB collateral account for liquidation.
+"""
+type FlagLiquidation @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address that applied the liquidation flag.
+	"""
+	operator: Bytes!
+	"""
+	PartyB account placed into flagged liquidation status.
+	"""
+	partyB: Bytes!
+	"""
+	Collateral token for the flagged PartyB account.
+	"""
+	collateral: Bytes!
+}
+
+"""
+An operator removed the liquidation flag from a PartyB collateral account.
+"""
+type UnflagLiquidation @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address that removed the liquidation flag.
+	"""
+	operator: Bytes!
+	"""
+	PartyB account removed from flagged liquidation status.
+	"""
+	partyB: Bytes!
+	"""
+	Collateral token for the unflagged PartyB account.
+	"""
+	collateral: Bytes!
+}
+
+"""
+A PartyB collateral account was liquidated, recording its balance, signed UPNL, and collateral price.
+"""
+type Liquidate @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Opaque bytes identifier assigned to this liquidation by the configured contract version.
+	"""
+	liquidationId: Bytes!
+	"""
+	Address that executed the PartyB liquidation.
+	"""
+	liquidator: Bytes!
+	"""
+	PartyB account whose collateral balance was liquidated.
+	"""
+	partyB: Bytes!
+	"""
+	Collateral token used for the liquidated PartyB account.
+	"""
+	collateral: Bytes!
+	"""
+	PartyB collateral balance emitted at liquidation; configured ABI provenance does not establish its decimals.
+	"""
+	balance: BigInt!
+	"""
+	Signed unrealized profit and loss (UPNL) used by the liquidation, preserving negative values.
+	"""
+	upnl: BigInt!
+	"""
+	Collateral price used by liquidation; configured ABI provenance does not establish its fixed-point scale.
+	"""
+	collateralPrice: BigInt!
+}
+
+"""
+Collateral was confiscated from a PartyA account during liquidation of the emitted PartyB.
+"""
+type ConfiscatePartyA @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Liquidated PartyB for which collateral was collected.
+	"""
+	partyB: Bytes!
+	"""
+	PartyA account from which liquidation collateral was confiscated.
+	"""
+	partyA: Bytes!
+	"""
+	ERC-20 token confiscated from PartyA.
+	"""
+	collateral: Bytes!
+	"""
+	Confiscated collateral quantity; configured ABI provenance does not establish whether token-native or internal decimals apply.
+	"""
+	amount: BigInt!
+}
+
+"""
+A pending PartyB withdrawal was confiscated during liquidation.
+"""
+type ConfiscatePartyBWithdrawal @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Liquidated PartyB whose pending withdrawal was confiscated.
+	"""
+	partyB: Bytes!
+	"""
+	User-scoped PartyB withdrawal identifier confiscated by liquidation.
+	"""
+	withdrawId: BigInt!
+}
+
+"""
+The emitted trades were closed at index-aligned prices for liquidation.
+"""
+type CloseTradesForLiquidation @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade identifiers closed by liquidation, aligned by index with `prices`.
+	"""
+	tradeIds: [BigInt!]
+	"""
+	Closing price for each corresponding `tradeIds` entry; configured ABI provenance does not establish the fixed-point scale.
+	"""
+	prices: [BigInt!]
+}
+
+"""
+Liquidation collateral was distributed to the emitted PartyA accounts in index-aligned amounts.
+"""
+type DistributeCollateral @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Protocol identifier of the liquidation whose collateral was distributed.
+	"""
+	liquidationId: BigInt!
+	"""
+	Liquidated PartyB from whose liquidation pool collateral was distributed.
+	"""
+	partyB: Bytes!
+	"""
+	ERC-20 token distributed from the liquidation.
+	"""
+	collateral: Bytes!
+	"""
+	Recipient PartyA accounts, aligned by index with `amounts`.
+	"""
+	partyAs: [Bytes!]
+	"""
+	Collateral quantity distributed to each corresponding `partyAs` entry; configured ABI provenance does not establish the decimals.
+	"""
+	amounts: [BigInt!]
+}
+
+"""
+A PartyB liquidation reached its terminal fully-liquidated state.
+"""
+type FullyLiquidated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyB account that reached fully-liquidated status.
+	"""
+	partyB: Bytes!
+	"""
+	Protocol identifier of the completed PartyB liquidation.
+	"""
+	liquidationId: BigInt!
+}
+
+"""
+A collateral token became permitted by the options protocol.
+"""
+type CollateralWhitelisted @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	ERC-20 token address added to the collateral whitelist.
+	"""
+	collateral: Bytes!
+}
+
+"""
+A collateral token ceased to be permitted by the options protocol.
+"""
+type CollateralRemovedFromWhitelist @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	ERC-20 token address removed from the collateral whitelist.
+	"""
+	collateral: Bytes!
+}
+
+"""
+The configured maximum number of close orders was replaced with the emitted bound.
+"""
+type MaxCloseOrdersLengthUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New upper bound on the number of close orders.
+	"""
+	max: BigInt!
+}
+
+"""
+The configured maximum trades per PartyA was replaced with the emitted bound.
+"""
+type MaxTradePerPartyAUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New upper bound on trades associated with one PartyA.
+	"""
+	max: BigInt!
+}
+
+"""
+The per-user balance limit was replaced with the emitted limit.
+"""
+type BalanceLimitPerUserUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New per-user collateral balance limit; configured ABI provenance does not establish its decimals.
+	"""
+	limit: BigInt!
+}
+
+"""
+The PartyA deallocation cooldown was replaced with the emitted duration.
+"""
+type PartyADeallocateCooldownUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New PartyA deallocation waiting period in seconds.
+	"""
+	cooldown: BigInt!
+}
+
+"""
+The PartyB deallocation cooldown was replaced with the emitted duration.
+"""
+type PartyBDeallocateCooldownUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New PartyB deallocation waiting period in seconds.
+	"""
+	cooldown: BigInt!
+}
+
+"""
+The timeout before an open intent can be force-cancelled was replaced with the emitted duration.
+"""
+type ForceCancelOpenIntentTimeoutUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New waiting period in seconds before an open intent becomes force-cancellable.
+	"""
+	timeout: BigInt!
+}
+
+"""
+The timeout before a close intent can be force-cancelled was replaced with the emitted duration.
+"""
+type ForceCancelCloseIntentTimeoutUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New waiting period in seconds before a close intent becomes force-cancellable.
+	"""
+	timeout: BigInt!
+}
+
+"""
+The default destination for collected protocol fees was replaced with the emitted address.
+"""
+type DefaultFeeCollectorUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address that will receive fees when no affiliate-specific collector applies.
+	"""
+	collector: Bytes!
+}
+
+"""
+All options operations covered by the global pause entered the paused state.
+"""
+type GlobalPaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Collateral deposits entered the paused state; this event does not move or take custody of funds.
+"""
+type DepositPaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Collateral withdrawal operations entered the paused state; this event does not move or take custody of funds.
+"""
+type WithdrawPaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Protocol actions restricted to PartyB actors entered the paused state.
+"""
+type PartyBActionsPaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Protocol actions restricted to PartyA actors entered the paused state.
+"""
+type PartyAActionsPaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+The protocol liquidation operation entered the paused state.
+"""
+type LiquidatingPaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Operations covered by the global pause returned to the enabled state.
+"""
+type GlobalUnpaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Collateral deposits returned to the enabled state.
+"""
+type DepositUnpaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Collateral withdrawal operations returned to the enabled state.
+"""
+type WithdrawUnpaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Protocol actions restricted to PartyB actors returned to the enabled state.
+"""
+type PartyBActionsUnpaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Protocol actions restricted to PartyA actors returned to the enabled state.
+"""
+type PartyAActionsUnpaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+The protocol liquidation operation returned to the enabled state.
+"""
+type LiquidatingUnpaused @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Protocol-wide emergency mode entered the active state; the event itself carries no custody transfer.
+"""
+type EmergencyModeActivated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Protocol-wide emergency mode returned to the inactive state.
+"""
+type EmergencyModeDeactivated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+}
+
+"""
+Emergency status entered the active state for one PartyB.
+"""
+type PartyBEmergencyStatusActivated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyB placed into emergency status.
+	"""
+	partyB: Bytes!
+}
+
+"""
+Emergency status returned to the inactive state for one PartyB.
+"""
+type PartyBEmergencyStatusDeactivated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyB removed from emergency status.
+	"""
+	partyB: Bytes!
+}
+
+"""
+An affiliate was enabled or disabled according to the emitted boolean status.
+"""
+type AffiliateStatusUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Affiliate address whose enabled status changed.
+	"""
+	affiliate: Bytes!
+	"""
+	`true` when the affiliate is enabled and `false` when disabled.
+	"""
+	status: Boolean!
+}
+
+"""
+An affiliate fee destination was replaced with the emitted collector address.
+"""
+type AffiliateFeeCollectorUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Affiliate whose fee destination changed.
+	"""
+	affiliate: Bytes!
+	"""
+	New address designated to collect fees for the affiliate.
+	"""
+	feeCollector: Bytes!
+}
+
+"""
+A role was granted to or removed from an account according to the emitted boolean.
+"""
+type RoleUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Account whose role membership changed.
+	"""
+	account: Bytes!
+	"""
+	Bytes32 access-control role identifier granted or removed.
+	"""
+	role: Bytes!
+	"""
+	`true` when `role` was granted to `account`; `false` when it was removed.
+	"""
+	granted: Boolean!
+}
+
+"""
+The single PartyB configuration tuple carried by its parent update event.
+"""
+type PartyBConfig @entity(immutable: true) {
+	"""
+	Parent `PartyBConfigUpdated` event identifier, shared by this one tuple snapshot.
+	"""
+	id: ID!
+	"""
+	Boolean `isActive` member emitted for the PartyB configuration.
+	"""
+	isActive: Boolean!
+	"""
+	Unsigned `lossCoverage` member from the configured ABI tuple; its economics and units are version-specific and unresolved.
+	"""
+	lossCoverage: BigInt!
+	"""
+	Protocol oracle identifier selected by this PartyB configuration.
+	"""
+	oracleId: BigInt!
+	"""
+	Unsigned `symbolType` member present in the configured ABI tuple; its enum mapping is unavailable from the pinned provenance.
+	"""
+	symbolType: BigInt!
+}
+
+"""
+A PartyB configuration was replaced with the emitted tuple snapshot.
+"""
+type PartyBConfigUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyB address whose configuration was replaced.
+	"""
+	partyB: Bytes!
+	"""
+	The event’s single configuration tuple snapshot; it is not an ABI array.
+	"""
+	config: PartyBConfig!
+}
+
+"""
+The validity window for settlement-price signatures was replaced with the emitted duration.
+"""
+type SettlementPriceSigValidTimeUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New settlement-price signature validity duration in seconds.
+	"""
+	time: BigInt!
+}
+
+"""
+The validity window for liquidation signatures was replaced with the emitted duration.
+"""
+type LiquidationSigValidTimeUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New liquidation signature validity duration in seconds.
+	"""
+	time: BigInt!
+}
+
+"""
+Liquidation detail was refreshed for one PartyB and collateral pair.
+"""
+type LiquidationDetailUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyB whose liquidation detail was refreshed.
+	"""
+	partyB: Bytes!
+	"""
+	Collateral token dimension of the refreshed liquidation detail.
+	"""
+	collateral: Bytes!
+}
+
+"""
+A PartyB updated the stored price for one protocol symbol.
+"""
+type SymbolPriceUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyB that submitted the symbol-price update.
+	"""
+	partyB: Bytes!
+	"""
+	Protocol symbol whose stored price was updated.
+	"""
+	symbolId: BigInt!
+}
+
+"""
+Role grant emitted by the options core or MultiAccount contract, preserving both supported event shapes.
+"""
+type RoleGranted @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Contract that emitted this role grant.
+	"""
+	source: Bytes!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Raw bytes32 access-control role identifier.
+	"""
+	role: Bytes!
+	"""
+	Role grantee for options-core events; also populated from MultiAccount’s `account` parameter for compatibility.
+	"""
+	user: Bytes!
+	"""
+	Role grantee for the MultiAccount event shape; null for options-core events.
+	"""
+	account: Bytes
+	"""
+	Address that performed the grant in the MultiAccount event shape; null for options-core events.
+	"""
+	sender: Bytes
+}
+
+"""
+Role revocation emitted by the options core or MultiAccount contract, preserving both supported event shapes.
+"""
+type RoleRevoked @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Contract that emitted this role revocation.
+	"""
+	source: Bytes!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Raw bytes32 access-control role identifier.
+	"""
+	role: Bytes!
+	"""
+	Role revokee for options-core events; also populated from MultiAccount’s `account` parameter for compatibility.
+	"""
+	user: Bytes!
+	"""
+	Role revokee for the MultiAccount event shape; null for options-core events.
+	"""
+	account: Bytes
+	"""
+	Address that performed the revocation in the MultiAccount event shape; null for options-core events.
+	"""
+	sender: Bytes
+}
+
+"""
+The release interval configured for one PartyB was replaced with the emitted duration.
+"""
+type PartyBReleaseIntervalUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyB whose release schedule changed.
+	"""
+	partyB: Bytes!
+	"""
+	New PartyB release interval in seconds.
+	"""
+	interval: BigInt!
+}
+
+"""
+The maximum number of PartyBs connectable to a PartyA was replaced with the emitted bound.
+"""
+type MaxConnectedPartyBsUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New upper bound on PartyB connections allowed for one PartyA.
+	"""
+	max: BigInt!
+}
+
+"""
+The PartyB unbinding cooldown was replaced with the emitted duration.
+"""
+type UnbindingCooldownUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New waiting period in seconds before PartyB unbinding can complete.
+	"""
+	cooldown: BigInt!
+}
+
+"""
+An address entered or left suspended status according to the emitted boolean.
+"""
+type AddressSuspended @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address whose suspension status changed.
+	"""
+	user: Bytes!
+	"""
+	`true` when the address is suspended and `false` when it is unsuspended.
+	"""
+	status: Boolean!
+}
+
+"""
+A user-scoped withdrawal entered or left suspended status according to the emitted boolean.
+"""
+type WithdrawalSuspended @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	User-scoped withdrawal identifier whose suspension status changed.
+	"""
+	withdrawId: BigInt!
+	"""
+	`true` when the withdrawal is suspended and `false` when it can proceed.
+	"""
+	status: Boolean!
+}
+
+"""
+The waiting period for deactivating instant-action mode was replaced with the emitted duration.
+"""
+type DeactiveInstantActionModeCooldownUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New waiting period in seconds for instant-action-mode deactivation.
+	"""
+	cooldown: BigInt!
+}
+
+"""
+Instant-action mode for a user was enabled or disabled according to the emitted boolean.
+"""
+type InstantActionsModeUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Account whose instant-action-mode status changed.
+	"""
+	user: Bytes!
+	"""
+	`true` when instant-action mode is enabled and `false` when disabled.
+	"""
+	status: Boolean!
+}
+
+"""
+The scheduled deactivation time for a user’s instant-action mode was replaced.
+"""
+type InstantActionsModeDeactivateTimeUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Account whose scheduled instant-action-mode deactivation changed.
+	"""
+	user: Bytes!
+	"""
+	New Unix timestamp scheduled for instant-action-mode deactivation.
+	"""
+	time: BigInt!
+}
+
+"""
+A named oracle contract was registered under a newly emitted protocol identifier.
+"""
+type OracleAdded @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Protocol identifier assigned to the newly registered oracle.
+	"""
+	oracleId: BigInt!
+	"""
+	Human-readable name emitted for the oracle.
+	"""
+	name: String!
+	"""
+	Contract address queried for this oracle.
+	"""
+	contractAddress: Bytes!
+}
+
+"""
+A named put or call options symbol was registered with its collateral token.
+"""
+type SymbolAdded @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Protocol identifier assigned to the newly registered options symbol.
+	"""
+	symbolId: BigInt!
+	"""
+	Human-readable name emitted for the options symbol.
+	"""
+	name: String!
+	"""
+	Raw OptionType ordinal: `0` is PUT and `1` is CALL in compatible options-core definitions.
+	"""
+	optionType: Int!
+	"""
+	ERC-20 collateral token used to settle this options symbol.
+	"""
+	collateral: Bytes!
+}
+
+"""
+The protocol price-oracle endpoint was replaced with the emitted contract address.
+"""
+type PriceOracleAddressUpdated @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	New contract address used as the protocol price oracle.
+	"""
+	oracle: Bytes!
+}
+
+"""
+An open intent that passed its configured timeout was force-cancelled.
+"""
+type ForceCancelOpenIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Open-intent identifier force-cancelled after its timeout.
+	"""
+	intentId: BigInt!
+}
+
+"""
+A close intent that passed its configured timeout was force-cancelled.
+"""
+type ForceCancelCloseIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Close-intent identifier force-cancelled after its timeout.
+	"""
+	intentId: BigInt!
+}
+
+"""
+A trade-transfer intent was submitted with a PartyB allowlist, requested price, and deadline.
+"""
+type SendTransferIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade offered for transfer.
+	"""
+	tradeId: BigInt!
+	"""
+	Current trade owner that submitted the transfer intent.
+	"""
+	sender: Bytes!
+	"""
+	PartyB addresses permitted to act as transfer counterparties.
+	"""
+	partyBWhitelist: [Bytes!]
+	"""
+	Requested transfer price emitted by the configured ABI; its fixed-point scale is not declared in that ABI.
+	"""
+	price: BigInt!
+	"""
+	Unix timestamp after which the transfer intent expires.
+	"""
+	deadline: BigInt!
+}
+
+"""
+A pending trade-transfer intent was cancelled for the emitted trade.
+"""
+type CancelTransferIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade whose pending transfer intent was cancelled.
+	"""
+	tradeId: BigInt!
+}
+
+"""
+A counterparty locked the pending transfer intent for the emitted trade.
+"""
+type LockTransferIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade whose transfer intent was locked.
+	"""
+	tradeId: BigInt!
+	"""
+	Counterparty that acquired the transfer-intent lock.
+	"""
+	counterParty: Bytes!
+}
+
+"""
+A counterparty released its lock on the transfer intent for the emitted trade.
+"""
+type UnlockTransferIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade whose transfer-intent lock was released.
+	"""
+	tradeId: BigInt!
+	"""
+	Counterparty that released or lost the transfer-intent lock.
+	"""
+	counterParty: Bytes!
+}
+
+"""
+A counterparty accepted cancellation of the transfer intent for the emitted trade.
+"""
+type AcceptCancelTransferIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade whose transfer-intent cancellation was accepted.
+	"""
+	tradeId: BigInt!
+	"""
+	Counterparty that accepted cancellation of the transfer intent.
+	"""
+	counterParty: Bytes!
+}
+
+"""
+A trade transfer was finalized for the emitted counterparty, fill price, and clearing-house signature.
+"""
+type FinalizeTransferIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade whose ownership transfer was finalized.
+	"""
+	tradeId: BigInt!
+	"""
+	Execution price used to finalize the transfer; its fixed-point scale is not declared in the configured ABI.
+	"""
+	fillPrice: BigInt!
+	"""
+	Counterparty receiving or filling the transferred trade.
+	"""
+	counterParty: Bytes!
+	"""
+	Opaque clearing-house authorization bytes supplied for finalization.
+	"""
+	clearingHouseSignature: Bytes!
+}
+
+"""
+A close intent was submitted for a trade with requested quantity, price, and deadline.
+"""
+type SendCloseIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Trade for which the close intent was submitted.
+	"""
+	tradeId: BigInt!
+	"""
+	Protocol identifier assigned to the close intent.
+	"""
+	intentId: BigInt!
+	"""
+	Requested close price emitted by the configured ABI; its fixed-point scale is not declared in that ABI.
+	"""
+	price: BigInt!
+	"""
+	Trade quantity requested for closing; its precision is not declared in the configured ABI.
+	"""
+	quantity: BigInt!
+	"""
+	Unix timestamp after which the close intent expires.
+	"""
+	deadline: BigInt!
+}
+
+"""
+A pending close intent was cancelled.
+"""
+type CancelCloseIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Close-intent identifier that was cancelled.
+	"""
+	intentId: BigInt!
+}
+
+"""
+PartyA transferred ownership of a trade from the emitted sender to receiver.
+"""
+type TransferTradeByPartyA @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyA account transferring ownership of the trade.
+	"""
+	sender: Bytes!
+	"""
+	PartyA account receiving ownership of the trade.
+	"""
+	receiver: Bytes!
+	"""
+	Trade whose PartyA owner changed.
+	"""
+	tradeId: BigInt!
+}
+
+"""
+An open intent was cancelled and assigned the emitted terminal status code.
+"""
+type CancelOpenIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Open-intent identifier that was cancelled.
+	"""
+	intentId: BigInt!
+	"""
+	Raw uint8 terminal status emitted for the cancelled open intent; the configured ABI does not include enum labels.
+	"""
+	finalStatus: Int!
+}
+
+"""
+Cancellation of a pending close intent was accepted.
+"""
+type AcceptCancelCloseIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Close-intent identifier whose cancellation was accepted.
+	"""
+	intentId: BigInt!
+}
+
+"""
+A close intent was filled for the emitted quantity and execution price.
+"""
+type FillCloseIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Close-intent identifier that received the fill.
+	"""
+	intentId: BigInt!
+	"""
+	Trade quantity closed by this fill; its precision is not declared in the configured ABI.
+	"""
+	quantity: BigInt!
+	"""
+	Execution price for this close fill; its fixed-point scale is not declared in the configured ABI.
+	"""
+	price: BigInt!
+}
+
+"""
+Cancellation of a pending open intent was accepted.
+"""
+type AcceptCancelOpenIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Open-intent identifier whose cancellation was accepted.
+	"""
+	intentId: BigInt!
+}
+
+"""
+A PartyB locked a pending open intent.
+"""
+type LockOpenIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Open-intent identifier locked for execution.
+	"""
+	intentId: BigInt!
+	"""
+	PartyB that acquired the open-intent lock.
+	"""
+	partyB: Bytes!
+}
+
+"""
+The PartyB lock on a pending open intent was released.
+"""
+type UnlockOpenIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Open-intent identifier whose lock was released.
+	"""
+	intentId: BigInt!
+}
+
+"""
+An open intent was filled into the emitted trade at the emitted quantity and price.
+"""
+type FillOpenIntent @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Open-intent identifier that received the fill.
+	"""
+	intentId: BigInt!
+	"""
+	Trade identifier created or filled from the open intent.
+	"""
+	tradeId: BigInt!
+	"""
+	Options trade quantity opened by this fill; its precision is not declared in the configured ABI.
+	"""
+	quantity: BigInt!
+	"""
+	Execution price for this open fill; its fixed-point scale is not declared in the configured ABI.
+	"""
+	price: BigInt!
+}
+
+"""
+An operator expired an options trade at its emitted settlement price.
+"""
+type ExpireTrade @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address authorized to execute expiry of the trade.
+	"""
+	operator: Bytes!
+	"""
+	Options trade that expired.
+	"""
+	tradeId: BigInt!
+	"""
+	Settlement price used to expire the trade; its fixed-point scale is not declared in the configured ABI.
+	"""
+	settlementPrice: BigInt!
+}
+
+"""
+An operator exercised an options trade at its emitted settlement price.
+"""
+type ExerciseTrade @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address authorized to exercise the trade.
+	"""
+	operator: Bytes!
+	"""
+	Options trade that was exercised.
+	"""
+	tradeId: BigInt!
+	"""
+	Settlement price used to exercise the trade; its fixed-point scale is not declared in the configured ABI.
+	"""
+	settlementPrice: BigInt!
+}
+
+"""
+A named deterministic PartyA trading account was created for a multi-account user.
+"""
+type AddAccount @entity(immutable: true) {
+	"""
+	New trading-account address, used directly as the immutable entity identifier.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Address of the newly created PartyA trading account.
+	"""
+	account: Bytes!
+	"""
+	Multi-account user that owns the new trading account.
+	"""
+	user: Bytes!
+	"""
+	Human-readable account name emitted at creation.
+	"""
+	name: String!
+	"""
+	Multi-account contract that emitted the account-creation event.
+	"""
 	accountSource: Bytes!
 }
 
+"""
+PartyA submitted a new options open intent with an eligible PartyB allowlist and packed request parameters.
+"""
 type SendOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    partyA: Bytes!
-    intentId: BigInt!
-    partyBsWhiteList: [Bytes!]
-    requestedParams: Bytes!
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	PartyA account that owns and submitted the open intent.
+	"""
+	partyA: Bytes!
+	"""
+	Protocol identifier assigned to the new open intent.
+	"""
+	intentId: BigInt!
+	"""
+	PartyB addresses permitted to lock or fill the open intent.
+	"""
+	partyBsWhiteList: [Bytes!]!
+	"""
+	Packed open-intent parameter payload emitted unchanged; its byte layout depends on the configured contract version.
+	"""
+	requestedParams: Bytes!
 }
 
+"""
+A pending open intent reached its expiry transition.
+"""
 type ExpireOpenIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Open-intent identifier that reached expiry.
+	"""
+	intentId: BigInt!
 }
 
+"""
+A pending close intent reached its expiry transition.
+"""
 type ExpireCloseIntent @entity(immutable: true) {
-    id: ID!
-    counterId: BigInt!
-    blockNumber: BigInt!
-    blockTimestamp: BigInt!
-    transactionHash: Bytes!
-    transactionIndex: BigInt!
-    logIndex: BigInt!
-    blockHash: Bytes!
-
-    intentId: BigInt!
+	"""
+	Transaction hash and block-global log index joined with `-`, uniquely identifying this emitted event log.
+	"""
+	id: ID!
+	"""
+	Monotonically increasing subgraph-wide event sequence assigned when this row is created.
+	"""
+	counterId: BigInt!
+	"""
+	Number of the block containing this event log.
+	"""
+	blockNumber: BigInt!
+	"""
+	Timestamp of the block containing this event log.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Hash of the transaction containing this event log.
+	"""
+	transactionHash: Bytes!
+	"""
+	Zero-based position of the containing transaction within its block.
+	"""
+	transactionIndex: BigInt!
+	"""
+	Zero-based position of this log among all logs in its block.
+	"""
+	logIndex: BigInt!
+	"""
+	Hash of the block containing this event log.
+	"""
+	blockHash: Bytes!
+	"""
+	Close-intent identifier that reached expiry.
+	"""
+	intentId: BigInt!
 }

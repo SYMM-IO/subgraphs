@@ -17,9 +17,12 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import queue
 import re
+import shutil
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -28,10 +31,15 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import DictLoader, Environment, select_autoescape
+
+try:
+    from scripts.fleet_identity import FLEET_HEALTH_PAYLOAD
+except ModuleNotFoundError:  # Direct execution places scripts/, not the repository root, on sys.path.
+    from fleet_identity import FLEET_HEALTH_PAYLOAD
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -47,10 +55,41 @@ MODULES = ["perps/analytics", "perps/events"]
 
 # Goldsky public project ID — used to build GraphQL endpoint URLs in the UI.
 GOLDSKY_PROJECT_ID = "project_cm1hfr4527p0f01u85mz499u8"
+COMMON_TOOL_DIRS = [
+    "/usr/local/bin",
+    "/opt/homebrew/bin",
+]
+GOLDSKY_BIN_ENV = "GOLDSKY_BIN"
 
 
 def goldsky_endpoint(base: str, ver_or_tag: str) -> str:
     return f"https://api.goldsky.com/api/public/{GOLDSKY_PROJECT_ID}/subgraphs/{base}/{ver_or_tag}/gn"
+
+
+def resolve_tool(name: str) -> str | None:
+    found = shutil.which(name)
+    if found:
+        return found
+    for tool_dir in COMMON_TOOL_DIRS:
+        candidate = Path(tool_dir) / name
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    return None
+
+
+def build_tool_env(base_env: dict[str, str] | None = None) -> dict[str, str]:
+    """Return a child-process environment that preserves GUI tool discovery."""
+    env = dict(os.environ if base_env is None else base_env)
+    existing_path = env.get("PATH", "")
+    path_parts = [*COMMON_TOOL_DIRS]
+    if existing_path:
+        path_parts.append(existing_path)
+    env["PATH"] = os.pathsep.join(path_parts)
+
+    goldsky = resolve_tool("goldsky")
+    if goldsky:
+        env[GOLDSKY_BIN_ENV] = goldsky
+    return env
 
 # Prod chain configs — "prod only" preset selects exactly these.
 PROD_CONFIGS = {
@@ -293,17 +332,18 @@ class FleetStore:
 
         Returns (success, error_message). On failure keeps the previous state.
         """
+        goldsky = resolve_tool("goldsky")
+        if not goldsky:
+            with self._lock:
+                self._last_error = "goldsky CLI not found on PATH or in /usr/local/bin / /opt/homebrew/bin"
+            return False, self._last_error
         try:
             proc = subprocess.run(
-                ["goldsky", "subgraph", "list"],
+                [goldsky, "subgraph", "list"],
                 capture_output=True,
                 text=True,
                 timeout=60,
             )
-        except FileNotFoundError:
-            with self._lock:
-                self._last_error = "goldsky CLI not found on PATH"
-            return False, self._last_error
         except subprocess.TimeoutExpired:
             with self._lock:
                 self._last_error = "goldsky subgraph list timed out after 60s"
@@ -447,6 +487,7 @@ class Job:
         proc = subprocess.Popen(
             cmd,
             cwd=REPO_ROOT,
+            env=build_tool_env(),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -584,9 +625,12 @@ def broadcast_activity() -> None:
 
 
 def run_goldsky(args: list[str], timeout: int = 60) -> tuple[int, str]:
+    goldsky = resolve_tool("goldsky")
+    if not goldsky:
+        return 127, "goldsky not found on PATH or in /usr/local/bin / /opt/homebrew/bin"
     try:
         proc = subprocess.run(
-            ["goldsky", *args],
+            [goldsky, *args],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,
@@ -2590,6 +2634,11 @@ if (FLEET_UI_DIST / "assets").exists():
 _store = FleetStore()
 
 
+@app.get("/healthz", response_class=JSONResponse)
+def healthz() -> JSONResponse:
+    return JSONResponse(FLEET_HEALTH_PAYLOAD)
+
+
 def _last_fetched_label() -> str:
     if not _store.last_fetched_at:
         return "not yet fetched"
@@ -3135,7 +3184,7 @@ def queue_chain_deploy_jobs(module: str, chains_sel: list[str], version: str) ->
             continue
         step_label = f"{c.key} · {module} {version}"
         cmd = [
-            "python3",
+            sys.executable,
             "scripts/manager.py",
             _config_path_arg(c),
             module,
@@ -3166,7 +3215,7 @@ def queue_bulk_deploy_jobs(selections: list[dict[str, Any]], version: str) -> tu
             continue
         step_label = f"{s['chain']} · {s['module']} {version}"
         cmd = [
-            "python3",
+            sys.executable,
             "scripts/manager.py",
             _config_path_arg(c),
             s["module"],

@@ -1,5 +1,5 @@
 import { SyncBalances as SyncBalancesEntity } from "../../../../generated/schema"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
@@ -12,6 +12,11 @@ export class SyncBalancesHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.collateral = event.params.collateral
 		entity.partyA = event.params.partyA
+		const partyBs: Bytes[] = []
+		for (let i = 0; i < event.params.partyBs.length; i++) {
+			partyBs.push(event.params.partyBs[i])
+		}
+		entity.partyBs = partyBs
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

@@ -1,9 +1,9 @@
 """
 AccountLayer affiliate / account manager profile.
 
-Affiliates register with AccountLayer, can be approved/paused/unpaused, and
-own sub-accounts. This entity stores current affiliate metadata and fee/share
-configuration that the subgraph has observed.
+Affiliates register with AccountLayer, can be approved, paused, or unpaused,
+and are associated with sub-accounts that retain separate wallet owners. This
+entity stores affiliate metadata and fee/share configuration observed by the subgraph.
 """
 type Affiliate @entity(immutable: false) {
 	"""
@@ -35,23 +35,23 @@ type Affiliate @entity(immutable: false) {
 	"""
 	feeDistributor: Bytes
 	"""
-	Subgraph status label derived from AccountLayer affiliate lifecycle events.
+	Latest affiliate lifecycle state such as PENDING, ACTIVE, or PAUSED.
 	"""
 	status: String!
 	"""
-	Affiliate Symmio share value observed from AccountLayer/FeeCollector configuration.
+	Affiliate Symmio fee-share read from AccountLayer after StakeholdersUpdated, in 1e18 precision where 1e18 is 100%; null until observed.
 	"""
 	symmioShare: BigInt
 	"""
-	Express withdraw rate configured for this affiliate when emitted.
+	Legacy ExpressRateSet value from older AccountLayer deployments; current perps-core retains this unused slot only for storage compatibility.
 	"""
 	expressRate: BigInt
 	"""
-	Virtual provider address configured for this affiliate when emitted.
+	Legacy VirtualProviderSet address from older AccountLayer deployments; current perps-core retains this unused slot only for storage compatibility.
 	"""
 	virtualProvider: Bytes
 	"""
-	Account manager address associated with this affiliate when emitted.
+	Deterministic AccountManager address emitted for this affiliate by historical deployments.
 	"""
 	accountManager: Bytes
 	"""

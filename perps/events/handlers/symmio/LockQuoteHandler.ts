@@ -2,7 +2,7 @@ import { LockQuote as LockQuoteEntity } from "../../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
-import { findAccountSourceForQuote } from "../../utils/account_utils";
+import { findAccountSourceForQuote } from "../../utils/account_utils"
 
 export class LockQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -14,6 +14,9 @@ export class LockQuoteHandler<T> {
 		entity.source = event.address
 		entity.partyB = event.params.partyB
 		entity.quoteId = event.params.quoteId
+		if (_event.parameters.length >= 3) {
+			entity.quoteStatus = _event.parameters[2].value.toI32()
+		}
 		entity.accountSource = findAccountSourceForQuote(event.params.quoteId.toString() + "-" + event.address.toHexString())
 
 		entity.blockTimestamp = event.block.timestamp

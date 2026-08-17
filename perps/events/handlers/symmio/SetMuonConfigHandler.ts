@@ -13,6 +13,9 @@ export class SetMuonConfigHandler<T> {
 		entity.source = event.address
 		entity.upnlValidTime = event.params.upnlValidTime
 		entity.priceValidTime = event.params.priceValidTime
+		if (_event.parameters.length >= 3) {
+			entity.priceQuantityValidTime = _event.parameters[2].value.toBigInt()
+		}
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number
 		entity.transactionHash = event.transaction.hash

@@ -36,6 +36,60 @@ UV_CACHE_DIR="${LOG_DIR}/uv-cache"
 mkdir -p "${LOG_DIR}"
 export UV_CACHE_DIR
 
+load_login_shell_path() {
+\tlocal shell_path="${SHELL:-/bin/zsh}"
+\tlocal path_marker="__SYMMIO_FLEET_PATH_$$__"
+\tlocal timeout_seconds="${FLEET_LOGIN_SHELL_TIMEOUT_SECONDS:-3}"
+\tlocal login_output=""
+\tlocal login_output_file=""
+\tlocal login_path=""
+\tlocal line=""
+\tlocal shell_pid=""
+\tlocal started_at=0
+\tlocal completed=1
+
+\tcase "${timeout_seconds}" in
+\t\t""|*[!0-9]*|0) timeout_seconds=3 ;;
+\tesac
+
+\tif [[ -x "${shell_path}" ]]; then
+\t\tlogin_output_file="$(mktemp "${TMPDIR:-/tmp}/symmio-fleet-path.XXXXXX")"
+\t\tFLEET_PATH_MARKER="${path_marker}" "${shell_path}" -lc 'printf "\\n%s%s\\n" "$FLEET_PATH_MARKER" "$PATH"' >"${login_output_file}" 2>/dev/null &
+\t\tshell_pid=$!
+\t\tstarted_at=${SECONDS}
+\t\twhile kill -0 "${shell_pid}" 2>/dev/null; do
+\t\t\tif (( SECONDS - started_at >= timeout_seconds )); then
+\t\t\t\tcompleted=0
+\t\t\t\tkill "${shell_pid}" 2>/dev/null || true
+\t\t\t\tsleep 0.1
+\t\t\t\tkill -KILL "${shell_pid}" 2>/dev/null || true
+\t\t\t\tbreak
+\t\t\tfi
+\t\t\tsleep 0.05
+\t\tdone
+\t\twait "${shell_pid}" 2>/dev/null || true
+\t\tif (( completed == 1 )); then
+\t\t\tlogin_output="$(<"${login_output_file}")"
+\t\tfi
+\t\trm -f "${login_output_file}"
+\tfi
+
+\twhile IFS= read -r line; do
+\t\tif [[ "${line}" == "${path_marker}"* ]]; then
+\t\t\tlogin_path="${line#"${path_marker}"}"
+\t\t\tbreak
+\t\tfi
+\tdone <<<"${login_output}"
+
+\tif [[ -n "${login_path}" ]]; then
+\t\tPATH="${login_path}:${PATH}"
+\tfi
+}
+
+PATH="/usr/local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:${HOME}/.local/bin:${HOME}/.cargo/bin:${HOME}/.foundry/bin:${PATH}"
+load_login_shell_path
+export PATH
+
 show_error() {
 \tlocal message="$1"
 \t/usr/bin/osascript \\
@@ -67,6 +121,13 @@ if [[ -z "${uv_bin}" ]]; then
 \tshow_error "Could not find uv. Install uv or set UV to its full path, then reopen SYMMIO Fleet."
 \texit 1
 fi
+
+{
+\tprintf '\\n[%s] starting SYMMIO Fleet\\n' "$(date '+%Y-%m-%d %H:%M:%S')"
+\tprintf 'PATH=%s\\n' "${PATH}"
+\tprintf 'uv=%s\\n' "${uv_bin}"
+\tprintf 'goldsky=%s\\n' "$(command -v goldsky || printf 'not found')"
+} >>"${LOG_FILE}"
 
 # The windowed app starts the server, opens a native window, and blocks until
 # the window is closed. Foreground, so this .app stays the running process.

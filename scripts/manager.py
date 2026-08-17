@@ -13,6 +13,38 @@ from typing import Any, Dict, Iterable, List, Optional, Set
 import yaml
 
 
+COMMON_TOOL_DIRS = [
+    "/usr/local/bin",
+    "/opt/homebrew/bin",
+]
+GOLDSKY_BIN_ENV = "GOLDSKY_BIN"
+
+
+def resolve_tool(name: str, configured_env: str | None = None) -> str | None:
+    """Resolve a CLI from an explicit propagated path, PATH, or macOS defaults."""
+    if configured_env:
+        configured = os.environ.get(configured_env)
+        if configured and os.path.isfile(configured) and os.access(configured, os.X_OK):
+            return configured
+
+    found = shutil.which(name)
+    if found:
+        return found
+    for tool_dir in COMMON_TOOL_DIRS:
+        candidate = os.path.join(tool_dir, name)
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+    return None
+
+
+def goldsky_command(*args: str) -> list[str]:
+    goldsky = resolve_tool("goldsky", GOLDSKY_BIN_ENV)
+    if not goldsky:
+        checked = ", ".join(COMMON_TOOL_DIRS)
+        raise FileNotFoundError(f"goldsky CLI not found via {GOLDSKY_BIN_ENV}, PATH, or {checked}")
+    return [goldsky, *args]
+
+
 def load_env_file():
     """Load variables from .env file (does not override existing env vars)."""
     env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
@@ -199,18 +231,29 @@ def get_handler_abi_dependencies(contract: Contract) -> List[str]:
 
 
 SYNC_META_SCHEMA = """
+\"\"\"Singleton schema-version metadata maintained by the subgraph.\"\"\"
 type SyncMeta @entity(immutable: false) {
+    \"\"\"Constant `meta` singleton identifier.\"\"\"
     id: ID!
+    \"\"\"Module-wide version from the module's `sync_versions.json`.\"\"\"
     globalVersion: String!
+    \"\"\"Pipe-delimited hash input formed from sorted `entity:version` pairs.\"\"\"
     versionsHash: String!
+    \"\"\"Block timestamp when this metadata record was created or last changed.\"\"\"
     deployedAt: BigInt!
+    \"\"\"Entity-specific version rows linked to this singleton.\"\"\"
     versions: [EntityVersion!]! @derivedFrom(field: "meta")
 }
 
+\"\"\"Current indexed schema version for one named entity.\"\"\"
 type EntityVersion @entity(immutable: false) {
+    \"\"\"Entity name used as the version-row identifier.\"\"\"
     id: ID!
+    \"\"\"Reference to the SyncMeta singleton.\"\"\"
     meta: SyncMeta!
+    \"\"\"Configured version string for this entity.\"\"\"
     version: String!
+    \"\"\"Block timestamp when this row was created or its version last changed.\"\"\"
     updatedAt: BigInt!
 }
 """
@@ -1004,7 +1047,7 @@ def generate_contract_utils(common_dir: str, version: str):
     has_liquidation_escrow = _abi_has_function(abi_file, "getLiquidationEscrow")
 
     lines = []
-    lines.append(f'import {{Address, BigInt, Bytes, log}} from "@graphprotocol/graph-ts"')
+    lines.append('import {Address, BigInt, Bytes, log} from "@graphprotocol/graph-ts"')
 
     # Build import list from generated types
     imports = [
@@ -1024,17 +1067,17 @@ def generate_contract_utils(common_dir: str, version: str):
     # getQuote
     lines.append(f"export function getQuote(address: Address, id: BigInt): symmio_{v}__getQuoteResultValue0Struct | null {{")
     lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-    lines.append(f"\tlet result = contract.try_getQuote(id)")
-    lines.append(f"\treturn result.reverted ? null : result.value")
-    lines.append(f"}}")
+    lines.append("\tlet result = contract.try_getQuote(id)")
+    lines.append("\treturn result.reverted ? null : result.value")
+    lines.append("}")
     lines.append("")
 
     # getCollateral
-    lines.append(f"export function getCollateral(address: Address,): Bytes | null {{")
+    lines.append("export function getCollateral(address: Address,): Bytes | null {")
     lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-    lines.append(f"\tlet result = contract.try_getCollateral()")
-    lines.append(f"\treturn result.reverted ? null : result.value")
-    lines.append(f"}}")
+    lines.append("\tlet result = contract.try_getCollateral()")
+    lines.append("\treturn result.reverted ? null : result.value")
+    lines.append("}")
     lines.append("")
 
     # getLiquidatedStateOfPartyA (only v0.8.1+)
@@ -1044,9 +1087,9 @@ def generate_contract_utils(common_dir: str, version: str):
             f"symmio_{v}__getLiquidatedStateOfPartyAResultValue0Struct | null {{"
         )
         lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-        lines.append(f"\tlet result = contract.try_getLiquidatedStateOfPartyA(partyA)")
-        lines.append(f"\treturn result.reverted ? null : result.value")
-        lines.append(f"}}")
+        lines.append("\tlet result = contract.try_getLiquidatedStateOfPartyA(partyA)")
+        lines.append("\treturn result.reverted ? null : result.value")
+        lines.append("}")
         lines.append("")
 
     # getBalanceInfoOfPartyA
@@ -1055,33 +1098,33 @@ def generate_contract_utils(common_dir: str, version: str):
         f"symmio_{v}__balanceInfoOfPartyAResult | null {{"
     )
     lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-    lines.append(f"\tlet result = contract.try_balanceInfoOfPartyA(partyA)")
-    lines.append(f"\treturn result.reverted ? null : result.value")
-    lines.append(f"}}")
+    lines.append("\tlet result = contract.try_balanceInfoOfPartyA(partyA)")
+    lines.append("\treturn result.reverted ? null : result.value")
+    lines.append("}")
     lines.append("")
 
     if has_party_a_reimbursement:
-        lines.append(f"export function partyAReimbursement(address: Address, partyA: Address): BigInt | null {{")
+        lines.append("export function partyAReimbursement(address: Address, partyA: Address): BigInt | null {")
         lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-        lines.append(f"\tlet result = contract.try_partyAReimbursement(partyA)")
-        lines.append(f"\treturn result.reverted ? null : result.value")
-        lines.append(f"}}")
+        lines.append("\tlet result = contract.try_partyAReimbursement(partyA)")
+        lines.append("\treturn result.reverted ? null : result.value")
+        lines.append("}")
         lines.append("")
 
     if has_party_a_deferred_balance:
-        lines.append(f"export function getPartyADeferredBalance(address: Address, partyA: Address): BigInt | null {{")
+        lines.append("export function getPartyADeferredBalance(address: Address, partyA: Address): BigInt | null {")
         lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-        lines.append(f"\tlet result = contract.try_getPartyADeferredBalance(partyA)")
-        lines.append(f"\treturn result.reverted ? null : result.value")
-        lines.append(f"}}")
+        lines.append("\tlet result = contract.try_getPartyADeferredBalance(partyA)")
+        lines.append("\treturn result.reverted ? null : result.value")
+        lines.append("}")
         lines.append("")
 
     if has_liquidation_escrow:
-        lines.append(f"export function getLiquidationEscrow(address: Address, partyA: Address): BigInt | null {{")
+        lines.append("export function getLiquidationEscrow(address: Address, partyA: Address): BigInt | null {")
         lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-        lines.append(f"\tlet result = contract.try_getLiquidationEscrow(partyA)")
-        lines.append(f"\treturn result.reverted ? null : result.value")
-        lines.append(f"}}")
+        lines.append("\tlet result = contract.try_getLiquidationEscrow(partyA)")
+        lines.append("\treturn result.reverted ? null : result.value")
+        lines.append("}")
         lines.append("")
 
     # getBalanceInfoOfPartyB
@@ -1090,22 +1133,22 @@ def generate_contract_utils(common_dir: str, version: str):
         f"symmio_{v}__balanceInfoOfPartyBResult | null {{"
     )
     lines.append(f"\tconst contract = symmio_{v}.bind(address)")
-    lines.append(f"\tlet result = contract.try_balanceInfoOfPartyB(partyB, partyA)")
-    lines.append(f"\treturn result.reverted ? null : result.value")
-    lines.append(f"}}")
+    lines.append("\tlet result = contract.try_balanceInfoOfPartyB(partyB, partyA)")
+    lines.append("\treturn result.reverted ? null : result.value")
+    lines.append("}")
     lines.append("")
 
     # symbolIdToSymbolName
-    lines.append(f"export function symbolIdToSymbolName(symbolId: BigInt, contractAddress: Address): string {{")
+    lines.append("export function symbolIdToSymbolName(symbolId: BigInt, contractAddress: Address): string {")
     lines.append(f"\tlet symmioContract = symmio_{v}.bind(contractAddress)")
-    lines.append(f"\tlet callResult = symmioContract.try_symbolNameById([symbolId])")
-    lines.append(f"\tif (callResult.reverted) {{")
-    lines.append(f'\t\tlog.error("error in symbol bind", [])')
-    lines.append(f'\t\treturn ""')
-    lines.append(f"\t}} else {{")
-    lines.append(f"\t\treturn callResult.value[0]")
-    lines.append(f"\t}}")
-    lines.append(f"}}")
+    lines.append("\tlet callResult = symmioContract.try_symbolNameById([symbolId])")
+    lines.append("\tif (callResult.reverted) {")
+    lines.append('\t\tlog.error("error in symbol bind", [])')
+    lines.append('\t\treturn ""')
+    lines.append("\t} else {")
+    lines.append("\t\treturn callResult.value[0]")
+    lines.append("\t}")
+    lines.append("}")
 
     out_path = os.path.join(common_dir, f"contract_utils_{v}.ts")
     with open(out_path, "w") as f:
@@ -1240,14 +1283,13 @@ def main():
 
         if args.provider == "goldsky":
             step(1, 1, f"Deploying to Goldsky as {Style.BOLD}{deploy_url}/{args.version}{Style.RESET}...")
-            command = [
-                "goldsky",
+            command = goldsky_command(
                 "subgraph",
                 "deploy",
                 f"{deploy_url}/{args.version}",
                 "--path",
                 "build",
-            ]
+            )
             subprocess.run(command, check=True)
             success(f"Deployed {args.version} to Goldsky")
             if not args.skip_pipeline_update:
@@ -1280,17 +1322,16 @@ def main():
         if args.version is None:
             raise Exception("Version should be provided with --version")
         if args.provider != "goldsky":
-            error(f"--delete is only supported for goldsky provider")
+            error("--delete is only supported for goldsky provider")
             sys.exit(1)
         deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Deleting {Style.BOLD}{deploy_url}/{args.version}{Style.RESET}...")
-        command = [
-            "goldsky",
+        command = goldsky_command(
             "subgraph",
             "delete",
             "-f",
             f"{deploy_url}/{args.version}",
-        ]
+        )
         subprocess.run(command, check=True)
         success(f"Deleted {args.version}")
 
@@ -1298,19 +1339,18 @@ def main():
         if args.version is None:
             raise Exception("Version should be provided with --version")
         if args.provider != "goldsky":
-            error(f"--add-latest-tag is only supported for goldsky provider")
+            error("--add-latest-tag is only supported for goldsky provider")
             sys.exit(1)
         deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Adding {Style.BOLD}latest{Style.RESET} tag to {deploy_url}/{args.version}...")
-        command = [
-            "goldsky",
+        command = goldsky_command(
             "subgraph",
             "tag",
             "create",
             f"{deploy_url}/{args.version}",
             "--tag",
             "latest",
-        ]
+        )
         subprocess.run(command, check=True)
         success("Tagged as latest")
 
@@ -1318,19 +1358,18 @@ def main():
         if args.version is None:
             raise Exception("Version should be provided with --version")
         if args.provider != "goldsky":
-            error(f"--add-stage-tag is only supported for goldsky provider")
+            error("--add-stage-tag is only supported for goldsky provider")
             sys.exit(1)
         deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Adding {Style.BOLD}stage{Style.RESET} tag to {deploy_url}/{args.version}...")
-        command = [
-            "goldsky",
+        command = goldsky_command(
             "subgraph",
             "tag",
             "create",
             f"{deploy_url}/{args.version}",
             "--tag",
             "stage",
-        ]
+        )
         subprocess.run(command, check=True)
         success("Tagged as stage")
 
@@ -1338,12 +1377,11 @@ def main():
         if args.version is None:
             raise Exception("Version should be provided with --version")
         if args.provider != "goldsky":
-            error(f"--delete-latest-tag is only supported for goldsky provider")
+            error("--delete-latest-tag is only supported for goldsky provider")
             sys.exit(1)
         deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Deleting {Style.BOLD}latest{Style.RESET} tag from {deploy_url}/{args.version}...")
-        command = [
-            "goldsky",
+        command = goldsky_command(
             "subgraph",
             "tag",
             "delete",
@@ -1351,7 +1389,7 @@ def main():
             "-f",
             "--tag",
             "latest",
-        ]
+        )
         subprocess.run(command, check=True)
         success("Deleted latest tag")
 
@@ -1359,12 +1397,11 @@ def main():
         if args.version is None:
             raise Exception("Version should be provided with --version")
         if args.provider != "goldsky":
-            error(f"--delete-stage-tag is only supported for goldsky provider")
+            error("--delete-stage-tag is only supported for goldsky provider")
             sys.exit(1)
         deploy_url = config.get_deploy_url(args.module_name, "goldsky")
         step(1, 1, f"Deleting {Style.BOLD}stage{Style.RESET} tag from {deploy_url}/{args.version}...")
-        command = [
-            "goldsky",
+        command = goldsky_command(
             "subgraph",
             "tag",
             "delete",
@@ -1372,7 +1409,7 @@ def main():
             "-f",
             "--tag",
             "stage",
-        ]
+        )
         subprocess.run(command, check=True)
         success("Deleted stage tag")
 

@@ -1,5 +1,5 @@
 import { SendTransferIntent as SendTransferIntentEntity } from "../../../../generated/schema"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
@@ -12,6 +12,11 @@ export class SendTransferIntentHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.tradeId = event.params.tradeId
 		entity.sender = event.params.sender
+		const partyBWhitelist: Bytes[] = []
+		for (let i = 0; i < event.params.partyBWhitelist.length; i++) {
+			partyBWhitelist.push(event.params.partyBWhitelist[i])
+		}
+		entity.partyBWhitelist = partyBWhitelist
 		entity.price = event.params.price
 		entity.deadline = event.params.deadline
 

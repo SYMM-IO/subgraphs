@@ -55,16 +55,20 @@ function getBalanceOf(version: Version, source: Address, account: Address): BigI
 	return getBalanceOf_0_8_0(source, account)
 }
 
+function setFreeAndTotalBalance(entity: LatestAccountBalance, freeBalance: BigInt): void {
+	entity.freeBalance = freeBalance
+	// Locked and pending-locked values are reservations backed by allocatedBalance,
+	// not additional collateral. Including them here would count those funds twice.
+	entity.totalBalance = freeBalance.plus(entity.allocatedBalance)
+}
+
 function finalizeBalance(entity: LatestAccountBalance, event: ethereum.Event, version: Version, source: Address, account: Address): boolean {
 	let free = getBalanceOf(version, source, account)
 	if (free === null) {
 		log.warning("Failed to get free balance of account {}", [account.toHexString()])
 		return false
 	}
-	entity.freeBalance = free
-	// Locked and pending-locked values are reservations backed by allocatedBalance,
-	// not additional collateral. Including them here would count those funds twice.
-	entity.totalBalance = entity.freeBalance.plus(entity.allocatedBalance)
+	setFreeAndTotalBalance(entity, free)
 	return true
 }
 
@@ -74,10 +78,7 @@ function finalizeBalanceAtBlock(entity: LatestAccountBalance, block: ethereum.Bl
 		log.warning("Failed to get free balance of account {} at block {}", [account.toHexString(), block.number.toString()])
 		return false
 	}
-	entity.freeBalance = free
-	// Locked and pending-locked values are reservations backed by allocatedBalance,
-	// not additional collateral. Including them here would count those funds twice.
-	entity.totalBalance = entity.freeBalance.plus(entity.allocatedBalance)
+	setFreeAndTotalBalance(entity, free)
 	return true
 }
 

@@ -28,7 +28,7 @@ type MarginTransfer @entity(immutable: true) {
 	"""
 	subAccount: SubAccount!
 	"""
-	Raw amount emitted by the AccountLayer event.
+	18-decimal core margin moved between the parent SubAccount and VirtualAccount.
 	"""
 	amount: BigInt!
 	"""
@@ -60,11 +60,11 @@ type MarginTransfer @entity(immutable: true) {
 	"""
 	transaction: Bytes!
 	"""
-	VirtualAccount entity reference when the virtual account existed in the indexed state.
+	Nullable alias of virtualAccount assigned to the same entity ID; resolution depends on target existence.
 	"""
 	virtualAccountRef: VirtualAccount
 	"""
-	SubAccount entity reference when the sub-account existed in the indexed state.
+	Nullable alias of subAccount assigned to the same entity ID; resolution depends on target existence.
 	"""
 	subAccountRef: SubAccount
 }

@@ -12,7 +12,7 @@ type Account @entity(immutable: false) {
 	"""
 	id: ID!
 	"""
-	Contract address that first introduced or most recently updated the account.
+	Contract assigned by creation or selected core handlers; it may change and does not identify every latest writer.
 	"""
 	source: Bytes
 	"""
@@ -40,7 +40,7 @@ type Account @entity(immutable: false) {
 	"""
 	globalCounter: BigInt!
 	"""
-	Wallet/user address that owns this account.
+	User attribution: wallet owner for AccountLayer profiles and commonly the represented address for direct/protocol actors.
 	"""
 	user: Bytes!
 	"""
@@ -52,11 +52,11 @@ type Account @entity(immutable: false) {
 	"""
 	owner: Bytes
 	"""
-	Block timestamp when the account was first indexed.
+	Timestamp assigned by latest full account-builder initialization; replace-on-existing flows can overwrite it.
 	"""
 	timestamp: BigInt!
 	"""
-	Block number of the latest account-profile update.
+	Block assigned by full initialization or selected handlers; not every profile update.
 	"""
 	blockNumber: BigInt!
 	"""
@@ -64,7 +64,7 @@ type Account @entity(immutable: false) {
 	"""
 	name: String
 	"""
-	Legacy account type label used by older account handlers.
+	Coarse classification: NORMAL, SOLVER, LIQUIDATOR, BRIDGE, or UNKNOWN; accountKind describes hierarchy shape.
 	"""
 	type: String
 	"""
@@ -72,7 +72,7 @@ type Account @entity(immutable: false) {
 	"""
 	lastActivityTimestamp: BigInt!
 	"""
-	Transaction hash that first created this account record.
+	Transaction assigned by latest full account-builder initialization; not guaranteed original creation.
 	"""
 	transaction: Bytes!
 	"""
@@ -84,7 +84,7 @@ type Account @entity(immutable: false) {
 	"""
 	accountSource: Bytes
 	"""
-	Affiliate entity associated with `accountSource` when known.
+	Currently unused nullable relation; no handler derives it from accountSource.
 	"""
 	affiliateRef: Affiliate
 	"""
@@ -120,7 +120,7 @@ type Account @entity(immutable: false) {
 	"""
 	isVirtual: Boolean
 	"""
-	Affiliate address associated with the account-layer hierarchy.
+	Affiliate/account-source address used to attribute this account.
 	"""
 	affiliate: Bytes
 	"""
@@ -132,15 +132,15 @@ type Account @entity(immutable: false) {
 	"""
 	virtualAccount: VirtualAccount
 	"""
-	Latest timestamp of core-contract activity attributed to this account.
+	Reserved field; no current perps handler assigns it.
 	"""
 	lastCoreActivityTimestamp: BigInt
 	"""
-	Latest timestamp of account-layer activity attributed to this account.
+	Latest selected AccountLayer create, delete, reuse, import, or ownership-transfer timestamp; not all layer activity.
 	"""
 	lastLayerActivityTimestamp: BigInt
 	"""
-	Latest timestamp of balance-changing activity attributed to this account.
+	Reserved field; no current perps handler assigns it.
 	"""
 	lastBalanceActivityTimestamp: BigInt
 	"""

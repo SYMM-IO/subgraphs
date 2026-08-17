@@ -3,11 +3,11 @@ Single-row mutable counter used to assign deterministic subgraph-side ordering v
 """
 type GlobalCounter @entity(immutable: false) {
 	"""
-	Counter namespace id.
+	Singleton counter ID, always GLOBAL in current handlers.
 	"""
 	id: String!
 	"""
-	Current counter value.
+	Last subgraph ordering value assigned in the GLOBAL namespace.
 	"""
 	counter: BigInt!
 }

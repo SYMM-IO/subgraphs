@@ -40,10 +40,7 @@ export class SendQuoteHandler<T> {
 
 			// Decode paramsData: (uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
 			let paramsData = _event.parameters[4].value.toBytes()
-			let decoded = ethereum.decode(
-				"(uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
-				paramsData,
-			)
+			let decoded = ethereum.decode("(uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)", paramsData)
 			if (decoded) {
 				let tuple = decoded.toTuple()
 				entity.symbolId = tuple[0].toBigInt()
@@ -81,8 +78,10 @@ export class SendQuoteHandler<T> {
 					entity.lf = _event.parameters[11].value.toBigInt()
 					entity.partyAmm = _event.parameters[10].value.toBigInt()
 					entity.partyBmm = _event.parameters[10].value.toBigInt()
+					entity.maxInterestRate = _event.parameters[12].value.toBigInt()
 					entity.tradingFee = BigInt.zero()
 					entity.deadline = _event.parameters[13].value.toBigInt()
+					entity.quoteStatus = _event.parameters[14].value.toI32()
 					break
 				}
 				default: {

@@ -11,7 +11,7 @@ type Symbol @entity(immutable: false) {
 	"""
 	id: ID!
 	"""
-	Monotonic indexer-side ordering counter assigned by this subgraph.
+	Indexer ordering value assigned when the Symbol row is created.
 	"""
 	globalCounter: BigInt!
 	"""
@@ -35,11 +35,11 @@ type Symbol @entity(immutable: false) {
 	"""
 	isValid: Boolean!
 	"""
-	Minimum notional value required for quotes on this symbol, in collateral units.
+	Value emitted by AddSymbol; current handlers do not refresh it after SetSymbolAcceptableValues.
 	"""
 	minAcceptableQuoteValue: BigInt
 	"""
-	Minimum portion reserved for liquidation fees, stored with 1e18 precision in core.
+	Value emitted by AddSymbol; current handlers do not refresh it after SetSymbolAcceptableValues.
 	"""
 	minAcceptablePortionLF: BigInt
 	"""
@@ -55,7 +55,7 @@ type Symbol @entity(immutable: false) {
 	"""
 	timestamp: BigInt!
 	"""
-	Block number of the latest symbol event handled for this entity.
+	Block of AddSymbol or latest symbol-adjustment handler that explicitly rewrote it; ordinary fee/funding updates do not.
 	"""
 	blockNumber: BigInt!
 	"""

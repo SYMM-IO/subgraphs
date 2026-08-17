@@ -12,7 +12,7 @@ type User @entity(immutable: false) {
 	"""
 	globalCounter: BigInt!
 	"""
-	Wallet address.
+	Attributed address; not necessarily an EOA wallet.
 	"""
 	address: Bytes!
 	"""
@@ -24,15 +24,15 @@ type User @entity(immutable: false) {
 	"""
 	transaction: Bytes!
 	"""
-	Classic or normalized Account records owned by this wallet.
+	Accounts whose current userRef points here; current-state attribution, not ownership history.
 	"""
 	accounts: [Account!]! @derivedFrom(field: "userRef")
 	"""
-	Account-layer sub-accounts owned by this wallet.
+	SubAccounts whose current ownerRef points here; current-state attribution, not ownership history.
 	"""
 	subAccounts: [SubAccount!]! @derivedFrom(field: "ownerRef")
 	"""
-	Account-layer virtual accounts owned through this wallet's sub-accounts.
+	VirtualAccount rows whose current ownerRef points here; includes deleted rows and is not ownership history.
 	"""
 	virtualAccounts: [VirtualAccount!]! @derivedFrom(field: "ownerRef")
 }

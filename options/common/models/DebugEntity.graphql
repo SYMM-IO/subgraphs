@@ -1,7 +1,25 @@
+"""
+Optional diagnostic record reserved for mapping instrumentation; no current options handler writes it.
+"""
 type DebugEntity @entity(immutable: true) {
+	"""
+	Reserved diagnostic key; no current options handler assigns it.
+	"""
 	id: String!
+	"""
+	Reserved diagnostic timestamp; no current options handler assigns it.
+	"""
 	timestamp: BigInt
+	"""
+	Reserved numeric trigger; no current options handler assigns it.
+	"""
 	trigger: BigInt
+	"""
+	Reserved diagnostic category; no current options handler assigns it.
+	"""
 	type: String
+	"""
+	Reserved diagnostic message; no current options handler assigns it.
+	"""
 	message: String
 }

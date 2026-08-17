@@ -21,8 +21,14 @@ import time
 import urllib.request
 from pathlib import Path
 
+try:
+    from scripts.fleet_identity import is_fleet_health_response
+except ModuleNotFoundError:  # Direct execution places scripts/, not the repository root, on sys.path.
+    from fleet_identity import is_fleet_health_response
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_ICON = REPO_ROOT / "assets" / "fleet-app" / "AppIcon.icns"
+FLEET_HEALTH_PATH = "/healthz"
 
 # fleet_web lives alongside this file.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -34,23 +40,37 @@ def _port_is_open(host: str, port: int) -> bool:
         return sock.connect_ex((host, port)) == 0
 
 
-def _wait_until_ready(url: str, timeout: float = 40.0) -> bool:
+class PortOccupiedError(RuntimeError):
+    """Raised when another service already owns the requested Fleet port."""
+
+
+def _is_fleet_ready(health_url: str, request_timeout: float = 1.5) -> bool:
+    try:
+        with urllib.request.urlopen(health_url, timeout=request_timeout) as resp:
+            return resp.status == 200 and is_fleet_health_response(resp.read())
+    except Exception:
+        return False
+
+
+def _wait_until_ready(health_url: str, timeout: float = 40.0) -> bool:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        try:
-            with urllib.request.urlopen(url, timeout=1.5) as resp:
-                if resp.status < 500:
-                    return True
-        except Exception:
-            time.sleep(0.3)
+        if _is_fleet_ready(health_url):
+            return True
+        time.sleep(0.3)
     return False
 
 
 def _start_server(host: str, port: int) -> "object | None":
-    """Start uvicorn in a daemon thread. Returns the server, or None if a server
-    is already listening on the port (we'll just attach a window to it)."""
+    """Start uvicorn, or attach only when the existing listener is Fleet."""
     if _port_is_open(host, port):
-        return None
+        health_url = f"http://{host}:{port}{FLEET_HEALTH_PATH}"
+        if _is_fleet_ready(health_url):
+            return None
+        raise PortOccupiedError(
+            f"Port {port} on {host} is already in use by a service that is not SYMMIO Fleet. "
+            "Close that service or choose another port."
+        )
 
     import uvicorn
 
@@ -123,10 +143,15 @@ def main() -> None:
     args = parser.parse_args()
 
     url = f"http://{args.host}:{args.port}/"
-    server = _start_server(args.host, args.port)
+    health_url = f"http://{args.host}:{args.port}{FLEET_HEALTH_PATH}"
+    try:
+        server = _start_server(args.host, args.port)
+    except PortOccupiedError as exc:
+        print(str(exc), file=sys.stderr)
+        raise SystemExit(1) from exc
 
-    if not _wait_until_ready(url):
-        print("Fleet server did not become ready in time", file=sys.stderr)
+    if not _wait_until_ready(health_url):
+        print(f"Fleet server did not return the expected identity at {health_url}", file=sys.stderr)
         raise SystemExit(1)
 
     try:

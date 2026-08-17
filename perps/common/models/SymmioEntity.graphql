@@ -3,7 +3,7 @@ Named Symmio-related address metadata stored by SetEntityMetadata handling.
 """
 type SymmioEntity @entity(immutable: false) {
 	"""
-	Address-based entity id.
+	Lowercase hexadecimal address used as the entity id.
 	"""
 	id: ID!
 	"""
@@ -11,7 +11,7 @@ type SymmioEntity @entity(immutable: false) {
 	"""
 	address: Bytes!
 	"""
-	Entity type label emitted or derived by metadata handlers.
+	Indexer-derived Solver, Affiliate, or Unknown classification from configured sets or affiliate handlers.
 	"""
 	type: String!
 	"""

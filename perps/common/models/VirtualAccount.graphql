@@ -23,11 +23,11 @@ type VirtualAccount @entity(immutable: false) {
 	"""
 	parentAddress: Bytes
 	"""
-	Wallet owner inherited from the parent sub-account when known.
+	Owner copied from parent at creation/reuse and updated on transfer only while active; deleted VAs may retain prior owner.
 	"""
 	owner: Bytes
 	"""
-	User entity for `owner`.
+	Owner relation updated on transfer only while VA is active/enumerated; deleted VAs may retain prior owner.
 	"""
 	ownerRef: User
 	"""
@@ -71,7 +71,7 @@ type VirtualAccount @entity(immutable: false) {
 	"""
 	isolationType: Int
 	"""
-	Latest margin balance tracked by margin-transfer handlers.
+	Indexer-maintained net AddMargin minus RemoveMargin while this VA existed; excludes emergency recovery and can miss pre-creation AddMargin.
 	"""
 	latestMarginBalance: BigInt
 	"""
@@ -99,7 +99,7 @@ type VirtualAccount @entity(immutable: false) {
 	"""
 	totalPositions: BigInt!
 	"""
-	Current active position count tracked by quote lifecycle handlers.
+	Legacy duplicate of openPositionsCount under current lifecycle handlers.
 	"""
 	activePositions: BigInt!
 	"""
@@ -107,7 +107,7 @@ type VirtualAccount @entity(immutable: false) {
 	"""
 	pendingQuotesCount: BigInt!
 	"""
-	Current open position count tracked by quote lifecycle handlers.
+	Current opened, not-yet-terminal quote count maintained by lifecycle handlers.
 	"""
 	openPositionsCount: BigInt!
 	"""

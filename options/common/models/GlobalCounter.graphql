@@ -1,4 +1,13 @@
+"""
+Mutable singleton used to assign global event ordering.
+"""
 type GlobalCounter @entity(immutable: false) {
-    id: String!
-    counter: BigInt!
+	"""
+	Singleton key `GLOBAL`.
+	"""
+	id: String!
+	"""
+	Latest subgraph-wide event ordering value assigned from this singleton.
+	"""
+	counter: BigInt!
 }

@@ -1,5 +1,5 @@
 import { WithdrawReceivedBridgeValues as WithdrawReceivedBridgeValuesEntity } from "../../../../generated/schema"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
@@ -10,6 +10,11 @@ export class WithdrawReceivedBridgeValuesHandler<T> {
 
 		let entity = new WithdrawReceivedBridgeValuesEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		const transactionIds: BigInt[] = []
+		for (let i = 0; i < event.params.transactionIds.length; i++) {
+			transactionIds.push(event.params.transactionIds[i])
+		}
+		entity.transactionIds = transactionIds
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

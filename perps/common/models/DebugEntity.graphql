@@ -7,15 +7,15 @@ type DebugEntity @entity(immutable: true) {
 	"""
 	id: String!
 	"""
-	Block timestamp associated with the debug record.
+	Reserved debug field; no current DebugEntity writer assigns it.
 	"""
 	timestamp: BigInt
 	"""
-	Optional numeric trigger value used by the writing handler.
+	Reserved debug field; no current DebugEntity writer assigns it.
 	"""
 	trigger: BigInt
 	"""
-	Debug category label.
+	Reserved debug field; no current DebugEntity writer assigns it.
 	"""
 	type: String
 	"""

@@ -1,10 +1,10 @@
 {
-  "global": "2026-05-13-001",
+  "global": "2026-08-17-001",
   "entities": {
     "account": "v1",
-    "affiliate_express_withdraw_account_snapshot": "v1",
-    "affiliate_express_withdraw_component_bucket": "v1",
-    "affiliate_express_withdraw_components": "v1",
+    "affiliate_express_withdraw_account_snapshot": "v2",
+    "affiliate_express_withdraw_component_bucket": "v2",
+    "affiliate_express_withdraw_components": "v2",
     "balance_change": "v1",
     "buyback": "v1",
     "buyback_day": "v1",
@@ -12,7 +12,7 @@
     "buyback_gateway_stats": "v1",
     "daily_account_owner_history": "v1",
     "daily_history": "v1",
-    "latest_account_balance": "v2",
+    "latest_account_balance": "v3",
     "monthly_history": "v1",
     "quote": "v1",
     "quote_event": "v1",

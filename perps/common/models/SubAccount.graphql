@@ -23,7 +23,7 @@ type SubAccount @entity(immutable: false) {
 	"""
 	ownerRef: User
 	"""
-	Affiliate entity associated with this sub-account.
+	Affiliate under which this sub-account is registered.
 	"""
 	affiliate: Affiliate!
 	"""
@@ -99,7 +99,7 @@ type SubAccount @entity(immutable: false) {
 	"""
 	legacyImportedTimestamp: BigInt
 	"""
-	Latest margin balance tracked by margin-transfer handlers.
+	Indexer-maintained net AddMargin minus RemoveMargin and EmergencyMarginRecovered amounts; not an authoritative core balance.
 	"""
 	latestMarginBalance: BigInt
 	"""
@@ -123,7 +123,7 @@ type SubAccount @entity(immutable: false) {
 	"""
 	activeVirtualAccounts: BigInt!
 	"""
-	Current active position count tracked by quote lifecycle handlers.
+	Legacy duplicate of openPositionsCount under current lifecycle handlers.
 	"""
 	activePositions: BigInt!
 	"""
@@ -135,7 +135,7 @@ type SubAccount @entity(immutable: false) {
 	"""
 	pendingQuotesCount: BigInt!
 	"""
-	Current open position count tracked by quote lifecycle handlers.
+	Current opened, not-yet-terminal quote count maintained by lifecycle handlers.
 	"""
 	openPositionsCount: BigInt!
 	"""

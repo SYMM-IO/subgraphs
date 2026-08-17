@@ -1,5 +1,5 @@
 import { CloseTradesForLiquidation as CloseTradesForLiquidationEntity } from "../../../../generated/schema"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
@@ -10,6 +10,16 @@ export class CloseTradesForLiquidationHandler<T> {
 
 		let entity = new CloseTradesForLiquidationEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
 		entity.counterId = getGlobalCounterAndInc()
+		const tradeIds: BigInt[] = []
+		for (let i = 0; i < event.params.tradeIds.length; i++) {
+			tradeIds.push(event.params.tradeIds[i])
+		}
+		entity.tradeIds = tradeIds
+		const prices: BigInt[] = []
+		for (let i = 0; i < event.params.prices.length; i++) {
+			prices.push(event.params.prices[i])
+		}
+		entity.prices = prices
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

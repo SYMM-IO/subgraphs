@@ -1,5 +1,5 @@
 import { DistributeCollateral as DistributeCollateralEntity } from "../../../../generated/schema"
-import { ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
@@ -13,6 +13,16 @@ export class DistributeCollateralHandler<T> {
 		entity.liquidationId = event.params.liquidationId
 		entity.partyB = event.params.partyB
 		entity.collateral = event.params.collateral
+		const partyAs: Bytes[] = []
+		for (let i = 0; i < event.params.partyAs.length; i++) {
+			partyAs.push(event.params.partyAs[i])
+		}
+		entity.partyAs = partyAs
+		const amounts: BigInt[] = []
+		for (let i = 0; i < event.params.amounts.length; i++) {
+			amounts.push(event.params.amounts[i])
+		}
+		entity.amounts = amounts
 
 		entity.blockTimestamp = event.block.timestamp
 		entity.blockNumber = event.block.number

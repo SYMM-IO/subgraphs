@@ -1,14 +1,17 @@
+// biome-ignore-all lint/style/useImportType: AssemblyScript does not support type-only imports.
+// biome-ignore-all lint/suspicious/banTsComment: AssemblyScript relies on generated generic event types.
 import { RoleGranted as RoleGrantedEntity } from "../../../../generated/schema"
 import { ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { getGlobalCounterAndInc } from "../../../common/utils"
 
 export class RoleGrantedHandler<T> {
-	handle(_event: ethereum.Event, version: Version): void {
-		// @ts-ignore
+	handle(_event: ethereum.Event, _version: Version): void {
+		// @ts-expect-error changetype is an AssemblyScript global
 		const event = changetype<T>(_event)
 
-		let entity = new RoleGrantedEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		const entity = new RoleGrantedEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		entity.source = event.address
 		entity.counterId = getGlobalCounterAndInc()
 		entity.role = event.params.role
 		entity.user = event.params.user

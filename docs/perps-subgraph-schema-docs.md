@@ -1,56 +1,75 @@
-# Perps Subgraph Schema Documentation
+# Subgraph Schema Documentation
 
-This repo documents subgraph APIs at the GraphQL schema level. Descriptions in
-`*.graphql` files use GraphQL's standard description syntax, so they are exposed
-through introspection and can be rendered by GraphiQL, GraphQL Voyager, SpectaQL,
-or similar tools.
+This repository documents its GraphQL APIs in canonical `*.graphql` source
+files. GraphQL descriptions are exposed through introspection and rendered by
+GraphiQL, GraphQL Voyager, SpectaQL, and similar tools.
 
-## Source Files
+## Canonical source files
 
--   Common imported models live in `perps/common/models/*.graphql`.
--   Analytics-only models live in `perps/analytics/schema.graphql`.
--   Raw event models live in `perps/events/schema.graphql`.
--   `scripts/manager.py` assembles the root `schema.graphql` during builds by
-    importing the configured common models, adding sync metadata, and appending
-    the target module schema.
+-   Perps shared models: `perps/common/models/*.graphql`.
+-   Perps analytics models: `perps/analytics/schema.graphql`.
+-   Perps raw-event models: `perps/events/schema.graphql`.
+-   Options shared models: `options/common/models/*.graphql`.
+-   Options raw-event models: `options/events/schema.graphql`.
+-   Generated synchronization entities: the `SYNC_META_SCHEMA` literal in
+    `scripts/manager.py`.
 
-Do not edit the generated root `schema.graphql` as the source of truth. It is
-overwritten by the manager.
+`scripts/manager.py` assembles root `schema.graphql` by importing the common
+models selected by `subgraph_config.json`, appending documented SyncMeta types,
+and appending the target module schema. Graph build copies that result to
+`build/schema.graphql`.
 
-## Common Conventions
+Do not edit generated root `schema.graphql` or `build/schema.graphql` as source
+of truth. Both are overwritten by the manager.
 
--   `source` is the emitting contract address for the entity's indexed event
-    stream, unless the entity description says otherwise.
--   `timestamp` is a block timestamp. On mutable entities it is usually the latest
-    handler update timestamp unless the field says it is creation-only.
--   `updateTimestamp` is the latest profile or aggregate update timestamp.
--   `blockNumber`, `transaction`, `transactionHash`, `transactionIndex`,
-    `logIndex`, and `blockHash` are raw block/log metadata.
--   BigInt monetary values are raw indexed integer values. They are not formatted
-    for token display.
--   Analytics trade notional fields use the subgraph's `unDecimal` helper:
-    `amount * price / 1e18`.
--   Quote fee-rate fields such as `Quote.tradingFee` and `Quote.closeFee` are
-    rates stored on quote state. Analytics fields such as `openFee`, `closeFee`,
-    `platformFee`, `openFeePaid`, and `closeFeePaid` are actual charged fee
-    amounts.
+## Evidence and provenance rules
 
-## Event Schema Scope
+A description must be supported by the canonical schema, configured ABI, and
+all handler write paths. Contract source supplies economic meaning, units,
+enum values, and state-transition context:
 
-`perps/events/schema.graphql` is intentionally close to raw event storage. Every
-raw event model and field has a GraphQL description, but many field descriptions
-are deliberately conservative unless schema, ABI, and handler assignments prove a
-more specific meaning.
+-   Use the sibling `../perps-core` repository for current perps
+    behavior, while retaining version caveats proven by historical ABIs and
+    version-dispatch handlers.
+-   Use the sibling `../options-core` repository for options only when
+    it matches the configured options ABI. If source and ABI differ, document
+    only ABI- and handler-proven facts and state the version uncertainty.
+-   Use the relevant sibling contract for non-core integrations such as BuyBack
+    Gateway behavior; do not infer those semantics from perps-core.
 
-Safe event-envelope meanings:
+Descriptions must explain domain role, direction or sign, unit or scale,
+lifecycle meaning, entity-key composition, provenance, default/fallback and
+version behavior, and parallel-array alignment when those facts apply. Do not
+use descriptions that merely restate an identifier, such as “field x from event
+x,” “value associated with this row,” or “snapshot for the X event.” Reserved
+or unused fields should say so explicitly and identify the missing producer.
 
--   `id` is usually `${transactionHash}-${logIndex}`. Some specialized entities
-    use a domain id and should be checked individually.
--   `source` is the emitting contract address.
--   `counterId` is a subgraph-side monotonically increasing ordering id.
--   `blockNumber`, `blockTimestamp`, and `blockHash` are block metadata.
--   `transactionHash`, `transactionIndex`, and `logIndex` locate the event log.
--   `@entity(immutable: true)` means the row is an append-only event snapshot.
+## Common conventions
 
-For richer event-field docs, generate them from schema, ABI, and handler
-assignments together instead of guessing from field names alone.
+-   `source` is the emitting contract unless an entity documents a derived source
+    or aggregation dimension.
+-   `timestamp` can mean creation, contract-supplied time, or latest update; each
+    mutable entity documents the actual write behavior.
+-   `transactionHash` is the hash of the transaction containing the event log.
+-   Graph `ethereum.Event.logIndex` is block-global: it is the zero-based position
+    among all logs in the block, not a receipt-local index.
+-   BigInt monetary values are raw integers. Descriptions distinguish collateral
+    token native decimals from SYMMIO's 18-decimal internal accounting.
+-   Analytics trade notional uses `amount * price / 1e18`.
+-   Quote `tradingFee` and `closeFee` are rates. Analytics `openFee`, `closeFee`,
+    `platformFee`, `openFeePaid`, and `closeFeePaid` are charged amounts.
+
+## Raw-event schema scope
+
+Raw-event entities stay close to emitted payloads, while documenting every
+normalization and omission. Most event IDs are
+`${transactionHash}-${logIndex}`, but domain-keyed exceptions are documented
+individually. `counterId` is subgraph-side ordering, and immutable entities are
+append-only rows.
+
+Raw fidelity is not implied when a handler enriches, defaults, corrects, or
+omits payload data. For example, legacy ABI fields can be synthesized as zero,
+some arrays are materialized into child entities, and DiamondCut currently
+stores occurrence metadata without its tuple payload. These exceptions belong
+in schema descriptions and focused tests rather than being hidden behind generic
+“raw event” wording.

@@ -138,7 +138,7 @@ def build_icns(master: Image.Image, outdir: Path) -> Path:
     for pt in ICONSET_SIZES:
         for scale in (1, 2):
             px = pt * scale
-            suffix = f"@2x" if scale == 2 else ""
+            suffix = "@2x" if scale == 2 else ""
             name = f"icon_{pt}x{pt}{suffix}.png"
             master.resize((px, px), Image.LANCZOS).save(iconset / name)
 

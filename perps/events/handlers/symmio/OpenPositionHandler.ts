@@ -27,6 +27,8 @@ export class OpenPositionHandler<T> {
 			entity.lockedValuesLf = lockedValuesTuple[1].toBigInt()
 			entity.lockedValuesPartyAmm = lockedValuesTuple[2].toBigInt()
 			entity.lockedValuesPartyBmm = lockedValuesTuple[3].toBigInt()
+		} else if (_event.parameters.length >= 6) {
+			entity.quoteStatus = _event.parameters[5].value.toI32()
 		}
 
 		entity.blockTimestamp = event.block.timestamp

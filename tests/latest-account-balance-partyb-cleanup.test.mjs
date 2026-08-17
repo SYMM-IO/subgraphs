@@ -6,18 +6,26 @@ const source = readFileSync("perps/analytics/utils/latestAccountBalance.ts", "ut
 const blockSource = readFileSync("perps/analytics/src_latest_account_balance_block.ts", "utf8");
 const schema = readFileSync("perps/analytics/schema.graphql", "utf8");
 const manager = readFileSync("scripts/manager.py", "utf8");
+const migrationGuide = readFileSync("docs/0.8.5_migration.md", "utf8");
 const baseConfig = JSON.parse(readFileSync("configs/perps/base.json", "utf8"));
 
 test("total balance counts free and allocated collateral without counting lock reservations twice", () => {
+	const balanceSetter = source.slice(source.indexOf("function setFreeAndTotalBalance("), source.indexOf("function finalizeBalance("));
 	const eventFinalizer = source.slice(source.indexOf("function finalizeBalance("), source.indexOf("function finalizeBalanceAtBlock("));
 	const blockFinalizer = source.slice(source.indexOf("function finalizeBalanceAtBlock("), source.indexOf("function isPartyALatestBalanceEmpty("));
 
+	assert.match(balanceSetter, /entity\.totalBalance = freeBalance\.plus\(entity\.allocatedBalance\)/);
+	assert.doesNotMatch(balanceSetter, /\.plus\(entity\.(?:locked|pendingLocked)/);
+
 	for (const finalizer of [eventFinalizer, blockFinalizer]) {
-		assert.match(finalizer, /entity\.totalBalance = entity\.freeBalance\.plus\(entity\.allocatedBalance\)/);
-		assert.doesNotMatch(finalizer, /\.plus\(entity\.(?:locked|pendingLocked)/);
+		assert.match(finalizer, /setFreeAndTotalBalance\(entity, free\)/);
 	}
 
 	assert.match(schema, /Free plus allocated collateral; locked and pending locked values are already backed by allocated balance\./);
+	assert.match(migrationGuide, /`"PARTY_A"`/);
+	assert.match(migrationGuide, /`"PARTY_B"`/);
+	assert.match(migrationGuide, /cross bucket \(`balanceKey` is the zero address\)/);
+	assert.match(migrationGuide, /accountType: "PARTY_B"/);
 });
 
 test("PartyB counterparty buckets are cleared when bucket-specific balances are zero", () => {

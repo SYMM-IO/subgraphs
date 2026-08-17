@@ -21,7 +21,7 @@ type Quote @entity(immutable: false) {
 	"""
 	source: Bytes!
 	"""
-	Monotonic indexer-side ordering counter assigned by this subgraph.
+	Global ordering value assigned by the latest lifecycle handler that rewrote this quote; not a stable creation index.
 	"""
 	globalCounter: BigInt!
 	"""
@@ -29,11 +29,11 @@ type Quote @entity(immutable: false) {
 	"""
 	quoteId: BigInt!
 	"""
-	Raw Solidity `QuoteStatus` ordinal.
+	Raw QuoteStatus ordinal: 0 PENDING, 1 LOCKED, 2 CANCEL_PENDING, 3 CANCELED, 4 OPENED, 5 CLOSE_PENDING, 6 CANCEL_CLOSE_PENDING, 7 CLOSED, 8 LIQUIDATED, 9 EXPIRED, 10 LIQUIDATED_PENDING.
 	"""
 	quoteStatus: Int
 	"""
-	PartyA address on the Symmio core quote.
+	PartyA read from SendQuote or quote storage; failed legacy catch-up currently substitutes the core address.
 	"""
 	partyA: Bytes!
 	"""
@@ -66,11 +66,11 @@ type Quote @entity(immutable: false) {
 	blockNumber: BigInt!
 
 	"""
-	Requested open price from SendQuote / quote storage.
+	Requested opening price, scaled by 1e18.
 	"""
 	requestedOpenPrice: BigInt
 	"""
-	Market price recorded for market-order validation at quote creation.
+	Market-order validation price captured at quote creation, scaled by 1e18.
 	"""
 	marketPrice: BigInt
 	"""
@@ -78,23 +78,23 @@ type Quote @entity(immutable: false) {
 	"""
 	orderTypeOpen: Int
 	"""
-	Requested total quote quantity.
+	Current 1e18-scaled quote quantity: requested while pending and reduced to opened fill after a partial split.
 	"""
 	quantity: BigInt
 	"""
-	CVA component from the quote locked values.
+	Current CVA locked value in 18-decimal internal collateral precision.
 	"""
 	cva: BigInt
 	"""
-	Liquidation-fee component from the quote locked values.
+	Current liquidation-fee locked value in 18-decimal internal collateral precision.
 	"""
 	lf: BigInt
 	"""
-	PartyB maintenance-margin component from the quote locked values.
+	Current PartyB maintenance margin in 18-decimal internal collateral precision.
 	"""
 	partyBmm: BigInt
 	"""
-	PartyA maintenance-margin component from the quote locked values.
+	Current PartyA maintenance margin in 18-decimal internal collateral precision.
 	"""
 	partyAmm: BigInt
 	"""
@@ -118,50 +118,50 @@ type Quote @entity(immutable: false) {
 	"""
 	partyBsWhiteList: [Bytes!]
 	"""
-	Maximum funding rate value from the quote; older cores called this max interest rate.
+	Maximum funding rate in 1e18 precision; older cores called it max interest rate.
 	"""
 	maxFundingRate: BigInt
 
 	"""
-	Amount filled by the OpenPosition event.
+	Most recently handled filled quantity, scaled by 1e18.
 	"""
 	fillAmount: BigInt
 	"""
-	Open execution price from the OpenPosition event or quote storage.
+	Current 1e18-scaled opened-price basis, adjusted by funding and restatement handling.
 	"""
 	openedPrice: BigInt
 	"""
-	Open-fee rate stored on the quote as `tradingFee`; zero for core versions that did not expose it.
+	Open-fee rate in 1e18 precision, where 1e18 is 100%; zero when older cores omitted it.
 	"""
 	tradingFee: BigInt!
 	"""
-	Close-fee rate stored on newer quote structs; zero for older core versions that did not expose it.
+	Close-fee rate in 1e18 precision, where 1e18 is 100%; zero for older core versions.
 	"""
 	closeFee: BigInt!
 
 	"""
-	Initial opened price snapshot preserved after later partial closes.
+	Creation/catch-up copy of the 1e18-scaled opened-price basis; not continuously synchronized.
 	"""
 	initialOpenedPrice: BigInt
 	"""
-	Initial CVA snapshot preserved after later close/liquidation updates.
+	Creation/catch-up copy of CVA in 18-decimal internal precision; normally from SendQuote.
 	"""
 	initialCva: BigInt!
 	"""
-	Initial PartyA maintenance-margin snapshot.
+	Creation/catch-up copy of PartyA MM in 18-decimal internal precision; normally from SendQuote.
 	"""
 	initialPartyAmm: BigInt
 	"""
-	Initial PartyB maintenance-margin snapshot.
+	Creation/catch-up copy of PartyB MM in 18-decimal internal precision; normally from SendQuote.
 	"""
 	initialPartyBmm: BigInt!
 	"""
-	Initial liquidation-fee snapshot.
+	Creation/catch-up copy of LF in 18-decimal internal precision; normally from SendQuote.
 	"""
 	initialLf: BigInt!
 
 	"""
-	Requested close price from RequestToClosePosition.
+	Requested close price, scaled by 1e18.
 	"""
 	closePrice: BigInt
 	"""
@@ -169,7 +169,7 @@ type Quote @entity(immutable: false) {
 	"""
 	orderTypeClose: Int
 	"""
-	Executed close price from FillCloseRequest or liquidation/force-close handlers.
+	Most recent 1e18-scaled close price from fill-close, force-close, emergency-close, or ADL handling.
 	"""
 	closedPrice: BigInt
 	"""
@@ -177,7 +177,7 @@ type Quote @entity(immutable: false) {
 	"""
 	closeDeadline: BigInt
 	"""
-	Quantity requested to close.
+	Requested close quantity, scaled by 1e18.
 	"""
 	quantityToClose: BigInt
 	"""
@@ -186,24 +186,24 @@ type Quote @entity(immutable: false) {
 	closeId: BigInt
 
 	"""
-	Cumulative amount closed or liquidated for this quote.
+	Cumulative quantity closed or liquidated, scaled by 1e18.
 	"""
 	closedAmount: BigInt
 	"""
-	Reserved analytics field; current handlers do not consistently populate it.
+	Unused reserved analytics field; no current perps handler assigns it.
 	"""
 	leverage: BigInt
 	"""
-	Average closed price from quote storage / close handlers.
+	Average closed price in 1e18 precision.
 	"""
 	averageClosedPrice: BigInt
 
 	"""
-	Price used by liquidation/ADL/force-close handling.
+	Derived 1e18-scaled execution price for quantity closed by liquidation handlers; not ADL or force close.
 	"""
 	liquidatePrice: BigInt
 	"""
-	Amount liquidated for this quote in the liquidation handler update.
+	Quantity closed by liquidation handlers, scaled by 1e18.
 	"""
 	liquidateAmount: BigInt
 	"""
@@ -216,15 +216,15 @@ type Quote @entity(immutable: false) {
 	liquidationId: Bytes
 
 	"""
-	Funding amount paid by PartyA as accumulated by ChargeFundingRate handling.
+	Indexer-derived cumulative PartyA funding debit in 18-decimal internal collateral precision.
 	"""
 	userPaidFunding: BigInt
 	"""
-	Funding amount received by PartyA as accumulated by ChargeFundingRate handling.
+	Indexer-derived cumulative PartyA funding credit in 18-decimal internal collateral precision.
 	"""
 	userReceivedFunding: BigInt
 	"""
-	Signed accumulated paid funding from quote storage, normalized as BigInt where supported.
+	Signed cumulative per-unit funding checkpoint scaled by 1e18.
 	"""
 	accumulatedPaidFunding: BigInt
 	"""
@@ -245,7 +245,7 @@ type Quote @entity(immutable: false) {
 	"""
 	timestamp: BigInt!
 	"""
-	Block timestamp of the SendQuote event.
+	SendQuote timestamp when indexed; catch-up-created rows use AcceptCancelRequest timestamp.
 	"""
 	timestampSendQuote: BigInt
 	"""
@@ -253,60 +253,60 @@ type Quote @entity(immutable: false) {
 	"""
 	timestampOpenPosition: BigInt
 	"""
-	Block timestamp when the quote reached a fully closed terminal path.
+	First indexed timestamp at which quoteStatus was CLOSED (7) or LIQUIDATED (8).
 	"""
 	timestampFullyClose: BigInt
 
 	"""
-	Immutable event log entries written for this quote by the analytics subgraph.
+	Lifecycle events whose `quote` relation points to this Quote.
 	"""
 	quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")
 	"""
-	Funding settlement entries written for this quote by ChargeFundingRate handling.
+	Derived funding realizations whose `quote` relation points to this Quote.
 	"""
 	fundingSettlements: [QuoteFundingSettlement!]! @derivedFrom(field: "quote")
 }
 
 """
-PartyA liquidation helper state keyed by PartyA address.
+Unused legacy PartyA liquidation helper retained for schema compatibility; no current perps handler creates or updates this entity.
 """
 type PartyA @entity(immutable: false) {
 	"""
-	PartyA address used as this helper row id.
+	Unused legacy entity key; no current writer assigns it.
 	"""
 	id: String!
 	"""
-	PartyB address most recently associated with this PartyA liquidation helper row.
+	Unused legacy PartyB field; no current writer assigns it.
 	"""
 	partyB: Bytes
 	"""
-	Quote ids tracked as pending until the PartyA liquidation flow resolves them.
+	Unused legacy pending-quote list; no current writer assigns it.
 	"""
 	quoteUntilLiquid: [BigInt!]
 	"""
-	Monotonic ordering counter from the handler update that last wrote this row.
+	Unused legacy ordering field; no current writer assigns it.
 	"""
 	globalCounter: BigInt!
 }
 
 """
-PartyB/PartyA liquidation helper state keyed by the handler that updates it.
+Unused legacy PartyB/PartyA liquidation helper retained for schema compatibility; no current perps handler creates or updates this entity.
 """
 type PartyBPartyA @entity(immutable: false) {
 	"""
-	Composite PartyB/PartyA helper id used by liquidation handlers.
+	Unused legacy entity key; no current writer assigns it.
 	"""
 	id: String!
 	"""
-	PartyB address associated with the tracked liquidation quote ids.
+	Unused legacy PartyB field; no current writer assigns it.
 	"""
 	partyB: Bytes
 	"""
-	Quote ids tracked as pending until the PartyB/PartyA liquidation flow resolves them.
+	Unused legacy pending-quote list; no current writer assigns it.
 	"""
 	quoteUntilLiquid: [BigInt!]
 	"""
-	Monotonic ordering counter from the handler update that last wrote this row.
+	Unused legacy ordering field; no current writer assigns it.
 	"""
 	globalCounter: BigInt!
 }
@@ -338,41 +338,41 @@ type PendingQuoteIndex @entity(immutable: false) {
 }
 
 """
-Point-in-time requested-open-price sample for a PartyA and symbol.
+Unused legacy PartyA/symbol price sample retained for schema compatibility; no current perps handler creates or updates this entity.
 """
 type PartyASymbolPrice @entity(immutable: false) {
 	"""
-	Subgraph id for the PartyA/symbol price sample row.
+	Unused legacy entity key; no current writer assigns it.
 	"""
 	id: String!
 	"""
-	PartyA address that submitted the sampled quote.
+	Unused legacy PartyA field; no current writer assigns it.
 	"""
 	partyA: Bytes!
 	"""
-	Protocol symbol id for the sampled quote.
+	Unused legacy symbol field; no current writer assigns it.
 	"""
 	symbolId: BigInt!
 	"""
-	Requested open price captured from the sampled quote.
+	Unused legacy requested-price field; no current writer assigns it.
 	"""
 	requestedOpenPrice: BigInt!
 	"""
-	Block timestamp when this requested-open-price sample was indexed.
+	Unused legacy timestamp field; no current writer assigns it.
 	"""
 	timeStamp: BigInt!
 	"""
-	Transaction hash that produced this requested-open-price sample.
+	Unused legacy transaction field; no current writer assigns it.
 	"""
 	trHash: Bytes!
 	"""
-	Monotonic ordering counter from the handler update that wrote this sample.
+	Unused legacy ordering field; no current writer assigns it.
 	"""
 	GlobalCounter: BigInt!
 }
 
 """
-Latest global fee value observed by handlers that track protocol fee updates.
+Indexer-derived net PartyA funding flow accumulated from successfully processed ChargeFundingRate entries.
 """
 type GlobalFee @entity(immutable: false) {
 	"""
@@ -380,11 +380,11 @@ type GlobalFee @entity(immutable: false) {
 	"""
 	id: ID!
 	"""
-	Running global funding-fee total accumulated from ChargeFundingRate handling.
+	Net PartyA funding received minus funding paid; this is not a protocol-fee total.
 	"""
 	globalFee: BigInt!
 	"""
-	Latest block timestamp included in the global fee accumulator.
+	Block timestamp of the latest ChargeFundingRate entry that updated this accumulator.
 	"""
 	latestTimestamp: BigInt!
 }
