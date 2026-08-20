@@ -11,7 +11,7 @@
 			"address": "0x99641E06d38F327166b3a48f86Ca2cbB3B4fB7EB",
 			"abi": "symmioLegacyOpen",
 			"version": "0_8_5",
-			"startBlock": "28307184",
+			"startBlock": "30230554",
 			"endBlock": "30584859",
 			"dependencies": ["symmio_0_8_5"]
 		},
