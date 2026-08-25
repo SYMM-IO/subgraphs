@@ -226,6 +226,40 @@ class HandlerAbiDependencyTests(TestCase):
         self.assertEqual(manager.get_handler_abi_dependencies(symmio_v085), [])
 
 
+class DataSourceContextTests(TestCase):
+    def test_vibe_topology_is_derived_from_its_config(self) -> None:
+        config_path = REPO_ROOT / "configs/perps/arbitrum_vibe.json"
+        config = manager.Config.from_dict(json.loads(config_path.read_text()), deployment_id="arbitrum-vibe")
+        core = next(contract for contract in config.contracts if contract.abi == "symmio")
+
+        context = manager.build_data_source_context(config, core, "perps/analytics")
+
+        self.assertEqual(context["deploymentId"], {"type": "String", "data": "arbitrum-vibe"})
+        self.assertEqual(
+            context["accountLayerSource"],
+            {"type": "Bytes", "data": "0x5733107211B2801Acd39933a54d482FE303c4907"},
+        )
+        self.assertEqual(
+            context["latestAccountBalanceSweepActivationBlock"],
+            {"type": "BigInt", "data": "0"},
+        )
+
+    def test_ambiguous_account_layers_are_rejected(self) -> None:
+        config = manager.Config(
+            network="test",
+            contracts=[
+                manager.Contract(address="0xcore", abi="symmio", version="0_8_6", startBlock="0"),
+                manager.Contract(address="0xlayer1", abi="accountLayer", version="1", startBlock="0"),
+                manager.Contract(address="0xlayer2", abi="accountLayer", version="2", startBlock="0"),
+            ],
+            deploy_urls={},
+            deployment_id="test",
+        )
+
+        with self.assertRaisesRegex(ValueError, "multiple AccountLayer addresses"):
+            manager.build_data_source_context(config, config.contracts[0], "perps/analytics")
+
+
 class DynamicTemplateHandlerTests(TestCase):
     def test_auto_detected_express_provider_uses_real_handlers(self) -> None:
         contract = manager.Contract(address="0x1", abi="expressProvider", version="1", startBlock="0", fake=True)

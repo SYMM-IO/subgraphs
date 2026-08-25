@@ -14,13 +14,9 @@ import {
 	WithdrawRequestAccountLookup,
 } from "../../../generated/schema"
 import { expressProvider_1 } from "../../../generated/templates/ExpressProvider/expressProvider_1"
-import {
-	ACCOUNT_KIND_LEGACY_MULTIACCOUNT,
-	ACCOUNT_KIND_SUB_ACCOUNT,
-	ACCOUNT_KIND_VIRTUAL_ACCOUNT,
-	accountLayerSourceForCore,
-	deploymentIdForSource,
-} from "../../common/utils/profile"
+import { ACCOUNT_KIND_LEGACY_MULTIACCOUNT, ACCOUNT_KIND_SUB_ACCOUNT, ACCOUNT_KIND_VIRTUAL_ACCOUNT } from "../../common/utils/profile"
+import { normalizeCoreSource } from "../../common/utils/account_layer_resolver"
+import { currentAccountLayerSource, currentDeploymentId } from "../../common/utils/deploymentContext"
 import { ZERO_ADDRESS_BYTES } from "./constants"
 import { isActiveWithdrawRequest, loadWithdrawRequest, loadWithdrawRequestAccountLookup, recordWithdrawCoreAdvanceHint } from "./withdrawRequest"
 
@@ -78,20 +74,22 @@ function bucketId(componentsId: string, bucket: string): string {
 }
 
 function sourceForAccount(account: Account, fallbackSource: Bytes | null = null): Bytes | null {
-	if (fallbackSource !== null) return fallbackSource
-	if (account.coreSource) return account.coreSource
-	if (account.source) return account.source
-	return null
+	let fallbackCore = normalizeCoreSource(fallbackSource)
+	if (fallbackCore !== null) return fallbackCore
+	let cachedCore = normalizeCoreSource(account.coreSource)
+	if (cachedCore !== null) return cachedCore
+	if (account.accountLayerSource !== null) return null
+	return normalizeCoreSource(account.source)
 }
 
 function deploymentForSource(source: Bytes, account: Account | null): string | null {
 	if (account && account.deploymentId) return account.deploymentId
-	return deploymentIdForSource(source)
+	return currentDeploymentId()
 }
 
 function accountLayerForSource(source: Bytes, account: Account | null): Bytes | null {
 	if (account && account.accountLayerSource) return account.accountLayerSource
-	return accountLayerSourceForCore(source)
+	return currentAccountLayerSource()
 }
 
 function accountBucket(account: Account, sub: SubAccount | null): string {
@@ -447,7 +445,7 @@ export function ensureExpressProviderSource(provider: Bytes, source: Bytes, coll
 	}
 	providerSource.source = source
 	providerSource.collateral = collateral
-	providerSource.deploymentId = deploymentIdForSource(source)
+	providerSource.deploymentId = currentDeploymentId()
 	providerSource.timestamp = timestamp
 	providerSource.blockNumber = blockNumber
 	providerSource.save()

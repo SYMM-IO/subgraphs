@@ -4,7 +4,8 @@ import { AccountType, createNewAccountIfNotExists } from "../../utils/builders"
 import { SymmioEntity } from "../../../../generated/schema"
 import { getSource } from "../../utils/get_source"
 import { AFFILIATES } from "../../../analytics/utils/constants"
-import { accountLayerSourceForCore, setAccountProfileSources } from "../../utils/profile"
+import { setAccountProfileSources } from "../../utils/profile"
+import { currentAccountLayerSource } from "../../utils/deploymentContext"
 
 export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 	handleAccount(_event: ethereum.Event, version: MultiAccountVersion): void {
@@ -22,7 +23,7 @@ export class AddAccountHandler<T> extends BaseMultiAccountHandler {
 		)
 		let coreSource = getSource<T>(event, version)
 		account.source = coreSource
-		setAccountProfileSources(account, coreSource, coreSource, accountLayerSourceForCore(coreSource))
+		setAccountProfileSources(account, coreSource, currentAccountLayerSource())
 		account.save()
 
 		const affId = event.address.toHexString()

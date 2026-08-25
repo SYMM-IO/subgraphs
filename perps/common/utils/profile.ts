@@ -9,6 +9,8 @@ import {
 	VirtualAccount,
 	WithdrawRequest,
 } from "../../../generated/schema"
+import { currentAccountLayerSource, currentDeploymentId } from "./deploymentContext"
+import { normalizeCoreSource } from "./account_layer_resolver"
 
 export const ACCOUNT_KIND_LEGACY_MULTIACCOUNT = "LEGACY_MULTIACCOUNT"
 export const ACCOUNT_KIND_SUB_ACCOUNT = "SUB_ACCOUNT"
@@ -18,60 +20,20 @@ export const ACCOUNT_KIND_LIQUIDATOR = "LIQUIDATOR"
 export const ACCOUNT_KIND_BRIDGE = "BRIDGE"
 export const ACCOUNT_KIND_UNKNOWN = "UNKNOWN"
 
-let coreToLayer = new Map<string, string>()
-let layerToCore = new Map<string, string>()
-let sourceToDeployment = new Map<string, string>()
-
-function registerDeployment(id: string, core: string, layer: string): void {
-	coreToLayer.set(core, layer)
-	layerToCore.set(layer, core)
-	sourceToDeployment.set(core, id)
-	sourceToDeployment.set(layer, id)
-}
-
-registerDeployment("arbitrum", "0x8f06459f184553e5d04f07f868720bdacab39395", "0xa60ac54e18739f1c4681409383dcf881de3efabe")
-registerDeployment("hyperevm", "0x57331038c21982116ee9b0906e4a5c5cb52dce2e", "0x46493c376758da47823d7e3ae5d417ea6546eeb3")
-registerDeployment("hyperevm-stage", "0x99641e06d38f327166b3a48f86ca2cbb3b4fb7eb", "0x812e98f31a4effc09dd82e6e87ff7456151a0dfb")
-registerDeployment("mantle", "0x2ecc7da3cc98d341f987c85c3d9fc198570838b5", "0xba3d3982dc12acd61fe11ff08ba2164cd1c12c78")
-registerDeployment("base-test", "0xa805fe5baa301d4e72c789694f3967452c77d6fd", "0xe566bcdc59a644a6d71564f4e941cf93b6a37846")
-registerDeployment("base-lc-test", "0x0f4352e4a88b5dc0531a98b538f04893fb22489c", "0xe566bcdc59a644a6d71564f4e941cf93b6a37846")
-
-export function coreSourceForAccountLayer(layer: Bytes): Bytes | null {
-	let key = layer.toHexString()
-	if (!layerToCore.has(key)) return null
-	return Bytes.fromHexString(layerToCore.get(key))
-}
-
-export function accountLayerSourceForCore(core: Bytes): Bytes | null {
-	let key = core.toHexString()
-	if (!coreToLayer.has(key)) return null
-	return Bytes.fromHexString(coreToLayer.get(key))
-}
-
-export function deploymentIdForSource(source: Bytes): string | null {
-	let key = source.toHexString()
-	if (!sourceToDeployment.has(key)) return null
-	return sourceToDeployment.get(key)
-}
-
-export function setAccountProfileSources(
-	account: Account,
-	source: Bytes,
-	coreSource: Bytes | null = null,
-	accountLayerSource: Bytes | null = null,
-): void {
-	account.deploymentId = deploymentIdForSource(source)
-	account.coreSource = coreSource
+export function setAccountProfileSources(account: Account, coreSource: Bytes | null = null, accountLayerSource: Bytes | null = null): void {
+	account.deploymentId = currentDeploymentId()
+	account.coreSource = normalizeCoreSource(coreSource)
 	account.accountLayerSource = accountLayerSource
 }
 
 export function setCoreEntityProfileSources(entitySource: Bytes, account: Account | null): ProfileSourceContext {
 	let context = new ProfileSourceContext()
-	context.deploymentId = deploymentIdForSource(entitySource)
-	context.coreSource = entitySource
-	context.accountLayerSource = accountLayerSourceForCore(entitySource)
+	context.deploymentId = currentDeploymentId()
+	context.coreSource = normalizeCoreSource(entitySource)
+	context.accountLayerSource = currentAccountLayerSource()
 	if (account) {
-		if (account.coreSource) context.coreSource = account.coreSource
+		let cachedCore = normalizeCoreSource(account.coreSource)
+		if (cachedCore !== null) context.coreSource = cachedCore
 		if (account.accountLayerSource) context.accountLayerSource = account.accountLayerSource
 		if (account.deploymentId) context.deploymentId = account.deploymentId
 	}
@@ -84,17 +46,11 @@ export class ProfileSourceContext {
 	accountLayerSource: Bytes | null = null
 }
 
-export function setSubAccountProfileDefaults(
-	sub: SubAccount,
-	owner: Bytes,
-	source: Bytes,
-	coreSource: Bytes | null,
-	accountLayerSource: Bytes | null,
-): void {
+export function setSubAccountProfileDefaults(sub: SubAccount, owner: Bytes, coreSource: Bytes | null, accountLayerSource: Bytes | null): void {
 	sub.ownerRef = owner.toHexString()
 	sub.affiliateAddress = Address.fromString(sub.affiliate)
-	sub.deploymentId = deploymentIdForSource(source)
-	sub.coreSource = coreSource
+	sub.deploymentId = currentDeploymentId()
+	sub.coreSource = normalizeCoreSource(coreSource)
 	sub.accountLayerSource = accountLayerSource
 	sub.routingMode = routingMode(sub.isolationType, sub.singleVAMode)
 }
@@ -112,7 +68,6 @@ export function initializeSubAccountCounters(sub: SubAccount): void {
 export function setVirtualAccountProfileDefaults(
 	va: VirtualAccount,
 	parent: SubAccount | null,
-	source: Bytes,
 	coreSource: Bytes | null,
 	accountLayerSource: Bytes | null,
 ): void {
@@ -121,8 +76,8 @@ export function setVirtualAccountProfileDefaults(
 		va.owner = parent.owner
 		va.ownerRef = parent.owner.toHexString()
 	}
-	va.deploymentId = deploymentIdForSource(source)
-	va.coreSource = coreSource
+	va.deploymentId = currentDeploymentId()
+	va.coreSource = normalizeCoreSource(coreSource)
 	va.accountLayerSource = accountLayerSource
 }
 
@@ -136,9 +91,9 @@ export function initializeVirtualAccountCounters(va: VirtualAccount): void {
 	va.rejectedQuotesCount = BigInt.zero()
 }
 
-export function setMarginTransferProfileSources(mt: MarginTransfer, source: Bytes, coreSource: Bytes | null, accountLayerSource: Bytes | null): void {
-	mt.deploymentId = deploymentIdForSource(source)
-	mt.coreSource = coreSource
+export function setMarginTransferProfileSources(mt: MarginTransfer, coreSource: Bytes | null, accountLayerSource: Bytes | null): void {
+	mt.deploymentId = currentDeploymentId()
+	mt.coreSource = normalizeCoreSource(coreSource)
 	mt.accountLayerSource = accountLayerSource
 	mt.virtualAccountRef = mt.virtualAccount
 	mt.subAccountRef = mt.subAccount

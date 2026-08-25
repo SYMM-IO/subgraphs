@@ -2,7 +2,8 @@ import { ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { getGlobalCounterAndInc } from "../../utils"
 import { MarginTransfer, SubAccount, VirtualAccount } from "../../../../generated/schema"
-import { coreSourceForAccountLayer, setMarginTransferProfileSources } from "../../utils/profile"
+import { setMarginTransferProfileSources } from "../../utils/profile"
+import { resolveCoreSourceFromAccountLayer } from "../../utils/account_layer_resolver"
 import { BigInt } from "@graphprotocol/graph-ts"
 import { updateMarginHierarchyHistories } from "../../../analytics/utils/historyHelpers"
 import { refreshAccountLayerMarginLatestBalances } from "../../utils/accountLayerMarginBalances"
@@ -14,13 +15,13 @@ export class AddMarginHandler<T> extends BaseAccountLayerHandler {
 		let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
 		let mt = new MarginTransfer(id)
 		mt.globalCounter = getGlobalCounterAndInc()
-		let coreSource = coreSourceForAccountLayer(event.address)
+		let coreSource = resolveCoreSourceFromAccountLayer(event.address, event.params.subAccount)
 		mt.type = "ADD"
 		mt.virtualAccount = event.params.virtualAccount.toHexString()
 		mt.subAccount = event.params.subAccount.toHexString()
 		mt.amount = event.params.amount
 		mt.source = event.address
-		setMarginTransferProfileSources(mt, event.address, coreSource, event.address)
+		setMarginTransferProfileSources(mt, coreSource, event.address)
 		mt.timestamp = event.block.timestamp
 		mt.blockNumber = event.block.number
 		mt.transaction = event.transaction.hash

@@ -13,7 +13,7 @@ export class DepositWithAccountHandler<T> extends DepositHandler<T> {
 		const event = changetype<T>(_event)
 		const globalCounter = super.handleGlobalCounter()
 
-		let accountSource = resolveAccountSourceFromAccountLayer(event.address, event.params.user)
+		let accountSource = resolveAccountSourceFromAccountLayer(event.params.user)
 		let account = createNewAccountIfNotExists(
 			event.params.user,
 			event.params.user,

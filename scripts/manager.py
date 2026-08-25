@@ -157,9 +157,10 @@ class Config:
     contracts: List[Contract]
     deploy_urls: Dict[str, Any]
     latestAccountBalanceSweepActivationBlock: str = "0"
+    deployment_id: str = ""
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Config":
+    def from_dict(cls, data: Dict[str, Any], deployment_id: str = "") -> "Config":
         contracts = [Contract(**c) for c in data["contracts"]]
         raw_activation_block = data.get("latestAccountBalanceSweepActivationBlock", "0")
         if isinstance(raw_activation_block, bool):
@@ -177,6 +178,7 @@ class Config:
             contracts,
             data["deploy_urls"],
             latestAccountBalanceSweepActivationBlock=str(activation_block),
+            deployment_id=deployment_id,
         )
 
     def get_deploy_url(self, module_name: str, provider: str = "goldsky") -> str:
@@ -189,6 +191,31 @@ class Config:
             return url[provider]
         # Plain string: use for any provider (same name across providers)
         return url
+
+
+def build_data_source_context(config: Config, contract: Contract, target_module: str) -> Dict[str, Dict[str, str]]:
+    """Build deployment topology once from config instead of hardcoding it in mappings."""
+    if not target_module.startswith("perps/") or contract.fake:
+        return {}
+
+    context: Dict[str, Dict[str, str]] = {}
+    if config.deployment_id:
+        context["deploymentId"] = {"type": "String", "data": config.deployment_id}
+
+    account_layers = {item.address.lower(): item.address for item in config.contracts if item.abi == "accountLayer" and not item.fake}
+    if len(account_layers) > 1:
+        addresses = ", ".join(sorted(account_layers.values()))
+        raise ValueError(f"Config declares multiple AccountLayer addresses; cannot infer one data-source context: {addresses}")
+    if account_layers:
+        context["accountLayerSource"] = {"type": "Bytes", "data": next(iter(account_layers.values()))}
+
+    if target_module == "perps/analytics" and contract.abi == "symmio":
+        context["latestAccountBalanceSweepActivationBlock"] = {
+            "type": "BigInt",
+            "data": config.latestAccountBalanceSweepActivationBlock,
+        }
+
+    return context
 
 
 abi_versions = {
@@ -889,13 +916,11 @@ def prepare_module(config: Config, target_module: str) -> List[Contract]:
         if contract.endBlock:
             source_config["source"]["endBlock"] = int(contract.endBlock)
 
+        source_context = build_data_source_context(config, contract, target_module)
+        if source_context:
+            source_config["context"] = source_context
+
         if target_module == "perps/analytics" and contract.abi == "symmio" and not contract.fake:
-            source_config["context"] = {
-                "latestAccountBalanceSweepActivationBlock": {
-                    "type": "BigInt",
-                    "data": config.latestAccountBalanceSweepActivationBlock,
-                }
-            }
             source_config["mapping"]["blockHandlers"] = [{"handler": "handleLatestAccountBalanceBlock", "filter": {"kind": "polling", "every": 1000}}]
 
         if len(contract.dependencies) > 0:
@@ -1217,7 +1242,7 @@ def main():
 
     with open(args.config_file, "r") as f:
         config_data = json.load(f)
-    config = Config.from_dict(config_data)
+    config = Config.from_dict(config_data, deployment_id=config_name.replace("_", "-"))
 
     # New block to handle the generate_entities option
     if args.generate_entities:

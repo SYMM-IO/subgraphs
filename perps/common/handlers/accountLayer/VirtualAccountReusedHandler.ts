@@ -2,7 +2,8 @@ import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { Account, VirtualAccount, SubAccount } from "../../../../generated/schema"
 import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
-import { coreSourceForAccountLayer, setAccountProfileSources, setVirtualAccountProfileDefaults } from "../../utils/profile"
+import { setAccountProfileSources, setVirtualAccountProfileDefaults } from "../../utils/profile"
+import { resolveCoreSourceFromAccountLayer } from "../../utils/account_layer_resolver"
 
 export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -33,9 +34,8 @@ export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 			}
 
 			let newSub = SubAccount.load(newParent)
-			let coreSource = coreSourceForAccountLayer(_event.address)
-			if (newSub && newSub.coreSource) coreSource = newSub.coreSource
-			setVirtualAccountProfileDefaults(va, newSub, _event.address, coreSource, _event.address)
+			let coreSource = resolveCoreSourceFromAccountLayer(_event.address, event.params.parent)
+			setVirtualAccountProfileDefaults(va, newSub, coreSource, _event.address)
 			va.save()
 
 			// If the VA wasn't deleted but parent changed, decrement old parent's active count first.
@@ -62,8 +62,7 @@ export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 		if (account) {
 			let parentAccount = Account.load(event.params.parent.toHexString())
 			let newSub = SubAccount.load(event.params.parent.toHexString())
-			let coreSource = coreSourceForAccountLayer(_event.address)
-			if (newSub && newSub.coreSource) coreSource = newSub.coreSource
+			let coreSource = resolveCoreSourceFromAccountLayer(_event.address, event.params.parent)
 			account.updateTimestamp = event.block.timestamp
 			account.lastLayerActivityTimestamp = event.block.timestamp
 			account.isDeleted = false
@@ -84,7 +83,7 @@ export class VirtualAccountReusedHandler<T> extends BaseAccountLayerHandler {
 				account.accountSource = newSub.affiliateAddress
 				account.affiliate = newSub.affiliateAddress
 			}
-			setAccountProfileSources(account, _event.address, coreSource, _event.address)
+			setAccountProfileSources(account, coreSource, _event.address)
 			account.save()
 		}
 

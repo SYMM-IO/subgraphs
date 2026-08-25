@@ -140,12 +140,15 @@ test("balance updates are aggregated by account classification without publishin
   }
 
   assert.match(latestBalance, /syncAffiliateExpressWithdrawBalanceSnapshot/)
-  assert.match(helper, /if \(fallbackSource !== null\) return fallbackSource/)
+  assert.match(helper, /normalizeCoreSource\(fallbackSource\)/)
+  assert.match(helper, /normalizeCoreSource\(account\.coreSource\)/)
+  assert.match(helper, /if \(account\.accountLayerSource !== null\) return null/)
+  assert.match(helper, /return normalizeCoreSource\(account\.source\)/)
   assert.match(subCreated, /syncAffiliateExpressWithdrawAccountMembership/)
   assert.match(legacyImported, /syncAffiliateExpressWithdrawAccountMembership/)
   assert.match(virtualCreated, /syncAffiliateExpressWithdrawAccountMembership/)
   assert.match(multiAccountAdded, /syncAffiliateExpressWithdrawAccountMembership/)
-  assert.match(commonMultiAccountAdded, /setAccountProfileSources\(account, coreSource, coreSource, accountLayerSourceForCore\(coreSource\)\)/)
+  assert.match(commonMultiAccountAdded, /setAccountProfileSources\(account, coreSource, currentAccountLayerSource\(\)\)/)
 
   assert.doesNotMatch(helper, /eligibleBase/i)
   assert.doesNotMatch(helper, /conservative/i)

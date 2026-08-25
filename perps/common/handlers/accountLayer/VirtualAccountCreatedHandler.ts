@@ -5,11 +5,11 @@ import { Account, VirtualAccount, SubAccount } from "../../../../generated/schem
 import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
 import {
 	ACCOUNT_KIND_VIRTUAL_ACCOUNT,
-	coreSourceForAccountLayer,
 	initializeVirtualAccountCounters,
 	setAccountProfileSources,
 	setVirtualAccountProfileDefaults,
 } from "../../utils/profile"
+import { resolveCoreSourceFromAccountLayer } from "../../utils/account_layer_resolver"
 
 export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -37,8 +37,8 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		account.parentAddress = event.params.parent
 		account.subAccount = event.params.parent.toHexString()
 		account.virtualAccount = event.params.account.toHexString()
-		let coreSource = coreSourceForAccountLayer(_event.address)
-		setAccountProfileSources(account, _event.address, coreSource, _event.address)
+		let coreSource = resolveCoreSourceFromAccountLayer(_event.address, event.params.parent)
+		setAccountProfileSources(account, coreSource, _event.address)
 		account.save()
 
 		let va = new VirtualAccount(event.params.account.toHexString())
@@ -66,10 +66,9 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		}
 
 		let sub = SubAccount.load(event.params.parent.toHexString())
-		if (sub && sub.coreSource) coreSource = sub.coreSource
-		setAccountProfileSources(account, _event.address, coreSource, _event.address)
+		setAccountProfileSources(account, coreSource, _event.address)
 		account.save()
-		setVirtualAccountProfileDefaults(va, sub, _event.address, coreSource, _event.address)
+		setVirtualAccountProfileDefaults(va, sub, coreSource, _event.address)
 		va.save()
 
 		if (sub) {

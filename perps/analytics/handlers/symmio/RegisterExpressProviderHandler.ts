@@ -1,4 +1,4 @@
-import { ethereum } from "@graphprotocol/graph-ts"
+import { dataSource, ethereum } from "@graphprotocol/graph-ts"
 import { Configuration } from "../../../../generated/schema"
 import { ExpressProvider } from "../../../../generated/templates"
 import { BaseHandler, Version } from "../../../common/BaseHandler"
@@ -14,7 +14,7 @@ export class RegisterExpressProviderHandler<T> extends BaseHandler {
 		let collateral = configuration ? configuration.collateral : ZERO_ADDRESS_BYTES
 		let isNewProvider = ensureExpressProviderSource(event.params.provider, _event.address, collateral, _event.block.timestamp, _event.block.number)
 		if (isNewProvider) {
-			ExpressProvider.create(event.params.provider)
+			ExpressProvider.createWithContext(event.params.provider, dataSource.context())
 		}
 	}
 }

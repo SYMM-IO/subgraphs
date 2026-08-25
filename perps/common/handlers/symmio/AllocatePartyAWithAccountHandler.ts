@@ -11,7 +11,7 @@ export class AllocatePartyAHandler<T> extends BaseHandler {
 		const globalCounter = super.handleGlobalCounter()
 		let account = Account.load(event.params.user.toHexString())
 		if (!account) {
-			let accountSource = resolveAccountSourceFromAccountLayer(event.address, event.params.user)
+			let accountSource = resolveAccountSourceFromAccountLayer(event.params.user)
 			account = createNewAccountIfNotExists(event.params.user, event.params.user, accountSource, AccountType.UNKNOWN, event.block, event.transaction)
 			account.source = event.address
 		}

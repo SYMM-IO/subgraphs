@@ -20,7 +20,7 @@ export class WithdrawHandler<T> extends CommonWithdrawHandler<T> {
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
 
-		let accountSource = resolveAccountSourceFromAccountLayer(event.address, event.params.user)
+		let accountSource = resolveAccountSourceFromAccountLayer(event.params.user)
 		let account = createNewAccountIfNotExists(
 			event.params.user,
 			event.params.user,

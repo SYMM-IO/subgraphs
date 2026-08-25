@@ -1,15 +1,10 @@
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
+import { BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts"
 import { BaseAccountLayerHandler, AccountLayerVersion } from "../../BaseHandler"
 import { createNewAccountIfNotExists, AccountType } from "../../utils/builders"
 import { SubAccount } from "../../../../generated/schema"
 import { accountLayer_1 } from "../../../../generated/accountLayer_1/accountLayer_1"
-import {
-	ACCOUNT_KIND_SUB_ACCOUNT,
-	coreSourceForAccountLayer,
-	initializeSubAccountCounters,
-	setAccountProfileSources,
-	setSubAccountProfileDefaults,
-} from "../../utils/profile"
+import { ACCOUNT_KIND_SUB_ACCOUNT, initializeSubAccountCounters, setAccountProfileSources, setSubAccountProfileDefaults } from "../../utils/profile"
+import { normalizeCoreSource, resolveCoreSourceFromAccountLayer } from "../../utils/account_layer_resolver"
 
 export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 	handleAccount(_event: ethereum.Event, version: AccountLayerVersion): void {
@@ -34,9 +29,7 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 		account.isDeleted = false
 		account.affiliate = event.params.affiliate
 		account.subAccount = event.params.account.toHexString()
-		let coreSource = coreSourceForAccountLayer(_event.address)
-		setAccountProfileSources(account, _event.address, coreSource, _event.address)
-		account.save()
+		let coreSource: Bytes | null = null
 
 		let sub = SubAccount.load(event.params.account.toHexString())
 		if (!sub) {
@@ -76,17 +69,18 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 			if (!subAccountData.reverted) {
 				sub.metadata = subAccountData.value.metadata
 				sub.symmioCore = subAccountData.value.symmioCore
-				coreSource = subAccountData.value.symmioCore
+				coreSource = normalizeCoreSource(subAccountData.value.symmioCore)
 				sub.isolationType = subAccountData.value.isolationType
 				sub.name = subAccountData.value.name
 				sub.singleVAMode = subAccountData.value.singleVAMode
 			}
 		}
+		if (coreSource === null) coreSource = resolveCoreSourceFromAccountLayer(_event.address, event.params.account)
 
-		setSubAccountProfileDefaults(sub, event.params.owner, _event.address, coreSource, _event.address)
+		setSubAccountProfileDefaults(sub, event.params.owner, coreSource, _event.address)
 		sub.routingMode = "CUSTOM"
 		sub.save()
-		setAccountProfileSources(account, _event.address, coreSource, _event.address)
+		setAccountProfileSources(account, coreSource, _event.address)
 		account.save()
 	}
 }
