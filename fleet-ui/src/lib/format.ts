@@ -10,6 +10,7 @@ export function toSelection(group: FleetGroup, row: FleetModule): Selection {
 		module: row.module,
 		base: row.base,
 		orphan: group.is_orphan,
+		managed_pipelines: row.managed_pipelines,
 	}
 }
 
@@ -30,5 +31,6 @@ export function searchableText(group: FleetGroup, row: FleetModule): string {
 	const tags = Object.entries(row.tags)
 		.map(([tag, version]) => `${tag} ${version}`)
 		.join(" ")
-	return `${group.chain} ${group.network} ${row.module} ${row.module_short} ${row.base} ${deployments} ${tags}`.toLowerCase()
+	const pipelines = row.managed_pipelines.map(pipeline => pipeline.name).join(" ")
+	return `${group.chain} ${group.network} ${row.module} ${row.module_short} ${row.base} ${deployments} ${tags} ${pipelines}`.toLowerCase()
 }

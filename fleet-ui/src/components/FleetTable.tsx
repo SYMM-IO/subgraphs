@@ -1,7 +1,7 @@
 import { ChevronDown, ChevronRight, Copy, ExternalLink, Rocket, Trash2 } from "lucide-react";
 import { Fragment, useState } from "react";
 import clsx from "clsx";
-import type { FleetGroup, FleetModule, Selection } from "../types/fleet";
+import type { FleetGroup, FleetModule, ManagedPipeline, Selection } from "../types/fleet";
 import { deploymentHealth, rowKey, searchableText, toSelection } from "../lib/format";
 import { endpointUrl } from "../lib/api";
 import { ChainLogo } from "./ChainLogo";
@@ -25,8 +25,7 @@ type TableProps = {
   onCopy: (base: string, versionOrTag: string) => void;
   onDelete: (base: string, version: string) => void;
   onRemoveTag: (base: string, version: string, tag: string) => void;
-  onPromote: (base: string, version: string, tags: string[]) => void;
-  onClearFilters: () => void;
+  onPromote: (base: string, version: string, tags: string[], managedPipelines: ManagedPipeline[]) => void;
 };
 
 function rowVisible(group: FleetGroup, row: FleetModule, filters: Filters) {
@@ -117,6 +116,7 @@ export function FleetTable(props: TableProps) {
                             <strong className={clsx("module-name", row.module_short === "analytics" && "module-primary")}>{row.module_short}</strong>
                             <code>{row.base}</code>
                             <span>{row.module}</span>
+                            {row.managed_pipelines.length ? <Pill tone="blue">{row.managed_pipelines.length} pipeline{row.managed_pipelines.length === 1 ? "" : "s"}</Pill> : null}
                           </div>
                         </div>
                       </div>
@@ -185,8 +185,8 @@ export function FleetTable(props: TableProps) {
                                       </div>
                                       <div className="deployment-actions">
                                         {movableTags.length ? (
-                                          <Button size="sm" variant="primary" onClick={() => props.onPromote(row.base, deployment.version, movableTags)}>
-                                            <Rocket size={14} aria-hidden="true" /> Promote
+                                          <Button size="sm" variant="primary" onClick={() => props.onPromote(row.base, deployment.version, movableTags, row.managed_pipelines)}>
+                                            <Rocket size={13} /> promote
                                           </Button>
                                         ) : null}
                                         <button className="icon-button danger" onClick={() => props.onDelete(row.base, deployment.version)} aria-label={`Delete ${row.base} ${deployment.version}`}>

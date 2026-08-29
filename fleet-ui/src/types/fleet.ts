@@ -10,12 +10,18 @@ export type Deployment = {
 	chain_network: string
 }
 
+export type ManagedPipeline = {
+	name: string
+	reference_count: number
+}
+
 export type FleetModule = {
 	module: string
 	module_short: string
 	base: string
 	deployments: Deployment[]
 	tags: Record<string, string>
+	managed_pipelines: ManagedPipeline[]
 }
 
 export type FleetGroup = {
@@ -86,4 +92,5 @@ export type Selection = {
 	module: string
 	base: string
 	orphan: boolean
+	managed_pipelines: ManagedPipeline[]
 }

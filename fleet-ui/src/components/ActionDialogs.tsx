@@ -1,7 +1,7 @@
-import { GitBranch, LoaderCircle, Rocket, Trash2, UploadCloud } from "lucide-react";
+import { GitBranch, Rocket, Trash2, UploadCloud, Workflow } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useRef, useState } from "react";
-import type { Selection } from "../types/fleet";
+import { useMemo, useState } from "react";
+import type { ManagedPipeline, Selection } from "../types/fleet";
 import { Button, Field, Modal } from "./ui";
 
 export type DialogState =
@@ -10,7 +10,7 @@ export type DialogState =
   | { kind: "bulk-promote"; selections: Selection[] }
   | { kind: "confirm-delete"; base: string; version: string }
   | { kind: "confirm-untag"; base: string; version: string; tag: string }
-  | { kind: "row-promote"; base: string; version: string; tags: string[] };
+  | { kind: "row-promote"; base: string; version: string; tags: string[]; managedPipelines: ManagedPipeline[] };
 
 type Props = {
   state: DialogState;
@@ -24,10 +24,11 @@ type Props = {
     version: string;
     requireSynced: boolean;
     deleteDisplaced: boolean;
+    updatePipelines: boolean;
   }) => void;
   onDelete: (base: string, version: string) => void;
   onUntag: (base: string, version: string, tag: string) => void;
-  onRowPromote: (base: string, version: string, tags: string[]) => void;
+  onRowPromote: (base: string, version: string, tags: string[], updatePipelines: boolean) => void;
 };
 
 export function ActionDialogs(props: Props) {
@@ -134,7 +135,7 @@ function BulkDeployDialog({
   busy: boolean;
   selections: Selection[];
   onClose?: () => void;
-  onSubmit: (version: string, selections: Selection[]) => void;
+  onSubmit: Props["onBulkDeploy"];
 }) {
   const [version, setVersion] = useState("");
   const [error, setError] = useState("");
@@ -205,24 +206,9 @@ function BulkPromoteDialog({
   const [stage, setStage] = useState(false);
   const [requireSynced, setRequireSynced] = useState(true);
   const [deleteDisplaced, setDeleteDisplaced] = useState(false);
-  const [error, setError] = useState("");
-  const versionRef = useRef<HTMLInputElement>(null);
-  const latestRef = useRef<HTMLInputElement>(null);
+  const [updatePipelines, setUpdatePipelines] = useState(true);
   const tags = useMemo(() => [latest && "latest", stage && "stage"].filter(Boolean) as string[], [latest, stage]);
-  const submit = () => {
-    if (!tags.length) {
-      setError("Select at least one tag to promote.");
-      latestRef.current?.focus();
-      return;
-    }
-    if (mode === "specific" && !version.trim()) {
-      setError("Enter the version label to promote, for example v0.2.13.");
-      versionRef.current?.focus();
-      return;
-    }
-    setError("");
-    onSubmit({ selections, tags, mode, version: version.trim(), requireSynced, deleteDisplaced });
-  };
+  const affectedPipelines = useMemo(() => pipelineNames(selections), [selections]);
   return (
     <Modal
       open={open}
@@ -235,10 +221,9 @@ function BulkPromoteDialog({
         <>
           <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
           <Button
-            variant={deleteDisplaced ? "danger" : "primary"}
-            onClick={submit}
-            disabled={busy}
-            aria-busy={busy}
+            variant="primary"
+            onClick={() => onSubmit({ selections, tags, mode, version, requireSynced, deleteDisplaced, updatePipelines })}
+            disabled={busy || tags.length === 0 || (mode === "specific" && !version.trim())}
           >
             {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}
             {deleteDisplaced ? "Promote and delete old versions" : "Promote selected"}
@@ -274,7 +259,12 @@ function BulkPromoteDialog({
         <label><input type="checkbox" checked={requireSynced} onChange={(e) => setRequireSynced(e.currentTarget.checked)} /> Require 100% sync before tagging</label>
         <label className="danger-text"><input type="checkbox" checked={deleteDisplaced} onChange={(e) => setDeleteDisplaced(e.currentTarget.checked)} /> Delete displaced versions</label>
       </div>
-      {deleteDisplaced ? <p className="danger-callout">After moving the selected tags, Fleet will permanently delete the versions they previously pointed to.</p> : null}
+      <PipelineFollowup
+        checked={updatePipelines}
+        onChange={setUpdatePipelines}
+        affectedPipelines={affectedPipelines}
+        description="Runs only after every selected subgraph is promoted successfully, using a fresh snapshot."
+      />
       <SelectionPreview selections={selections} />
     </Modal>
   );
@@ -294,8 +284,7 @@ function RowPromoteDialog({
   onSubmit: Props["onRowPromote"];
 }) {
   const [selected, setSelected] = useState(() => new Set(state.tags));
-  const [error, setError] = useState("");
-  const firstTagRef = useRef<HTMLInputElement>(null);
+  const [updatePipelines, setUpdatePipelines] = useState(true);
   const tags = Array.from(selected);
   const submit = () => {
     if (!tags.length) {
@@ -317,8 +306,8 @@ function RowPromoteDialog({
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
-          <Button variant="primary" disabled={busy} onClick={submit} aria-busy={busy}>
-            {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}Promote tags
+          <Button variant="primary" disabled={busy || tags.length === 0} onClick={() => onSubmit(state.base, state.version, tags, updatePipelines)}>
+            {busy ? "Promoting..." : "Promote"}
           </Button>
         </>
       }
@@ -342,8 +331,50 @@ function RowPromoteDialog({
           </label>
         ))}
       </div>
-      {error ? <p className="field-error" role="alert">{error}</p> : null}
+      <PipelineFollowup
+        checked={updatePipelines}
+        onChange={setUpdatePipelines}
+        affectedPipelines={state.managedPipelines.map((pipeline) => pipeline.name)}
+        description="Runs after the selected tags are promoted successfully, using a fresh snapshot."
+      />
     </Modal>
+  );
+}
+
+function pipelineNames(selections: Selection[]) {
+  return Array.from(new Set(selections.flatMap((selection) => selection.managed_pipelines.map((pipeline) => pipeline.name)))).sort();
+}
+
+function PipelineFollowup({
+  checked,
+  onChange,
+  affectedPipelines,
+  description,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  affectedPipelines: string[];
+  description: string;
+}) {
+  return (
+    <div className="pipeline-followup">
+      <label>
+        <input type="checkbox" checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} />
+        <Workflow size={17} />
+        <span>
+          <strong>Update managed Goldsky pipelines</strong>
+          <small>{description}</small>
+        </span>
+      </label>
+      <div className="pipeline-targets">
+        {affectedPipelines.length ? (
+          <>
+            <span>Affected</span>
+            {affectedPipelines.map((pipeline) => <code key={pipeline}>{pipeline}</code>)}
+          </>
+        ) : <span>No managed pipeline definitions match these targets.</span>}
+      </div>
+    </div>
   );
 }
 
@@ -353,7 +384,10 @@ function SelectionPreview({ selections }: { selections: Selection[] }) {
       {selections.map((selection) => (
         <div key={`${selection.chain}|${selection.module}`} className="selection-row">
           <code>{selection.base || selection.chain}</code>
-          <span>{selection.chain} · {selection.module}</span>
+          <span>
+            {selection.chain} · {selection.module}
+            {selection.managed_pipelines.length ? ` · ${selection.managed_pipelines.length} managed pipeline${selection.managed_pipelines.length === 1 ? "" : "s"}` : ""}
+          </span>
         </div>
       ))}
     </div>

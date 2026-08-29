@@ -293,10 +293,9 @@ export function App() {
             onToggle={toggleRow}
             onToggleAll={toggleAll}
             onCopy={copyEndpoint}
-            onDelete={(base, version) => openDialog({ kind: "confirm-delete", base, version })}
-            onRemoveTag={(base, version, tag) => openDialog({ kind: "confirm-untag", base, version, tag })}
-            onPromote={(base, version, tags) => openDialog({ kind: "row-promote", base, version, tags })}
-            onClearFilters={() => setFilters(emptyFilters)}
+            onDelete={(base, version) => setDialog({ kind: "confirm-delete", base, version })}
+            onRemoveTag={(base, version, tag) => setDialog({ kind: "confirm-untag", base, version, tag })}
+            onPromote={(base, version, tags, managedPipelines) => setDialog({ kind: "row-promote", base, version, tags, managedPipelines })}
           />
         </main>
       </div>
@@ -330,7 +329,7 @@ export function App() {
         }}
         onDelete={(base, version) => void runAction(() => deleteVersion({ base, version }))}
         onUntag={(base, version, tag) => void runAction(() => removeTag({ base, version, tag }))}
-        onRowPromote={(base, version, tags) => void runAction(() => rowPromote({ base, version, tags }))}
+        onRowPromote={(base, version, tags, updatePipelines) => void runAction(() => rowPromote({ base, version, tags, updatePipelines }))}
       />
       <ToastHost toast={toast} onOpenChange={closeToast} />
     </>

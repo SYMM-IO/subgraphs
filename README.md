@@ -195,18 +195,20 @@ python3 scripts/monitor.py --version v0.0.1 --watch 60
 
 The script reports sync percentage, block range, and flags any errors or subgraphs that are not yet fully synced. Edit the `SUBGRAPHS` list at the top of the file to add or remove monitored subgraphs.
 
-## Automatic Goldsky Pipeline Updates
+## Promotion-Gated Goldsky Pipeline Updates
 
-Goldsky deployments automatically update existing Mirror pipelines that consume the deployed subgraph. Pipeline definitions under `pipelines/` are the source of truth and also define the dependency relationship: every `subgraph_entity` reference whose `name` matches the deployed subgraph is rendered with the new immutable version.
+Deploying a subgraph does not change a managed Goldsky pipeline. The release gate is the Fleet UI's **Promote** or **Bulk Promote** action, where **Update managed Goldsky pipelines** is enabled by default and the matching pipeline names are previewed before promotion.
 
-After a successful `goldsky subgraph deploy`, `scripts/manager.py` runs the pipeline updater. For every related pipeline it:
+Pipeline definitions under `pipelines/` are the source of truth and define the dependency relationship. After all requested tag moves succeed, Fleet renders every matching `subgraph_entity` reference with the promoted immutable version. For every related pipeline it:
 
-1. Confirms the pipeline already exists, so the automatic hook cannot accidentally create one.
-2. Renders all matching source references with the deployed version.
+1. Confirms the pipeline already exists, so the promotion flow cannot accidentally create one.
+2. Renders all matching source references with the promoted version.
 3. Validates the rendered definition.
-4. Applies it with `--from-snapshot new --force`, preserving pipeline progress with a fresh snapshot.
+4. Applies it with `--from-snapshot new --force`, continuing the pipeline from a fresh snapshot.
 
-Pipeline maintenance is best-effort. Validation errors, Goldsky failures, and timeouts are printed as warnings, but the manager still exits successfully because the subgraph deployment has already completed. This also means a failed pipeline update does not stop later deployments in a fleet batch.
+Bulk Promote collects the version chosen for each selected subgraph and renders them together. It updates pipelines only when every selected subgraph was promoted successfully; a skipped or failed target prevents the pipeline update. This keeps multiple subgraphs consumed by the same pipeline on one intentional release boundary.
+
+Pipeline validation or apply failures happen after the tag promotion, so tags are not rolled back. Fleet marks the Activity as failed and shows a specific error toast for the pipeline follow-up. Uncheck the option when a pipeline should be updated manually.
 
 ```bash
 # Preview which managed pipelines consume a subgraph (no Goldsky writes)
@@ -215,11 +217,19 @@ python3 scripts/pipeline_updater.py --subgraph hyperevm_mainnet_analytics --vers
 # Validate and apply the related pipeline definitions
 python3 scripts/pipeline_updater.py --subgraph hyperevm_mainnet_analytics --version v0.2.18 --apply
 
-# Emergency/manual deployment without the automatic pipeline follow-up
-python3 scripts/manager.py configs/perps/hyperevm.json perps/analytics v0.2.18 --deploy --skip-pipeline-update
+# Preview one atomic update containing multiple subgraph versions
+python3 scripts/pipeline_updater.py \
+  --subgraph-version arbitrum_analytics=v0.2.11 \
+  --subgraph-version arbitrum-vibe-analytics=v0.0.3
+
+# Apply that multi-subgraph update after reviewing the preview
+python3 scripts/pipeline_updater.py \
+  --subgraph-version arbitrum_analytics=v0.2.11 \
+  --subgraph-version arbitrum-vibe-analytics=v0.0.3 \
+  --apply
 ```
 
-Each Goldsky command has a default timeout of 900 seconds. Override it with `GOLDSKY_PIPELINE_TIMEOUT_SECONDS` when needed. Automatic updates never create, delete, or move subgraph tags.
+Each Goldsky command has a default timeout of 900 seconds. Override it with `GOLDSKY_PIPELINE_TIMEOUT_SECONDS` when needed. Pipeline updates never create, delete, or move subgraph tags.
 
 ## Troubleshooting
 

@@ -37,9 +37,9 @@ from fastapi.staticfiles import StaticFiles
 from jinja2 import DictLoader, Environment, select_autoescape
 
 try:
-    from scripts.fleet_identity import FLEET_HEALTH_PAYLOAD
-except ModuleNotFoundError:  # Direct execution places scripts/, not the repository root, on sys.path.
-    from fleet_identity import FLEET_HEALTH_PAYLOAD
+    from scripts.pipeline_updater import PipelineDependency, load_pipeline_dependencies, update_managed_pipelines
+except ModuleNotFoundError:  # Direct execution via `python scripts/fleet_web.py`.
+    from pipeline_updater import PipelineDependency, load_pipeline_dependencies, update_managed_pipelines
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -657,6 +657,16 @@ def do_tag_delete(base: str, version: str, tag: str) -> tuple[bool, str]:
 def do_subgraph_delete(base: str, version: str) -> tuple[bool, str]:
     rc, out = run_goldsky(["subgraph", "delete", "-f", f"{base}/{version}"])
     return rc == 0, out
+
+
+def do_pipeline_update(subgraph_versions: dict[str, str]) -> tuple[bool, list[str]]:
+    """Apply one promotion-gated update across every related managed pipeline."""
+    results = update_managed_pipelines(subgraph_versions, apply=True)
+    if not results:
+        return True, ["pipelines: no related managed pipelines found"]
+
+    lines = [f"pipeline {result.pipeline}: {result.status} — {result.message}" for result in results]
+    return not any(result.failed for result in results), lines
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -1743,7 +1753,10 @@ GRID_HTML = r"""
         data-base="{{ row.base }}"
         data-module-full="{{ row.module }}"
         data-version-count="{{ row.deployments|length }}"
-        data-search="{{ g.chain }} {{ g.network }} {{ row.module_short }} {{ row.module }} {{ row.base }}{% for d in row.deployments %} {{ d.version }} {{ d.status }} {{ d.synced }}{% endfor %}{% for tag, ver in row.tags.items() %} {{ tag }} {{ ver }}{% endfor %}"
+        data-search="{{ g.chain }} {{ g.network }} {{ row.module_short }} {{ row.module }} {{ row.base }}
+          {%- for d in row.deployments %} {{ d.version }} {{ d.status }} {{ d.synced }}{% endfor %}
+          {%- for tag, ver in row.tags.items() %} {{ tag }} {{ ver }}{% endfor %}
+          {%- for pipeline in row.managed_pipelines %} {{ pipeline.name }}{% endfor %}"
         data-orphan="{{ '1' if g.is_orphan else '0' }}"
         {% if loop.first %}style="border-top: 2px solid #2a3240;"{% endif %}>
       <td class="align-top" data-label="Select" style="padding-top: 10px;">
@@ -1969,6 +1982,18 @@ ROW_PROMOTE_MODAL = r"""
       </div>
     </div>
 
+    <div class="mb-4">
+      <label class="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="update_pipelines" value="1" checked />
+        <span>
+          Update managed Goldsky pipelines
+          <span class="text-xs text-gray-500 block">
+            Runs after the tags are promoted{% if affected_pipelines %}: {{ affected_pipelines|join(', ') }}{% endif %}.
+          </span>
+        </span>
+      </label>
+    </div>
+
     <div class="text-xs text-gray-500 mb-4" style="border-top: 1px solid #242830; padding-top: 10px;">
       After tagging, you'll be asked whether to delete the displaced version(s) that no longer carry any tag.
     </div>
@@ -2088,6 +2113,15 @@ PROMOTE_MODAL = r"""
       <label class="flex items-center gap-2 text-sm">
         <input type="checkbox" name="delete_displaced" value="1" />
         Also delete displaced versioned deployments (destructive)
+      </label>
+    </div>
+    <div class="mb-4">
+      <label class="flex items-start gap-2 text-sm">
+        <input type="checkbox" name="update_pipelines" value="1" checked />
+        <span>
+          Update managed Goldsky pipelines
+          <span class="text-xs text-gray-500 block">Runs only after every selected promotion succeeds.</span>
+        </span>
       </label>
     </div>
 
@@ -2339,6 +2373,18 @@ BULK_PROMOTE_MODAL = r"""
       </div>
 
       <div class="form-group">
+        <label class="check-row" style="font-size: 12px; align-items: flex-start;">
+          <input type="checkbox" name="update_pipelines" value="1" checked />
+          <span>
+            Update managed Goldsky pipelines
+            <span class="form-hint block">
+              Runs only after every selected promotion succeeds{% if affected_pipelines %}: {{ affected_pipelines|join(', ') }}{% endif %}.
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Targets</label>
         <div class="selection-preview">
           {% for s in selections %}
@@ -2399,6 +2445,16 @@ def render_last_fetched_oob() -> str:
 # ────────────────────────────────────────────────────────────────────
 
 
+def _pipeline_views(base: str, dependencies: dict[str, list[PipelineDependency]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "name": dependency.pipeline,
+            "reference_count": dependency.reference_count,
+        }
+        for dependency in dependencies.get(base, [])
+    ]
+
+
 def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[dict[str, Any]]:
     """Group deployments by chain so analytics + events sit together in the UI.
 
@@ -2408,6 +2464,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
     Any Goldsky subgraph not referenced by any local config is surfaced at the
     end as an "unmapped" group so operators can still inspect/manage it."""
     groups: list[dict[str, Any]] = []
+    pipeline_dependencies = load_pipeline_dependencies()
     known_bases: set[str] = set()
     for c in chains:
         for base in c.deploy_urls.values():
@@ -2430,6 +2487,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
                     "base": base,
                     "deployments": deployments,
                     "tags": tags,
+                    "managed_pipelines": _pipeline_views(base, pipeline_dependencies),
                 }
             )
         if not module_rows:
@@ -2485,6 +2543,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
                         "base": orphan_base,
                         "deployments": deployments,
                         "tags": tags,
+                        "managed_pipelines": _pipeline_views(orphan_base, pipeline_dependencies),
                     }
                 ],
             }
@@ -2725,6 +2784,7 @@ async def promote(request: Request) -> HTMLResponse:
     chains_sel = [str(k) for k in form.getlist("chains")]
     require_synced = form.get("require_synced") == "1"
     delete_displaced = form.get("delete_displaced") == "1"
+    update_pipelines = form.get("update_pipelines") == "1"
 
     if module not in MODULES or not tags:
         raise HTTPException(400, "module + at least one tag required")
@@ -2738,6 +2798,7 @@ async def promote(request: Request) -> HTMLResponse:
     applied_count = 0
     skipped_count = 0
     failed_count = 0
+    promoted_versions: dict[str, str] = {}
 
     for c in chain_objs:
         base = c.deploy_urls.get(module)
@@ -2794,6 +2855,7 @@ async def promote(request: Request) -> HTMLResponse:
 
         if chain_ok:
             applied_count += 1
+            promoted_versions[base] = ver_for_chain
         else:
             failed_count += 1
             continue
@@ -2813,6 +2875,15 @@ async def promote(request: Request) -> HTMLResponse:
                 if ok_d:
                     _store.apply_deployment_remove(base, old_ver)
 
+    pipeline_ok = True
+    if update_pipelines:
+        if applied_count == len(chain_objs):
+            pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, promoted_versions)
+            log_lines.extend(pipeline_lines)
+        else:
+            pipeline_ok = False
+            log_lines.append("pipelines: skipped because not every selected promotion succeeded")
+
     result_html = _env.get_template("promote_result").render(
         log="\n".join(log_lines) or "(no chains matched)",
         applied_count=applied_count,
@@ -2820,7 +2891,13 @@ async def promote(request: Request) -> HTMLResponse:
         failed_count=failed_count,
         grid=render_grid(_store),
     )
-    if failed_count:
+    if applied_count and not pipeline_ok:
+        toast = render_toast(
+            "err",
+            "Promotion completed, but pipelines were not updated",
+            f"applied {applied_count}, skipped {skipped_count}, failed {failed_count}",
+        )
+    elif failed_count:
         toast = render_toast("err", f"Promote finished with {failed_count} failure(s)", f"applied {applied_count}, skipped {skipped_count}")
     elif applied_count:
         toast = render_toast("ok", f"Promoted {applied_count} chain(s) → {'/'.join(tags)}", f"skipped {skipped_count}")
@@ -3040,8 +3117,12 @@ async def delete_version(request: Request) -> HTMLResponse:
 @app.get("/row-promote-form", response_class=HTMLResponse)
 def row_promote_form(base: str, version: str) -> HTMLResponse:
     current_tags = _store.state.tags.get(base, {})
+    affected_pipelines = [dependency.pipeline for dependency in load_pipeline_dependencies().get(base, [])]
     html = _env.get_template("row_promote_modal").render(
-        base=base, version=version, current_tags=current_tags
+        base=base,
+        version=version,
+        current_tags=current_tags,
+        affected_pipelines=affected_pipelines,
     )
     return HTMLResponse(html)
 
@@ -3055,6 +3136,7 @@ async def row_promote(request: Request) -> HTMLResponse:
     base = str(form.get("base", ""))
     version = str(form.get("version", ""))
     tags = [str(t) for t in form.getlist("tags")]
+    update_pipelines = form.get("update_pipelines") == "1"
     if not base or not version:
         raise HTTPException(400, "base and version required")
     if not tags:
@@ -3094,13 +3176,24 @@ async def row_promote(request: Request) -> HTMLResponse:
     remaining_tags = _store.state.tags.get(base, {})
     orphaned = [v for v in sorted(displaced) if not any(rv == v for rv in remaining_tags.values())]
 
-    act.finish(ok_overall, "\n".join(log_bits))
-    if ok_overall:
+    tags_ok = ok_overall
+    pipeline_ok = True
+    if update_pipelines and tags_ok:
+        pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, {base: version})
+        log_bits.extend(pipeline_lines)
+    elif update_pipelines:
+        pipeline_ok = False
+        log_bits.append("pipelines: skipped because tag promotion failed")
+
+    act.finish(tags_ok and pipeline_ok, "\n".join(log_bits))
+    if tags_ok and pipeline_ok:
         toast = render_toast(
             "ok",
             f"Promoted to {'+'.join(tags)}",
             f"{base}/{version}" + (f" · displaced {', '.join(orphaned)}" if orphaned else ""),
         )
+    elif tags_ok:
+        toast = render_toast("err", "Promoted, but pipeline update failed", "; ".join(log_bits))
     else:
         toast = render_toast("err", "Promote had failures", "; ".join(log_bits))
 
@@ -3158,12 +3251,14 @@ async def _read_selections(request: Request) -> list[dict[str, Any]]:
 def _enrich_selections(sels: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Ensure selection dicts carry a 'base' resolved from the store if missing."""
     chain_by_key = _chain_lookup()
+    pipeline_dependencies = load_pipeline_dependencies()
     out = []
     for s in sels:
         if not s.get("base"):
             c = chain_by_key.get(s["chain"])
             if c:
                 s["base"] = c.deploy_urls.get(s["module"], "")
+        s["managed_pipelines"] = _pipeline_views(s.get("base", ""), pipeline_dependencies)
         out.append(s)
     return out
 
@@ -3248,7 +3343,17 @@ async def bulk_promote_form(request: Request) -> HTMLResponse:
     selections = _enrich_selections(await _read_selections(request))
     if not selections:
         raise HTTPException(400, "no selections")
-    html = _env.get_template("bulk_promote_modal").render(selections=selections)
+    affected_pipelines = sorted(
+        {
+            pipeline["name"]
+            for selection in selections
+            for pipeline in selection.get("managed_pipelines", [])
+        }
+    )
+    html = _env.get_template("bulk_promote_modal").render(
+        selections=selections,
+        affected_pipelines=affected_pipelines,
+    )
     return HTMLResponse(html)
 
 
@@ -3284,6 +3389,7 @@ async def bulk_promote(request: Request) -> HTMLResponse:
     version = str(form.get("version", "")).strip()
     require_synced = form.get("require_synced") == "1"
     delete_displaced = form.get("delete_displaced") == "1"
+    update_pipelines = form.get("update_pipelines") == "1"
 
     if not selections:
         raise HTTPException(400, "no selections")
@@ -3298,6 +3404,7 @@ async def bulk_promote(request: Request) -> HTMLResponse:
     skipped = 0
     failed = 0
     log_lines: list[str] = []
+    promoted_versions: dict[str, str] = {}
     state = _store.state
 
     act = register_activity(
@@ -3362,6 +3469,7 @@ async def bulk_promote(request: Request) -> HTMLResponse:
             failed += 1
             continue
         applied += 1
+        promoted_versions[base] = ver_for_chain
 
         if delete_displaced and displaced_versions:
             original_tags = state.tags.get(base, {})
@@ -3377,10 +3485,25 @@ async def bulk_promote(request: Request) -> HTMLResponse:
                 else:
                     log_lines.append(f"{s['chain']}: delete FAILED: {out_d}")
 
-    overall_ok = failed == 0 and applied > 0
+    pipeline_ok = True
+    if update_pipelines:
+        if applied == len(selections):
+            pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, promoted_versions)
+            log_lines.extend(pipeline_lines)
+        else:
+            pipeline_ok = False
+            log_lines.append("pipelines: skipped because not every selected promotion succeeded")
+
+    overall_ok = failed == 0 and applied > 0 and pipeline_ok
     act.finish(overall_ok, "\n".join(log_lines))
 
-    if applied and not failed:
+    if applied and not pipeline_ok:
+        toast = render_toast(
+            "err",
+            "Promotion completed, but pipelines were not updated",
+            f"applied {applied} · failed {failed} · skipped {skipped}",
+        )
+    elif applied and not failed:
         toast = render_toast(
             "ok",
             f"Promoted {applied} subgraph{'s' if applied != 1 else ''} → {'+'.join(tags)}",
@@ -3577,6 +3700,9 @@ async def api_row_promote(request: Request) -> JSONResponse:
     base = str(data.get("base", ""))
     version = str(data.get("version", ""))
     tags = [str(t) for t in data.get("tags", []) if str(t)]
+    update_pipelines = data.get("updatePipelines", True)
+    if not isinstance(update_pipelines, bool):
+        raise HTTPException(400, "updatePipelines must be a boolean")
     if not base or not version:
         raise HTTPException(400, "base and version required")
     if not tags:
@@ -3612,13 +3738,24 @@ async def api_row_promote(request: Request) -> JSONResponse:
 
     remaining_tags = _store.state.tags.get(base, {})
     orphaned = [v for v in sorted(displaced) if not any(rv == v for rv in remaining_tags.values())]
-    act.finish(ok_overall, "\n".join(log_bits))
-    if ok_overall:
+    tags_ok = ok_overall
+    pipeline_ok = True
+    if update_pipelines and tags_ok:
+        pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, {base: version})
+        log_bits.extend(pipeline_lines)
+    elif update_pipelines:
+        pipeline_ok = False
+        log_bits.append("pipelines: skipped because tag promotion failed")
+
+    act.finish(tags_ok and pipeline_ok, "\n".join(log_bits))
+    if tags_ok and pipeline_ok:
         return _api_response(
             "ok",
             f"Promoted to {'+'.join(tags)}",
             f"{base}/{version}" + (f" · displaced {', '.join(orphaned)}" if orphaned else ""),
         )
+    if tags_ok:
+        return _api_response("err", "Promoted, but pipeline update failed", "; ".join(log_bits))
     return _api_response("err", "Promote had failures", "; ".join(log_bits), status_code=500)
 
 
@@ -3631,6 +3768,9 @@ async def api_bulk_promote(request: Request) -> JSONResponse:
     version = str(data.get("version", "")).strip()
     require_synced = bool(data.get("requireSynced", True))
     delete_displaced = bool(data.get("deleteDisplaced", False))
+    update_pipelines = data.get("updatePipelines", True)
+    if not isinstance(update_pipelines, bool):
+        raise HTTPException(400, "updatePipelines must be a boolean")
     if not selections:
         raise HTTPException(400, "no selections")
     if not tags:
@@ -3642,6 +3782,7 @@ async def api_bulk_promote(request: Request) -> JSONResponse:
     skipped = 0
     failed = 0
     log_lines: list[str] = []
+    promoted_versions: dict[str, str] = {}
     state = _store.state
     act = register_activity(f"Bulk promote → {'+'.join(tags)} on {len(selections)} subgraph(s)", kind="promote")
 
@@ -3701,6 +3842,7 @@ async def api_bulk_promote(request: Request) -> JSONResponse:
             failed += 1
             continue
         applied += 1
+        promoted_versions[base] = ver_for_chain
 
         if delete_displaced and displaced_versions:
             original_tags = state.tags.get(base, {})
@@ -3716,8 +3858,23 @@ async def api_bulk_promote(request: Request) -> JSONResponse:
                 else:
                     log_lines.append(f"{s['chain']}: delete FAILED: {out_d}")
 
-    overall_ok = failed == 0 and applied > 0
+    pipeline_ok = True
+    if update_pipelines:
+        if applied == len(selections):
+            pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, promoted_versions)
+            log_lines.extend(pipeline_lines)
+        else:
+            pipeline_ok = False
+            log_lines.append("pipelines: skipped because not every selected promotion succeeded")
+
+    overall_ok = failed == 0 and applied > 0 and pipeline_ok
     act.finish(overall_ok, "\n".join(log_lines))
+    if applied and not pipeline_ok:
+        return _api_response(
+            "err",
+            "Promotion completed, but pipelines were not updated",
+            f"applied {applied} · failed {failed} · skipped {skipped}",
+        )
     if applied and not failed:
         return _api_response(
             "ok",

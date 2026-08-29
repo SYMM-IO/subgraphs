@@ -1,5 +1,5 @@
+import asyncio
 import json
-import os
 from pathlib import Path
 import sys
 import tempfile
@@ -80,6 +80,23 @@ class ToolResolutionTests(TestCase):
         )
 
 
+class JsonRequest:
+    def __init__(self, payload: dict) -> None:
+        self.payload = payload
+
+    async def json(self) -> dict:
+        return self.payload
+
+
+def response_json(response) -> dict:
+    return json.loads(response.body)
+
+
+async def run_inline(function, *args, **kwargs):
+    """Keep endpoint unit tests synchronous and avoid creating executor threads."""
+    return function(*args, **kwargs)
+
+
 class BulkDeploySequenceTests(TestCase):
     def setUp(self) -> None:
         self._old_chains = fleet_web._store._chains
@@ -123,11 +140,25 @@ class BulkDeploySequenceTests(TestCase):
             [
                 (
                     "hyperevm · perps/analytics v9.9.9",
-                    [sys.executable, "scripts/manager.py", "configs/perps/hyperevm.json", "perps/analytics", "v9.9.9", "--deploy"],
+                    [
+                        "python3",
+                        "scripts/manager.py",
+                        "configs/perps/hyperevm.json",
+                        "perps/analytics",
+                        "v9.9.9",
+                        "--deploy",
+                    ],
                 ),
                 (
                     "arbitrum · perps/analytics v9.9.9",
-                    [sys.executable, "scripts/manager.py", "configs/perps/arbitrum.json", "perps/analytics", "v9.9.9", "--deploy"],
+                    [
+                        "python3",
+                        "scripts/manager.py",
+                        "configs/perps/arbitrum.json",
+                        "perps/analytics",
+                        "v9.9.9",
+                        "--deploy",
+                    ],
                 ),
             ],
         )
@@ -228,11 +259,25 @@ class ActivityProgressRenderTests(TestCase):
             [
                 (
                     "arbitrum · perps/analytics v1.2.3",
-                    [sys.executable, "scripts/manager.py", "configs/perps/arbitrum.json", "perps/analytics", "v1.2.3", "--deploy"],
+                    [
+                        "python3",
+                        "scripts/manager.py",
+                        "configs/perps/arbitrum.json",
+                        "perps/analytics",
+                        "v1.2.3",
+                        "--deploy",
+                    ],
                 ),
                 (
                     "hyperevm · perps/analytics v1.2.3",
-                    [sys.executable, "scripts/manager.py", "configs/perps/hyperevm.json", "perps/analytics", "v1.2.3", "--deploy"],
+                    [
+                        "python3",
+                        "scripts/manager.py",
+                        "configs/perps/hyperevm.json",
+                        "perps/analytics",
+                        "v1.2.3",
+                        "--deploy",
+                    ],
                 ),
             ],
         )
@@ -243,6 +288,8 @@ class ReactApiTests(TestCase):
         self._old_chains = fleet_web._store._chains
         self._old_state = fleet_web._store._state
         self._old_last_fetched = fleet_web._store._last_fetched_at
+        self._old_jobs = dict(fleet_web._JOBS)
+        fleet_web._JOBS.clear()
         fleet_web._store._chains = [
             fleet_web.ChainConfig(
                 key="base",
@@ -268,11 +315,137 @@ class ReactApiTests(TestCase):
         fleet_web._store._chains = self._old_chains
         fleet_web._store._state = self._old_state
         fleet_web._store._last_fetched_at = self._old_last_fetched
+        fleet_web._JOBS.clear()
+        fleet_web._JOBS.update(self._old_jobs)
 
     def test_build_fleet_payload_returns_react_api_shape(self) -> None:
-        data = fleet_web.build_fleet_payload(fleet_web._store)
+        dependencies = {
+            "base_analytics": [
+                fleet_web.PipelineDependency(
+                    pipeline="base-solvency-engine",
+                    config_path=Path("pipelines/base-solvency-engine.yaml"),
+                    reference_count=3,
+                )
+            ]
+        }
+        with patch.object(fleet_web, "load_pipeline_dependencies", return_value=dependencies):
+            data = fleet_web.build_fleet_payload(fleet_web._store)
 
         self.assertEqual(data["summary"]["rows"], 1)
         self.assertEqual(data["groups"][0]["modules"][0]["deployments"][0]["version"], "v1")
         self.assertEqual(data["groups"][0]["modules"][0]["tags"]["latest"], "v1")
+        self.assertEqual(
+            data["groups"][0]["modules"][0]["managed_pipelines"],
+            [{"name": "base-solvency-engine", "reference_count": 3}],
+        )
         self.assertIn("last fetched", data["lastFetchedLabel"])
+
+    def test_row_promote_updates_pipeline_after_tag_success(self) -> None:
+        with (
+            patch.object(fleet_web.asyncio, "to_thread", new=run_inline),
+            patch.object(fleet_web, "do_pipeline_update", return_value=(True, ["pipeline updated"])) as update_pipeline,
+        ):
+            response = asyncio.run(
+                fleet_web.api_row_promote(
+                    JsonRequest({
+                        "base": "base_analytics",
+                        "version": "v1",
+                        "tags": ["latest"],
+                        "updatePipelines": True,
+                    })
+                )
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json(response)["toast"]["kind"], "ok")
+        update_pipeline.assert_called_once_with({"base_analytics": "v1"})
+
+    def test_row_promote_does_not_update_pipeline_when_option_is_disabled(self) -> None:
+        with patch.object(fleet_web, "do_pipeline_update") as update_pipeline:
+            response = asyncio.run(
+                fleet_web.api_row_promote(
+                    JsonRequest({
+                        "base": "base_analytics",
+                        "version": "v1",
+                        "tags": ["latest"],
+                        "updatePipelines": False,
+                    })
+                )
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json(response)["toast"]["kind"], "ok")
+        update_pipeline.assert_not_called()
+
+    def test_row_promote_reports_pipeline_failure_without_hiding_tag_success(self) -> None:
+        with (
+            patch.object(fleet_web.asyncio, "to_thread", new=run_inline),
+            patch.object(fleet_web, "do_pipeline_update", return_value=(False, ["pipeline failed"])),
+        ):
+            response = asyncio.run(
+                fleet_web.api_row_promote(
+                    JsonRequest({
+                        "base": "base_analytics",
+                        "version": "v1",
+                        "tags": ["latest"],
+                        "updatePipelines": True,
+                    })
+                )
+            )
+
+        payload = response_json(response)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["toast"]["kind"], "err")
+        self.assertEqual(payload["toast"]["title"], "Promoted, but pipeline update failed")
+        self.assertEqual(payload["fleet"]["groups"][0]["modules"][0]["tags"]["latest"], "v1")
+
+    def test_bulk_promote_updates_pipeline_after_every_selection_succeeds(self) -> None:
+        selections = [{"chain": "base", "module": "perps/analytics", "base": "base_analytics", "orphan": False}]
+        with (
+            patch.object(fleet_web.asyncio, "to_thread", new=run_inline),
+            patch.object(fleet_web, "do_pipeline_update", return_value=(True, ["pipeline updated"])) as update_pipeline,
+        ):
+            response = asyncio.run(
+                fleet_web.api_bulk_promote(
+                    JsonRequest({
+                        "selections": selections,
+                        "tags": ["latest"],
+                        "mode": "specific",
+                        "version": "v1",
+                        "requireSynced": True,
+                        "deleteDisplaced": False,
+                        "updatePipelines": True,
+                    })
+                )
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json(response)["toast"]["kind"], "ok")
+        update_pipeline.assert_called_once_with({"base_analytics": "v1"})
+
+    def test_bulk_promote_skips_pipeline_when_a_selection_is_not_promoted(self) -> None:
+        selections = [
+            {"chain": "base", "module": "perps/analytics", "base": "base_analytics", "orphan": False},
+            {"chain": "missing", "module": "perps/analytics", "base": "missing_analytics", "orphan": True},
+        ]
+        with (
+            patch.object(fleet_web.asyncio, "to_thread", new=run_inline),
+            patch.object(fleet_web, "do_pipeline_update") as update_pipeline,
+        ):
+            response = asyncio.run(
+                fleet_web.api_bulk_promote(
+                    JsonRequest({
+                        "selections": selections,
+                        "tags": ["latest"],
+                        "mode": "specific",
+                        "version": "v1",
+                        "requireSynced": True,
+                        "deleteDisplaced": False,
+                        "updatePipelines": True,
+                    })
+                )
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json(response)["toast"]["kind"], "err")
+        update_pipeline.assert_not_called()

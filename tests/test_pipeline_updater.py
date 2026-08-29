@@ -2,12 +2,16 @@ import subprocess
 import tempfile
 from pathlib import Path
 from unittest import TestCase
-from unittest.mock import patch
 
 import yaml
 
-import scripts.manager as manager
-from scripts.pipeline_updater import render_subgraph_version, update_related_pipelines
+from scripts.pipeline_updater import (
+    load_pipeline_dependencies,
+    render_subgraph_version,
+    render_subgraph_versions,
+    update_managed_pipelines,
+    update_related_pipelines,
+)
 
 
 def write_pipeline(path: Path, name: str, subgraph: str, version: str = "old") -> None:
@@ -55,6 +59,44 @@ class PipelineRenderingTests(TestCase):
         self.assertEqual(rendered["sources"]["matching"]["subgraphs"][1]["version"], "v2")
         self.assertEqual(config["sources"]["matching"]["subgraphs"][0]["version"], "v1")
 
+    def test_render_updates_multiple_subgraphs_in_one_pass(self) -> None:
+        config = {
+            "sources": {
+                "matching": {
+                    "type": "subgraph_entity",
+                    "subgraphs": [
+                        {"name": "arbitrum_analytics", "version": "v1"},
+                        {"name": "arbitrum-vibe-analytics", "version": "v2"},
+                    ],
+                }
+            }
+        }
+
+        rendered, count = render_subgraph_versions(
+            config,
+            {"arbitrum_analytics": "v3", "arbitrum-vibe-analytics": "v4"},
+        )
+
+        self.assertEqual(count, 2)
+        self.assertEqual(
+            rendered["sources"]["matching"]["subgraphs"],
+            [
+                {"name": "arbitrum_analytics", "version": "v3"},
+                {"name": "arbitrum-vibe-analytics", "version": "v4"},
+            ],
+        )
+
+    def test_dependency_index_counts_references_by_subgraph(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            write_pipeline(config_dir / "related.yaml", "related", "base_analytics")
+
+            dependencies = load_pipeline_dependencies(config_dir)
+
+        self.assertEqual(len(dependencies["base_analytics"]), 1)
+        self.assertEqual(dependencies["base_analytics"][0].pipeline, "related")
+        self.assertEqual(dependencies["base_analytics"][0].reference_count, 2)
+
     def test_dry_run_only_returns_related_pipelines(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             config_dir = Path(temp_dir)
@@ -70,6 +112,49 @@ class PipelineRenderingTests(TestCase):
 
 
 class PipelineApplyTests(TestCase):
+    def test_batch_apply_keeps_every_requested_subgraph_version(self) -> None:
+        rendered_references: list[list[dict[str, str]]] = []
+
+        def runner(command, **_kwargs):
+            if command[1:3] == ["pipeline", "apply"]:
+                with Path(command[3]).open() as rendered_file:
+                    rendered = yaml.safe_load(rendered_file)
+                rendered_references.append(rendered["sources"]["entities"]["subgraphs"])
+            return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+        config = {
+            "name": "shared",
+            "sources": {
+                "entities": {
+                    "type": "subgraph_entity",
+                    "subgraphs": [
+                        {"name": "arbitrum_analytics", "version": "old-prod"},
+                        {"name": "arbitrum-vibe-analytics", "version": "old-stage"},
+                    ],
+                }
+            },
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            with (config_dir / "shared.yaml").open("w") as config_file:
+                yaml.safe_dump(config, config_file, sort_keys=False)
+
+            results = update_managed_pipelines(
+                {"arbitrum_analytics": "new-prod", "arbitrum-vibe-analytics": "new-stage"},
+                apply=True,
+                config_dir=config_dir,
+                runner=runner,
+            )
+
+        self.assertEqual(results[0].status, "updated")
+        self.assertEqual(
+            rendered_references,
+            [[
+                {"name": "arbitrum_analytics", "version": "new-prod"},
+                {"name": "arbitrum-vibe-analytics", "version": "new-stage"},
+            ]],
+        )
+
     def test_apply_checks_existing_pipeline_validates_and_uses_fresh_snapshot(self) -> None:
         calls: list[list[str]] = []
         rendered_versions: list[str] = []
@@ -111,20 +196,3 @@ class PipelineApplyTests(TestCase):
 
         self.assertEqual([(result.pipeline, result.status) for result in results], [("broken", "failed"), ("working", "updated")])
         self.assertIn("not found", results[0].message)
-
-
-class ManagerPipelineHookTests(TestCase):
-    def test_pipeline_updater_failure_is_non_fatal(self) -> None:
-        completed = subprocess.CompletedProcess(["pipeline_updater"], 1)
-        with patch.object(manager.subprocess, "run", return_value=completed), patch.object(manager, "warn") as warn:
-            result = manager.update_pipelines_after_deploy("base_analytics", "v3")
-
-        self.assertFalse(result)
-        warn.assert_called_once()
-
-    def test_pipeline_updater_start_error_is_non_fatal(self) -> None:
-        with patch.object(manager.subprocess, "run", side_effect=OSError("missing python")), patch.object(manager, "warn") as warn:
-            result = manager.update_pipelines_after_deploy("base_analytics", "v3")
-
-        self.assertFalse(result)
-        self.assertIn("deployment succeeded", warn.call_args.args[0])

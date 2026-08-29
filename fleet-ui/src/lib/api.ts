@@ -47,6 +47,7 @@ export async function bulkPromote(input: {
 	version: string
 	requireSynced: boolean
 	deleteDisplaced: boolean
+	updatePipelines: boolean
 }): Promise<ApiActionResponse> {
 	return apiPost<ApiActionResponse>("/api/bulk-promote", input)
 }
@@ -59,7 +60,7 @@ export async function deleteVersion(input: { base: string; version: string }): P
 	return apiPost<ApiActionResponse>("/api/delete-version", input)
 }
 
-export async function rowPromote(input: { base: string; version: string; tags: string[] }): Promise<ApiActionResponse> {
+export async function rowPromote(input: { base: string; version: string; tags: string[]; updatePipelines: boolean }): Promise<ApiActionResponse> {
 	return apiPost<ApiActionResponse>("/api/row-promote", input)
 }
 
