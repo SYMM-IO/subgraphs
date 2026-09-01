@@ -32,3 +32,4 @@ __pycache__/
 # SYMMIO Fleet desktop app — generated bundle (machine-specific path) + runtime
 /SYMMIO Fleet.app/
 /.fleet-app/
+.diffstory/
