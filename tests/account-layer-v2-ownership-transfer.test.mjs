@@ -70,11 +70,12 @@ test("AccountLayer v2 ABI is byte-for-byte pinned and exposes ownership enumerat
 
 test("AccountLayer v3 ABI matches the fresh Arbitrum surface", () => {
 	const abiBytes = read("configs/abis/accountLayer_3.json");
-	assert.equal(createHash("sha256").update(abiBytes).digest("hex"), "256152b79f68f0f2129db28e8b8f7d2d05e0e5071c206c97d6554ece09150522");
+	assert.equal(createHash("sha256").update(abiBytes).digest("hex"), "aaefaff7bd24b80836007b204412796d8cec9fc14472909d36d155db023a6736");
 
 	const abi = JSON.parse(abiBytes.toString("utf8"));
 	const eventNames = new Set(abi.filter(entry => entry.type === "event").map(entry => entry.name));
 	assert.ok(eventNames.has("SignerScopeUpdated"));
+	assert.ok(eventNames.has("OwnershipTransferred"));
 	assert.equal(eventNames.has("ExpressRateSet"), false);
 	assert.equal(eventNames.has("VirtualProviderSet"), false);
 });

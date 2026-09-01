@@ -72,6 +72,11 @@
     },
     {
         "inputs": [],
+        "name": "ExternalCallSignerWasModified",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "HasActiveVirtualAccounts",
         "type": "error"
     },
@@ -145,6 +150,11 @@
     {
         "inputs": [],
         "name": "LegacyContractNotRegistered",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "MarginKeyMismatch",
         "type": "error"
     },
     {
@@ -282,6 +292,31 @@
         "inputs": [],
         "name": "ZeroAmount",
         "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "virtualAccount",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "subAccount",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+            }
+        ],
+        "name": "AddMargin",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -592,6 +627,45 @@
             }
         ],
         "name": "_call",
+        "outputs": [
+            {
+                "internalType": "bytes[]",
+                "name": "",
+                "type": "bytes[]"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "internalType": "enum VirtualAccountIsolationType",
+                "name": "isolationType",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "symbolId",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "marginAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bytes[]",
+                "name": "callDatas",
+                "type": "bytes[]"
+            }
+        ],
+        "name": "_callWithMargin",
         "outputs": [
             {
                 "internalType": "bytes[]",
@@ -1366,6 +1440,30 @@
                 "internalType": "address",
                 "name": "",
                 "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "getAffiliateForAccount",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "affiliate",
+                "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "exists",
+                "type": "bool"
             }
         ],
         "stateMutability": "view",
@@ -2265,6 +2363,17 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            }
+        ],
+        "name": "SafeERC20FailedOperation",
+        "type": "error"
+    },
+    {
         "anonymous": false,
         "inputs": [
             {
@@ -3027,31 +3136,6 @@
                 "type": "uint256"
             }
         ],
-        "name": "AddMargin",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "virtualAccount",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "subAccount",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amount",
-                "type": "uint256"
-            }
-        ],
         "name": "EmergencyMarginRecovered",
         "type": "event"
     },
@@ -3239,6 +3323,11 @@
                         "internalType": "int256",
                         "name": "upnl",
                         "type": "int256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "fundingDebt",
+                        "type": "uint256"
                     },
                     {
                         "internalType": "uint256",
@@ -3757,6 +3846,37 @@
         "inputs": [
             {
                 "internalType": "address",
+                "name": "signerOrZero",
+                "type": "address"
+            }
+        ],
+        "name": "setTransientSigner",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "signerOrZero",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "scope",
+                "type": "address"
+            }
+        ],
+        "name": "setTransientSignerScoped",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
                 "name": "core",
                 "type": "address"
             },
@@ -3790,6 +3910,57 @@
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "pendingOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferCanceled",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "currentOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "pendingOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferStarted",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
     },
     {
         "inputs": [

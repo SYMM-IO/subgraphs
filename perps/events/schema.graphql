@@ -12855,11 +12855,7 @@ type SetMuonFunctionUpnlValidTime @entity(immutable: true) {
 	"""
 	func: Int!
 	"""
-	Whether the per-function validity override is enabled; false uses the global UPNL validity.
-	"""
-	enabled: Boolean!
-	"""
-	Override validity duration in seconds, or zero when cleared.
+	Per-function validity duration in seconds; zero restores the global UPNL validity.
 	"""
 	upnlValidTime: BigInt!
 	"""
@@ -13329,9 +13325,13 @@ type AffiliateDeposit @entity(immutable: true) {
 	"""
 	counterId: BigInt!
 	"""
-	Affiliate pool credited by the deposit; depositor is not emitted.
+	Affiliate pool credited by the deposit.
 	"""
 	affiliate: Bytes!
+	"""
+	Account that transferred collateral into the affiliate pool.
+	"""
+	depositor: Bytes!
 	"""
 	Collateral transferred from caller into the affiliate pool.
 	"""
@@ -13382,6 +13382,10 @@ type AffiliateWithdraw @entity(immutable: true) {
 	Affiliate pool debited; not necessarily caller or recipient.
 	"""
 	affiliate: Bytes!
+	"""
+	Account that received the withdrawn affiliate-pool collateral.
+	"""
+	recipient: Bytes!
 	"""
 	Unlocked collateral removed and transferred to the authorized caller.
 	"""
@@ -14259,7 +14263,11 @@ type GeneralDeposit @entity(immutable: true) {
 	"""
 	counterId: BigInt!
 	"""
-	Collateral transferred into general liquidity pool; depositor not emitted.
+	Account that transferred collateral into the general liquidity pool.
+	"""
+	depositor: Bytes!
+	"""
+	Collateral transferred into the general liquidity pool.
 	"""
 	amount: BigInt!
 	"""
@@ -14305,7 +14313,11 @@ type GeneralWithdraw @entity(immutable: true) {
 	"""
 	counterId: BigInt!
 	"""
-	Unlocked collateral removed from general pool.
+	Account that received the general-pool withdrawal.
+	"""
+	recipient: Bytes!
+	"""
+	Unlocked collateral removed from the general pool.
 	"""
 	amount: BigInt!
 	"""
@@ -14405,7 +14417,11 @@ type OperatorFeesClaimed @entity(immutable: true) {
 	"""
 	affiliate: Bytes!
 	"""
-	Collateral removed from that bucket and transferred to un-emitted recipient.
+	Account that received the claimed operator fees.
+	"""
+	recipient: Bytes!
+	"""
+	Collateral removed from that bucket and transferred to the emitted recipient.
 	"""
 	amount: BigInt!
 	"""
@@ -16555,6 +16571,10 @@ type FeesClaimed @entity(immutable: true) {
 	"""
 	symmio: Bytes
 	"""
+	Recipient emitted by the Express Provider variant; absent on the Account Layer variant.
+	"""
+	recipient: Bytes
+	"""
 	Collateral claimed and distributed from AccountLayer or transferred from Express Provider fees.
 	"""
 	amount: BigInt!
@@ -17659,5 +17679,579 @@ type WhitelistedSymmioCoreSet @entity(immutable: true) {
 	"""
 	Block hash that included this event.
 	"""
+	blockHash: Bytes!
+}
+
+"""One signed balance change produced by an explicit Clearing House settlement."""
+type ClearingHouseAccountSettlement @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the settlement."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Account or allocation subject whose settlement was applied."""
+	subject: Bytes!
+	"""Concrete account whose balance changed."""
+	account: Bytes!
+	"""Allocation bucket credited or debited; zero denotes free balance."""
+	allocationKey: Bytes!
+	"""Signed 18-decimal balance delta applied to the account bucket."""
+	amount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Per-symbol PnL, funding, and platform-fee components of a Clearing House settlement."""
+type ClearingHouseSettlementComponent @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the settlement component."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Account or allocation subject whose component was calculated."""
+	subject: Bytes!
+	"""Concrete account included in the settlement."""
+	account: Bytes!
+	"""Protocol symbol used for the component calculation."""
+	symbolId: BigInt!
+	"""Allocation bucket to which the component belongs."""
+	allocationKey: Bytes!
+	"""Signed 18-decimal realized PnL included in the settlement."""
+	realizedPnl: BigInt!
+	"""Signed 18-decimal funding included in the settlement."""
+	funding: BigInt!
+	"""Signed 18-decimal platform fee included in the settlement."""
+	platformFee: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Funding and PnL amounts scaled and applied during a PartyA liquidation."""
+type LiquidationFundingSettled @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the liquidation settlement."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Liquidated PartyA account."""
+	partyA: Bytes!
+	"""PartyB whose funding and PnL were settled."""
+	partyB: Bytes!
+	"""PartyA allocation bucket used for this settlement."""
+	allocationKey: Bytes!
+	"""Signed funding before liquidation scaling."""
+	rawFunding: BigInt!
+	"""Signed funding applied after liquidation scaling."""
+	settledFunding: BigInt!
+	"""Signed PnL before liquidation scaling."""
+	rawPnl: BigInt!
+	"""Signed PnL applied after liquidation scaling."""
+	settledPnl: BigInt!
+	"""Numerator used to scale raw settlement values."""
+	scaleNumerator: BigInt!
+	"""Denominator used to scale raw settlement values."""
+	scaleDenominator: BigInt!
+	"""Opaque identifier shared by events from the same liquidation."""
+	liquidationId: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Funding left unapplied when liquidation settlement for a PartyB was abandoned."""
+type LiquidationFundingSettlementAbandoned @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the abandoned settlement."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Liquidated PartyA account."""
+	partyA: Bytes!
+	"""PartyB whose funding settlement was abandoned."""
+	partyB: Bytes!
+	"""Signed funding that could not be applied."""
+	rawFunding: BigInt!
+	"""Opaque identifier shared by events from the same liquidation."""
+	liquidationId: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Liquidation fill that used the configured PartyB shortfall allowance."""
+type PartyALiquidationOvershootUsed @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the overshoot use."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Quote closed into PartyA liquidation."""
+	quoteId: BigInt!
+	"""PartyA account approaching liquidation."""
+	partyA: Bytes!
+	"""PartyB whose overshoot setting was used."""
+	partyB: Bytes!
+	"""Protocol symbol of the affected quote."""
+	symbolId: BigInt!
+	"""Configured liquidation overshoot rate."""
+	rate: BigInt!
+	"""Maximum shortfall permitted for this fill."""
+	allowedShortfall: BigInt!
+	"""Shortfall produced by the executed fill."""
+	actualShortfall: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Funding amount settled for one quote during explicit accounting."""
+type QuoteFundingSettled @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the quote funding settlement."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Quote whose funding was settled."""
+	quoteId: BigInt!
+	"""Protocol symbol of the quote."""
+	symbolId: BigInt!
+	"""PartyB side of the quote."""
+	partyB: Bytes!
+	"""PartyA side of the quote."""
+	partyA: Bytes!
+	"""PartyA allocation bucket used for settlement."""
+	allocationKey: Bytes!
+	"""Signed 18-decimal funding applied to the quote."""
+	funding: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Raw funding and PnL calculated for a quote during PartyA liquidation."""
+type QuoteLiquidationFundingCalculated @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the quote calculation."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Liquidated PartyA account."""
+	partyA: Bytes!
+	"""PartyB side of the quote."""
+	partyB: Bytes!
+	"""Quote included in the liquidation calculation."""
+	quoteId: BigInt!
+	"""Protocol symbol of the quote."""
+	symbolId: BigInt!
+	"""Signed funding calculated before settlement scaling."""
+	rawFunding: BigInt!
+	"""Signed PnL calculated before settlement scaling."""
+	rawPnl: BigInt!
+	"""Opaque identifier shared by events from the same liquidation."""
+	liquidationId: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Progress made while restoring PartyB funding around a symbol restatement."""
+type RestatementFundingRestorationProgress @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the restoration progress."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Protocol symbol being restated."""
+	symbolId: BigInt!
+	"""Restatement epoch for the symbol."""
+	epoch: BigInt!
+	"""Whether this restoration runs as part of finalization."""
+	finalizing: Boolean!
+	"""Number of PartyB accounts processed by this transaction."""
+	processedPartyBs: BigInt!
+	"""Number of PartyB accounts still awaiting restoration."""
+	remainingPartyBs: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Start of a PartyB funding-restoration pass for a symbol restatement."""
+type RestatementFundingRestorationStarted @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the restoration start."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Protocol symbol being restated."""
+	symbolId: BigInt!
+	"""Restatement epoch for the symbol."""
+	epoch: BigInt!
+	"""Whether this restoration runs as part of finalization."""
+	finalizing: Boolean!
+	"""Number of PartyB accounts awaiting restoration."""
+	pendingPartyBs: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""One quote amount consumed from the prepared inventory of a symbol restatement."""
+type RestatementInventoryConsumed @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the inventory consumption."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Protocol symbol being restated."""
+	symbolId: BigInt!
+	"""Restatement epoch for the symbol."""
+	epoch: BigInt!
+	"""Quote whose position amount consumed inventory."""
+	quoteId: BigInt!
+	"""PartyB whose prepared inventory was reduced."""
+	partyB: Bytes!
+	"""Raw position-type ordinal of the consumed inventory."""
+	positionType: Int!
+	"""Position amount consumed from the prepared inventory."""
+	consumedAmount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Long and short inventory prepared for one PartyB during a symbol restatement."""
+type RestatementInventoryPrepared @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the prepared inventory."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Protocol symbol being restated."""
+	symbolId: BigInt!
+	"""Restatement epoch for the symbol."""
+	epoch: BigInt!
+	"""PartyB whose inventory was prepared."""
+	partyB: Bytes!
+	"""Long position amount remaining for this PartyB."""
+	partyBRemainingLongAmount: BigInt!
+	"""Short position amount remaining for this PartyB."""
+	partyBRemainingShortAmount: BigInt!
+	"""Long position amount remaining across all prepared PartyBs."""
+	totalRemainingLongAmount: BigInt!
+	"""Short position amount remaining across all prepared PartyBs."""
+	totalRemainingShortAmount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Completion of inventory and funding preparation for a symbol restatement."""
+type RestatementPreparationCompleted @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted preparation completion."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Protocol symbol being restated."""
+	symbolId: BigInt!
+	"""Restatement epoch for the symbol."""
+	epoch: BigInt!
+	"""Long position amount remaining after preparation."""
+	totalRemainingLongAmount: BigInt!
+	"""Short position amount remaining after preparation."""
+	totalRemainingShortAmount: BigInt!
+	"""Number of PartyB funding checkpoints still pending."""
+	pendingFundingPartyBCount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Batch progress while preparing PartyB inventory and funding for a restatement."""
+type RestatementPreparationProgress @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted preparation progress."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Protocol symbol being restated."""
+	symbolId: BigInt!
+	"""Restatement epoch for the symbol."""
+	epoch: BigInt!
+	"""Number of PartyB entries submitted in this batch."""
+	submittedPartyBCount: BigInt!
+	"""Number of PartyB inventories first prepared in this batch."""
+	newlyPreparedPartyBCount: BigInt!
+	"""Number of PartyB funding states checkpointed in this batch."""
+	fundingCheckpointedPartyBCount: BigInt!
+	"""Long position amount remaining after this batch."""
+	totalRemainingLongAmount: BigInt!
+	"""Short position amount remaining after this batch."""
+	totalRemainingShortAmount: BigInt!
+	"""Number of PartyB funding checkpoints still pending."""
+	pendingFundingPartyBCount: BigInt!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""PartyB and symbol-specific liquidation overshoot rate configuration."""
+type SetPartyBLiquidationOvershootRate @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the configuration change."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""PartyB whose liquidation overshoot setting changed."""
+	partyB: Bytes!
+	"""Protocol symbol covered by the setting."""
+	symbolId: BigInt!
+	"""Overshoot rate in effect before the change."""
+	oldRate: BigInt!
+	"""Overshoot rate in effect after the change."""
+	newRate: BigInt!
+	"""Whether the PartyB-symbol pair now has an explicit override."""
+	hasOverride: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Tagged solver-fee receiver configured by a PartyB."""
+type SetSolverFeeReceiverForTag @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the receiver change."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""PartyB that owns the tag-specific routing rule."""
+	partyB: Bytes!
+	"""Receiver selected for the tag."""
+	receiver: Bytes!
+	"""Unhashed bytes32 fee-routing tag."""
+	tag: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""Symbol-specific minimum notional liquidation-fee rate configuration."""
+type SetSymbolMinAcceptableNotionalLFRate @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the minimum-rate change."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Protocol symbol covered by the minimum rate."""
+	symbolId: BigInt!
+	"""Minimum notional liquidation-fee rate before the change."""
+	oldMinAcceptableNotionalLFRate: BigInt!
+	"""Minimum notional liquidation-fee rate after the change."""
+	newMinAcceptableNotionalLFRate: BigInt!
+	"""Whether the symbol now has an explicit rate override."""
+	hasOverride: Boolean!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
+	blockHash: Bytes!
+}
+
+"""One tagged solver-fee amount charged alongside an open or close execution."""
+type SolverFeeCharged @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with `-`."""
+	id: ID!
+	"""SYMMIO core that emitted the fee charge."""
+	source: Bytes!
+	"""Subgraph-wide sequence number assigned while indexing."""
+	counterId: BigInt!
+	"""Quote whose solver-fee cap was consumed."""
+	quoteId: BigInt!
+	"""PartyA account that paid the fee."""
+	partyA: Bytes!
+	"""PartyB side of the charged quote."""
+	partyB: Bytes!
+	"""Account credited with the solver fee."""
+	receiver: Bytes!
+	"""Protocol symbol of the charged quote."""
+	symbolId: BigInt!
+	"""Raw solver-fee type ordinal distinguishing open and close charges."""
+	feeType: Int!
+	"""Charged 18-decimal solver-fee amount."""
+	amount: BigInt!
+	"""Unhashed bytes32 fee-routing tag."""
+	tag: Bytes!
+	"""Block number that included this event."""
+	blockNumber: BigInt!
+	"""Block timestamp that included this event."""
+	blockTimestamp: BigInt!
+	"""Hash of the transaction containing this event log."""
+	transactionHash: Bytes!
+	"""Transaction index within the block."""
+	transactionIndex: BigInt!
+	"""Zero-based index of this log among all logs in its block."""
+	logIndex: BigInt!
+	"""Block hash that included this event."""
 	blockHash: Bytes!
 }

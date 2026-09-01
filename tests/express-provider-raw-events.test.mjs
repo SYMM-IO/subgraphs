@@ -42,8 +42,8 @@ const entityFields = block => {
 };
 
 test("Express Provider raw mapping covers every ABI event exactly once", () => {
-	assert.equal(events.length, 43);
-	assert.equal(new Set(eventNames).size, 43);
+	assert.equal(events.length, 39);
+	assert.equal(new Set(eventNames).size, 39);
 	assert.deepEqual(Object.keys(deps).sort(), eventNames);
 
 	const exports = [...source.matchAll(/^export function handle([A-Za-z0-9_]+)\(/gm)].map(match => match[1]).sort();
@@ -67,7 +67,12 @@ test("Express Provider raw mapping covers every ABI event exactly once", () => {
 			assert.equal(fields.get(field), type, `${event.name}.${field} must be ${type}`);
 		}
 		for (const input of event.inputs) {
-			const expectedType = event.name === "WithdrawAccepted" && input.name === "optionType" ? "Int" : schemaTypeFor(input);
+			const expectedType =
+				event.name === "WithdrawAccepted" && input.name === "optionType"
+					? "Int"
+					: event.name === "FeesClaimed" && input.name === "recipient"
+						? "Bytes"
+						: schemaTypeFor(input);
 			assert.equal(fields.get(input.name), expectedType, `${event.name}.${input.name} schema type mismatch`);
 			assert.match(
 				handler,

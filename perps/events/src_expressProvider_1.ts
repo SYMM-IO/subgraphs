@@ -55,14 +55,6 @@ import {PausedUpdatedHandler} from './handlers/expressProvider/PausedUpdatedHand
 import {PausedUpdated} from '../../generated/templates/ExpressProvider/expressProvider_1'
 import {RequestDebtClearedHandler} from './handlers/expressProvider/RequestDebtClearedHandler'
 import {RequestDebtCleared} from '../../generated/templates/ExpressProvider/expressProvider_1'
-import {SponsorConfigUpdatedHandler} from './handlers/expressProvider/SponsorConfigUpdatedHandler'
-import {SponsorConfigUpdated} from '../../generated/templates/ExpressProvider/expressProvider_1'
-import {SponsorCoverageRestoredHandler} from './handlers/expressProvider/SponsorCoverageRestoredHandler'
-import {SponsorCoverageRestored} from '../../generated/templates/ExpressProvider/expressProvider_1'
-import {SponsorDepositHandler} from './handlers/expressProvider/SponsorDepositHandler'
-import {SponsorDeposit} from '../../generated/templates/ExpressProvider/expressProvider_1'
-import {SponsorWithdrawHandler} from './handlers/expressProvider/SponsorWithdrawHandler'
-import {SponsorWithdraw} from '../../generated/templates/ExpressProvider/expressProvider_1'
 import {TokensRescuedHandler} from './handlers/expressProvider/TokensRescuedHandler'
 import {TokensRescued} from '../../generated/templates/ExpressProvider/expressProvider_1'
 import {ValidatorApprovalTimeoutUpdatedHandler} from './handlers/expressProvider/ValidatorApprovalTimeoutUpdatedHandler'
@@ -280,34 +272,6 @@ export function handlePausedUpdated(event: PausedUpdated): void {
 export function handleRequestDebtCleared(event: RequestDebtCleared): void {
     ensureSyncMeta(event.block)
     let handler = new RequestDebtClearedHandler<RequestDebtCleared>()
-    handler.handle(event, ExpressProviderVersion.v_1)
-}
-
-
-export function handleSponsorConfigUpdated(event: SponsorConfigUpdated): void {
-    ensureSyncMeta(event.block)
-    let handler = new SponsorConfigUpdatedHandler<SponsorConfigUpdated>()
-    handler.handle(event, ExpressProviderVersion.v_1)
-}
-
-
-export function handleSponsorCoverageRestored(event: SponsorCoverageRestored): void {
-    ensureSyncMeta(event.block)
-    let handler = new SponsorCoverageRestoredHandler<SponsorCoverageRestored>()
-    handler.handle(event, ExpressProviderVersion.v_1)
-}
-
-
-export function handleSponsorDeposit(event: SponsorDeposit): void {
-    ensureSyncMeta(event.block)
-    let handler = new SponsorDepositHandler<SponsorDeposit>()
-    handler.handle(event, ExpressProviderVersion.v_1)
-}
-
-
-export function handleSponsorWithdraw(event: SponsorWithdraw): void {
-    ensureSyncMeta(event.block)
-    let handler = new SponsorWithdrawHandler<SponsorWithdraw>()
     handler.handle(event, ExpressProviderVersion.v_1)
 }
 

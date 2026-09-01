@@ -83,18 +83,6 @@
 	"RequestDebtCleared": [
 		"RequestDebtCleared"
 	],
-	"SponsorConfigUpdated": [
-		"SponsorConfigUpdated"
-	],
-	"SponsorCoverageRestored": [
-		"SponsorCoverageRestored"
-	],
-	"SponsorDeposit": [
-		"SponsorDeposit"
-	],
-	"SponsorWithdraw": [
-		"SponsorWithdraw"
-	],
 	"TokensRescued": [
 		"TokensRescued"
 	],
@@ -104,11 +92,11 @@
 	"ValidatorUpdated": [
 		"ValidatorUpdated"
 	],
-	"WithdrawAccepted": [
-		"WithdrawAccepted"
-	],
 	"WithdrawAccelerated": [
 		"WithdrawAccelerated"
+	],
+	"WithdrawAccepted": [
+		"WithdrawAccepted"
 	],
 	"WithdrawCancelled": [
 		"WithdrawCancelled"

@@ -1,7 +1,7 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { EntityVersion, SyncMeta } from "../../generated/schema"
 
-const GLOBAL_VERSION = "2026-08-17-001"
+const GLOBAL_VERSION = "2026-09-01-001"
 const VERSIONS_HASH = "allocate_party_a:v1|buyback:v1|buyback_day:v1|buyback_deposit:v1|buyback_gateway_stats:v1|deallocate_party_a:v1|deposit:v1|force_close_position:v1|request_to_cancel_close_request:v1|request_to_cancel_quote:v1|request_to_close_position:v1|send_quote:v2|withdraw:v1"
 
 function ensureEntityVersion(id: string, versionValue: string, timestamp: BigInt): void {

@@ -28,8 +28,6 @@ import {ChargeAccumulatedFundingFeeHandler} from './handlers/symmio/ChargeAccumu
 import {ChargeAccumulatedFundingFee} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {ChargeFundingRateHandler} from './handlers/symmio/ChargeFundingRateHandler'
 import {ChargeFundingRate} from '../../generated/symmio_0_8_6/symmio_0_8_6'
-import {CloseSolverFeeChargedHandler} from './handlers/symmio/CloseSolverFeeChargedHandler'
-import {CloseSolverFeeCharged} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {DeallocateForPartyBHandler} from './handlers/symmio/DeallocateForPartyBHandler'
 import {DeallocateForPartyB} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {DeallocatePartyAHandler} from './handlers/symmio/DeallocatePartyAHandler'
@@ -80,8 +78,6 @@ import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
 import {LockQuote} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
 import {OpenPosition} from '../../generated/symmio_0_8_6/symmio_0_8_6'
-import {OpenSolverFeeChargedHandler} from './handlers/symmio/OpenSolverFeeChargedHandler'
-import {OpenSolverFeeCharged} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {PartyAReimbursementChangeHandler} from './handlers/symmio/PartyAReimbursementChangeHandler'
 import {PartyAReimbursementChange} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {PendingQuoteCancelledByAdjustmentHandler} from './handlers/symmio/PendingQuoteCancelledByAdjustmentHandler'
@@ -150,6 +146,8 @@ import {SettleUpnlUnified} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SettleUpnl} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SoftPartyBLiquidationHandler} from './handlers/symmio/SoftPartyBLiquidationHandler'
 import {SoftPartyBLiquidation} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {SolverFeeChargedHandler} from './handlers/symmio/SolverFeeChargedHandler'
+import {SolverFeeCharged} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {TakeoverPartyALiquidationHandler} from './handlers/symmio/TakeoverPartyALiquidationHandler'
 import {TakeoverPartyALiquidation} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {TradingFeeChargedHandler} from './handlers/symmio/TradingFeeChargedHandler'
@@ -287,13 +285,6 @@ export function handleChargeAccumulatedFundingFee(event: ChargeAccumulatedFundin
 export function handleChargeFundingRate(event: ChargeFundingRate): void {
     ensureSyncMeta(event.block)
     let handler = new ChargeFundingRateHandler<ChargeFundingRate>()
-    handler.handle(event, Version.v_0_8_6)
-}
-
-
-export function handleCloseSolverFeeCharged(event: CloseSolverFeeCharged): void {
-    ensureSyncMeta(event.block)
-    let handler = new CloseSolverFeeChargedHandler<CloseSolverFeeCharged>()
     handler.handle(event, Version.v_0_8_6)
 }
 
@@ -469,13 +460,6 @@ export function handleLockQuote(event: LockQuote): void {
 export function handleOpenPosition(event: OpenPosition): void {
     ensureSyncMeta(event.block)
     let handler = new OpenPositionHandler<OpenPosition>()
-    handler.handle(event, Version.v_0_8_6)
-}
-
-
-export function handleOpenSolverFeeCharged(event: OpenSolverFeeCharged): void {
-    ensureSyncMeta(event.block)
-    let handler = new OpenSolverFeeChargedHandler<OpenSolverFeeCharged>()
     handler.handle(event, Version.v_0_8_6)
 }
 
@@ -714,6 +698,13 @@ export function handleSettleUpnlUnified(event: SettleUpnlUnified): void {
 export function handleSoftPartyBLiquidation(event: SoftPartyBLiquidation): void {
     ensureSyncMeta(event.block)
     let handler = new SoftPartyBLiquidationHandler<SoftPartyBLiquidation>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleSolverFeeCharged(event: SolverFeeCharged): void {
+    ensureSyncMeta(event.block)
+    let handler = new SolverFeeChargedHandler<SolverFeeCharged>()
     handler.handle(event, Version.v_0_8_6)
 }
 

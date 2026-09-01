@@ -1,0 +1,26 @@
+{
+	"network": "arbitrum-one",
+	"contracts": [
+		{
+			"address": "0x57331027091994FCb9c5Aec48ea92cEf0a93CF6A",
+			"abi": "symmio",
+			"version": "0_8_6",
+			"startBlock": "500268225",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2",
+				"accountLayer_1"
+			]
+		},
+		{
+			"address": "0x573310d1D6ec18cB21E1aB949414470D9bf5c24E",
+			"abi": "accountLayer",
+			"version": "3",
+			"startBlock": "500269118"
+		}
+	],
+	"deploy_urls": {
+		"perps/analytics": "arbitrum-vibe-mainnet-analytics",
+		"perps/events": "arbitrum-vibe-mainnet-events"
+	}
+}

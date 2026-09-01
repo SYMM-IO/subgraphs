@@ -417,8 +417,7 @@
 		"RequestToCancelQuote",
 		"DeferredLiquidatePartyA",
 		"PendingQuoteCancelledByAdjustment",
-		"OpenSolverFeeCharged(uint256,address,address,address,uint256,uint256)",
-		"CloseSolverFeeCharged(uint256,address,address,address,uint256,uint256)"
+		"SolverFeeCharged(uint256,address,address,address,uint256,uint8,uint256,bytes32)"
 	],
 	"AffiliateExpressWithdrawComponents": [
 		"WithdrawInitiated",

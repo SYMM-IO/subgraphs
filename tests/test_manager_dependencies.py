@@ -122,10 +122,10 @@ class Symmio086DependencyTests(TestCase):
         finally:
             os.chdir(previous_cwd)
 
-        self.assertEqual(len(dependencies), 233)
-        self.assertEqual(len(event_refs), 233)
-        self.assertEqual(len(events), 233)
-        self.assertEqual(len({event.name for event in events}), 233)
+        self.assertEqual(len(dependencies), 251)
+        self.assertEqual(len(event_refs), 251)
+        self.assertEqual(len(events), 251)
+        self.assertEqual(len({event.name for event in events}), 251)
         resolved = {event.name: event.signature.replace("indexed ", "") for event in events}
         for event_name, signature in EVENTS_OVERLOAD_SIGNATURES.items():
             self.assertEqual(resolved[event_name], signature)
@@ -162,7 +162,7 @@ class AccountLayerV3DependencyTests(TestCase):
         finally:
             os.chdir(previous_cwd)
 
-        self.assertEqual(len(events), 46)
+        self.assertEqual(len(events), 49)
         self.assertEqual({event.name for event in events}, {entry["name"] for entry in abi if entry["type"] == "event"})
         self.assertIn("SignerScopeUpdated", {event.name for event in events})
         self.assertNotIn("ExpressRateSet", event_refs)
@@ -242,6 +242,20 @@ class DataSourceContextTests(TestCase):
         self.assertEqual(
             context["latestAccountBalanceSweepActivationBlock"],
             {"type": "BigInt", "data": "0"},
+        )
+
+    def test_vibe_mainnet_topology_uses_the_production_account_layer(self) -> None:
+        config_path = REPO_ROOT / "configs/perps/arbitrum_vibe_mainnet.json"
+        config = manager.Config.from_dict(json.loads(config_path.read_text()), deployment_id="arbitrum-vibe-mainnet")
+        core = next(contract for contract in config.contracts if contract.abi == "symmio")
+
+        context = manager.build_data_source_context(config, core, "perps/analytics")
+
+        self.assertEqual(core.startBlock, "500268225")
+        self.assertEqual(context["deploymentId"], {"type": "String", "data": "arbitrum-vibe-mainnet"})
+        self.assertEqual(
+            context["accountLayerSource"],
+            {"type": "Bytes", "data": "0x573310d1D6ec18cB21E1aB949414470D9bf5c24E"},
         )
 
     def test_ambiguous_account_layers_are_rejected(self) -> None:

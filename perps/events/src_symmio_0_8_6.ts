@@ -52,10 +52,12 @@ import {ChargeAccumulatedFundingFeeHandler} from './handlers/symmio/ChargeAccumu
 import {ChargeAccumulatedFundingFee} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {ChargeFundingRateHandler} from './handlers/symmio/ChargeFundingRateHandler'
 import {ChargeFundingRate} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {ClearingHouseAccountSettlementHandler} from './handlers/symmio/ClearingHouseAccountSettlementHandler'
+import {ClearingHouseAccountSettlement} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {ClearingHouseSettlementComponentHandler} from './handlers/symmio/ClearingHouseSettlementComponentHandler'
+import {ClearingHouseSettlementComponent} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {CloseAffiliatePositionsHandler} from './handlers/symmio/CloseAffiliatePositionsHandler'
 import {CloseAffiliatePositions} from '../../generated/symmio_0_8_6/symmio_0_8_6'
-import {CloseSolverFeeChargedHandler} from './handlers/symmio/CloseSolverFeeChargedHandler'
-import {CloseSolverFeeCharged} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {CompleteUnbindRequestHandler} from './handlers/symmio/CompleteUnbindRequestHandler'
 import {CompleteUnbindRequest} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {CrossLockedValuesMigratedHandler} from './handlers/symmio/CrossLockedValuesMigratedHandler'
@@ -146,12 +148,14 @@ import {LiquidationDisputedHandler} from './handlers/symmio/LiquidationDisputedH
 import {LiquidationDisputed} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {LiquidationEscrowCreatedHandler} from './handlers/symmio/LiquidationEscrowCreatedHandler'
 import {LiquidationEscrowCreated} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {LiquidationFundingSettledHandler} from './handlers/symmio/LiquidationFundingSettledHandler'
+import {LiquidationFundingSettled} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {LiquidationFundingSettlementAbandonedHandler} from './handlers/symmio/LiquidationFundingSettlementAbandonedHandler'
+import {LiquidationFundingSettlementAbandoned} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {LockQuoteHandler} from './handlers/symmio/LockQuoteHandler'
 import {LockQuote} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {OpenPosition1} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {OpenPositionHandler} from './handlers/symmio/OpenPositionHandler'
-import {OpenSolverFeeChargedHandler} from './handlers/symmio/OpenSolverFeeChargedHandler'
-import {OpenSolverFeeCharged} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {OperationalFeeAllowanceReductionRequestedHandler} from './handlers/symmio/OperationalFeeAllowanceReductionRequestedHandler'
 import {OperationalFeeAllowanceReductionRequested} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {OperationalFeeAllowanceSetHandler} from './handlers/symmio/OperationalFeeAllowanceSetHandler'
@@ -166,6 +170,14 @@ import {OperationalFeeMultiplierSetHandler} from './handlers/symmio/OperationalF
 import {OperationalFeeMultiplierSet} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {OperationalFeeReductionDelaySetHandler} from './handlers/symmio/OperationalFeeReductionDelaySetHandler'
 import {OperationalFeeReductionDelaySet} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {OwnershipTransferCanceledHandler} from './handlers/symmio/OwnershipTransferCanceledHandler'
+import {OwnershipTransferCanceled} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {OwnershipTransferStartedHandler} from './handlers/symmio/OwnershipTransferStartedHandler'
+import {OwnershipTransferStarted} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {OwnershipTransferredHandler} from './handlers/symmio/OwnershipTransferredHandler'
+import {OwnershipTransferred} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {PartyALiquidationOvershootUsedHandler} from './handlers/symmio/PartyALiquidationOvershootUsedHandler'
+import {PartyALiquidationOvershootUsed} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {PartyAReimbursementChangeHandler} from './handlers/symmio/PartyAReimbursementChangeHandler'
 import {PartyAReimbursementChange} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {PauseAccountingHandler} from './handlers/symmio/PauseAccountingHandler'
@@ -204,6 +216,10 @@ import {ProposeToDeactivateInstantActionModeHandler} from './handlers/symmio/Pro
 import {ProposeToDeactivateInstantActionMode} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {QuoteAdjustedHandler} from './handlers/symmio/QuoteAdjustedHandler'
 import {QuoteAdjusted} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {QuoteFundingSettledHandler} from './handlers/symmio/QuoteFundingSettledHandler'
+import {QuoteFundingSettled} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {QuoteLiquidationFundingCalculatedHandler} from './handlers/symmio/QuoteLiquidationFundingCalculatedHandler'
+import {QuoteLiquidationFundingCalculated} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {QuotesMigratedHandler} from './handlers/symmio/QuotesMigratedHandler'
 import {QuotesMigrated} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {RegisterAffiliateHandler} from './handlers/symmio/RegisterAffiliateHandler'
@@ -240,6 +256,18 @@ import {RestatementAbortedHandler} from './handlers/symmio/RestatementAbortedHan
 import {RestatementAborted} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {RestatementFinalizedHandler} from './handlers/symmio/RestatementFinalizedHandler'
 import {RestatementFinalized} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {RestatementFundingRestorationProgressHandler} from './handlers/symmio/RestatementFundingRestorationProgressHandler'
+import {RestatementFundingRestorationProgress} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {RestatementFundingRestorationStartedHandler} from './handlers/symmio/RestatementFundingRestorationStartedHandler'
+import {RestatementFundingRestorationStarted} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {RestatementInventoryConsumedHandler} from './handlers/symmio/RestatementInventoryConsumedHandler'
+import {RestatementInventoryConsumed} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {RestatementInventoryPreparedHandler} from './handlers/symmio/RestatementInventoryPreparedHandler'
+import {RestatementInventoryPrepared} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {RestatementPreparationCompletedHandler} from './handlers/symmio/RestatementPreparationCompletedHandler'
+import {RestatementPreparationCompleted} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {RestatementPreparationProgressHandler} from './handlers/symmio/RestatementPreparationProgressHandler'
+import {RestatementPreparationProgress} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {RestatementStartedHandler} from './handlers/symmio/RestatementStartedHandler'
 import {RestatementStarted} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {RestoreBridgeTransactionHandler} from './handlers/symmio/RestoreBridgeTransactionHandler'
@@ -334,6 +362,8 @@ import {SetPartyBBindableHandler} from './handlers/symmio/SetPartyBBindableHandl
 import {SetPartyBBindable} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetPartyBEmergencyStatusHandler} from './handlers/symmio/SetPartyBEmergencyStatusHandler'
 import {SetPartyBEmergencyStatus} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {SetPartyBLiquidationOvershootRateHandler} from './handlers/symmio/SetPartyBLiquidationOvershootRateHandler'
+import {SetPartyBLiquidationOvershootRate} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetPartyBOpenPositionsPausedForPartyBHandler} from './handlers/symmio/SetPartyBOpenPositionsPausedForPartyBHandler'
 import {SetPartyBOpenPositionsPausedForPartyB} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetPartyBStrictDeallocationHandler} from './handlers/symmio/SetPartyBStrictDeallocationHandler'
@@ -350,6 +380,8 @@ import {SetSignatureVerifierAddressHandler} from './handlers/symmio/SetSignature
 import {SetSignatureVerifierAddress} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSoftLiquidationPenaltyCollectorHandler} from './handlers/symmio/SetSoftLiquidationPenaltyCollectorHandler'
 import {SetSoftLiquidationPenaltyCollector} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {SetSolverFeeReceiverForTagHandler} from './handlers/symmio/SetSolverFeeReceiverForTagHandler'
+import {SetSolverFeeReceiverForTag} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSolverFeeReceiverHandler} from './handlers/symmio/SetSolverFeeReceiverHandler'
 import {SetSolverFeeReceiver} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSpeedUpUserHandler} from './handlers/symmio/SetSpeedUpUserHandler'
@@ -362,6 +394,8 @@ import {SetSymbolFundingStateHandler} from './handlers/symmio/SetSymbolFundingSt
 import {SetSymbolFundingState} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSymbolMaxLeverageHandler} from './handlers/symmio/SetSymbolMaxLeverageHandler'
 import {SetSymbolMaxLeverage} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {SetSymbolMinAcceptableNotionalLFRateHandler} from './handlers/symmio/SetSymbolMinAcceptableNotionalLFRateHandler'
+import {SetSymbolMinAcceptableNotionalLFRate} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSymbolTradingFeeHandler} from './handlers/symmio/SetSymbolTradingFeeHandler'
 import {SetSymbolTradingFee} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSymbolTypeHandler} from './handlers/symmio/SetSymbolTypeHandler'
@@ -390,6 +424,8 @@ import {SignerSetHandler} from './handlers/symmio/SignerSetHandler'
 import {SignerSet} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SoftPartyBLiquidationHandler} from './handlers/symmio/SoftPartyBLiquidationHandler'
 import {SoftPartyBLiquidation} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {SolverFeeChargedHandler} from './handlers/symmio/SolverFeeChargedHandler'
+import {SolverFeeCharged} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SuspendBridgeTransactionHandler} from './handlers/symmio/SuspendBridgeTransactionHandler'
 import {SuspendBridgeTransaction} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {TakeoverPartyALiquidationHandler} from './handlers/symmio/TakeoverPartyALiquidationHandler'
@@ -657,16 +693,23 @@ export function handleChargeFundingRate(event: ChargeFundingRate): void {
 }
 
 
-export function handleCloseAffiliatePositions(event: CloseAffiliatePositions): void {
+export function handleClearingHouseAccountSettlement(event: ClearingHouseAccountSettlement): void {
     ensureSyncMeta(event.block)
-    let handler = new CloseAffiliatePositionsHandler<CloseAffiliatePositions>()
+    let handler = new ClearingHouseAccountSettlementHandler<ClearingHouseAccountSettlement>()
     handler.handle(event, Version.v_0_8_6)
 }
 
 
-export function handleCloseSolverFeeCharged(event: CloseSolverFeeCharged): void {
+export function handleClearingHouseSettlementComponent(event: ClearingHouseSettlementComponent): void {
     ensureSyncMeta(event.block)
-    let handler = new CloseSolverFeeChargedHandler<CloseSolverFeeCharged>()
+    let handler = new ClearingHouseSettlementComponentHandler<ClearingHouseSettlementComponent>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleCloseAffiliatePositions(event: CloseAffiliatePositions): void {
+    ensureSyncMeta(event.block)
+    let handler = new CloseAffiliatePositionsHandler<CloseAffiliatePositions>()
     handler.handle(event, Version.v_0_8_6)
 }
 
@@ -986,6 +1029,20 @@ export function handleLiquidationEscrowCreated(event: LiquidationEscrowCreated):
 }
 
 
+export function handleLiquidationFundingSettled(event: LiquidationFundingSettled): void {
+    ensureSyncMeta(event.block)
+    let handler = new LiquidationFundingSettledHandler<LiquidationFundingSettled>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleLiquidationFundingSettlementAbandoned(event: LiquidationFundingSettlementAbandoned): void {
+    ensureSyncMeta(event.block)
+    let handler = new LiquidationFundingSettlementAbandonedHandler<LiquidationFundingSettlementAbandoned>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
 export function handleLockQuote(event: LockQuote): void {
     ensureSyncMeta(event.block)
     let handler = new LockQuoteHandler<LockQuote>()
@@ -996,13 +1053,6 @@ export function handleLockQuote(event: LockQuote): void {
 export function handleOpenPosition1(event: OpenPosition1): void {
     ensureSyncMeta(event.block)
     let handler = new OpenPositionHandler<OpenPosition1>()
-    handler.handle(event, Version.v_0_8_6)
-}
-
-
-export function handleOpenSolverFeeCharged(event: OpenSolverFeeCharged): void {
-    ensureSyncMeta(event.block)
-    let handler = new OpenSolverFeeChargedHandler<OpenSolverFeeCharged>()
     handler.handle(event, Version.v_0_8_6)
 }
 
@@ -1052,6 +1102,34 @@ export function handleOperationalFeeMultiplierSet(event: OperationalFeeMultiplie
 export function handleOperationalFeeReductionDelaySet(event: OperationalFeeReductionDelaySet): void {
     ensureSyncMeta(event.block)
     let handler = new OperationalFeeReductionDelaySetHandler<OperationalFeeReductionDelaySet>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleOwnershipTransferCanceled(event: OwnershipTransferCanceled): void {
+    ensureSyncMeta(event.block)
+    let handler = new OwnershipTransferCanceledHandler<OwnershipTransferCanceled>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleOwnershipTransferStarted(event: OwnershipTransferStarted): void {
+    ensureSyncMeta(event.block)
+    let handler = new OwnershipTransferStartedHandler<OwnershipTransferStarted>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+    ensureSyncMeta(event.block)
+    let handler = new OwnershipTransferredHandler<OwnershipTransferred>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handlePartyALiquidationOvershootUsed(event: PartyALiquidationOvershootUsed): void {
+    ensureSyncMeta(event.block)
+    let handler = new PartyALiquidationOvershootUsedHandler<PartyALiquidationOvershootUsed>()
     handler.handle(event, Version.v_0_8_6)
 }
 
@@ -1189,6 +1267,20 @@ export function handleQuoteAdjusted(event: QuoteAdjusted): void {
 }
 
 
+export function handleQuoteFundingSettled(event: QuoteFundingSettled): void {
+    ensureSyncMeta(event.block)
+    let handler = new QuoteFundingSettledHandler<QuoteFundingSettled>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleQuoteLiquidationFundingCalculated(event: QuoteLiquidationFundingCalculated): void {
+    ensureSyncMeta(event.block)
+    let handler = new QuoteLiquidationFundingCalculatedHandler<QuoteLiquidationFundingCalculated>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
 export function handleQuotesMigrated(event: QuotesMigrated): void {
     ensureSyncMeta(event.block)
     let handler = new QuotesMigratedHandler<QuotesMigrated>()
@@ -1311,6 +1403,48 @@ export function handleRestatementAborted(event: RestatementAborted): void {
 export function handleRestatementFinalized(event: RestatementFinalized): void {
     ensureSyncMeta(event.block)
     let handler = new RestatementFinalizedHandler<RestatementFinalized>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleRestatementFundingRestorationProgress(event: RestatementFundingRestorationProgress): void {
+    ensureSyncMeta(event.block)
+    let handler = new RestatementFundingRestorationProgressHandler<RestatementFundingRestorationProgress>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleRestatementFundingRestorationStarted(event: RestatementFundingRestorationStarted): void {
+    ensureSyncMeta(event.block)
+    let handler = new RestatementFundingRestorationStartedHandler<RestatementFundingRestorationStarted>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleRestatementInventoryConsumed(event: RestatementInventoryConsumed): void {
+    ensureSyncMeta(event.block)
+    let handler = new RestatementInventoryConsumedHandler<RestatementInventoryConsumed>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleRestatementInventoryPrepared(event: RestatementInventoryPrepared): void {
+    ensureSyncMeta(event.block)
+    let handler = new RestatementInventoryPreparedHandler<RestatementInventoryPrepared>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleRestatementPreparationCompleted(event: RestatementPreparationCompleted): void {
+    ensureSyncMeta(event.block)
+    let handler = new RestatementPreparationCompletedHandler<RestatementPreparationCompleted>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleRestatementPreparationProgress(event: RestatementPreparationProgress): void {
+    ensureSyncMeta(event.block)
+    let handler = new RestatementPreparationProgressHandler<RestatementPreparationProgress>()
     handler.handle(event, Version.v_0_8_6)
 }
 
@@ -1644,6 +1778,13 @@ export function handleSetPartyBEmergencyStatus(event: SetPartyBEmergencyStatus):
 }
 
 
+export function handleSetPartyBLiquidationOvershootRate(event: SetPartyBLiquidationOvershootRate): void {
+    ensureSyncMeta(event.block)
+    let handler = new SetPartyBLiquidationOvershootRateHandler<SetPartyBLiquidationOvershootRate>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
 export function handleSetPartyBOpenPositionsPausedForPartyB(event: SetPartyBOpenPositionsPausedForPartyB): void {
     ensureSyncMeta(event.block)
     let handler = new SetPartyBOpenPositionsPausedForPartyBHandler<SetPartyBOpenPositionsPausedForPartyB>()
@@ -1707,6 +1848,13 @@ export function handleSetSolverFeeReceiver(event: SetSolverFeeReceiver): void {
 }
 
 
+export function handleSetSolverFeeReceiverForTag(event: SetSolverFeeReceiverForTag): void {
+    ensureSyncMeta(event.block)
+    let handler = new SetSolverFeeReceiverForTagHandler<SetSolverFeeReceiverForTag>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
 export function handleSetSpeedUpUser(event: SetSpeedUpUser): void {
     ensureSyncMeta(event.block)
     let handler = new SetSpeedUpUserHandler<SetSpeedUpUser>()
@@ -1738,6 +1886,13 @@ export function handleSetSymbolFundingState(event: SetSymbolFundingState): void 
 export function handleSetSymbolMaxLeverage(event: SetSymbolMaxLeverage): void {
     ensureSyncMeta(event.block)
     let handler = new SetSymbolMaxLeverageHandler<SetSymbolMaxLeverage>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleSetSymbolMinAcceptableNotionalLFRate(event: SetSymbolMinAcceptableNotionalLFRate): void {
+    ensureSyncMeta(event.block)
+    let handler = new SetSymbolMinAcceptableNotionalLFRateHandler<SetSymbolMinAcceptableNotionalLFRate>()
     handler.handle(event, Version.v_0_8_6)
 }
 
@@ -1836,6 +1991,13 @@ export function handleSignerSet(event: SignerSet): void {
 export function handleSoftPartyBLiquidation(event: SoftPartyBLiquidation): void {
     ensureSyncMeta(event.block)
     let handler = new SoftPartyBLiquidationHandler<SoftPartyBLiquidation>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleSolverFeeCharged(event: SolverFeeCharged): void {
+    ensureSyncMeta(event.block)
+    let handler = new SolverFeeChargedHandler<SolverFeeCharged>()
     handler.handle(event, Version.v_0_8_6)
 }
 

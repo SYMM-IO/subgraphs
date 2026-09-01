@@ -4,5 +4,14 @@
 	"VirtualProviderSet": [],
 	"SignerScopeUpdated": [
 		"SignerScopeUpdated"
+	],
+	"OwnershipTransferCanceled": [
+		"OwnershipTransferCanceled"
+	],
+	"OwnershipTransferStarted": [
+		"OwnershipTransferStarted"
+	],
+	"OwnershipTransferred": [
+		"OwnershipTransferred"
 	]
 }

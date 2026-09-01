@@ -1041,6 +1041,9 @@ def generate_contract_utils(common_dir: str, version: str):
     has_party_a_reimbursement = _abi_has_function(abi_file, "partyAReimbursement")
     has_party_a_deferred_balance = _abi_has_function(abi_file, "getPartyADeferredBalance")
     has_liquidation_escrow = _abi_has_function(abi_file, "getLiquidationEscrow")
+    has_balance_of = _abi_has_function(abi_file, "balanceOf")
+    has_is_cross_party_b = _abi_has_function(abi_file, "isCrossPartyB")
+    has_funding_fees = _abi_has_function(abi_file, "getFundingFeesOfPartyB")
 
     lines = []
     lines.append('import {Address, BigInt, Bytes, log} from "@graphprotocol/graph-ts"')
@@ -1054,6 +1057,8 @@ def generate_contract_utils(common_dir: str, version: str):
     ]
     if has_liquidation:
         imports.append(f"symmio_{v}__getLiquidatedStateOfPartyAResultValue0Struct")
+    if has_funding_fees:
+        imports.append(f"symmio_{v}__getFundingFeesOfPartyBResultValue0Struct")
 
     lines.append("import {")
     lines.append("\t" + ",\n\t".join(imports) + ",")
@@ -1069,12 +1074,20 @@ def generate_contract_utils(common_dir: str, version: str):
     lines.append("")
 
     # getCollateral
-    lines.append("export function getCollateral(address: Address,): Bytes | null {")
+    lines.append("export function getCollateral(address: Address): Bytes | null {")
     lines.append(f"\tconst contract = symmio_{v}.bind(address)")
     lines.append("\tlet result = contract.try_getCollateral()")
     lines.append("\treturn result.reverted ? null : result.value")
     lines.append("}")
     lines.append("")
+
+    if has_balance_of:
+        lines.append("export function getBalanceOf(address: Address, account: Address): BigInt | null {")
+        lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+        lines.append("\tlet result = contract.try_balanceOf(account)")
+        lines.append("\treturn result.reverted ? null : result.value")
+        lines.append("}")
+        lines.append("")
 
     # getLiquidatedStateOfPartyA (only v0.8.1+)
     if has_liquidation:
@@ -1123,6 +1136,14 @@ def generate_contract_utils(common_dir: str, version: str):
         lines.append("}")
         lines.append("")
 
+    if has_is_cross_party_b:
+        lines.append("export function isCrossPartyB(address: Address, partyB: Address): bool {")
+        lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+        lines.append("\tlet result = contract.try_isCrossPartyB(partyB)")
+        lines.append("\treturn result.reverted ? false : result.value")
+        lines.append("}")
+        lines.append("")
+
     # getBalanceInfoOfPartyB
     lines.append(
         f"export function getBalanceInfoOfPartyB(address: Address, partyA: Address, partyB: Address): "
@@ -1133,6 +1154,17 @@ def generate_contract_utils(common_dir: str, version: str):
     lines.append("\treturn result.reverted ? null : result.value")
     lines.append("}")
     lines.append("")
+
+    if has_funding_fees:
+        lines.append(
+            f"export function getFundingFeesOfPartyB(address: Address, symbolId: BigInt, partyB: Address): "
+            f"symmio_{v}__getFundingFeesOfPartyBResultValue0Struct | null {{"
+        )
+        lines.append(f"\tconst contract = symmio_{v}.bind(address)")
+        lines.append("\tlet result = contract.try_getFundingFeesOfPartyB(symbolId, partyB)")
+        lines.append("\treturn result.reverted ? null : result.value")
+        lines.append("}")
+        lines.append("")
 
     # symbolIdToSymbolName
     lines.append("export function symbolIdToSymbolName(symbolId: BigInt, contractAddress: Address): string {")

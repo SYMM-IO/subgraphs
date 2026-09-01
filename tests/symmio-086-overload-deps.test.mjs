@@ -66,9 +66,16 @@ const v086OnlyEventNames = [
 	"AdjustmentCancelled",
 	"AdjustmentScheduled",
 	"CancelAffiliateShutdown",
+	"ClearingHouseAccountSettlement",
+	"ClearingHouseSettlementComponent",
 	"CloseAffiliatePositions",
 	"DistributeFromLiquidationEscrow",
 	"LiquidationEscrowCreated",
+	"LiquidationFundingSettled",
+	"LiquidationFundingSettlementAbandoned",
+	"OwnershipTransferCanceled",
+	"OwnershipTransferStarted",
+	"OwnershipTransferred",
 	"OperationalFeeAllowanceReductionRequested",
 	"OperationalFeeAllowanceSet",
 	"OperationalFeeCharged",
@@ -77,12 +84,21 @@ const v086OnlyEventNames = [
 	"OperationalFeeMultiplierSet",
 	"OperationalFeeReductionDelaySet",
 	"PauseWithdrawAdvance",
+	"PartyALiquidationOvershootUsed",
 	"PartyAReimbursementChange",
 	"PendingQuoteCancelledByAdjustment",
 	"PriceAdjustmentConfirmed",
 	"QuoteAdjusted",
+	"QuoteFundingSettled",
+	"QuoteLiquidationFundingCalculated",
 	"RestatementAborted",
+	"RestatementFundingRestorationProgress",
+	"RestatementFundingRestorationStarted",
 	"RestatementFinalized",
+	"RestatementInventoryConsumed",
+	"RestatementInventoryPrepared",
+	"RestatementPreparationCompleted",
+	"RestatementPreparationProgress",
 	"RestatementStarted",
 	"ScheduleAffiliateShutdown",
 	"SendQuoteSolverFeeCaps",
@@ -91,9 +107,12 @@ const v086OnlyEventNames = [
 	"SetMuonFunctionUpnlValidTime",
 	"SetOperationalFeeReceiver",
 	"SetPartyALiquidationSnapshot",
+	"SetPartyBLiquidationOvershootRate",
 	"SetPartyBStrictDeallocation",
 	"SetPartyBOpenPositionsPausedForPartyB",
 	"SetSolverFeeReceiver",
+	"SetSolverFeeReceiverForTag",
+	"SetSymbolMinAcceptableNotionalLFRate",
 	"UnpauseWithdrawAdvance",
 	"WithdrawAdvanced",
 ];
@@ -126,8 +145,7 @@ test("v0.8.6 raw events select the richer payload overloads and every release-on
 		assert.deepEqual(deps[eventName], [eventName], `missing release-only ${eventName}`);
 	}
 	assert.deepEqual(deps.SettlePartyALiquidation, ["SettlePartyALiquidation(address,address[],address[],int256[],uint256[],bytes)"]);
-	assert.deepEqual(deps.OpenSolverFeeCharged, ["OpenSolverFeeCharged(uint256,address,address,address,uint256,uint256)"]);
-	assert.deepEqual(deps.CloseSolverFeeCharged, ["CloseSolverFeeCharged(uint256,address,address,address,uint256,uint256)"]);
+	assert.deepEqual(deps.SolverFeeCharged, ["SolverFeeCharged(uint256,address,address,address,uint256,uint8,uint256,bytes32)"]);
 });
 
 test("v0.8.6 analytics selects one exact extended PartyA settlement event", () => {

@@ -8,6 +8,7 @@ export class GeneralDepositHandler<T> {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		const entity = new EventEntity(event.transaction.hash.toHex() + "-" + event.logIndex.toString())
+		entity.depositor = event.params.depositor
 		entity.amount = event.params.amount
 		setRawExpressProviderEventMetadata(entity, _event)
 		entity.save()

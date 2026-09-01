@@ -47,6 +47,12 @@ import {LegacyAccountImportedHandler} from './handlers/accountLayer/LegacyAccoun
 import {LegacyAccountImported} from '../../generated/accountLayer_3/accountLayer_3'
 import {OperatorSetHandler} from './handlers/accountLayer/OperatorSetHandler'
 import {OperatorSet} from '../../generated/accountLayer_3/accountLayer_3'
+import {OwnershipTransferCanceledHandler} from './handlers/accountLayer/OwnershipTransferCanceledHandler'
+import {OwnershipTransferCanceled} from '../../generated/accountLayer_3/accountLayer_3'
+import {OwnershipTransferStartedHandler} from './handlers/accountLayer/OwnershipTransferStartedHandler'
+import {OwnershipTransferStarted} from '../../generated/accountLayer_3/accountLayer_3'
+import {OwnershipTransferredHandler} from './handlers/accountLayer/OwnershipTransferredHandler'
+import {OwnershipTransferred} from '../../generated/accountLayer_3/accountLayer_3'
 import {PausedHandler} from './handlers/accountLayer/PausedHandler'
 import {Paused} from '../../generated/accountLayer_3/accountLayer_3'
 import {RegistrationCancelledHandler} from './handlers/accountLayer/RegistrationCancelledHandler'
@@ -258,6 +264,27 @@ export function handleLegacyAccountImported(event: LegacyAccountImported): void 
 export function handleOperatorSet(event: OperatorSet): void {
     ensureSyncMeta(event.block)
     let handler = new OperatorSetHandler<OperatorSet>()
+    handler.handle(event, AccountLayerVersion.v_3)
+}
+
+
+export function handleOwnershipTransferCanceled(event: OwnershipTransferCanceled): void {
+    ensureSyncMeta(event.block)
+    let handler = new OwnershipTransferCanceledHandler<OwnershipTransferCanceled>()
+    handler.handle(event, AccountLayerVersion.v_3)
+}
+
+
+export function handleOwnershipTransferStarted(event: OwnershipTransferStarted): void {
+    ensureSyncMeta(event.block)
+    let handler = new OwnershipTransferStartedHandler<OwnershipTransferStarted>()
+    handler.handle(event, AccountLayerVersion.v_3)
+}
+
+
+export function handleOwnershipTransferred(event: OwnershipTransferred): void {
+    ensureSyncMeta(event.block)
+    let handler = new OwnershipTransferredHandler<OwnershipTransferred>()
     handler.handle(event, AccountLayerVersion.v_3)
 }
 

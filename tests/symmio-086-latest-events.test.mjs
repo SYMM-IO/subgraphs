@@ -7,18 +7,37 @@ const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8"
 const latestEventSignatures = [
 	"AdjustmentCancelled(uint256,uint256)",
 	"AdjustmentScheduled(uint256,uint256,uint256,uint256)",
-	"CloseSolverFeeCharged(uint256,address,address,address,uint256,uint256)",
-	"OpenSolverFeeCharged(uint256,address,address,address,uint256,uint256)",
+	"ClearingHouseAccountSettlement(address,address,address,int256)",
+	"ClearingHouseSettlementComponent(address,address,uint256,address,int256,int256,int256)",
+	"LiquidationFundingSettled(address,address,address,int256,int256,int256,int256,uint256,uint256,bytes)",
+	"LiquidationFundingSettlementAbandoned(address,address,int256,bytes)",
+	"OwnershipTransferCanceled(address)",
+	"OwnershipTransferStarted(address,address)",
+	"OwnershipTransferred(address,address)",
+	"PartyALiquidationOvershootUsed(uint256,address,address,uint256,uint256,uint256,uint256)",
 	"PartyAReimbursementChange(address,uint256,uint256,uint8)",
 	"PendingQuoteCancelledByAdjustment(uint256,uint256)",
 	"PriceAdjustmentConfirmed(uint256,uint256,uint256)",
 	"QuoteAdjusted(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+	"QuoteFundingSettled(uint256,uint256,address,address,address,int256)",
+	"QuoteLiquidationFundingCalculated(address,address,uint256,uint256,int256,int256,bytes)",
 	"RestatementAborted(uint256,uint256)",
+	"RestatementFundingRestorationProgress(uint256,uint256,bool,uint256,uint256)",
+	"RestatementFundingRestorationStarted(uint256,uint256,bool,uint256)",
 	"RestatementFinalized(uint256,uint256)",
+	"RestatementInventoryConsumed(uint256,uint256,uint256,address,uint8,uint256)",
+	"RestatementInventoryPrepared(uint256,uint256,address,uint256,uint256,uint256,uint256)",
+	"RestatementPreparationCompleted(uint256,uint256,uint256,uint256,uint256)",
+	"RestatementPreparationProgress(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
 	"RestatementStarted(uint256,uint256,uint256)",
+	"SetMuonFunctionUpnlValidTime(uint8,uint256)",
+	"SetPartyBLiquidationOvershootRate(address,uint256,uint256,uint256,bool)",
 	"SetPartyBStrictDeallocation(address,bool)",
 	"SetSolverFeeReceiver(address,address)",
+	"SetSolverFeeReceiverForTag(address,address,bytes32)",
+	"SetSymbolMinAcceptableNotionalLFRate(uint256,uint256,uint256,bool)",
 	"SettlePartyALiquidation(address,address[],address[],int256[],uint256[],bytes)",
+	"SolverFeeCharged(uint256,address,address,address,uint256,uint8,uint256,bytes32)",
 ];
 
 function canonicalType(input) {
@@ -36,6 +55,8 @@ test("checked-in v0.8.6 ABI contains the latest event surface and drops obsolete
 	for (const signature of latestEventSignatures) assert.ok(signatures.has(signature), `missing ${signature}`);
 	assert.equal(signatures.has("OpenSolverFeeCharged(uint256,address,address,uint256,uint256)"), false);
 	assert.equal(signatures.has("CloseSolverFeeCharged(uint256,address,address,uint256,uint256)"), false);
+	assert.equal(signatures.has("OpenSolverFeeCharged(uint256,address,address,address,uint256,uint256)"), false);
+	assert.equal(signatures.has("CloseSolverFeeCharged(uint256,address,address,address,uint256,uint256)"), false);
 });
 
 test("analytics tracks settlement reasons and exact reimbursement state", () => {
@@ -78,22 +99,22 @@ test("analytics mirrors every core pending-quote removal during a restatement", 
 
 test("analytics refreshes the exact solver-fee receiver balance", () => {
 	const deps = read("perps/analytics/deps_symmio_0_8_6.json");
-	for (const eventName of ["OpenSolverFeeCharged", "CloseSolverFeeCharged"]) {
-		const handler = read(`perps/analytics/handlers/symmio/${eventName}Handler.ts`);
-		assert.match(handler, /event\.params\.receiver/);
-		assert.match(handler, /updatePartyALatestBalance/);
-		assert.equal(deps.includes(`${eventName}(uint256,address,address,address,uint256,uint256)`), true);
-	}
+	const handler = read("perps/analytics/handlers/symmio/SolverFeeChargedHandler.ts");
+	assert.match(handler, /event\.params\.receiver/);
+	assert.match(handler, /updatePartyALatestBalance/);
+	assert.equal(deps.includes("SolverFeeCharged(uint256,address,address,address,uint256,uint8,uint256,bytes32)"), true);
 });
 
 test("raw events retain new receiver and extended settlement payload fields", () => {
 	const schema = read("perps/events/schema.graphql");
 	const settle = read("perps/events/handlers/symmio/SettlePartyALiquidationHandler.ts");
-	const openFee = read("perps/events/handlers/symmio/OpenSolverFeeChargedHandler.ts");
+	const solverFee = read("perps/events/handlers/symmio/SolverFeeChargedHandler.ts");
 	assert.match(schema, /type PartyAReimbursementChange @entity/);
 	assert.match(schema, /type QuoteAdjusted @entity/);
 	assert.match(schema, /allocationKeys: \[Bytes!\]/);
 	assert.match(schema, /cvaAmounts: \[BigInt!\]/);
 	assert.match(settle, /parameters\[4\]\.value\.toBigIntArray/);
-	assert.match(openFee, /entity\.receiver = event\.params\.receiver/);
+	for (const field of ["receiver", "feeType", "amount", "tag"]) {
+		assert.match(solverFee, new RegExp(`entity\\.${field} = event\\.params\\.${field}`));
+	}
 });

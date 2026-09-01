@@ -3,8 +3,8 @@ import {
 	symmio_0_8_2,
 	symmio_0_8_2__balanceInfoOfPartyAResult,
 	symmio_0_8_2__balanceInfoOfPartyBResult,
-	symmio_0_8_2__getLiquidatedStateOfPartyAResultValue0Struct,
 	symmio_0_8_2__getQuoteResultValue0Struct,
+	symmio_0_8_2__getLiquidatedStateOfPartyAResultValue0Struct,
 } from "../../generated/symmio_0_8_2/symmio_0_8_2"
 
 export function getQuote(address: Address, id: BigInt): symmio_0_8_2__getQuoteResultValue0Struct | null {
@@ -13,9 +13,15 @@ export function getQuote(address: Address, id: BigInt): symmio_0_8_2__getQuoteRe
 	return result.reverted ? null : result.value
 }
 
-export function getCollateral(address: Address,): Bytes | null {
+export function getCollateral(address: Address): Bytes | null {
 	const contract = symmio_0_8_2.bind(address)
 	let result = contract.try_getCollateral()
+	return result.reverted ? null : result.value
+}
+
+export function getBalanceOf(address: Address, account: Address): BigInt | null {
+	const contract = symmio_0_8_2.bind(address)
+	let result = contract.try_balanceOf(account)
 	return result.reverted ? null : result.value
 }
 
@@ -28,12 +34,6 @@ export function getLiquidatedStateOfPartyA(address: Address, partyA: Address): s
 export function getBalanceInfoOfPartyA(address: Address, partyA: Address): symmio_0_8_2__balanceInfoOfPartyAResult | null {
 	const contract = symmio_0_8_2.bind(address)
 	let result = contract.try_balanceInfoOfPartyA(partyA)
-	return result.reverted ? null : result.value
-}
-
-export function getBalanceOf(address: Address, account: Address): BigInt | null {
-	const contract = symmio_0_8_2.bind(address)
-	let result = contract.try_balanceOf(account)
 	return result.reverted ? null : result.value
 }
 

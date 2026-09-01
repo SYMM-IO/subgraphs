@@ -30,17 +30,11 @@
 	"CloseAffiliatePositions": [
 		"CloseAffiliatePositions"
 	],
-	"CloseSolverFeeCharged": [
-		"CloseSolverFeeCharged(uint256,address,address,address,uint256,uint256)"
-	],
 	"DistributeFromLiquidationEscrow": [
 		"DistributeFromLiquidationEscrow"
 	],
 	"LiquidationEscrowCreated": [
 		"LiquidationEscrowCreated"
-	],
-	"OpenSolverFeeCharged": [
-		"OpenSolverFeeCharged(uint256,address,address,address,uint256,uint256)"
 	],
 	"OperationalFeeAllowanceReductionRequested": [
 		"OperationalFeeAllowanceReductionRequested"
@@ -131,5 +125,65 @@
 	],
 	"SettlePartyALiquidation": [
 		"SettlePartyALiquidation(address,address[],address[],int256[],uint256[],bytes)"
+	],
+	"ClearingHouseAccountSettlement": [
+		"ClearingHouseAccountSettlement"
+	],
+	"ClearingHouseSettlementComponent": [
+		"ClearingHouseSettlementComponent"
+	],
+	"LiquidationFundingSettled": [
+		"LiquidationFundingSettled"
+	],
+	"LiquidationFundingSettlementAbandoned": [
+		"LiquidationFundingSettlementAbandoned"
+	],
+	"OwnershipTransferCanceled": [
+		"OwnershipTransferCanceled"
+	],
+	"OwnershipTransferStarted": [
+		"OwnershipTransferStarted"
+	],
+	"OwnershipTransferred": [
+		"OwnershipTransferred"
+	],
+	"PartyALiquidationOvershootUsed": [
+		"PartyALiquidationOvershootUsed"
+	],
+	"QuoteFundingSettled": [
+		"QuoteFundingSettled"
+	],
+	"QuoteLiquidationFundingCalculated": [
+		"QuoteLiquidationFundingCalculated"
+	],
+	"RestatementFundingRestorationProgress": [
+		"RestatementFundingRestorationProgress"
+	],
+	"RestatementFundingRestorationStarted": [
+		"RestatementFundingRestorationStarted"
+	],
+	"RestatementInventoryConsumed": [
+		"RestatementInventoryConsumed"
+	],
+	"RestatementInventoryPrepared": [
+		"RestatementInventoryPrepared"
+	],
+	"RestatementPreparationCompleted": [
+		"RestatementPreparationCompleted"
+	],
+	"RestatementPreparationProgress": [
+		"RestatementPreparationProgress"
+	],
+	"SetPartyBLiquidationOvershootRate": [
+		"SetPartyBLiquidationOvershootRate"
+	],
+	"SetSolverFeeReceiverForTag": [
+		"SetSolverFeeReceiverForTag"
+	],
+	"SetSymbolMinAcceptableNotionalLFRate": [
+		"SetSymbolMinAcceptableNotionalLFRate"
+	],
+	"SolverFeeCharged": [
+		"SolverFeeCharged(uint256,address,address,address,uint256,uint8,uint256,bytes32)"
 	]
 }
