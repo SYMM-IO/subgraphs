@@ -17,6 +17,7 @@
 			"abi": "symmio",
 			"version": "0_8_5",
 			"startBlock": "46754528",
+			"accountLayerSource": "0x56caf00c6C5cB5478570Bb23807B9d1D697863DC",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
@@ -25,7 +26,7 @@
 		{
 			"address": "0x56caf00c6C5cB5478570Bb23807B9d1D697863DC",
 			"abi": "accountLayer",
-			"version": "1",
+			"version": "2",
 			"startBlock": "45290554"
 		},
 		{

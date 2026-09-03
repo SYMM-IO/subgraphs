@@ -227,6 +227,49 @@ class HandlerAbiDependencyTests(TestCase):
 
 
 class DataSourceContextTests(TestCase):
+    def test_base_topology_scopes_account_layer_to_the_paired_core(self) -> None:
+        config_path = REPO_ROOT / "configs/perps/base.json"
+        config = manager.Config.from_dict(json.loads(config_path.read_text()), deployment_id="base")
+        account_layer = next(contract for contract in config.contracts if contract.abi == "accountLayer")
+        paired_core = next(
+            contract
+            for contract in config.contracts
+            if contract.abi == "symmio"
+            and contract.version == "0_8_5"
+            and contract.address.lower() == "0x91cf2d8ed503ec52768999aa6d8dbea6e52dbe43"
+        )
+
+        expected_source = {"type": "Bytes", "data": account_layer.address}
+        unrelated_sources = [contract for contract in config.contracts if contract not in (paired_core, account_layer)]
+        for target_module in ("perps/analytics", "perps/events"):
+            paired_context = manager.build_data_source_context(config, paired_core, target_module)
+            account_layer_context = manager.build_data_source_context(config, account_layer, target_module)
+            self.assertEqual(paired_context["accountLayerSource"], expected_source)
+            self.assertEqual(account_layer_context["accountLayerSource"], expected_source)
+
+            for contract in unrelated_sources:
+                context = manager.build_data_source_context(config, contract, target_module)
+                self.assertNotIn("accountLayerSource", context, f"unexpected AccountLayer context on {contract.abi} {contract.address}")
+
+    def test_explicit_account_layer_source_must_reference_a_declared_contract(self) -> None:
+        config = manager.Config(
+            network="test",
+            contracts=[
+                manager.Contract(
+                    address="0xcore",
+                    abi="symmio",
+                    version="0_8_5",
+                    startBlock="0",
+                    accountLayerSource="0xmissing",
+                ),
+                manager.Contract(address="0xlayer", abi="accountLayer", version="1", startBlock="0"),
+            ],
+            deploy_urls={},
+        )
+
+        with self.assertRaisesRegex(ValueError, "is not declared as a contract"):
+            manager.build_data_source_context(config, config.contracts[0], "perps/analytics")
+
     def test_vibe_topology_is_derived_from_its_config(self) -> None:
         config_path = REPO_ROOT / "configs/perps/arbitrum_vibe.json"
         config = manager.Config.from_dict(json.loads(config_path.read_text()), deployment_id="arbitrum-vibe")

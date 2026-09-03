@@ -117,6 +117,7 @@ class Contract:
     events: List[Event] = field(default_factory=list)
     dependencies: List[str] = field(default_factory=list)
     excludedEvents: List[str] = field(default_factory=list)
+    accountLayerSource: Optional[str] = None
 
     def path(self) -> str:
         return f"{self.abi}_{self.version}"
@@ -164,6 +165,30 @@ class Config:
         return url
 
 
+def resolve_account_layer_source(config: Config, contract: Contract) -> Optional[str]:
+    """Resolve AccountLayer context, preferring explicit per-source topology when configured."""
+    account_layers = {item.address.lower(): item.address for item in config.contracts if item.abi == "accountLayer" and not item.fake}
+
+    explicitly_scoped = any(item.accountLayerSource is not None for item in config.contracts if not item.fake)
+    if explicitly_scoped:
+        for item in config.contracts:
+            if item.fake or item.accountLayerSource is None:
+                continue
+            if item.accountLayerSource.lower() not in account_layers:
+                raise ValueError(f"AccountLayer source '{item.accountLayerSource}' is not declared as a contract in the config")
+
+        if contract.abi == "accountLayer":
+            return account_layers.get(contract.address.lower())
+        if contract.accountLayerSource is not None:
+            return account_layers[contract.accountLayerSource.lower()]
+        return None
+
+    if len(account_layers) > 1:
+        addresses = ", ".join(sorted(account_layers.values()))
+        raise ValueError(f"Config declares multiple AccountLayer addresses; cannot infer one data-source context: {addresses}")
+    return next(iter(account_layers.values()), None)
+
+
 def build_data_source_context(config: Config, contract: Contract, target_module: str) -> Dict[str, Dict[str, str]]:
     """Build deployment topology once from config instead of hardcoding it in mappings."""
     if not target_module.startswith("perps/") or contract.fake:
@@ -173,12 +198,9 @@ def build_data_source_context(config: Config, contract: Contract, target_module:
     if config.deployment_id:
         context["deploymentId"] = {"type": "String", "data": config.deployment_id}
 
-    account_layers = {item.address.lower(): item.address for item in config.contracts if item.abi == "accountLayer" and not item.fake}
-    if len(account_layers) > 1:
-        addresses = ", ".join(sorted(account_layers.values()))
-        raise ValueError(f"Config declares multiple AccountLayer addresses; cannot infer one data-source context: {addresses}")
-    if account_layers:
-        context["accountLayerSource"] = {"type": "Bytes", "data": next(iter(account_layers.values()))}
+    account_layer_source = resolve_account_layer_source(config, contract)
+    if account_layer_source is not None:
+        context["accountLayerSource"] = {"type": "Bytes", "data": account_layer_source}
 
     if target_module == "perps/analytics" and contract.abi == "symmio":
         context["latestAccountBalanceSweepActivationBlock"] = {
@@ -901,10 +923,9 @@ def prepare_module(config: Config, target_module: str) -> List[Contract]:
             if not any(abi_ref["name"] == dependency for abi_ref in source_config["mapping"]["abis"]):
                 source_config["mapping"]["abis"].append({"name": dependency, "file": f"./abis/{dependency}.json"})
 
-        # symmio handlers (Allocate/Deposit/Withdraw) call accountLayer_1.bind() via the resolver
-        # to fix the activeUsers ordering bug. Every symmio data source on chains using accountLayer
-        # must declare accountLayer_1 in its abis so the binding can be resolved at runtime.
-        if contract.abi == "symmio" and "accountLayer" in unique_abis:
+        # Paired symmio handlers (Allocate/Deposit/Withdraw) call accountLayer_1.bind()
+        # via the resolver, so only sources carrying AccountLayer context need the ABI.
+        if contract.abi == "symmio" and "accountLayerSource" in source_context:
             if not any(a["name"] == "accountLayer_1" for a in source_config["mapping"]["abis"]):
                 source_config["mapping"]["abis"].append({"name": "accountLayer_1", "file": "./abis/accountLayer_1.json"})
 

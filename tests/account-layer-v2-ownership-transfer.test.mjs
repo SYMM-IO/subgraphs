@@ -106,7 +106,7 @@ test("Arbitrum Vibe uses receipt-backed deployment boundaries and dedicated endp
 	);
 });
 
-test("only HyperEVM main and stage use AccountLayer v2, preserving their original start blocks", () => {
+test("Base and HyperEVM use AccountLayer v2 from their verified start blocks", () => {
 	const v2Sources = [];
 	for (const file of readdirSync(new URL("../configs/perps/", import.meta.url))) {
 		if (!file.endsWith(".json")) continue;
@@ -120,6 +120,11 @@ test("only HyperEVM main and stage use AccountLayer v2, preserving their origina
 	v2Sources.sort((left, right) => (left.file < right.file ? -1 : left.file > right.file ? 1 : 0));
 
 	assert.deepEqual(v2Sources, [
+		{
+			file: "base.json",
+			address: "0x56caf00c6C5cB5478570Bb23807B9d1D697863DC",
+			startBlock: "45290554",
+		},
 		{
 			file: "hyperevm.json",
 			address: "0x46493c376758Da47823D7E3Ae5d417eA6546eEB3",
