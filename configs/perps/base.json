@@ -23,6 +23,12 @@
 			]
 		},
 		{
+			"address": "0x56caf00c6C5cB5478570Bb23807B9d1D697863DC",
+			"abi": "accountLayer",
+			"version": "1",
+			"startBlock": "45290554"
+		},
+		{
 			"address": "0x91Cf2D8Ed503EC52768999aA6D8DBeA6e52dbe43",
 			"abi": "symmio",
 			"version": "0_8_4",
