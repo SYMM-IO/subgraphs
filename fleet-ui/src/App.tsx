@@ -332,7 +332,7 @@ export function App() {
         }}
         onDelete={(base, version) => void runAction(() => deleteVersion({ base, version }))}
         onUntag={(base, version, tag) => void runAction(() => removeTag({ base, version, tag }))}
-        onPipelineUpdate={(base) => void runAction(() => updateManagedPipeline({ base }))}
+        onPipelineUpdate={(base, version) => void runAction(() => updateManagedPipeline({ base, version }))}
         onRowPromote={(base, version, tags, updatePipelines) => void runAction(() => rowPromote({ base, version, tags, updatePipelines }))}
       />
       <ToastHost toast={toast} onOpenChange={closeToast} />

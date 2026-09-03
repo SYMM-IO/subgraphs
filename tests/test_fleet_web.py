@@ -264,6 +264,45 @@ class ActivityProgressRenderTests(TestCase):
         self.assertIn('data-label="Tags"', html)
         self.assertIn('id="no-filter-results"', html)
 
+    def test_deployment_rows_show_current_pipeline_version_and_switch_action(self) -> None:
+        store = fleet_web.FleetStore()
+        store._chains = [
+            fleet_web.ChainConfig(
+                key="base",
+                path=Path("configs/perps/base.json"),
+                network="base",
+                deploy_urls={"perps/analytics": "base_analytics"},
+            )
+        ]
+        store._state = fleet_web.GoldskyState(
+            deployments={
+                version.full: version
+                for version in (
+                    fleet_web.Deployment(base_name="base_analytics", version="v0"),
+                    fleet_web.Deployment(base_name="base_analytics", version="v1"),
+                )
+            },
+            managed_pipeline_versions={"base-solvency-engine": {"base_analytics": ("v1",)}},
+            verified_managed_pipelines={"base-solvency-engine"},
+        )
+        dependencies = {
+            "base_analytics": [
+                fleet_web.PipelineDependency(
+                    pipeline="base-solvency-engine",
+                    config_path=Path("pipelines/base-solvency-engine.yaml"),
+                    reference_count=1,
+                    configured_versions=("v1",),
+                )
+            ]
+        }
+
+        with patch.object(fleet_web, "load_pipeline_dependencies", return_value=dependencies):
+            html = fleet_web.render_grid(store)
+
+        self.assertIn("pipeline current", html)
+        self.assertIn("switch pipeline here", html)
+        self.assertIn('"version": "v0"', html)
+
     def test_last_fetched_oob_updates_shell_timestamp(self) -> None:
         old_last_fetched = fleet_web._store._last_fetched_at
         fleet_web._store._last_fetched_at = time.time()
@@ -417,6 +456,57 @@ class ReactApiTests(TestCase):
         update_pipeline.assert_called_once_with({"base_analytics": "v1"})
         create_tag.assert_not_called()
         delete_tag.assert_not_called()
+
+    def test_row_pipeline_action_can_switch_to_older_deployed_version(self) -> None:
+        fleet_web._store._state.deployments["base_analytics/v0"] = fleet_web.Deployment(base_name="base_analytics", version="v0")
+        fleet_web._store._state.managed_pipeline_versions["base-solvency-engine"]["base_analytics"] = ("v1",)
+        dependencies = {
+            "base_analytics": [
+                fleet_web.PipelineDependency(
+                    pipeline="base-solvency-engine",
+                    config_path=Path("pipelines/base-solvency-engine.yaml"),
+                    reference_count=3,
+                    configured_versions=("v1",),
+                )
+            ]
+        }
+        with (
+            patch.object(fleet_web.asyncio, "to_thread", new=run_inline),
+            patch.object(fleet_web, "load_pipeline_dependencies", return_value=dependencies),
+            patch.object(fleet_web, "do_pipeline_update", return_value=(True, ["pipeline updated"])) as update_pipeline,
+            patch.object(fleet_web, "do_tag_create") as create_tag,
+            patch.object(fleet_web, "do_tag_delete") as delete_tag,
+        ):
+            response = asyncio.run(fleet_web.api_update_pipeline(JsonRequest({"base": "base_analytics", "version": "v0"})))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response_json(response)["toast"]["kind"], "ok")
+        self.assertEqual(fleet_web._store.state.managed_pipeline_versions["base-solvency-engine"]["base_analytics"], ("v0",))
+        self.assertEqual(fleet_web._store.state.tags["base_analytics"], {"latest": "v1"})
+        update_pipeline.assert_called_once_with({"base_analytics": "v0"})
+        create_tag.assert_not_called()
+        delete_tag.assert_not_called()
+
+    def test_row_pipeline_action_rejects_a_version_that_is_not_deployed(self) -> None:
+        dependencies = {
+            "base_analytics": [
+                fleet_web.PipelineDependency(
+                    pipeline="base-solvency-engine",
+                    config_path=Path("pipelines/base-solvency-engine.yaml"),
+                    reference_count=3,
+                    configured_versions=("v0",),
+                )
+            ]
+        }
+        with (
+            patch.object(fleet_web, "load_pipeline_dependencies", return_value=dependencies),
+            patch.object(fleet_web, "do_pipeline_update") as update_pipeline,
+            self.assertRaises(fleet_web.HTTPException) as raised,
+        ):
+            asyncio.run(fleet_web.api_update_pipeline(JsonRequest({"base": "base_analytics", "version": "v-does-not-exist"})))
+
+        self.assertEqual(raised.exception.status_code, 400)
+        update_pipeline.assert_not_called()
 
     def test_row_promote_updates_pipeline_after_tag_success(self) -> None:
         with (

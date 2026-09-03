@@ -466,13 +466,14 @@ html[data-theme="dark"] .chain-logo { outline-color: rgb(255 255 255 / 10%); }
 .detail-heading small { color: var(--color-text-secondary); font-size: .6875rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .deployment-subtable, .tag-subtable { display: grid; align-content: start; gap: 1px; background: var(--color-border); }
 .deployment-subrow, .tag-subrow { min-height: 52px; display: grid; align-items: center; gap: 10px; padding: 8px 12px; background: var(--color-bg-surface); }
-.deployment-subrow { grid-template-columns: minmax(138px, 1fr) minmax(132px, .9fr) minmax(100px, .8fr) auto; }
+.deployment-subrow { grid-template-columns: minmax(128px, 1fr) minmax(120px, .8fr) minmax(90px, .65fr) minmax(154px, .9fr) auto; }
 .tag-subrow { grid-template-columns: minmax(0, 1fr) auto; }
 .subrow-header { min-height: 36px; padding-block: 0; background: var(--color-bg-subtle); }
 .subrow-header:hover { background: var(--color-bg-subtle) !important; }
-.deployment-subrow > :nth-child(4) { min-width: 132px; }
-.deployment-version, .deployment-status, .deployment-tags, .deployment-actions, .tag-target, .tag-actions, .endpoint-actions { min-width: 0; gap: 6px; }
+.deployment-subrow > :nth-child(5) { min-width: 132px; }
+.deployment-version, .deployment-status, .deployment-tags, .deployment-pipeline, .deployment-actions, .tag-target, .tag-actions, .endpoint-actions { min-width: 0; gap: 6px; }
 .deployment-status, .deployment-tags { flex-wrap: wrap; }
+.deployment-pipeline { display: flex; align-items: center; flex-wrap: wrap; }
 .deployment-actions, .tag-actions { justify-content: flex-end; }
 .version, .tag-target .mono { min-width: 0; margin: 0; overflow: hidden; color: var(--color-text-primary); font-size: .75rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
 .endpoint-actions { opacity: .72; }
@@ -758,7 +759,7 @@ html[data-theme="dark"] .chain-logo { outline-color: rgb(255 255 255 / 10%); }
   .deployment-detail-panel { border-radius: 0 0 12px 12px; }
   .detail-sections { grid-template-columns: 1fr; }
   .deployment-subrow, .tag-subrow { grid-template-columns: 1fr; align-items: stretch; gap: 9px; padding: 11px; }
-  .deployment-subrow > :nth-child(4) { min-width: 0; }
+  .deployment-subrow > :nth-child(5) { min-width: 0; }
   .subrow-header { display: none; }
   .deployment-actions, .tag-actions { justify-content: flex-start; }
   .dialog-footer { flex-wrap: wrap; }

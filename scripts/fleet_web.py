@@ -944,6 +944,7 @@ BASE_HTML = r"""
                   color: #cfd4db; min-width: 60px; }
   .v-row .v-meta { display: inline-flex; gap: 6px; align-items: center; }
   .v-row .v-tags { display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .v-row .v-pipeline { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .v-row .v-actions { margin-left: auto; display: inline-flex; gap: 4px; align-items: center;
                       opacity: .55; transition: opacity .12s; }
   .v-row:hover .v-actions, .v-row:focus-within .v-actions { opacity: 1; }
@@ -1280,8 +1281,8 @@ BASE_HTML = r"""
     .chain-cell { align-items: center; }
     .v-row { display: grid; grid-template-columns: minmax(64px, auto) 1fr;
              gap: 6px 8px; padding: 8px; }
-    .v-row .ep-links, .v-row .v-meta, .v-row .v-tags, .v-row .v-actions { margin-left: 0; }
-    .v-row .v-meta, .v-row .v-tags, .v-row .v-actions { grid-column: 1 / -1; }
+    .v-row .ep-links, .v-row .v-meta, .v-row .v-tags, .v-row .v-pipeline, .v-row .v-actions { margin-left: 0; }
+    .v-row .v-meta, .v-row .v-tags, .v-row .v-pipeline, .v-row .v-actions { grid-column: 1 / -1; }
     .v-row .v-actions { opacity: 1; justify-content: flex-start; flex-wrap: wrap; }
     .tag-row { align-items: center; }
     .modal { width: calc(100vw - 24px); max-height: calc(100vh - 24px); padding: 16px; }
@@ -1868,6 +1869,13 @@ GRID_HTML = r"""
             <summary class="version-summary">
               <span class="chev">▸</span>
               <span class="text-xs text-gray-400">{{ row.deployments|length }} version{{ 's' if row.deployments|length != 1 else '' }}</span>
+              {% if row.managed_pipelines %}
+                <span class="text-xs text-gray-500">pipeline:
+                  {% for pipeline in row.managed_pipelines %}
+                    {{ pipeline.configured_versions|join(', ') if pipeline.version_source == 'goldsky' and pipeline.configured_versions else 'unverified' }}{{ ';' if not loop.last else '' }}
+                  {% endfor %}
+                </span>
+              {% endif %}
             </summary>
             <div class="flex flex-col mt-1">
           {% for d in row.deployments %}
@@ -1907,6 +1915,34 @@ GRID_HTML = r"""
                   {% endif %}
                 {% endfor %}
               </span>
+              {% if row.managed_pipelines %}
+                {% set pipeline_match = namespace(count=0) %}
+                {% for pipeline in row.managed_pipelines %}
+                  {% if pipeline.version_source == 'goldsky' and pipeline.configured_versions|length == 1 and pipeline.configured_versions[0] == d.version %}
+                    {% set pipeline_match.count = pipeline_match.count + 1 %}
+                  {% endif %}
+                {% endfor %}
+                <span class="v-pipeline">
+                  {% if pipeline_match.count == row.managed_pipelines|length %}
+                    <span class="pill pill-green">pipeline current</span>
+                  {% else %}
+                    {% if pipeline_match.count %}
+                      <span class="pill pill-yellow">{{ pipeline_match.count }}/{{ row.managed_pipelines|length }} current</span>
+                    {% else %}
+                      <span class="text-xs text-gray-500">pipeline not current</span>
+                    {% endif %}
+                    <button class="btn btn-xs btn-ghost"
+                            hx-post="/update-pipeline"
+                            hx-vals='{"base": "{{ row.base }}", "version": "{{ d.version }}"}'
+                            hx-confirm="Switch managed pipeline references for {{ row.base }} to {{ d.version }}? This uses a fresh snapshot and does not move tags."
+                            hx-target="#grid" hx-swap="innerHTML"
+                            hx-disabled-elt="this">
+                      <span class="label-normal">switch pipeline here</span>
+                      <span class="htmx-indicator"><span class="spin"></span> switching…</span>
+                    </button>
+                  {% endif %}
+                </span>
+              {% endif %}
               <span class="v-actions">
                 {# Promote only makes sense when a managed tag currently lives on a DIFFERENT version.
                    If all managed tags are either absent or already on this version, nothing to promote. #}
@@ -1965,7 +2001,7 @@ GRID_HTML = r"""
             {% if pipeline_state.needs_update and row.latest_deployed_version %}
               <button class="btn btn-xs btn-primary"
                       hx-post="/update-pipeline"
-                      hx-vals='{"base": "{{ row.base }}"}'
+                      hx-vals='{"base": "{{ row.base }}", "version": "{{ row.latest_deployed_version }}"}'
                       hx-confirm="Update managed pipeline references for {{ row.base }} to {{ row.latest_deployed_version }}? This uses a fresh snapshot."
                       hx-target="#grid" hx-swap="innerHTML"
                       hx-disabled-elt="this">
@@ -2578,8 +2614,8 @@ def _pipeline_views(
     return views
 
 
-async def update_pipeline_to_latest(base: str) -> tuple[str, str, str]:
-    """Update every managed pipeline reference for a subgraph to its newest deployment."""
+async def update_pipeline_to_version(base: str, version: str = "") -> tuple[str, str, str]:
+    """Switch every managed pipeline reference for a subgraph to a deployed version."""
     if not base:
         raise HTTPException(400, "base required")
 
@@ -2587,22 +2623,24 @@ async def update_pipeline_to_latest(base: str) -> tuple[str, str, str]:
     if base not in dependencies:
         raise HTTPException(400, f"{base} has no repository-managed pipeline")
 
-    target_version = _latest_deployed_version(_store.state, base)
+    target_version = version.strip() or _latest_deployed_version(_store.state, base)
     if not target_version:
         raise HTTPException(400, f"{base} has no deployed version")
+    if f"{base}/{target_version}" not in _store.state.deployments:
+        raise HTTPException(400, f"{base}/{target_version} is not a deployed version")
 
     pipeline_views = _pipeline_views(base, dependencies, _store.state, target_version)
     if pipeline_views and all(pipeline["status"] == "current" for pipeline in pipeline_views):
         return "ok", "Managed pipelines already current", f"{base} already uses {target_version}"
 
-    activity = register_activity(f"Update managed pipelines → {base}/{target_version}", kind="pipeline")
+    activity = register_activity(f"Switch managed pipelines → {base}/{target_version}", kind="pipeline")
     ok, lines = await asyncio.to_thread(do_pipeline_update, {base: target_version})
     detail = "\n".join(lines)
     activity.finish(ok, detail)
     if ok:
         _store.apply_pipeline_versions({base: target_version})
-        return "ok", f"Managed pipelines updated to {target_version}", f"{base} · {len(dependencies[base])} pipeline(s)"
-    return "err", "Managed pipeline update failed", detail
+        return "ok", f"Managed pipelines switched to {target_version}", f"{base} · {len(dependencies[base])} pipeline(s)"
+    return "err", "Managed pipeline switch failed", detail
 
 
 def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[dict[str, Any]]:
@@ -3273,7 +3311,7 @@ async def delete_version(request: Request) -> HTMLResponse:
 @app.post("/update-pipeline", response_class=HTMLResponse)
 async def update_pipeline(request: Request) -> HTMLResponse:
     form = await request.form()
-    kind, title, body = await update_pipeline_to_latest(str(form.get("base", "")))
+    kind, title, body = await update_pipeline_to_version(str(form.get("base", "")), str(form.get("version", "")))
     return HTMLResponse(render_grid(_store) + render_toast(kind, title, body))
 
 
@@ -3827,7 +3865,7 @@ async def api_delete_version(request: Request) -> JSONResponse:
 @app.post("/api/update-pipeline", response_class=JSONResponse)
 async def api_update_pipeline(request: Request) -> JSONResponse:
     data = await _json_body(request)
-    kind, title, body = await update_pipeline_to_latest(str(data.get("base", "")))
+    kind, title, body = await update_pipeline_to_version(str(data.get("base", "")), str(data.get("version", "")))
     return _api_response(kind, title, body)
 
 

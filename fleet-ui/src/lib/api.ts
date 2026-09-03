@@ -60,7 +60,7 @@ export async function deleteVersion(input: { base: string; version: string }): P
 	return apiPost<ApiActionResponse>("/api/delete-version", input)
 }
 
-export async function updateManagedPipeline(input: { base: string }): Promise<ApiActionResponse> {
+export async function updateManagedPipeline(input: { base: string; version: string }): Promise<ApiActionResponse> {
 	return apiPost<ApiActionResponse>("/api/update-pipeline", input)
 }
 

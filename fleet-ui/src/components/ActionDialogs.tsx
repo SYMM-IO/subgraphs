@@ -29,7 +29,7 @@ type Props = {
   }) => void;
   onDelete: (base: string, version: string) => void;
   onUntag: (base: string, version: string, tag: string) => void;
-  onPipelineUpdate: (base: string) => void;
+  onPipelineUpdate: (base: string, version: string) => void;
   onRowPromote: (base: string, version: string, tags: string[], updatePipelines: boolean) => void;
 };
 
@@ -49,13 +49,13 @@ export function ActionDialogs(props: Props) {
       <ConfirmDialog
         open={open}
         busy={props.busy}
-        title="Update managed pipelines"
+        title="Switch managed pipelines"
         description={`${state.managedPipelines.length} pipeline${state.managedPipelines.length === 1 ? "" : "s"} associated with ${state.base}`}
         icon={<Workflow size={18} aria-hidden="true" />}
-        confirmLabel={`Update to ${state.targetVersion}`}
+        confirmLabel={`Switch to ${state.targetVersion}`}
         body={`Replace the current source version${currentVersions.length === 1 ? "" : "s"} (${currentVersions.join(", ") || "unverified"}) with ${state.targetVersion} and apply each pipeline from a fresh snapshot. This does not move subgraph tags.`}
         onClose={close}
-        onConfirm={() => props.onPipelineUpdate(state.base)}
+        onConfirm={() => props.onPipelineUpdate(state.base, state.targetVersion)}
       />
     );
   }

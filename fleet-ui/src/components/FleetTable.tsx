@@ -85,6 +85,15 @@ function ManagedPipelineCell({
   );
 }
 
+function pipelineVersionSummary(pipelines: ManagedPipeline[]) {
+  if (!pipelines.length) return "Not managed";
+  const livePipelines = pipelines.filter((pipeline) => pipeline.version_source === "goldsky");
+  const versions = Array.from(new Set(livePipelines.flatMap((pipeline) => pipeline.configured_versions)));
+  const unverifiedCount = pipelines.length - livePipelines.length;
+  if (!versions.length) return "Version unverified";
+  return `${versions.join(", ")}${unverifiedCount ? ` + ${unverifiedCount} unverified` : ""}`;
+}
+
 export function FleetTable(props: TableProps) {
   const rows = visibleRows(props.groups, props.filters);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -191,6 +200,7 @@ export function FleetTable(props: TableProps) {
                             <section className="detail-section">
                               <div className="detail-heading">
                                 <span>Deployments</span>
+                                <small>Managed pipeline: {pipelineVersionSummary(row.managed_pipelines)}</small>
                               </div>
                               <div className="deployment-subtable">
                                 {row.deployments.length ? (
@@ -198,6 +208,7 @@ export function FleetTable(props: TableProps) {
                                     <span>Version</span>
                                     <span>Status</span>
                                     <span>Tags</span>
+                                    <span>Pipeline</span>
                                     <span>Actions</span>
                                   </div>
                                 ) : null}
@@ -205,6 +216,10 @@ export function FleetTable(props: TableProps) {
                                   const health = deploymentHealth(deployment);
                                   const tagsOnVersion = Object.entries(row.tags).filter(([, version]) => version === deployment.version).map(([tag]) => tag);
                                   const movableTags = Object.entries(row.tags).filter(([, version]) => version !== deployment.version).map(([tag]) => tag);
+                                  const pipelinesOnVersion = row.managed_pipelines.filter(
+                                    (pipeline) => pipeline.version_source === "goldsky" && pipeline.configured_versions.length === 1 && pipeline.configured_versions[0] === deployment.version,
+                                  );
+                                  const allPipelinesOnVersion = row.managed_pipelines.length > 0 && pipelinesOnVersion.length === row.managed_pipelines.length;
                                   return (
                                     <div className="deployment-subrow" key={deployment.version}>
                                       <div className="deployment-version">
@@ -224,6 +239,23 @@ export function FleetTable(props: TableProps) {
                                       </div>
                                       <div className="deployment-tags">
                                         {tagsOnVersion.length ? tagsOnVersion.map((tag) => <Pill key={tag} tone="blue">{tag}</Pill>) : <span className="muted">no tags</span>}
+                                      </div>
+                                      <div className="deployment-pipeline">
+                                        {!row.managed_pipelines.length ? <span className="muted">not managed</span> : allPipelinesOnVersion ? (
+                                          <Pill tone="green">current</Pill>
+                                        ) : (
+                                          <>
+                                            {pipelinesOnVersion.length ? <Pill tone="yellow">{pipelinesOnVersion.length}/{row.managed_pipelines.length} current</Pill> : <span className="muted">not current</span>}
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => props.onUpdatePipeline(row.base, deployment.version, row.managed_pipelines)}
+                                              aria-label={`Switch managed pipelines for ${row.base} to ${deployment.version}`}
+                                            >
+                                              <Workflow size={13} aria-hidden="true" /> Switch here
+                                            </Button>
+                                          </>
+                                        )}
                                       </div>
                                       <div className="deployment-actions">
                                         {movableTags.length ? (
