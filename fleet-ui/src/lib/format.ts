@@ -31,6 +31,8 @@ export function searchableText(group: FleetGroup, row: FleetModule): string {
 	const tags = Object.entries(row.tags)
 		.map(([tag, version]) => `${tag} ${version}`)
 		.join(" ")
-	const pipelines = row.managed_pipelines.map(pipeline => pipeline.name).join(" ")
+	const pipelines = row.managed_pipelines
+		.map(pipeline => `${pipeline.name} ${pipeline.configured_versions.join(" ")} ${pipeline.status}`)
+		.join(" ")
 	return `${group.chain} ${group.network} ${row.module} ${row.module_short} ${row.base} ${deployments} ${tags} ${pipelines}`.toLowerCase()
 }

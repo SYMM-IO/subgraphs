@@ -6,7 +6,9 @@ from unittest import TestCase
 import yaml
 
 from scripts.pipeline_updater import (
+    extract_subgraph_versions,
     load_pipeline_dependencies,
+    parse_pipeline_definition_versions,
     render_subgraph_version,
     render_subgraph_versions,
     update_managed_pipelines,
@@ -96,6 +98,23 @@ class PipelineRenderingTests(TestCase):
         self.assertEqual(len(dependencies["base_analytics"]), 1)
         self.assertEqual(dependencies["base_analytics"][0].pipeline, "related")
         self.assertEqual(dependencies["base_analytics"][0].reference_count, 2)
+        self.assertEqual(dependencies["base_analytics"][0].configured_versions, ("old",))
+
+    def test_extracts_versions_from_flat_goldsky_definition(self) -> None:
+        definition = {
+            "funding": {
+                "type": "subgraph_entity",
+                "subgraphs": [{"name": "base_analytics", "version": "v2"}],
+            },
+            "position": {
+                "type": "subgraph_entity",
+                "subgraphs": [{"name": "base_analytics", "version": "v2"}],
+            },
+            "transform": {"type": "sql", "sql": "select 1"},
+        }
+
+        self.assertEqual(extract_subgraph_versions(definition), {"base_analytics": ("v2",)})
+        self.assertEqual(parse_pipeline_definition_versions(yaml.safe_dump(definition)), {"base_analytics": ("v2",)})
 
     def test_dry_run_only_returns_related_pipelines(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

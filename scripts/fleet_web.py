@@ -31,15 +31,28 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+import yaml
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import DictLoader, Environment, select_autoescape
 
 try:
-    from scripts.pipeline_updater import PipelineDependency, load_pipeline_dependencies, update_managed_pipelines
+    from scripts.fleet_identity import FLEET_HEALTH_PAYLOAD
+    from scripts.pipeline_updater import (
+        PipelineDependency,
+        load_pipeline_dependencies,
+        parse_pipeline_definition_versions,
+        update_managed_pipelines,
+    )
 except ModuleNotFoundError:  # Direct execution via `python scripts/fleet_web.py`.
-    from pipeline_updater import PipelineDependency, load_pipeline_dependencies, update_managed_pipelines
+    from fleet_identity import FLEET_HEALTH_PAYLOAD
+    from pipeline_updater import (
+        PipelineDependency,
+        load_pipeline_dependencies,
+        parse_pipeline_definition_versions,
+        update_managed_pipelines,
+    )
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -202,6 +215,8 @@ class GoldskyState:
 
     deployments: dict[str, Deployment] = field(default_factory=dict)
     tags: dict[str, dict[str, str]] = field(default_factory=dict)
+    managed_pipeline_versions: dict[str, dict[str, tuple[str, ...]]] = field(default_factory=dict)
+    verified_managed_pipelines: set[str] = field(default_factory=set)
 
     def for_base(self, base_name: str) -> list[Deployment]:
         return [d for d in self.deployments.values() if d.base_name == base_name]
@@ -287,6 +302,46 @@ def _chain_sort_key(key: str) -> tuple[int, int | str]:
     return (1, key)
 
 
+def _version_sort_key(version: str) -> tuple[tuple[int, int | str], ...]:
+    """Sort version labels naturally, so v0.2.10 follows v0.2.9."""
+    return tuple((0, int(part)) if part.isdigit() else (1, part.lower()) for part in re.findall(r"\d+|\D+", version))
+
+
+def _latest_deployed_version(state: GoldskyState, base: str) -> str:
+    deployments = state.for_base(base)
+    return max(deployments, key=lambda deployment: _version_sort_key(deployment.version)).version if deployments else ""
+
+
+def fetch_managed_pipeline_versions(
+    dependencies: dict[str, list[PipelineDependency]],
+) -> tuple[dict[str, dict[str, tuple[str, ...]]], set[str]]:
+    """Read live source versions for repository-managed Goldsky pipelines."""
+    goldsky = resolve_tool("goldsky")
+    if not goldsky:
+        return {}, set()
+
+    versions: dict[str, dict[str, tuple[str, ...]]] = {}
+    verified: set[str] = set()
+    pipeline_names = sorted({dependency.pipeline for matches in dependencies.values() for dependency in matches})
+    for pipeline in pipeline_names:
+        try:
+            result = subprocess.run(
+                [goldsky, "pipeline", "get", pipeline, "--definition", "--output", "yaml", "--color", "false"],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            if result.returncode != 0:
+                continue
+            versions[pipeline] = parse_pipeline_definition_versions(result.stdout)
+            verified.add(pipeline)
+        except (OSError, subprocess.TimeoutExpired, ValueError, yaml.YAMLError):
+            continue
+
+    return versions, verified
+
+
 # ────────────────────────────────────────────────────────────────────
 # State & Goldsky interaction (web-safe; no sys.exit, no Rich console)
 # ────────────────────────────────────────────────────────────────────
@@ -354,6 +409,8 @@ class FleetStore:
                 self._last_error = msg
             return False, msg
         new_state = parse_goldsky_list(proc.stdout)
+        pipeline_dependencies = load_pipeline_dependencies()
+        new_state.managed_pipeline_versions, new_state.verified_managed_pipelines = fetch_managed_pipeline_versions(pipeline_dependencies)
         with self._lock:
             self._state = new_state
             self._last_fetched_at = time.time()
@@ -386,6 +443,15 @@ class FleetStore:
                     del self._state.tags[base][t]
                 if not self._state.tags[base]:
                     del self._state.tags[base]
+
+    def apply_pipeline_versions(self, subgraph_versions: dict[str, str]) -> None:
+        """Optimistically mirror successful pipeline updates in the UI cache."""
+        dependencies = load_pipeline_dependencies()
+        with self._lock:
+            for subgraph, version in subgraph_versions.items():
+                for dependency in dependencies.get(subgraph, []):
+                    self._state.managed_pipeline_versions.setdefault(dependency.pipeline, {})[subgraph] = (version,)
+                    self._state.verified_managed_pipelines.add(dependency.pipeline)
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -1037,7 +1103,7 @@ BASE_HTML = r"""
                 font-size: 13px; }
   .no-results strong { display: block; color: #d6dde7; margin-bottom: 3px; font-size: 14px; }
   table { width: 100%; border-collapse: collapse; }
-  #grid table { min-width: 980px; }
+  #grid table { min-width: 1260px; }
   th, td { padding: 10px 12px; border-bottom: 1px solid rgba(35,42,53,.86); font-size: 13px; vertical-align: top; }
   th { text-align: left; color: #92a0b2; font-weight: 700; font-size: 10px;
        text-transform: uppercase; letter-spacing: 0.06em; position: sticky; top: 0;
@@ -1742,6 +1808,7 @@ GRID_HTML = r"""
       <th style="width: 120px;">Chain</th>
       <th style="width: 110px;">Module</th>
       <th>Deployments</th>
+      <th style="width: 280px;">Managed pipelines</th>
       <th style="width: 200px;">Tags</th>
     </tr>
   </thead>
@@ -1875,6 +1942,40 @@ GRID_HTML = r"""
           </details>
         {% else %}
           <span class="text-gray-600 text-xs">no deployments</span>
+        {% endif %}
+      </td>
+      <td class="align-top" data-label="Managed pipelines">
+        {% if row.managed_pipelines %}
+          {% set pipeline_state = namespace(needs_update=false) %}
+          <div class="flex flex-col gap-2">
+            {% for pipeline in row.managed_pipelines %}
+              {% if pipeline.status != 'current' %}{% set pipeline_state.needs_update = true %}{% endif %}
+              <div class="text-xs">
+                <div class="font-mono text-gray-300" style="word-break: break-word;">{{ pipeline.name }}</div>
+                <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <span class="pill {{ 'pill-green' if pipeline.status == 'current' else 'pill-yellow' if pipeline.status == 'outdated' else 'pill-gray' }}">
+                    {{ pipeline.status }}
+                  </span>
+                  <span class="text-gray-500 font-mono">
+                    {{ pipeline.configured_versions|join(', ') if pipeline.configured_versions else 'version unknown' }}
+                  </span>
+                </div>
+              </div>
+            {% endfor %}
+            {% if pipeline_state.needs_update and row.latest_deployed_version %}
+              <button class="btn btn-xs btn-primary"
+                      hx-post="/update-pipeline"
+                      hx-vals='{"base": "{{ row.base }}"}'
+                      hx-confirm="Update managed pipeline references for {{ row.base }} to {{ row.latest_deployed_version }}? This uses a fresh snapshot."
+                      hx-target="#grid" hx-swap="innerHTML"
+                      hx-disabled-elt="this">
+                <span class="label-normal">update → {{ row.latest_deployed_version }}</span>
+                <span class="htmx-indicator"><span class="spin"></span> updating…</span>
+              </button>
+            {% endif %}
+          </div>
+        {% else %}
+          <span class="text-gray-600 text-xs">not managed</span>
         {% endif %}
       </td>
       <td class="align-top" data-label="Tags">
@@ -2445,14 +2546,63 @@ def render_last_fetched_oob() -> str:
 # ────────────────────────────────────────────────────────────────────
 
 
-def _pipeline_views(base: str, dependencies: dict[str, list[PipelineDependency]]) -> list[dict[str, Any]]:
-    return [
-        {
-            "name": dependency.pipeline,
-            "reference_count": dependency.reference_count,
-        }
-        for dependency in dependencies.get(base, [])
-    ]
+def _pipeline_views(
+    base: str,
+    dependencies: dict[str, list[PipelineDependency]],
+    state: GoldskyState,
+    target_version: str,
+) -> list[dict[str, Any]]:
+    views: list[dict[str, Any]] = []
+    for dependency in dependencies.get(base, []):
+        is_live = dependency.pipeline in state.verified_managed_pipelines
+        configured_versions = (
+            state.managed_pipeline_versions.get(dependency.pipeline, {}).get(base, ())
+            if is_live
+            else dependency.configured_versions
+        )
+        if not is_live or not target_version:
+            status = "unknown"
+        elif configured_versions == (target_version,):
+            status = "current"
+        else:
+            status = "outdated"
+        views.append(
+            {
+                "name": dependency.pipeline,
+                "reference_count": dependency.reference_count,
+                "configured_versions": list(configured_versions),
+                "version_source": "goldsky" if is_live else "config",
+                "status": status,
+            }
+        )
+    return views
+
+
+async def update_pipeline_to_latest(base: str) -> tuple[str, str, str]:
+    """Update every managed pipeline reference for a subgraph to its newest deployment."""
+    if not base:
+        raise HTTPException(400, "base required")
+
+    dependencies = load_pipeline_dependencies()
+    if base not in dependencies:
+        raise HTTPException(400, f"{base} has no repository-managed pipeline")
+
+    target_version = _latest_deployed_version(_store.state, base)
+    if not target_version:
+        raise HTTPException(400, f"{base} has no deployed version")
+
+    pipeline_views = _pipeline_views(base, dependencies, _store.state, target_version)
+    if pipeline_views and all(pipeline["status"] == "current" for pipeline in pipeline_views):
+        return "ok", "Managed pipelines already current", f"{base} already uses {target_version}"
+
+    activity = register_activity(f"Update managed pipelines → {base}/{target_version}", kind="pipeline")
+    ok, lines = await asyncio.to_thread(do_pipeline_update, {base: target_version})
+    detail = "\n".join(lines)
+    activity.finish(ok, detail)
+    if ok:
+        _store.apply_pipeline_versions({base: target_version})
+        return "ok", f"Managed pipelines updated to {target_version}", f"{base} · {len(dependencies[base])} pipeline(s)"
+    return "err", "Managed pipeline update failed", detail
 
 
 def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[dict[str, Any]]:
@@ -2476,10 +2626,11 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
             base = c.deploy_urls.get(module)
             if not base:
                 continue
-            deployments = sorted(state.for_base(base), key=lambda d: d.version)
+            deployments = sorted(state.for_base(base), key=lambda deployment: _version_sort_key(deployment.version))
             tags = state.tags.get(base, {})
             if not deployments and not tags:
                 continue
+            latest_version = deployments[-1].version if deployments else ""
             module_rows.append(
                 {
                     "module": module,
@@ -2487,7 +2638,8 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
                     "base": base,
                     "deployments": deployments,
                     "tags": tags,
-                    "managed_pipelines": _pipeline_views(base, pipeline_dependencies),
+                    "latest_deployed_version": latest_version,
+                    "managed_pipelines": _pipeline_views(base, pipeline_dependencies, state, latest_version),
                 }
             )
         if not module_rows:
@@ -2510,7 +2662,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
     orphan_bases = sorted(all_goldsky_bases - known_bases)
 
     for orphan_base in orphan_bases:
-        deployments = sorted(state.for_base(orphan_base), key=lambda d: d.version)
+        deployments = sorted(state.for_base(orphan_base), key=lambda deployment: _version_sort_key(deployment.version))
         tags = state.tags.get(orphan_base, {})
         if not deployments and not tags:
             continue
@@ -2528,6 +2680,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
             if key in orphan_base.lower():
                 guessed_logo = chain_logo_url(key)
                 break
+        latest_version = deployments[-1].version if deployments else ""
         groups.append(
             {
                 "chain": orphan_base,
@@ -2543,7 +2696,8 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
                         "base": orphan_base,
                         "deployments": deployments,
                         "tags": tags,
-                        "managed_pipelines": _pipeline_views(orphan_base, pipeline_dependencies),
+                        "latest_deployed_version": latest_version,
+                        "managed_pipelines": _pipeline_views(orphan_base, pipeline_dependencies, state, latest_version),
                     }
                 ],
             }
@@ -2814,7 +2968,7 @@ async def promote(request: Request) -> HTMLResponse:
                 log_lines.append(f"{c.key}: skip — no 100% synced deployment")
                 skipped_count += 1
                 continue
-            ver_for_chain = sorted(synced, key=lambda d: d.version)[-1].version
+            ver_for_chain = max(synced, key=lambda deployment: _version_sort_key(deployment.version)).version
         else:
             ver_for_chain = version
 
@@ -2880,6 +3034,8 @@ async def promote(request: Request) -> HTMLResponse:
         if applied_count == len(chain_objs):
             pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, promoted_versions)
             log_lines.extend(pipeline_lines)
+            if pipeline_ok:
+                _store.apply_pipeline_versions(promoted_versions)
         else:
             pipeline_ok = False
             log_lines.append("pipelines: skipped because not every selected promotion succeeded")
@@ -3114,6 +3270,13 @@ async def delete_version(request: Request) -> HTMLResponse:
     return HTMLResponse(render_grid(_store) + toast)
 
 
+@app.post("/update-pipeline", response_class=HTMLResponse)
+async def update_pipeline(request: Request) -> HTMLResponse:
+    form = await request.form()
+    kind, title, body = await update_pipeline_to_latest(str(form.get("base", "")))
+    return HTMLResponse(render_grid(_store) + render_toast(kind, title, body))
+
+
 @app.get("/row-promote-form", response_class=HTMLResponse)
 def row_promote_form(base: str, version: str) -> HTMLResponse:
     current_tags = _store.state.tags.get(base, {})
@@ -3181,6 +3344,8 @@ async def row_promote(request: Request) -> HTMLResponse:
     if update_pipelines and tags_ok:
         pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, {base: version})
         log_bits.extend(pipeline_lines)
+        if pipeline_ok:
+            _store.apply_pipeline_versions({base: version})
     elif update_pipelines:
         pipeline_ok = False
         log_bits.append("pipelines: skipped because tag promotion failed")
@@ -3258,7 +3423,9 @@ def _enrich_selections(sels: list[dict[str, Any]]) -> list[dict[str, Any]]:
             c = chain_by_key.get(s["chain"])
             if c:
                 s["base"] = c.deploy_urls.get(s["module"], "")
-        s["managed_pipelines"] = _pipeline_views(s.get("base", ""), pipeline_dependencies)
+        base = s.get("base", "")
+        target_version = _latest_deployed_version(_store.state, base)
+        s["managed_pipelines"] = _pipeline_views(base, pipeline_dependencies, _store.state, target_version)
         out.append(s)
     return out
 
@@ -3425,7 +3592,7 @@ async def bulk_promote(request: Request) -> HTMLResponse:
                 log_lines.append(f"{s['chain']}: skip — no 100% synced deployment")
                 skipped += 1
                 continue
-            ver_for_chain = sorted(synced, key=lambda d: d.version)[-1].version
+            ver_for_chain = max(synced, key=lambda deployment: _version_sort_key(deployment.version)).version
         else:
             ver_for_chain = version
 
@@ -3490,6 +3657,8 @@ async def bulk_promote(request: Request) -> HTMLResponse:
         if applied == len(selections):
             pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, promoted_versions)
             log_lines.extend(pipeline_lines)
+            if pipeline_ok:
+                _store.apply_pipeline_versions(promoted_versions)
         else:
             pipeline_ok = False
             log_lines.append("pipelines: skipped because not every selected promotion succeeded")
@@ -3655,6 +3824,13 @@ async def api_delete_version(request: Request) -> JSONResponse:
     return _api_response("err", "Delete failed", out or f"{base}/{version}", status_code=500)
 
 
+@app.post("/api/update-pipeline", response_class=JSONResponse)
+async def api_update_pipeline(request: Request) -> JSONResponse:
+    data = await _json_body(request)
+    kind, title, body = await update_pipeline_to_latest(str(data.get("base", "")))
+    return _api_response(kind, title, body)
+
+
 @app.post("/api/move-tag", response_class=JSONResponse)
 async def api_move_tag(request: Request) -> JSONResponse:
     data = await _json_body(request)
@@ -3743,6 +3919,8 @@ async def api_row_promote(request: Request) -> JSONResponse:
     if update_pipelines and tags_ok:
         pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, {base: version})
         log_bits.extend(pipeline_lines)
+        if pipeline_ok:
+            _store.apply_pipeline_versions({base: version})
     elif update_pipelines:
         pipeline_ok = False
         log_bits.append("pipelines: skipped because tag promotion failed")
@@ -3798,7 +3976,7 @@ async def api_bulk_promote(request: Request) -> JSONResponse:
                 log_lines.append(f"{s['chain']}: skip — no 100% synced deployment")
                 skipped += 1
                 continue
-            ver_for_chain = sorted(synced, key=lambda d: d.version)[-1].version
+            ver_for_chain = max(synced, key=lambda deployment: _version_sort_key(deployment.version)).version
         else:
             ver_for_chain = version
 
@@ -3863,6 +4041,8 @@ async def api_bulk_promote(request: Request) -> JSONResponse:
         if applied == len(selections):
             pipeline_ok, pipeline_lines = await asyncio.to_thread(do_pipeline_update, promoted_versions)
             log_lines.extend(pipeline_lines)
+            if pipeline_ok:
+                _store.apply_pipeline_versions(promoted_versions)
         else:
             pipeline_ok = False
             log_lines.append("pipelines: skipped because not every selected promotion succeeded")

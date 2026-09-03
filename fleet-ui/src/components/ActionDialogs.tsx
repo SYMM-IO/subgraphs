@@ -1,6 +1,6 @@
-import { GitBranch, Rocket, Trash2, UploadCloud, Workflow } from "lucide-react";
+import { GitBranch, LoaderCircle, Rocket, Trash2, UploadCloud, Workflow } from "lucide-react";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ManagedPipeline, Selection } from "../types/fleet";
 import { Button, Field, Modal } from "./ui";
 
@@ -10,6 +10,7 @@ export type DialogState =
   | { kind: "bulk-promote"; selections: Selection[] }
   | { kind: "confirm-delete"; base: string; version: string }
   | { kind: "confirm-untag"; base: string; version: string; tag: string }
+  | { kind: "confirm-pipeline-update"; base: string; targetVersion: string; managedPipelines: ManagedPipeline[] }
   | { kind: "row-promote"; base: string; version: string; tags: string[]; managedPipelines: ManagedPipeline[] };
 
 type Props = {
@@ -28,6 +29,7 @@ type Props = {
   }) => void;
   onDelete: (base: string, version: string) => void;
   onUntag: (base: string, version: string, tag: string) => void;
+  onPipelineUpdate: (base: string) => void;
   onRowPromote: (base: string, version: string, tags: string[], updatePipelines: boolean) => void;
 };
 
@@ -39,6 +41,23 @@ export function ActionDialogs(props: Props) {
   }
   if (props.state.kind === "bulk-promote") {
     return <BulkPromoteDialog open={open} busy={props.busy} selections={props.state.selections} onClose={close} onSubmit={props.onBulkPromote} />;
+  }
+  if (props.state.kind === "confirm-pipeline-update") {
+    const state = props.state;
+    const currentVersions = Array.from(new Set(state.managedPipelines.flatMap((pipeline) => pipeline.configured_versions)));
+    return (
+      <ConfirmDialog
+        open={open}
+        busy={props.busy}
+        title="Update managed pipelines"
+        description={`${state.managedPipelines.length} pipeline${state.managedPipelines.length === 1 ? "" : "s"} associated with ${state.base}`}
+        icon={<Workflow size={18} aria-hidden="true" />}
+        confirmLabel={`Update to ${state.targetVersion}`}
+        body={`Replace the current source version${currentVersions.length === 1 ? "" : "s"} (${currentVersions.join(", ") || "unverified"}) with ${state.targetVersion} and apply each pipeline from a fresh snapshot. This does not move subgraph tags.`}
+        onClose={close}
+        onConfirm={() => props.onPipelineUpdate(state.base)}
+      />
+    );
   }
   if (props.state.kind === "confirm-delete") {
     const state = props.state;
@@ -207,8 +226,25 @@ function BulkPromoteDialog({
   const [requireSynced, setRequireSynced] = useState(true);
   const [deleteDisplaced, setDeleteDisplaced] = useState(false);
   const [updatePipelines, setUpdatePipelines] = useState(true);
+  const [error, setError] = useState("");
+  const latestRef = useRef<HTMLInputElement>(null);
+  const versionRef = useRef<HTMLInputElement>(null);
   const tags = useMemo(() => [latest && "latest", stage && "stage"].filter(Boolean) as string[], [latest, stage]);
   const affectedPipelines = useMemo(() => pipelineNames(selections), [selections]);
+  const submit = () => {
+    if (!tags.length) {
+      setError("Select at least one tag to promote.");
+      latestRef.current?.focus();
+      return;
+    }
+    if (mode === "specific" && !version.trim()) {
+      setError("Enter a version label or use newest fully synced mode.");
+      versionRef.current?.focus();
+      return;
+    }
+    setError("");
+    onSubmit({ selections, tags, mode, version: version.trim(), requireSynced, deleteDisplaced, updatePipelines });
+  };
   return (
     <Modal
       open={open}
@@ -222,8 +258,8 @@ function BulkPromoteDialog({
           <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
           <Button
             variant="primary"
-            onClick={() => onSubmit({ selections, tags, mode, version, requireSynced, deleteDisplaced, updatePipelines })}
-            disabled={busy || tags.length === 0 || (mode === "specific" && !version.trim())}
+            onClick={submit}
+            disabled={busy}
           >
             {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}
             {deleteDisplaced ? "Promote and delete old versions" : "Promote selected"}
@@ -285,6 +321,8 @@ function RowPromoteDialog({
 }) {
   const [selected, setSelected] = useState(() => new Set(state.tags));
   const [updatePipelines, setUpdatePipelines] = useState(true);
+  const [error, setError] = useState("");
+  const firstTagRef = useRef<HTMLInputElement>(null);
   const tags = Array.from(selected);
   const submit = () => {
     if (!tags.length) {
@@ -293,7 +331,7 @@ function RowPromoteDialog({
       return;
     }
     setError("");
-    onSubmit(state.base, state.version, tags);
+    onSubmit(state.base, state.version, tags, updatePipelines);
   };
   return (
     <Modal
@@ -306,8 +344,8 @@ function RowPromoteDialog({
       footer={
         <>
           <Button variant="ghost" onClick={onClose} disabled={busy}>Cancel</Button>
-          <Button variant="primary" disabled={busy || tags.length === 0} onClick={() => onSubmit(state.base, state.version, tags, updatePipelines)}>
-            {busy ? "Promoting..." : "Promote"}
+          <Button variant="primary" disabled={busy} onClick={submit}>
+            {busy ? <LoaderCircle size={14} className="spin-slow" aria-hidden="true" /> : null}Promote
           </Button>
         </>
       }
@@ -331,6 +369,7 @@ function RowPromoteDialog({
           </label>
         ))}
       </div>
+      {error ? <p className="field-error" role="alert">{error}</p> : null}
       <PipelineFollowup
         checked={updatePipelines}
         onChange={setUpdatePipelines}

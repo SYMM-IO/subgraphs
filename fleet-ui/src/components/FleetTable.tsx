@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, Copy, ExternalLink, Rocket, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, ExternalLink, Rocket, Trash2, Workflow } from "lucide-react";
 import { Fragment, useState } from "react";
 import clsx from "clsx";
 import type { FleetGroup, FleetModule, ManagedPipeline, Selection } from "../types/fleet";
@@ -26,6 +26,8 @@ type TableProps = {
   onDelete: (base: string, version: string) => void;
   onRemoveTag: (base: string, version: string, tag: string) => void;
   onPromote: (base: string, version: string, tags: string[], managedPipelines: ManagedPipeline[]) => void;
+  onUpdatePipeline: (base: string, targetVersion: string, managedPipelines: ManagedPipeline[]) => void;
+  onClearFilters: () => void;
 };
 
 function rowVisible(group: FleetGroup, row: FleetModule, filters: Filters) {
@@ -43,6 +45,43 @@ export function visibleRows(groups: FleetGroup[], filters: Filters) {
     group.modules
       .filter((row) => rowVisible(group, row, filters))
       .map((row) => ({ group, row, key: rowKey(group, row), selection: toSelection(group, row) })),
+  );
+}
+
+function ManagedPipelineCell({
+  row,
+  onUpdate,
+}: {
+  row: FleetModule;
+  onUpdate: (base: string, targetVersion: string, managedPipelines: ManagedPipeline[]) => void;
+}) {
+  if (!row.managed_pipelines.length) return <span className="muted">not managed</span>;
+
+  const needsUpdate = row.managed_pipelines.some((pipeline) => pipeline.status !== "current");
+  return (
+    <div className="managed-pipeline-cell">
+      <div className="managed-pipeline-list">
+        {row.managed_pipelines.map((pipeline) => (
+          <div className="managed-pipeline-item" key={pipeline.name}>
+            <div className="managed-pipeline-name" title={pipeline.name}>
+              <Workflow size={13} aria-hidden="true" />
+              <span>{pipeline.name}</span>
+            </div>
+            <div className="managed-pipeline-version">
+              <span className="mono">{pipeline.configured_versions.length ? pipeline.configured_versions.join(", ") : "version unknown"}</span>
+              <Pill tone={pipeline.status === "current" ? "green" : pipeline.status === "outdated" ? "yellow" : "gray"}>
+                {pipeline.status === "current" ? "current" : pipeline.status === "outdated" ? "outdated" : "unverified"}
+              </Pill>
+            </div>
+          </div>
+        ))}
+      </div>
+      {needsUpdate && row.latest_deployed_version ? (
+        <Button size="sm" variant="primary" onClick={() => onUpdate(row.base, row.latest_deployed_version, row.managed_pipelines)}>
+          <Workflow size={13} aria-hidden="true" /> Update to {row.latest_deployed_version}
+        </Button>
+      ) : null}
+    </div>
   );
 }
 
@@ -81,6 +120,7 @@ export function FleetTable(props: TableProps) {
               <th scope="col">Network / subgraph</th>
               <th scope="col">Versions</th>
               <th scope="col">Tags</th>
+              <th scope="col">Managed pipeline</th>
               <th className="details-col" scope="col">Details</th>
             </tr>
           </thead>
@@ -116,7 +156,6 @@ export function FleetTable(props: TableProps) {
                             <strong className={clsx("module-name", row.module_short === "analytics" && "module-primary")}>{row.module_short}</strong>
                             <code>{row.base}</code>
                             <span>{row.module}</span>
-                            {row.managed_pipelines.length ? <Pill tone="blue">{row.managed_pipelines.length} pipeline{row.managed_pipelines.length === 1 ? "" : "s"}</Pill> : null}
                           </div>
                         </div>
                       </div>
@@ -134,6 +173,9 @@ export function FleetTable(props: TableProps) {
                         <span>tag{tagCount === 1 ? "" : "s"}</span>
                       </div>
                     </td>
+                    <td data-label="Managed pipeline">
+                      <ManagedPipelineCell row={row} onUpdate={props.onUpdatePipeline} />
+                    </td>
                     <td data-label="Details" className="details-col">
                       <button className="expand-button" onClick={() => toggleExpanded(key)} aria-expanded={isExpanded} aria-label={`${isExpanded ? "Collapse" : "Open"} ${group.chain} ${row.module}`}>
                         {isExpanded ? <ChevronDown size={15} aria-hidden="true" /> : <ChevronRight size={15} aria-hidden="true" />}
@@ -143,7 +185,7 @@ export function FleetTable(props: TableProps) {
                   </tr>
                   {isExpanded ? (
                     <tr className="deployment-detail-row">
-                      <td colSpan={5}>
+                      <td colSpan={6}>
                         <div className="deployment-detail-panel">
                           <div className="detail-sections">
                             <section className="detail-section">

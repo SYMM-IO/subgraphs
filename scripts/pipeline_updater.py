@@ -14,7 +14,7 @@ import argparse
 import os
 import subprocess
 import tempfile
-from collections import Counter
+from collections import Counter, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
@@ -47,6 +47,43 @@ class PipelineDependency:
     pipeline: str
     config_path: Path
     reference_count: int
+    configured_versions: tuple[str, ...] = ()
+
+
+def extract_subgraph_versions(definition: dict[str, Any]) -> dict[str, tuple[str, ...]]:
+    """Collect subgraph versions from a repository or Goldsky definition.
+
+    Repository configs nest source definitions under ``sources``. Goldsky's
+    ``pipeline get --definition`` output is the flattened source/transform/sink
+    mapping, so both shapes are accepted.
+    """
+    sources = definition.get("sources")
+    candidates = sources.values() if isinstance(sources, dict) else definition.values()
+    versions: dict[str, set[str]] = defaultdict(set)
+
+    for source in candidates:
+        if not isinstance(source, dict) or source.get("type") not in {"subgraph_entity", "subgraphEntity"}:
+            continue
+        references = source.get("subgraphs")
+        if not isinstance(references, list):
+            continue
+        for reference in references:
+            if not isinstance(reference, dict):
+                continue
+            subgraph = reference.get("name")
+            version = reference.get("version")
+            if isinstance(subgraph, str) and subgraph and isinstance(version, str) and version:
+                versions[subgraph].add(version)
+
+    return {subgraph: tuple(sorted(found_versions)) for subgraph, found_versions in sorted(versions.items())}
+
+
+def parse_pipeline_definition_versions(text: str) -> dict[str, tuple[str, ...]]:
+    """Parse Goldsky's YAML definition output into subgraph/version mappings."""
+    definition = yaml.safe_load(text)
+    if not isinstance(definition, dict):
+        raise ValueError("pipeline definition must be a YAML object")
+    return extract_subgraph_versions(definition)
 
 
 def load_pipeline_dependencies(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[str, list[PipelineDependency]]:
@@ -70,6 +107,7 @@ def load_pipeline_dependencies(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[st
             continue
 
         reference_counts: Counter[str] = Counter()
+        configured_versions: dict[str, set[str]] = defaultdict(set)
         for source in sources.values():
             if not isinstance(source, dict) or source.get("type") != "subgraph_entity":
                 continue
@@ -78,7 +116,11 @@ def load_pipeline_dependencies(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[st
                 continue
             for reference in references:
                 if isinstance(reference, dict) and isinstance(reference.get("name"), str) and reference["name"]:
-                    reference_counts[reference["name"]] += 1
+                    subgraph = reference["name"]
+                    reference_counts[subgraph] += 1
+                    version = reference.get("version")
+                    if isinstance(version, str) and version:
+                        configured_versions[subgraph].add(version)
 
         for subgraph, reference_count in sorted(reference_counts.items()):
             dependencies.setdefault(subgraph, []).append(
@@ -86,6 +128,7 @@ def load_pipeline_dependencies(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[st
                     pipeline=pipeline,
                     config_path=config_path,
                     reference_count=reference_count,
+                    configured_versions=tuple(sorted(configured_versions[subgraph])),
                 )
             )
 

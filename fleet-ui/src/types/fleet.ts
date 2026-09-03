@@ -13,6 +13,9 @@ export type Deployment = {
 export type ManagedPipeline = {
 	name: string
 	reference_count: number
+	configured_versions: string[]
+	version_source: "goldsky" | "config"
+	status: "current" | "outdated" | "unknown"
 }
 
 export type FleetModule = {
@@ -21,6 +24,7 @@ export type FleetModule = {
 	base: string
 	deployments: Deployment[]
 	tags: Record<string, string>
+	latest_deployed_version: string
 	managed_pipelines: ManagedPipeline[]
 }
 

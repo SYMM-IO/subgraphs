@@ -10,6 +10,7 @@ import {
   refreshFleet,
   removeTag,
   rowPromote,
+  updateManagedPipeline,
 } from "./lib/api";
 import { ActivityRail } from "./components/ActivityRail";
 import { ActionDialogs, type DialogState } from "./components/ActionDialogs";
@@ -296,6 +297,8 @@ export function App() {
             onDelete={(base, version) => setDialog({ kind: "confirm-delete", base, version })}
             onRemoveTag={(base, version, tag) => setDialog({ kind: "confirm-untag", base, version, tag })}
             onPromote={(base, version, tags, managedPipelines) => setDialog({ kind: "row-promote", base, version, tags, managedPipelines })}
+            onUpdatePipeline={(base, targetVersion, managedPipelines) => openDialog({ kind: "confirm-pipeline-update", base, targetVersion, managedPipelines })}
+            onClearFilters={() => setFilters({ ...emptyFilters, chains: new Set() })}
           />
         </main>
       </div>
@@ -329,6 +332,7 @@ export function App() {
         }}
         onDelete={(base, version) => void runAction(() => deleteVersion({ base, version }))}
         onUntag={(base, version, tag) => void runAction(() => removeTag({ base, version, tag }))}
+        onPipelineUpdate={(base) => void runAction(() => updateManagedPipeline({ base }))}
         onRowPromote={(base, version, tags, updatePipelines) => void runAction(() => rowPromote({ base, version, tags, updatePipelines }))}
       />
       <ToastHost toast={toast} onOpenChange={closeToast} />

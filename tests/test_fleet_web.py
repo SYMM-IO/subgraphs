@@ -1,6 +1,8 @@
 import asyncio
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import time
@@ -80,6 +82,42 @@ class ToolResolutionTests(TestCase):
         )
 
 
+class ManagedPipelineStateTests(TestCase):
+    def test_fetch_reads_live_pipeline_subgraph_versions(self) -> None:
+        dependencies = {
+            "base_analytics": [
+                fleet_web.PipelineDependency(
+                    pipeline="base-solvency-engine",
+                    config_path=Path("pipelines/base-solvency-engine.yaml"),
+                    reference_count=1,
+                    configured_versions=("v1",),
+                )
+            ]
+        }
+        definition = """
+funding:
+  type: subgraph_entity
+  subgraphs:
+    - name: base_analytics
+      version: v2
+"""
+        completed = subprocess.CompletedProcess(["goldsky"], 0, stdout=definition, stderr="")
+        with (
+            patch.object(fleet_web, "resolve_tool", return_value="/usr/local/bin/goldsky"),
+            patch.object(fleet_web.subprocess, "run", return_value=completed) as run,
+        ):
+            versions, verified = fleet_web.fetch_managed_pipeline_versions(dependencies)
+
+        self.assertEqual(versions, {"base-solvency-engine": {"base_analytics": ("v2",)}})
+        self.assertEqual(verified, {"base-solvency-engine"})
+        self.assertIn("--definition", run.call_args.args[0])
+
+    def test_version_sort_is_natural(self) -> None:
+        versions = ["v0.2.9", "v0.2.11", "v0.2.10"]
+
+        self.assertEqual(sorted(versions, key=fleet_web._version_sort_key), ["v0.2.9", "v0.2.10", "v0.2.11"])
+
+
 class JsonRequest:
     def __init__(self, payload: dict) -> None:
         self.payload = payload
@@ -141,7 +179,7 @@ class BulkDeploySequenceTests(TestCase):
                 (
                     "hyperevm · perps/analytics v9.9.9",
                     [
-                        "python3",
+                        sys.executable,
                         "scripts/manager.py",
                         "configs/perps/hyperevm.json",
                         "perps/analytics",
@@ -152,7 +190,7 @@ class BulkDeploySequenceTests(TestCase):
                 (
                     "arbitrum · perps/analytics v9.9.9",
                     [
-                        "python3",
+                        sys.executable,
                         "scripts/manager.py",
                         "configs/perps/arbitrum.json",
                         "perps/analytics",
@@ -260,7 +298,7 @@ class ActivityProgressRenderTests(TestCase):
                 (
                     "arbitrum · perps/analytics v1.2.3",
                     [
-                        "python3",
+                        sys.executable,
                         "scripts/manager.py",
                         "configs/perps/arbitrum.json",
                         "perps/analytics",
@@ -271,7 +309,7 @@ class ActivityProgressRenderTests(TestCase):
                 (
                     "hyperevm · perps/analytics v1.2.3",
                     [
-                        "python3",
+                        sys.executable,
                         "scripts/manager.py",
                         "configs/perps/hyperevm.json",
                         "perps/analytics",
@@ -308,6 +346,8 @@ class ReactApiTests(TestCase):
                 )
             },
             tags={"base_analytics": {"latest": "v1"}},
+            managed_pipeline_versions={"base-solvency-engine": {"base_analytics": ("v0",)}},
+            verified_managed_pipelines={"base-solvency-engine"},
         )
         fleet_web._store._last_fetched_at = time.time()
 
@@ -325,6 +365,7 @@ class ReactApiTests(TestCase):
                     pipeline="base-solvency-engine",
                     config_path=Path("pipelines/base-solvency-engine.yaml"),
                     reference_count=3,
+                    configured_versions=("v0",),
                 )
             ]
         }
@@ -334,11 +375,48 @@ class ReactApiTests(TestCase):
         self.assertEqual(data["summary"]["rows"], 1)
         self.assertEqual(data["groups"][0]["modules"][0]["deployments"][0]["version"], "v1")
         self.assertEqual(data["groups"][0]["modules"][0]["tags"]["latest"], "v1")
+        self.assertEqual(data["groups"][0]["modules"][0]["latest_deployed_version"], "v1")
         self.assertEqual(
             data["groups"][0]["modules"][0]["managed_pipelines"],
-            [{"name": "base-solvency-engine", "reference_count": 3}],
+            [
+                {
+                    "name": "base-solvency-engine",
+                    "reference_count": 3,
+                    "configured_versions": ["v0"],
+                    "version_source": "goldsky",
+                    "status": "outdated",
+                }
+            ],
         )
         self.assertIn("last fetched", data["lastFetchedLabel"])
+
+    def test_row_pipeline_action_updates_to_latest_deployed_version_without_tags(self) -> None:
+        dependencies = {
+            "base_analytics": [
+                fleet_web.PipelineDependency(
+                    pipeline="base-solvency-engine",
+                    config_path=Path("pipelines/base-solvency-engine.yaml"),
+                    reference_count=3,
+                    configured_versions=("v0",),
+                )
+            ]
+        }
+        with (
+            patch.object(fleet_web.asyncio, "to_thread", new=run_inline),
+            patch.object(fleet_web, "load_pipeline_dependencies", return_value=dependencies),
+            patch.object(fleet_web, "do_pipeline_update", return_value=(True, ["pipeline updated"])) as update_pipeline,
+            patch.object(fleet_web, "do_tag_create") as create_tag,
+            patch.object(fleet_web, "do_tag_delete") as delete_tag,
+        ):
+            response = asyncio.run(fleet_web.api_update_pipeline(JsonRequest({"base": "base_analytics"})))
+
+        payload = response_json(response)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(payload["toast"]["kind"], "ok")
+        self.assertEqual(payload["fleet"]["groups"][0]["modules"][0]["managed_pipelines"][0]["status"], "current")
+        update_pipeline.assert_called_once_with({"base_analytics": "v1"})
+        create_tag.assert_not_called()
+        delete_tag.assert_not_called()
 
     def test_row_promote_updates_pipeline_after_tag_success(self) -> None:
         with (

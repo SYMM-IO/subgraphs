@@ -199,6 +199,8 @@ The script reports sync percentage, block range, and flags any errors or subgrap
 
 Deploying a subgraph does not change a managed Goldsky pipeline. The release gate is the Fleet UI's **Promote** or **Bulk Promote** action, where **Update managed Goldsky pipelines** is enabled by default and the matching pipeline names are previewed before promotion.
 
+The Fleet list also shows each associated managed pipeline and the subgraph version read from its live Goldsky definition. Rows whose pipeline reference does not match the newest deployed version expose an **Update to _version_** action. That action updates the pipeline from a fresh snapshot without moving `stage`, `latest`, or any other subgraph tag. If the live definition cannot be read, Fleet shows the repository-configured version as unverified and still allows an explicit update.
+
 Pipeline definitions under `pipelines/` are the source of truth and define the dependency relationship. After all requested tag moves succeed, Fleet renders every matching `subgraph_entity` reference with the promoted immutable version. For every related pipeline it:
 
 1. Confirms the pipeline already exists, so the promotion flow cannot accidentally create one.
