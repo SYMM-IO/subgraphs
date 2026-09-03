@@ -28,6 +28,8 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 			va.source = event.address
 			va.timestamp = event.block.timestamp
 			va.updateTimestamp = event.block.timestamp
+			va.totalPositions = BigInt.zero()
+			va.activePositions = BigInt.zero()
 			va.latestMarginBalance = BigInt.zero()
 			va.reuseCount = BigInt.zero()
 			initializeVirtualAccountCounters(va)

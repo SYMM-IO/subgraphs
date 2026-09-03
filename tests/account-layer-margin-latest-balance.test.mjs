@@ -26,6 +26,18 @@ test("account-layer margin handlers refresh affected core latest balances", () =
 	assert.match(marginBalances, /Version\.v_0_8_6/, "account-layer margin refresh must read the stage core with v0.8.6 ABI")
 })
 
+test("emergency recovery initializes required position counters on orphan virtual-account stubs", () => {
+	const emergencyRecover = read("perps/common/handlers/accountLayer/EmergencyMarginRecoveredHandler.ts")
+	const stubStart = emergencyRecover.indexOf("va = new VirtualAccount(vaId)")
+	const stubSave = emergencyRecover.indexOf("va.save()", stubStart)
+
+	assert.notEqual(stubStart, -1, "emergency recovery must create an orphan VirtualAccount stub")
+	assert.notEqual(stubSave, -1, "emergency recovery must persist the orphan VirtualAccount stub")
+	const stubInitialization = emergencyRecover.slice(stubStart, stubSave)
+	assert.match(stubInitialization, /va\.totalPositions = BigInt\.zero\(\)/, "the stub must initialize required totalPositions")
+	assert.match(stubInitialization, /va\.activePositions = BigInt\.zero\(\)/, "the stub must initialize required activePositions")
+})
+
 test("account-layer topology comes from canonical state instead of address registries", () => {
 	const profile = read("perps/common/utils/profile.ts")
 	const resolver = read("perps/common/utils/account_layer_resolver.ts")
