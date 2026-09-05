@@ -51,6 +51,25 @@ This structure addresses the following challenges:
 5. **Review Output**: The script will generate necessary files and output the deployment status. It's important to
    review the generated files, especially `subgraph.yaml` and `schema.graphql`, to ensure they are correctly configured.
 
+### Per-source Account Layer pairing
+
+When a network config contains historical or otherwise unrelated Symmio deployments, set `accountLayerSource` only on
+the Core or MultiAccount sources that belong to the declared AccountLayer deployment:
+
+```json
+{
+  "address": "0xCore",
+  "abi": "symmio",
+  "version": "0_8_5",
+  "startBlock": "123",
+  "accountLayerSource": "0xAccountLayer"
+}
+```
+
+Once any source uses `accountLayerSource`, the manager adds AccountLayer context only to explicitly paired sources and
+to the AccountLayer data source itself. Configs without this field retain the legacy single-AccountLayer inference; an
+ambiguous config with multiple AccountLayer contracts must use explicit pairings.
+
 ## How It Works (Overview)
 
 1. **Configuration Loading**:

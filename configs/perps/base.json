@@ -15,8 +15,26 @@
 		{
 			"address": "0x91Cf2D8Ed503EC52768999aA6D8DBeA6e52dbe43",
 			"abi": "symmio",
+			"version": "0_8_5",
+			"startBlock": "46754528",
+			"accountLayerSource": "0x56caf00c6C5cB5478570Bb23807B9d1D697863DC",
+			"dependencies": [
+				"feeCollector_1",
+				"symmioMultiAccount_2"
+			]
+		},
+		{
+			"address": "0x56caf00c6C5cB5478570Bb23807B9d1D697863DC",
+			"abi": "accountLayer",
+			"version": "2",
+			"startBlock": "45290554"
+		},
+		{
+			"address": "0x91Cf2D8Ed503EC52768999aA6D8DBeA6e52dbe43",
+			"abi": "symmio",
 			"version": "0_8_4",
 			"startBlock": "24730204",
+			"endBlock": "46754527",
 			"dependencies": [
 				"feeCollector_1",
 				"symmioMultiAccount_2"
