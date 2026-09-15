@@ -2489,7 +2489,7 @@ type FullyLiquidatedPartyA @entity(immutable: true) {
 	"""
 	counterId: BigInt!
 	"""
-	Opaque identifier scoping this liquidation lifecycle.
+	Emitted liquidation identifier for v0.8.3+. Empty bytes (`0x`) for v0.8.1-v0.8.2, whose event contains only partyA.
 	"""
 	liquidationId: Bytes!
 	"""

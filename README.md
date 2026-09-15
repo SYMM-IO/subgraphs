@@ -194,6 +194,27 @@ This file is central to module-specific configurations and should be placed in t
    - The script constructs the deployment command based on the network (including Mantle if specified) and executes the
      `graph deploy` command.
 
+## Legacy PartyA liquidation completion
+
+SYMMIO v0.8.1 and v0.8.2 emit `FullyLiquidatedPartyA(address)`; v0.8.3+ also emits the liquidation ID.
+Both analytics and raw-event subgraphs index these signatures. Analytics resolves the legacy ID through
+the historical liquidation state. If that read fails, it leaves completion unresolved rather than
+assigning the event to an unknown liquidation. Raw events preserve the emitted payload and store `0x`
+in `FullyLiquidatedPartyA.liquidationId` for the legacy signature.
+
+Deployments built with ABIs that omitted the legacy completion event require historical reindexing.
+Rebuild both modules and deploy new untagged versions using the configured historical block ranges.
+Do not graft from the current head: it would preserve the missing records. Replay must include the
+liquidation initialization as well as its completion. Keep the existing deployments while validating
+the replacements, and obtain explicit approval before moving any Goldsky tags.
+
+For the BNB regression at block `41788947`, transaction
+`0x6c8de748b04fb0b176624d94e191edf3f9cfbfc9f40335aad1c2948c2580bdd7`, log `64`,
+verify a `FULLY_LIQUIDATED` analytics lifecycle event, `fullyLiquidated: true`,
+`fullyLiquidatedTimestamp: "1724940788"`, and `involvedPartyBCounts: "0"`. The raw completion entity
+must use the transaction hash plus `-64` and an empty legacy liquidation ID. A settlement event alone
+does not establish that every counterparty has settled.
+
 ## Monitoring
 
 Use `scripts/monitor.py` to check the sync status and health of deployed subgraphs on Goldsky. Requires the `goldsky` CLI to be installed and authenticated.

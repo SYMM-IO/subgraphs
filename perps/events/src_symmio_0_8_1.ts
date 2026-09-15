@@ -1,6 +1,6 @@
+import {ensureSyncMeta} from './src_sync_meta'
 import { AcceptCancelCloseRequestHandler } from "./handlers/symmio/AcceptCancelCloseRequestHandler"
 import {
-import {ensureSyncMeta} from './src_sync_meta'
 	AcceptCancelCloseRequest,
 	AcceptCancelRequest,
 	ActiveEmergencyMode,
@@ -21,6 +21,7 @@ import {ensureSyncMeta} from './src_sync_meta'
 	ForceCancelCloseRequest,
 	ForceCancelQuote,
 	ForceClosePosition,
+	FullyLiquidatedPartyA,
 	FullyLiquidatedPartyB,
 	LiquidatePartyA,
 	LiquidatePartyB,
@@ -94,6 +95,7 @@ import { FillCloseRequestHandler } from "./handlers/symmio/FillCloseRequestHandl
 import { ForceCancelCloseRequestHandler } from "./handlers/symmio/ForceCancelCloseRequestHandler"
 import { ForceCancelQuoteHandler } from "./handlers/symmio/ForceCancelQuoteHandler"
 import { ForceClosePositionHandler } from "./handlers/symmio/ForceClosePositionHandler"
+import { FullyLiquidatedPartyAHandler } from "./handlers/symmio/FullyLiquidatedPartyAHandler"
 import { FullyLiquidatedPartyBHandler } from "./handlers/symmio/FullyLiquidatedPartyBHandler"
 import { LiquidatePartyAHandler } from "./handlers/symmio/LiquidatePartyAHandler"
 import { LiquidatePartyBHandler } from "./handlers/symmio/LiquidatePartyBHandler"
@@ -266,6 +268,12 @@ export function handleForceCancelQuote(event: ForceCancelQuote): void {
 export function handleForceClosePosition(event: ForceClosePosition): void {
 	ensureSyncMeta(event.block)
 	let handler = new ForceClosePositionHandler<ForceClosePosition>()
+	handler.handle(event, Version.v_0_8_1)
+}
+
+export function handleFullyLiquidatedPartyA(event: FullyLiquidatedPartyA): void {
+	ensureSyncMeta(event.block)
+	let handler = new FullyLiquidatedPartyAHandler<FullyLiquidatedPartyA>()
 	handler.handle(event, Version.v_0_8_1)
 }
 
