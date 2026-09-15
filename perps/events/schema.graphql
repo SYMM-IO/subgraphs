@@ -2489,7 +2489,7 @@ type FullyLiquidatedPartyA @entity(immutable: true) {
 	"""
 	counterId: BigInt!
 	"""
-	Opaque identifier scoping this liquidation lifecycle.
+	Emitted liquidation identifier for v0.8.3+. Empty bytes (`0x`) for v0.8.1-v0.8.2, whose event contains only partyA.
 	"""
 	liquidationId: Bytes!
 	"""
@@ -3891,9 +3891,9 @@ type RoleGranted @entity(immutable: true) {
 	"""
 	role: Bytes!
 	"""
-	User/account actor emitted for this transition.
+	Grantee address: emitted user on Core events, or the account field on AccountLayer/MultiAccount events. Retained as the legacy compatibility alias.
 	"""
-	user: Bytes
+	user: Bytes!
 	"""
 	Account affected by this transition.
 	"""
@@ -3949,9 +3949,9 @@ type RoleRevoked @entity(immutable: true) {
 	"""
 	role: Bytes!
 	"""
-	User/account actor emitted for this transition.
+	Grantee address: emitted user on Core events, or the account field on AccountLayer/MultiAccount events. Retained as the legacy compatibility alias.
 	"""
-	user: Bytes
+	user: Bytes!
 	"""
 	Account affected by this transition.
 	"""

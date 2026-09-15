@@ -1,5 +1,5 @@
 {
-  "global": "2026-09-01-001",
+  "global": "2026-09-15-001",
   "entities": {
     "allocate_party_a": "v1",
     "buyback": "v1",
@@ -12,6 +12,8 @@
     "request_to_cancel_close_request": "v1",
     "request_to_cancel_quote": "v1",
     "request_to_close_position": "v1",
+    "role_granted": "v2",
+    "role_revoked": "v2",
     "send_quote": "v2",
     "withdraw": "v1"
   }

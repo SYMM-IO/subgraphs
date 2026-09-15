@@ -12,6 +12,7 @@ export class RoleRevokedHandler<T> {
 		entity.counterId = getGlobalCounterAndInc()
 		entity.source = event.address
 		entity.role = event.params.role
+		entity.user = event.params.account
 		entity.account = event.params.account
 		entity.sender = event.params.sender
 		entity.blockNumber = event.block.number

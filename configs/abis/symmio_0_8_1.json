@@ -5,6 +5,19 @@
 			{
 				"indexed": false,
 				"internalType": "address",
+				"name": "partyA",
+				"type": "address"
+			}
+		],
+		"name": "FullyLiquidatedPartyA",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
 				"name": "liquidator",
 				"type": "address"
 			},

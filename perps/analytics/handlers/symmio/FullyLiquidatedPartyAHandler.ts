@@ -10,13 +10,15 @@ export class FullyLiquidatedPartyAHandler<T> extends CommonFullyLiquidatedPartyA
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
 		if (version >= Version.v_0_8_3) {
-			createPartyALiquidationEvent(_event, event.params.partyA, event.params.liquidationId, "FULLY_LIQUIDATED", null)
+			// Legacy generated events have no liquidationId field.
+			let liquidationId = _event.parameters[1].value.toBytes()
+			createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "FULLY_LIQUIDATED", null)
+			if (version == Version.v_0_8_6) {
+				reconcileCompletedPartyALiquidation(event.address, event.params.partyA, liquidationId)
+				clearPartyALiquidationTracking(event.address, event.params.partyA)
+			}
 		} else {
 			createPartyALiquidationEventFromState(_event, version, event.params.partyA, "FULLY_LIQUIDATED", null)
-		}
-		if (version == Version.v_0_8_6) {
-			reconcileCompletedPartyALiquidation(event.address, event.params.partyA, event.params.liquidationId)
-			clearPartyALiquidationTracking(event.address, event.params.partyA)
 		}
 	}
 }

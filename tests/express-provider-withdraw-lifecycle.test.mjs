@@ -257,7 +257,7 @@ test("v0.8.5 analytics instantiates provider templates on HyperEVM", () => {
 	assert.match(source, /RegisterExpressProviderHandler/);
 });
 
-test("core provider marker never overwrites singular provider metadata", () => {
+test("core provider compatibility fields are deprecated and do not drive accounting", () => {
 	const schema = read("perps/analytics/schema.graphql");
 	const helper = read("perps/analytics/utils/affiliateExpressWithdrawComponents.ts");
 	const registry = entityBlock(schema, "ExpressProviderSourceByCore");
@@ -266,9 +266,11 @@ test("core provider marker never overwrites singular provider metadata", () => {
 	const ensure = helper.slice(ensureStart, ensureEnd);
 
 	assert.doesNotMatch(registry, /providerSources:/);
-	assert.doesNotMatch(registry, /\n\s*providerSource: ExpressProviderSource!/);
-	assert.doesNotMatch(registry, /\n\s*provider: Bytes!/);
-	assert.doesNotMatch(ensure, /byCore\.providerSources =|byCore\.providerSource =|byCore\.provider =/);
+	assert.match(registry, /providerSource: ExpressProviderSource! @deprecated/);
+	assert.match(registry, /provider: Bytes! @deprecated/);
+	assert.doesNotMatch(ensure, /byCore\.providerSources =/);
+	const accounting = helper.slice(0, ensureStart) + helper.slice(ensureEnd);
+	assert.doesNotMatch(accounting, /byCore\.(providerSource|provider)\b/);
 });
 
 test("raw registration creates each provider template only once", () => {

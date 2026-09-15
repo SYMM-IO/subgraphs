@@ -1,5 +1,18 @@
 [
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "partyA",
+				"type": "address"
+			}
+		],
+		"name": "FullyLiquidatedPartyA",
+		"type": "event"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "bytes4",
