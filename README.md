@@ -215,6 +215,22 @@ verify a `FULLY_LIQUIDATED` analytics lifecycle event, `fullyLiquidated: true`,
 must use the transaction hash plus `-64` and an empty legacy liquidation ID. A settlement event alone
 does not establish that every counterparty has settled.
 
+### Compatibility when replacing an index
+
+Compare the replacement schema and representative queries with the current version before promotion.
+`ExpressProviderSourceByCore.providerSource` and `.provider` remain deprecated compatibility fields
+for the most recently discovered provider. Use `expressProviderSources(where: {source: ...})` to find
+all providers; the core marker does not select a provider for accounting.
+Raw `RoleGranted.user` and `RoleRevoked.user` preserve the grantee address across Core, MultiAccount,
+and AccountLayer event signatures. `SetMuonIds.gateway`, `.x`, and `.parity` are nullable because
+v0.8.5+ logs omit them; older logs retain their emitted values.
+
+Pin bulk reads to one versioned endpoint and a fixed block. A replacement can order string IDs
+differently, and replaying additional events can change `counterId`/`globalCounter` values. Restart
+pagination after switching versions. For a single Core's `SendQuote` rows, use `orderBy: quoteId`
+with a matching `quoteId_gt` cursor; other event feeds can use their numeric ordering field and a
+matching cursor within the pinned version. Compare records by entity ID, separately from ordering.
+
 ## Monitoring
 
 Use `scripts/monitor.py` to check the sync status and health of deployed subgraphs on Goldsky. Requires the `goldsky` CLI to be installed and authenticated.

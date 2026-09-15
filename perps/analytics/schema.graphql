@@ -3656,6 +3656,14 @@ type ExpressProviderSourceByCore @entity(immutable: false) {
 	"""
 	id: ID!
 	"""
+	Most recently discovered provider record for this core, retained for legacy queries. A core may have multiple providers.
+	"""
+	providerSource: ExpressProviderSource! @deprecated(reason: "Query ExpressProviderSource by source to discover all providers for a core.")
+	"""
+	Most recently discovered provider address for this core, retained for legacy queries. Not an exclusive provider association.
+	"""
+	provider: Bytes! @deprecated(reason: "Query ExpressProviderSource by source to discover all providers for a core.")
+	"""
 	SYMMIO core represented by this marker.
 	"""
 	source: Bytes!

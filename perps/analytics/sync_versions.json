@@ -1,5 +1,5 @@
 {
-  "global": "2026-08-17-001",
+  "global": "2026-09-15-001",
   "entities": {
     "account": "v1",
     "affiliate_express_withdraw_account_snapshot": "v2",
@@ -12,6 +12,7 @@
     "buyback_gateway_stats": "v1",
     "daily_account_owner_history": "v1",
     "daily_history": "v1",
+    "express_provider_source_by_core": "v2",
     "latest_account_balance": "v3",
     "monthly_history": "v1",
     "quote": "v1",

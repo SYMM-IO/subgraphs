@@ -1,8 +1,8 @@
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { EntityVersion, SyncMeta } from "../../generated/schema"
 
-const GLOBAL_VERSION = "2026-08-17-001"
-const VERSIONS_HASH = "account:v1|affiliate_express_withdraw_account_snapshot:v2|affiliate_express_withdraw_component_bucket:v2|affiliate_express_withdraw_components:v2|balance_change:v1|buyback:v1|buyback_day:v1|buyback_deposit:v1|buyback_gateway_stats:v1|daily_account_owner_history:v1|daily_history:v1|latest_account_balance:v3|monthly_history:v1|quote:v1|quote_event:v1|solver_daily_history:v1|solver_only_daily_history:v1|symbol:v1|total_account_owner_history:v1|total_history:v1|user:v1|weekly_history:v1|withdraw_request:v2"
+const GLOBAL_VERSION = "2026-09-15-001"
+const VERSIONS_HASH = "account:v1|affiliate_express_withdraw_account_snapshot:v2|affiliate_express_withdraw_component_bucket:v2|affiliate_express_withdraw_components:v2|balance_change:v1|buyback:v1|buyback_day:v1|buyback_deposit:v1|buyback_gateway_stats:v1|daily_account_owner_history:v1|daily_history:v1|express_provider_source_by_core:v2|latest_account_balance:v3|monthly_history:v1|quote:v1|quote_event:v1|solver_daily_history:v1|solver_only_daily_history:v1|symbol:v1|total_account_owner_history:v1|total_history:v1|user:v1|weekly_history:v1|withdraw_request:v2"
 
 function ensureEntityVersion(id: string, versionValue: string, timestamp: BigInt): void {
     let entityVersion = EntityVersion.load(id)
@@ -44,6 +44,7 @@ export function ensureSyncMeta(block: ethereum.Block): void {
     ensureEntityVersion("buyback_gateway_stats", "v1", block.timestamp)
     ensureEntityVersion("daily_account_owner_history", "v1", block.timestamp)
     ensureEntityVersion("daily_history", "v1", block.timestamp)
+    ensureEntityVersion("express_provider_source_by_core", "v2", block.timestamp)
     ensureEntityVersion("latest_account_balance", "v3", block.timestamp)
     ensureEntityVersion("monthly_history", "v1", block.timestamp)
     ensureEntityVersion("quote", "v1", block.timestamp)

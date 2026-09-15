@@ -452,6 +452,10 @@ export function ensureExpressProviderSource(provider: Bytes, source: Bytes, coll
 
 	let byCore = ExpressProviderSourceByCore.load(providerSourceByCoreId(source))
 	if (!byCore) byCore = new ExpressProviderSourceByCore(providerSourceByCoreId(source))
+	// Legacy query fields describe the last discovery; accounting uses the
+	// per-provider registry and only checks this marker for availability.
+	byCore.providerSource = providerSource.id
+	byCore.provider = provider
 	byCore.source = source
 	byCore.collateral = collateral
 	byCore.deploymentId = providerSource.deploymentId
