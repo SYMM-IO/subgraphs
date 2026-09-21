@@ -54,6 +54,7 @@ test("liquidation quote events serialize each batch executor and retain per-quot
 	const source = bytes("core"),
 		executor = bytes("batch-executor");
 	const quote = {
+		liquidationId: bytes("liquidation"),
 		liquidateAmount: number(2),
 		liquidatePrice: number(3),
 		partyA: bytes("a"),
@@ -102,7 +103,12 @@ test("liquidation quote events serialize each batch executor and retain per-quot
 		["tx-9-21", "tx-9-22", "tx-9-23"],
 	);
 	for (const row of rows.slice(0, 2)) {
+		assert.equal(row.liquidationDetail, "a-liquidation-core");
 		assert.deepEqual(JSON.parse(row.metadata), { amount: "2", openedPrice: "4", closePrice: "3", liquidator: "batch-executor" });
 	}
 	assert.deepEqual(JSON.parse(rows[2].metadata), { amount: "2", openedPrice: "4", closePrice: "3" });
+	assert.equal(rows[2].liquidationDetail, undefined);
+	quote.liquidationId = null;
+	mapping.handleLiquidatePosition(event, 0, number(24), "LIQUIDATE_PARTY_A", null, null, executor);
+	assert.equal(rows[3].liquidationDetail, undefined, "old unknown protocol IDs must not create invented relations");
 });

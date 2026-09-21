@@ -1,6 +1,6 @@
 {
 	"LiquidationStart": ["LiquidatePartyA", "DeferredLiquidatePartyA"],
-	"TradingFeePayment": ["TradingFeeCharged"],
+	"QuoteFeeTotals": ["TradingFeeCharged"],
 	"WithdrawFinalization": ["WithdrawFinalized"],
 	"__extends": "deps_symmio_0_8_5.json",
 	"UserActivity": [

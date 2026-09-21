@@ -13,9 +13,9 @@ export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
-		recordWithdrawFinalization<T>(_event)
 
-		let wr = resolveWithdrawRequest(event.params.user, event.params.requestId, _event.address, _event.transaction.hash)
+		let wr = resolveWithdrawRequest(event.params.user, event.params.requestId, _event.address, _event.transaction.hash, _event.logIndex)
+		recordWithdrawFinalization<T>(_event, wr)
 		if (!wr) return
 		wr.status = "COMPLETED"
 		wr.updateTimestamp = _event.block.timestamp

@@ -3,14 +3,14 @@ import { Account } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
-import { recordTradingFeePayment } from "../../utils/explorerEvents"
+import { accumulateQuoteFees } from "../../utils/explorerEvents"
 
 export class TradingFeeChargedHandler<T> extends CommonTradingFeeChargedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
-		recordTradingFeePayment<T>(_event)
+		accumulateQuoteFees<T>(_event)
 
 		let account = Account.load(event.params.partyA.toHexString())
 		if (!account) return

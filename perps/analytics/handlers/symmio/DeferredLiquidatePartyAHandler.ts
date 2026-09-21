@@ -11,8 +11,8 @@ export class DeferredLiquidatePartyAHandler<T> extends CommonDeferredLiquidatePa
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
-		recordLiquidationStart(_event, true)
 		super.handle(_event, version)
+		recordLiquidationStart(_event, true, version)
 		if (version == Version.v_0_8_6) {
 			startPartyALiquidationTracking(_event, event.params.partyA, event.params.liquidationId)
 			applyPartyALiquidationDeferredBalance(_event, event.params.partyA, event.params.liquidationId)

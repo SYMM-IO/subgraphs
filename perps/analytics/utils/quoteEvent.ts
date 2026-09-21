@@ -22,7 +22,7 @@ export class JSONBuilder {
 	}
 }
 
-export function createQuoteEvent(event: ethereum.Event, quoteId: BigInt, type: string, metadata: string | null): void {
+export function createQuoteEvent(event: ethereum.Event, quoteId: BigInt, type: string, metadata: string | null, liquidationDetail: string | null = null): void {
 	let id = event.transaction.hash.toHexString() + "-" + event.logIndex.toString() + "-" + quoteId.toString()
 	let entity = new QuoteEvent(id)
 	entity.globalCounter = getGlobalCounterAndInc()
@@ -31,6 +31,7 @@ export function createQuoteEvent(event: ethereum.Event, quoteId: BigInt, type: s
 	entity.quote = quoteId.toString() + "-" + event.address.toHexString()
 	entity.type = type
 	entity.metadata = metadata
+	if (liquidationDetail !== null) entity.liquidationDetail = liquidationDetail
 	entity.timestamp = event.block.timestamp
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash

@@ -53,13 +53,11 @@ export class LiquidatePartyAHandlerWithAccount<T> extends BaseHandler {
 			if (liqState && liqState.liquidationId.toHexString() == liquidationId.toHexString()) {
 				timestamp = liqState.timestamp
 				liquidationTimestamp = liqState.liquidationTimestamp
-			} else if (version == Version.v_0_8_6) {
+			} else {
 				// A later same-block liquidation may be visible to eth_call.
 				// Keep this event keyed correctly instead of importing its state.
 				timestamp = event.block.timestamp
 				liquidationTimestamp = event.block.timestamp
-			} else {
-				return
 			}
 		} else if (version == Version.v_0_8_2) {
 			// @ts-ignore

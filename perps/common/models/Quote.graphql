@@ -12,6 +12,8 @@ Numeric enum fields mirror Solidity enum ordinals from `QuoteStorage.sol`:
 Unless a field says otherwise, BigInt values are raw contract values.
 """
 type Quote @entity(immutable: false) {
+	"""Exact cumulative open/close fees when TradingFeeCharged is available (v0.8.5+). Null is unknown, not zero; older quotes still require the legacy fee fallback."""
+	paidFees: QuoteFeeTotals @derivedFrom(field: "quote")
 	"""
 	Composite quote id `${quoteId}-${coreAddress}`.
 	"""
