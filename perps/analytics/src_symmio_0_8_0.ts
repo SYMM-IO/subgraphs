@@ -31,6 +31,8 @@ import {ForceCancelQuote} from '../../generated/symmio_0_8_0/symmio_0_8_0'
 import {ForceClosePositionHandler} from './handlers/symmio/ForceClosePositionHandler'
 import {ForceClosePosition} from '../../generated/symmio_0_8_0/symmio_0_8_0'
 import {LiquidatePositionsPartyAHandler} from './handlers/symmio/LiquidatePositionsPartyAHandler'
+import {LiquidatePartyAHandler} from './handlers/symmio/LiquidatePartyAHandler'
+import {LiquidatePartyA} from '../../generated/symmio_0_8_0/symmio_0_8_0'
 import {LiquidatePositionsPartyA} from '../../generated/symmio_0_8_0/symmio_0_8_0'
 import {LiquidatePositionsPartyBHandler} from './handlers/symmio/LiquidatePositionsPartyBHandler'
 import {LiquidatePositionsPartyB} from '../../generated/symmio_0_8_0/symmio_0_8_0'
@@ -285,4 +287,10 @@ export function handleWithdraw(event: Withdraw): void {
 
 export function handleLatestAccountBalanceBlock(block: ethereum.Block): void {
     handleLatestAccountBalanceBlockImpl(block, Version.v_0_8_0)
+}
+
+export function handleLiquidatePartyA(event: LiquidatePartyA): void {
+	ensureSyncMeta(event.block)
+	let handler = new LiquidatePartyAHandler<LiquidatePartyA>()
+	handler.handle(event, Version.v_0_8_0)
 }

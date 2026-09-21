@@ -17,6 +17,7 @@ export function handleLiquidatePosition<T>(
 	closeType: string,
 	fundingContext: FundingSettlementContext | null,
 	fundingSignedAmountOverride: BigInt | null,
+	liquidator: Address | null = null,
 ): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
@@ -69,15 +70,17 @@ export function handleLiquidatePosition<T>(
 	}
 	if (version >= Version.v_0_8_5) syncFundingFeeState(_event, version, quote.symbolId!, changetype<Address>(quote.partyB!))
 
+	let metadata = new JSONBuilder()
+		.add("amount", liquidAmount.toString())
+		.add("openedPrice", quote.openedPrice!.toString())
+		.add("closePrice", liquidPrice.toString())
+	// The position-batch executor can differ from the liquidation starter.
+	if (liquidator !== null) metadata.add("liquidator", liquidator.toHexString())
 	createQuoteEvent(
 		_event,
 		qId,
 		closeType,
-		new JSONBuilder()
-			.add("amount", liquidAmount.toString())
-			.add("openedPrice", quote.openedPrice!.toString())
-			.add("closePrice", liquidPrice.toString())
-			.build(),
+		metadata.build(),
 	)
 
 	let account = Account.load(quote.partyA.toHexString())

@@ -15,6 +15,8 @@ export class TransferToBridgeHandler<T> extends BaseHandler {
 		bridge.amount = event.params.amount
 		bridge.account = event.params.user
 		bridge.type = "BRIDGE"
+		bridge.bridgeAddress = event.params.bridgeAddress
+		bridge.bridgeTransactionId = event.params.transactionId
 		bridge.collateral = getConfiguration(event).collateral
 		setBalanceChangeContext(bridge, Account.load(event.params.user.toHexString()), event.address, _event.transaction.input)
 		bridge.timestamp = event.block.timestamp

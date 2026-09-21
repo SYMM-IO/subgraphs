@@ -4,11 +4,13 @@ import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { createPartyALiquidationEvent, createPartyALiquidationEventFromState } from "../../utils/liquidationEvent"
 import { startPartyALiquidationTracking } from "../../utils/partyALiquidation"
+import { recordLiquidationStart } from "../../utils/explorerEvents"
 
 export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
+		recordLiquidationStart(_event, false)
 		super.handle(_event, version)
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)

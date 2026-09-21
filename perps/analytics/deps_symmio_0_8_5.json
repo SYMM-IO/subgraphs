@@ -1,4 +1,7 @@
 {
+	"LiquidationStart": ["LiquidatePartyA", "DeferredLiquidatePartyA"],
+	"TradingFeePayment": ["TradingFeeCharged"],
+	"WithdrawFinalization": ["WithdrawFinalized"],
 	"ClearingHouseLiquidationContext": [
 		"LiquidateCrossPartyB",
 		"TakeoverPartyALiquidation",

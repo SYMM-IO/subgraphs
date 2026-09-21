@@ -195,7 +195,7 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 				}
 			}
 			fundingAmounts.push(fundingAmount)
-			handleLiquidatePosition<T>(_event, version, quoteId, "LIQUIDATE_PARTY_A", fundingContexts[i], fundingOverride)
+			handleLiquidatePosition<T>(_event, version, quoteId, "LIQUIDATE_PARTY_A", fundingContexts[i], fundingOverride, event.params.liquidator)
 		}
 
 		updatePartyALatestBalance(_event, version, event.params.partyA)

@@ -364,10 +364,100 @@ type BalanceChange @entity(immutable: true) {
 	Account entity created or resolved for the Deposit/Withdraw sender.
 	"""
 	senderRef: Account
+	"""Registered bridge from TransferToBridge; null for other balance changes."""
+	bridgeAddress: Bytes
+	"""Protocol bridge transaction id, not the EVM transaction hash."""
+	bridgeTransactionId: BigInt
 	"""
 	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
 	"""
 	globalCounter: BigInt!
+}
+
+"""Exact per-quote platform fee emitted by TradingFeeCharged (v0.8.5+)."""
+type TradingFeePayment @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with a hyphen."""
+	id: ID!
+	"""SYMMIO core that emitted this fee."""
+	source: Bytes!
+	"""Quote identifier scoped to this core."""
+	quoteId: BigInt!
+	"""PartyA account charged by the execution."""
+	partyA: Bytes!
+	"""PartyB counterparty emitted by the execution."""
+	partyB: Bytes!
+	"""Protocol market identifier."""
+	symbolId: BigInt!
+	"""Affiliate emitted with this fee."""
+	affiliate: Bytes!
+	"""Exact charged platform fee in 18-decimal internal units."""
+	amount: BigInt!
+	"""Emitted fee type: 0 open, 1 close."""
+	feeType: Int!
+	"""Block timestamp of the fee log."""
+	timestamp: BigInt!
+	"""Block number containing the fee log."""
+	blockNumber: BigInt!
+	"""Hash of the EVM transaction containing this fee log."""
+	transaction: Bytes!
+	"""Zero-based log index within the block."""
+	logIndex: BigInt!
+}
+
+"""Exact core finalization log, retained even if request resolution fails."""
+type WithdrawFinalization @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with a hyphen."""
+	id: ID!
+	"""SYMMIO core that emitted finalization."""
+	source: Bytes!
+	"""Request identifier emitted by the core."""
+	requestId: BigInt!
+	"""Emitted user/finalizing signer; do not assume this is the request owner."""
+	user: Bytes!
+	"""Block timestamp of the finalization log."""
+	timestamp: BigInt!
+	"""Block number containing the finalization log."""
+	blockNumber: BigInt!
+	"""Hash of the EVM transaction containing finalization."""
+	transaction: Bytes!
+	"""Zero-based log index within the block for exact event matching."""
+	logIndex: BigInt!
+}
+
+"""Historical liquidation starts independent of recoverable contract state."""
+type LiquidationStart @entity(immutable: true) {
+	"""Transaction hash and block-global log index joined with a hyphen."""
+	id: ID!
+	"""SYMMIO core that emitted the liquidation start."""
+	source: Bytes!
+	"""PartyA account entering liquidation."""
+	partyA: Bytes!
+	"""Starter of liquidation, not the position-batch executor."""
+	liquidator: Bytes!
+	"""True for DeferredLiquidatePartyA, false for LiquidatePartyA."""
+	deferred: Boolean!
+	"""Only populated when emitted; absent in v0.8.0-v0.8.2."""
+	liquidationId: Bytes
+	"""Emitted allocated balance; absent before v0.8.2."""
+	allocatedBalance: BigInt
+	"""Emitted signed unrealized PnL; absent before v0.8.2."""
+	upnl: BigInt
+	"""Emitted signed total unrealized loss; absent before v0.8.2."""
+	totalUnrealizedLoss: BigInt
+	"""Original liquidation block emitted by the deferred-start event."""
+	liquidationBlockNumber: BigInt
+	"""Original liquidation timestamp emitted by the deferred-start event."""
+	liquidationTimestamp: BigInt
+	"""Original liquidation balance emitted by the deferred-start event."""
+	liquidationAllocatedBalance: BigInt
+	"""Block timestamp of this start log, including deferred starts."""
+	timestamp: BigInt!
+	"""Block number containing this start log."""
+	blockNumber: BigInt!
+	"""Hash of the EVM transaction containing this start log."""
+	transaction: Bytes!
+	"""Zero-based log index within the block."""
+	logIndex: BigInt!
 }
 
 """
