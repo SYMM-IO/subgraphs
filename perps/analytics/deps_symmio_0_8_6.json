@@ -1,5 +1,8 @@
 {
 	"__extends": "deps_symmio_0_8_5.json",
+	"QuoteSolverFee": [
+		"SolverFeeCharged(uint256,address,address,address,uint256,uint8,uint256,bytes32)"
+	],
 	"UserActivity": [
 		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
 		"RequestToClosePosition",

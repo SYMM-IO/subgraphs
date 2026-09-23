@@ -262,6 +262,11 @@ type Quote @entity(immutable: false) {
 	"""
 	quoteEvents: [QuoteEvent!]! @derivedFrom(field: "quote")
 	"""
+	Cumulative solver fees grouped by the original contract tag, derived from indexed v0.8.6 SolverFeeCharged events.
+	An empty list means no matching charges were indexed; it does not establish complete historical coverage.
+	"""
+	solverFees: [QuoteSolverFee!]! @derivedFrom(field: "quote")
+	"""
 	Derived funding realizations whose `quote` relation points to this Quote.
 	"""
 	fundingSettlements: [QuoteFundingSettlement!]! @derivedFrom(field: "quote")
