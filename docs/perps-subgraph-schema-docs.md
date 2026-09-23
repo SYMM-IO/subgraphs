@@ -59,6 +59,47 @@ or unused fields should say so explicitly and identify the missing producer.
 -   Quote `tradingFee` and `closeFee` are rates. Analytics `openFee`, `closeFee`,
     `platformFee`, `openFeePaid`, and `closeFeePaid` are charged amounts.
 
+## Quote solver fees
+
+Analytics exposes `Quote.solverFees`, a derived list of mutable `QuoteSolverFee`
+summaries. Each summary is keyed by `${quote.id}-${tag hex}`; the Quote id already
+includes the emitting Core contract address. The original `bytes32` tag is stored
+as `Bytes`, without assigning static/dynamic labels or using the current solver
+`/info` configuration to reconstruct historical charges.
+
+`SolverFeeCharged.feeType` selects the cumulative amount: OPEN (`0`) increments
+`openFeePaid`, and CLOSE (`1`) increments `closeFeePaid`, including partial closes.
+Both fields start at zero on first creation and retain the exact emitted amount
+in 18-decimal normalized collateral units. Repeated entries with the same tag,
+including payments to different receivers, are summed into the same summary.
+Different tags and quote ids remain separate. The handler continues refreshing
+the actual receiver's balance and adds no contract reads for the fee summary.
+
+Only indexed Quotes receive summaries. A missing Quote or unsupported fee type
+is logged and does not produce a summary. An empty `solverFees` list therefore
+means no applicable charges were indexed, not proof that historical fees were
+zero. OperationalFeeCharged events are not included because they have no quote
+id or tag.
+
+To populate historical totals, reindex Analytics across the relevant v0.8.6 fee
+events with the preceding Quote history. Grafting at the current head does not
+backfill these summaries. This feature does not add a separate record per charge
+or modify the raw-event subgraph.
+
+```graphql
+query QuoteSolverFees($id: ID!) {
+	quote(id: $id) {
+		id
+		solverFees(first: 100, orderBy: id) {
+			id
+			tag
+			openFeePaid
+			closeFeePaid
+		}
+	}
+}
+```
+
 ## Raw-event schema scope
 
 Raw-event entities stay close to emitted payloads, while documenting every
