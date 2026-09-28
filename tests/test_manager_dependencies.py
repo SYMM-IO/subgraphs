@@ -2,9 +2,13 @@ import json
 import os
 import re
 import tempfile
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
+
+import yaml
 
 import scripts.manager as manager
 
@@ -111,6 +115,51 @@ class SolverFeeReceiptTests(TestCase):
                     manager.build_event_handlers(module, contract, [event]),
                     [{"event": event.signature, "handler": event.handler_name}],
                 )
+
+
+class ManifestApiVersionTests(TestCase):
+    def _prepare_manifest(self, config_name: str, module: str) -> dict:
+        config = manager.Config.from_dict(
+            json.loads((REPO_ROOT / "configs/perps" / f"{config_name}.json").read_text()),
+            deployment_id=config_name.replace("_", "-"),
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for directory in ("configs", "perps"):
+                (root / directory).symlink_to(REPO_ROOT / directory, target_is_directory=True)
+            previous_cwd = Path.cwd()
+            try:
+                os.chdir(root)
+                with redirect_stdout(StringIO()):
+                    manager.prepare_module(config, module)
+                return yaml.safe_load((root / "subgraph.yaml").read_text())
+            finally:
+                os.chdir(previous_cwd)
+
+    def test_vibe_analytics_uses_one_receipt_capable_api_for_all_sources_and_templates(self) -> None:
+        for config_name in ("arbitrum_vibe", "arbitrum_vibe_mainnet"):
+            with self.subTest(config=config_name):
+                manifest = self._prepare_manifest(config_name, "perps/analytics")
+                self.assertTrue(manifest["templates"])
+                sources = manifest["dataSources"] + manifest["templates"]
+                self.assertEqual({source["mapping"]["apiVersion"] for source in sources}, {"0.0.7"})
+                self.assertEqual(
+                    [
+                        (source["name"], handler["handler"])
+                        for source in sources
+                        for handler in source["mapping"]["eventHandlers"]
+                        if handler.get("receipt")
+                    ],
+                    [("symmio_0_8_6", "handleOpenPosition"), ("symmio_0_8_6", "handleFillCloseRequest")],
+                )
+
+    def test_raw_events_and_legacy_analytics_keep_the_previous_api_without_receipts(self) -> None:
+        for config_name, module in (("arbitrum_vibe", "perps/events"), ("base", "perps/analytics")):
+            with self.subTest(config=config_name, module=module):
+                manifest = self._prepare_manifest(config_name, module)
+                sources = manifest["dataSources"] + manifest.get("templates", [])
+                self.assertEqual({source["mapping"]["apiVersion"] for source in sources}, {"0.0.6"})
+                self.assertFalse(any(handler.get("receipt") for source in sources for handler in source["mapping"]["eventHandlers"]))
 
 
 class SchemaGenerationTests(TestCase):

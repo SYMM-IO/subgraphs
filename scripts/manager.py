@@ -890,7 +890,6 @@ def prepare_module(config: Config, target_module: str) -> List[Contract]:
                     },
                     "mapping": {
                         "kind": "ethereum/events",
-                        "apiVersion": "0.0.6",
                         "language": "wasm/assemblyscript",
                         "entities": express_provider_template_entities(target_module),
                         "abis": [{"name": contract.path(), "file": f"./abis/{contract.path()}.json"}],
@@ -916,7 +915,6 @@ def prepare_module(config: Config, target_module: str) -> List[Contract]:
             },
             "mapping": {
                 "kind": "ethereum/events",
-                "apiVersion": "0.0.7" if any(handler.get("receipt") for handler in event_handlers) else "0.0.6",
                 "language": "wasm/assemblyscript",
                 "entities": ["Account"],
                 "abis": [{"name": contract.path(), "file": f"./abis/{contract.path()}.json"}],
@@ -973,6 +971,13 @@ def prepare_module(config: Config, target_module: str) -> List[Contract]:
             source_config["name"] += f"_{contract_indexes[(contract.abi, contract.version)]}"
 
         subgraph_config["dataSources"].append(source_config)
+
+    # Graph Node requires one mapping API version across sources and templates.
+    # Receipt retrieval remains opt-in on the individual event handlers.
+    mappings = [source["mapping"] for source in subgraph_config["dataSources"] + subgraph_config["templates"]]
+    api_version = "0.0.7" if any(handler.get("receipt") for mapping in mappings for handler in mapping["eventHandlers"]) else "0.0.6"
+    for mapping in mappings:
+        mapping["apiVersion"] = api_version
 
     if not subgraph_config["templates"]:
         del subgraph_config["templates"]

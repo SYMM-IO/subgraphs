@@ -87,9 +87,11 @@ version or lifecycle event type; it must not be interpreted as a zero fee.
 OperationalFeeCharged is excluded because it has no quote id or tag.
 
 The manager enables `receipt: true` only for the canonical v0.8.6 analytics open
-and close handlers on real contracts, and uses mapping API `0.0.7` for those data
-sources. Other handlers, older versions, fake contracts, and raw-event mappings
-do not request receipts. See The Graph's [transaction receipt documentation](https://thegraph.com/docs/en/subgraphs/developing/creating/subgraph-manifest/#transaction-receipts-in-event-handlers).
+and close handlers on real contracts. If any handler requests receipts, all data
+sources and templates use mapping API `0.0.7`, as Graph Node requires a single API
+version per subgraph. Other handlers, older versions, fake contracts, and raw-event
+mappings do not request receipts. Subgraphs without receipt-enabled handlers keep
+mapping API `0.0.6`. See The Graph's [transaction receipt documentation](https://thegraph.com/docs/en/subgraphs/developing/creating/subgraph-manifest/#transaction-receipts-in-event-handlers).
 This avoids extra fee entity storage and writes, but adds receipt retrieval and
 processing during indexing; it does not imply zero indexing cost.
 
