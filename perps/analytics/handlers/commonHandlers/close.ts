@@ -8,6 +8,7 @@ import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { onFundingSettlementAndPositionClose } from "../../utils/aggregatedPosition"
 import { syncFundingFeeState } from "../../utils/fundingFeeState"
 import { FundingSettlementContext, recordQuoteFundingSettlement } from "../../utils/fundingHistory"
+import { solverFeeMetadata } from "../../utils/solverFeeMetadata"
 
 export function handleClose<T>(
 	_event: ethereum.Event,
@@ -39,6 +40,7 @@ export function handleClose<T>(
 			.addNullable("openedPrice", quote.openedPrice === null ? null : quote.openedPrice!.toString())
 			.add("closePrice", event.params.closedPrice.toString())
 			.add("quoteStatus", quote.quoteStatus.toString())
+			.addRawNullable("solverFees", closeType == "FILL_CLOSE" ? solverFeeMetadata(_event, event.params.quoteId, version, 1) : null)
 			.build(),
 	)
 

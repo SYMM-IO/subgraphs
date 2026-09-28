@@ -123,6 +123,23 @@ class Contract:
         return f"{self.abi}_{self.version}"
 
 
+def build_event_handlers(target_module: str, contract: Contract, events: List[Event]) -> List[Dict[str, Any]]:
+    # Receipts let immutable lifecycle events include fees emitted before or after
+    # the execution. Compatibility overloads and unrelated mappings do not need them.
+    receipt_events = {
+        "OpenPosition(uint256,address,address,uint256,uint256)",
+        "FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+    }
+    supports_fee_metadata = target_module == "perps/analytics" and contract.abi == "symmio" and contract.version == "0_8_6" and not contract.fake
+    handlers = []
+    for event in events:
+        handler: Dict[str, Any] = {"event": event.signature, "handler": event.handler_name}
+        if supports_fee_metadata and event.signature.replace("indexed ", "") in receipt_events:
+            handler["receipt"] = True
+        handlers.append(handler)
+    return handlers
+
+
 @dataclass
 class Config:
     network: str
@@ -887,6 +904,7 @@ def prepare_module(config: Config, target_module: str) -> List[Contract]:
         contract_events = contract.events
         if contract.fake:
             contract_events = [contract.events[0]]
+        event_handlers = build_event_handlers(target_module, contract, contract_events)
         source_config = {
             "kind": "ethereum/contract",
             "name": contract.path(),
@@ -898,11 +916,11 @@ def prepare_module(config: Config, target_module: str) -> List[Contract]:
             },
             "mapping": {
                 "kind": "ethereum/events",
-                "apiVersion": "0.0.6",
+                "apiVersion": "0.0.7" if any(handler.get("receipt") for handler in event_handlers) else "0.0.6",
                 "language": "wasm/assemblyscript",
                 "entities": ["Account"],
                 "abis": [{"name": contract.path(), "file": f"./abis/{contract.path()}.json"}],
-                "eventHandlers": [{"event": event.signature, "handler": event.handler_name} for event in contract_events],
+                "eventHandlers": event_handlers,
                 "file": f"./{target_module}/src_{contract.path() if not contract.fake else 'fake'}.ts",
             },
         }

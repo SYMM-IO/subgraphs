@@ -371,37 +371,6 @@ type BalanceChange @entity(immutable: true) {
 }
 
 """
-Cumulative solver fees actually charged for one indexed Quote and contract tag.
-Updated from v0.8.6 SolverFeeCharged events, summing all receivers sharing the tag.
-Totals cover indexed events only; historical completeness requires replay from the first applicable fee event.
-"""
-type QuoteSolverFee @entity(immutable: false) {
-	"""
-	Quote entity id followed by the lowercase hexadecimal tag, separated by a hyphen: `${quote.id}-${tag hex}`.
-	The Quote id includes the Core contract address, isolating identical numeric quote ids across contracts.
-	"""
-	id: ID!
-	"""
-	Existing normalized Quote charged by these fee events.
-	"""
-	quote: Quote!
-	"""
-	Original bytes32 contract tag. Preserved without interpreting it as a static or dynamic fee category.
-	"""
-	tag: Bytes!
-	"""
-	Sum of emitted amounts with feeType OPEN (0), in 18-decimal normalized collateral units.
-	Initialized to zero when this quote-tag summary is first created.
-	"""
-	openFeePaid: BigInt!
-	"""
-	Sum of emitted amounts with feeType CLOSE (1), including partial closes, in 18-decimal normalized collateral units.
-	Initialized to zero when this quote-tag summary is first created.
-	"""
-	closeFeePaid: BigInt!
-}
-
-"""
 Immutable lifecycle event log attached to a normalized Quote entity.
 """
 type QuoteEvent @entity(immutable: true) {
@@ -430,7 +399,11 @@ type QuoteEvent @entity(immutable: true) {
 	"""
 	type: String!
 	"""
-	Optional handler-built metadata serialized as a string.
+	Handler-built JSON string. For v0.8.6 OPEN_POSITION and FILL_CLOSE, solverFees contains
+	[tag, amount] pairs for this execution only. Tags are raw lowercase bytes32 hex; amounts
+	are exact integer strings in 18-decimal normalized collateral units, summed per tag.
+	An empty list means no matching tagged fee logs; absent solverFees means unavailable
+	for that version or event type, not a zero fee.
 	"""
 	metadata: String
 	"""
