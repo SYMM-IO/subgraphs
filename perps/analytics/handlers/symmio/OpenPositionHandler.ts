@@ -10,6 +10,7 @@ import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance, updatePartyBLatestBalance } from "../../utils/latestAccountBalance"
 import { onPositionOpen } from "../../utils/aggregatedPosition"
 import { syncFundingFeeState } from "../../utils/fundingFeeState"
+import { solverFeeMetadata } from "../../utils/solverFeeMetadata"
 
 export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -65,6 +66,7 @@ export class OpenPositionHandler<T> extends CommonOpenPositionHandler<T> {
 				.addNullable("lf", quote.lf ? quote.lf!.toString() : null)
 				.addNullable("partyAmm", quote.partyAmm ? quote.partyAmm!.toString() : null)
 				.addNullable("partyBmm", quote.partyBmm ? quote.partyBmm!.toString() : null)
+				.addRawNullable("solverFees", solverFeeMetadata(_event, event.params.quoteId, version, 0))
 				.build(),
 		)
 		onPositionOpen(

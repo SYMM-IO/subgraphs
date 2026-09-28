@@ -17,6 +17,14 @@ export class JSONBuilder {
 		return this
 	}
 
+	// Only pass JSON serialized by our metadata helpers, never unescaped user input.
+	addRawNullable(key: string, value: string | null): JSONBuilder {
+		if (value !== null) {
+			this.pairs.push('"' + key + '":' + value)
+		}
+		return this
+	}
+
 	build(): string {
 		return "{" + this.pairs.join(",") + "}"
 	}

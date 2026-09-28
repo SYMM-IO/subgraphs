@@ -61,42 +61,64 @@ or unused fields should say so explicitly and identify the missing producer.
 
 ## Quote solver fees
 
-Analytics exposes `Quote.solverFees`, a derived list of mutable `QuoteSolverFee`
-summaries. Each summary is keyed by `${quote.id}-${tag hex}`; the Quote id already
-includes the emitting Core contract address. The original `bytes32` tag is stored
-as `Bytes`, without assigning static/dynamic labels or using the current solver
-`/info` configuration to reconstruct historical charges.
+Analytics stores solver fees inside the existing `QuoteEvent.metadata` JSON
+string. For v0.8.6 `OPEN_POSITION` and `FILL_CLOSE`, `solverFees` is a list of
+`[tag, amount]` pairs for that individual execution, including each partial close.
+Repeated entries sharing a tag, including different receivers, are summed only
+within that execution. No separate fee entity is created; `QuoteEvent` remains
+immutable and is saved once.
 
-`SolverFeeCharged.feeType` selects the cumulative amount: OPEN (`0`) increments
-`openFeePaid`, and CLOSE (`1`) increments `closeFeePaid`, including partial closes.
-Both fields start at zero on first creation and retain the exact emitted amount
-in 18-decimal normalized collateral units. Repeated entries with the same tag,
-including payments to different receivers, are summed into the same summary.
-Different tags and quote ids remain separate. The handler continues refreshing
-the actual receiver's balance and adds no contract reads for the fee summary.
+Tags retain the original lowercase `bytes32` hex without inferring static/dynamic
+categories. Amounts are exact integer strings in 18-decimal normalized collateral
+units: `"100000000000000000"` represents 0.1. Clients must use decimal or integer
+arithmetic, not JavaScript `Number`. Neither the current solver `/info` config
+nor a symbol's current fee schedule is used to reconstruct charges.
 
-Only indexed Quotes receive summaries. A missing Quote or unsupported fee type
-is logged and does not produce a summary. An empty `solverFees` list therefore
-means no applicable charges were indexed, not proof that historical fees were
-zero. OperationalFeeCharged events are not included because they have no quote
-id or tag.
+The handler reads `SolverFeeCharged` logs from the execution's transaction receipt,
+filtering by Core address, quote id, and fee type (OPEN `0`, CLOSE `1`). Open fees
+follow `OpenPosition`; close fees precede `FillCloseRequest`. Adjacent canonical
+executions of the same quote bound each search, so multiple closes in one
+transaction remain separate. Compatibility overloads with `lockedValues` are
+ignored as execution boundaries. The existing receiver-balance refresh remains.
 
-To populate historical totals, reindex Analytics across the relevant v0.8.6 fee
-events with the preceding Quote history. Grafting at the current head does not
-backfill these summaries. This feature does not add a separate record per charge
-or modify the raw-event subgraph.
+`solverFees: []` means the execution receipt has no matching tagged fee logs.
+An absent `solverFees` field means this metadata is unavailable for that contract
+version or lifecycle event type; it must not be interpreted as a zero fee.
+OperationalFeeCharged is excluded because it has no quote id or tag.
+
+The manager enables `receipt: true` only for the canonical v0.8.6 analytics open
+and close handlers on real contracts, and uses mapping API `0.0.7` for those data
+sources. Other handlers, older versions, fake contracts, and raw-event mappings
+do not request receipts. See The Graph's [transaction receipt documentation](https://thegraph.com/docs/en/subgraphs/developing/creating/subgraph-manifest/#transaction-receipts-in-event-handlers).
+This avoids extra fee entity storage and writes, but adds receipt retrieval and
+processing during indexing; it does not imply zero indexing cost.
+
+**Migration:** `Quote.solverFees` and `QuoteSolverFee` are removed. Consumers must
+query event metadata and parse its JSON. Reindex Analytics from the relevant
+contract history to populate existing immutable events. Grafting at the current
+head does not backfill this metadata. The raw-event subgraph is unchanged.
 
 ```graphql
-query QuoteSolverFees($id: ID!) {
-	quote(id: $id) {
+query QuoteExecutionFees($quote: String!) {
+	quoteEvents(where: { quote: $quote }, orderBy: globalCounter) {
 		id
-		solverFees(first: 100, orderBy: id) {
-			id
-			tag
-			openFeePaid
-			closeFeePaid
-		}
+		type
+		metadata
 	}
+}
+```
+
+After `JSON.parse(event.metadata)`, a close can include:
+
+```json
+{
+	"amount": "1000000000000000000",
+	"closePrice": "2000000000000000000",
+	"quoteStatus": "6",
+	"solverFees": [
+		["0x5354415449435f534f4c5645525f464545000000000000000000000000000000", "100000000000000000"],
+		["0x534f4c5645525f46454500000000000000000000000000000000000000000000", "400000000000000"]
+	]
 }
 ```
 

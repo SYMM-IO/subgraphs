@@ -82,6 +82,37 @@ class DependencyInheritanceTests(TestCase):
         self.assertEqual(manager.ordered_unique(["B", "A", "B", "C", "A"]), ["B", "A", "C"])
 
 
+class SolverFeeReceiptTests(TestCase):
+    def test_only_canonical_analytics_executions_request_receipts(self) -> None:
+        contract = manager.Contract(address="0x1", abi="symmio", version="0_8_6", startBlock="0")
+        events = manager.get_events_with_signatures(["OpenPosition", "FillCloseRequest", "SolverFeeCharged"], contract)
+        handlers = manager.build_event_handlers("perps/analytics", contract, events)
+        self.assertEqual(
+            {handler["event"].replace("indexed ", "") for handler in handlers if handler.get("receipt")},
+            {
+                "OpenPosition(uint256,address,address,uint256,uint256)",
+                "FillCloseRequest(uint256,address,address,uint256,uint256,uint8,uint256)",
+            },
+        )
+        self.assertTrue(any("(uint256,uint256,uint256,uint256)" in event.signature for event in events))
+
+    def test_unrelated_modules_versions_and_fake_contracts_do_not_request_receipts(self) -> None:
+        event = manager.Event("test", "OpenPosition(uint256,address,address,uint256,uint256)", "OpenPosition", "OpenPosition", "handleOpenPosition")
+        cases = [
+            ("perps/events", "symmio", "0_8_6", False),
+            ("perps/analytics", "symmio", "0_8_5", False),
+            ("perps/analytics", "symmio", "0_8_6", True),
+            ("perps/analytics", "other", "0_8_6", False),
+        ]
+        for module, abi, version, fake in cases:
+            with self.subTest(module=module, abi=abi, version=version, fake=fake):
+                contract = manager.Contract(address="0x1", abi=abi, version=version, startBlock="0", fake=fake)
+                self.assertEqual(
+                    manager.build_event_handlers(module, contract, [event]),
+                    [{"event": event.signature, "handler": event.handler_name}],
+                )
+
+
 class SchemaGenerationTests(TestCase):
     def test_common_models_are_imported_in_deterministic_filename_order(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
