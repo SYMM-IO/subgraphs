@@ -68,8 +68,10 @@ Repeated entries sharing a tag, including different receivers, are summed only
 within that execution. No separate fee entity is created; `QuoteEvent` remains
 immutable and is saved once.
 
-Tags retain the original lowercase `bytes32` hex without inferring static/dynamic
-categories. Amounts are exact integer strings in 18-decimal normalized collateral
+Tags decode zero-padded printable ASCII `bytes32` values to labels such as
+`SOLVER_FEE` and `STATIC_SOLVER_FEE`. Empty or non-text tags retain their original
+lowercase hex. Labels are JSON-escaped, and aggregation still uses the original
+raw tag. Amounts are exact integer strings in 18-decimal normalized collateral
 units: `"100000000000000000"` represents 0.1. Clients must use decimal or integer
 arithmetic, not JavaScript `Number`. Neither the current solver `/info` config
 nor a symbol's current fee schedule is used to reconstruct charges.
@@ -94,8 +96,10 @@ This avoids extra fee entity storage and writes, but adds receipt retrieval and
 processing during indexing; it does not imply zero indexing cost.
 
 **Migration:** `Quote.solverFees` and `QuoteSolverFee` are removed. Consumers must
-query event metadata and parse its JSON. Reindex Analytics from the relevant
-contract history to populate existing immutable events. Grafting at the current
+query event metadata and parse its JSON. Consumers matching text tags must now
+use the decoded labels instead of their hex encoding. Reindex Analytics from the
+relevant contract history to populate existing immutable events and replace
+previously stored hex labels with decoded text. Grafting at the current
 head does not backfill this metadata. The raw-event subgraph is unchanged.
 
 ```graphql
@@ -116,8 +120,8 @@ After `JSON.parse(event.metadata)`, a close can include:
 	"closePrice": "2000000000000000000",
 	"quoteStatus": "6",
 	"solverFees": [
-		["0x5354415449435f534f4c5645525f464545000000000000000000000000000000", "100000000000000000"],
-		["0x534f4c5645525f46454500000000000000000000000000000000000000000000", "400000000000000"]
+		["STATIC_SOLVER_FEE", "100000000000000000"],
+		["SOLVER_FEE", "400000000000000"]
 	]
 }
 ```

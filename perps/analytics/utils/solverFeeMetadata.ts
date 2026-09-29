@@ -7,6 +7,20 @@ const FEE_TOPIC = "0xe65d37f480102fb7565ba751a2179584e61501d6d4e2f7a7232cfd340d3
 const OPEN_TOPIC = "0xa50f98254710514f60327a4e909cd0be099a62f316299907ef997f3dc4d1cda5"
 const CLOSE_TOPIC = "0xfa7483d69b899cf16df47cc736ab853f88135f704980d7d358a9746aead7a321"
 
+function feeTagLabel(tag: string): string {
+	let bytes = Bytes.fromHexString(tag)
+	let end = bytes.length
+	while (end > 0 && bytes[end - 1] == 0) end--
+	if (end == 0) return tag
+	let label = ""
+	for (let i = 0; i < end; i++) {
+		// Decode printable ASCII labels only; preserve binary tags without data loss.
+		if (bytes[i] < 32 || bytes[i] > 126) return tag
+		label += String.fromCharCode(bytes[i])
+	}
+	return label
+}
+
 function decodeQuoteId(data: Bytes): BigInt {
 	assert(data.length >= 32, "Solver fee metadata: missing quote id")
 	let decoded = ethereum.decode("uint256", Bytes.fromUint8Array(data.subarray(0, 32)))
@@ -63,7 +77,8 @@ export function solverFeeMetadata(event: ethereum.Event, quoteId: BigInt, versio
 	}
 	let pairs = new Array<string>()
 	for (let i = 0; i < tags.length; i++) {
-		pairs.push('["' + tags[i] + '","' + amounts[i].toString() + '"]')
+		let label = feeTagLabel(tags[i]).split("\\").join("\\\\").split('"').join('\\"')
+		pairs.push('["' + label + '","' + amounts[i].toString() + '"]')
 	}
 	return "[" + pairs.join(",") + "]"
 }
