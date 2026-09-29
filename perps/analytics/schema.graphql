@@ -400,8 +400,9 @@ type QuoteEvent @entity(immutable: true) {
 	type: String!
 	"""
 	Handler-built JSON string. For v0.8.6 OPEN_POSITION and FILL_CLOSE, solverFees contains
-	[tag, amount] pairs for this execution only. Tags are raw lowercase bytes32 hex; amounts
-	are exact integer strings in 18-decimal normalized collateral units, summed per tag.
+	[tag, amount] pairs for this execution only. Tags decode zero-padded printable ASCII
+	labels (e.g. SOLVER_FEE); empty or non-text tags retain their lowercase bytes32 hex.
+	Amounts are exact integer strings in 18-decimal normalized collateral units, summed per raw tag.
 	An empty list means no matching tagged fee logs; absent solverFees means unavailable
 	for that version or event type, not a zero fee.
 	"""

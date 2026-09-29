@@ -20,6 +20,9 @@ const variableTag = `0x${Buffer.from("SOLVER_FEE").toString("hex").padEnd(64, "0
 const Version = Object.fromEntries(Array.from({ length: 7 }, (_, version) => [`v_0_8_${version}`, version]));
 
 class Bytes extends Uint8Array {
+	static fromHexString(value) {
+		return bytes(value);
+	}
 	static fromUint8Array(value) {
 		return new Bytes(value);
 	}
@@ -212,14 +215,40 @@ test("three captured Arbitrum partial closes each store their own fixed and vari
 		h.close(event, 6, "FILL_CLOSE", 172);
 		const metadata = JSON.parse(h.saved[index].metadata);
 		assert.deepEqual(metadata.solverFees, [
-			[variableTag, variable[index]],
-			[staticTag, "100000000000000000"],
+			["SOLVER_FEE", variable[index]],
+			["STATIC_SOLVER_FEE", "100000000000000000"],
 		]);
 		assert.equal(metadata.amount, "100");
 		assert.equal(metadata.closePrice, "210");
 	}
 	assert.equal(h.saved.length, 3, "one immutable event write per execution, no later fee updates");
 	assert.equal(new Set(h.saved.map(row => row.id)).size, 3);
+});
+
+test("opening metadata decodes text fee tags and sums repeated tags across receivers", () => {
+	const logs = [
+		execution(0),
+		fee({ feeType: 0, feeTag: variableTag, amount: "37142282435237600" }),
+		fee({ feeType: 0, feeTag: variableTag, amount: "1", to: otherCore }),
+		fee({ feeType: 0, feeTag: staticTag }),
+	];
+	assert.deepEqual(pairs(logs, 0, 0), [
+		["SOLVER_FEE", "37142282435237601"],
+		["STATIC_SOLVER_FEE", "100000000000000000"],
+	]);
+});
+
+test("custom and full-width text tags decode with JSON quotes and backslashes preserved", () => {
+	for (const label of ['CUSTOM_"FEE"\\TAG', "A".repeat(32)]) {
+		const feeTag = `0x${Buffer.from(label).toString("hex").padEnd(64, "0")}`;
+		assert.deepEqual(pairs([fee({ feeTag }), execution()], 1), [[label, "100000000000000000"]]);
+	}
+});
+
+test("non-text tags and embedded nulls retain their complete raw hex", () => {
+	for (const feeTag of [tag, otherTag, `0x${"ff".repeat(32)}`, `0x${Buffer.from("SOLVER_FEE\0OTHER").toString("hex").padEnd(64, "0")}`]) {
+		assert.deepEqual(pairs([fee({ feeTag }), execution()], 1), [[feeTag, "100000000000000000"]]);
+	}
 });
 
 test("multiple closes of one quote in a transaction have disjoint fee windows, including a fee-less close", () => {
