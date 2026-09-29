@@ -72,11 +72,11 @@ class DependencyInheritanceTests(TestCase):
         previous_cwd = Path.cwd()
         try:
             os.chdir(REPO_ROOT)
-            events = manager.get_needed_events_for(["Quote", "User"], "perps/analytics", contract)
+            events = manager.get_needed_events_for(["Quote", "QuoteFeeHint", "User"], "perps/analytics", contract)
         finally:
             os.chdir(previous_cwd)
 
-        self.assertEqual(events, [*quote_events, "AddAccount"])
+        self.assertEqual(events, [*quote_events, "TradingFeeCharged", "AddAccount"])
 
     def test_ordered_unique_preserves_first_seen_order(self) -> None:
         self.assertEqual(manager.ordered_unique(["B", "A", "B", "C", "A"]), ["B", "A", "C"])

@@ -1,16 +1,38 @@
-import { BigInt, ethereum } from "@graphprotocol/graph-ts"
-import { LiquidationDetail, LiquidationStart, QuoteFeeTotals, WithdrawFinalization, WithdrawRequest } from "../../../generated/schema"
+import { BigInt, ethereum, store } from "@graphprotocol/graph-ts"
+import { DebugEntity, LiquidationDetail, Quote, QuoteFeeHint, WithdrawRequest } from "../../../generated/schema"
 import { Version } from "../../common/BaseHandler"
+import { JSONBuilder } from "./quoteEvent"
+
+export function consumeQuoteFeeHint(quote: Quote): void {
+	let hint = QuoteFeeHint.load(quote.id)
+	if (!hint || !hint.source.equals(quote.source) || !hint.partyA.equals(quote.partyA)) return
+	if (hint.paidOpenFee !== null) quote.paidOpenFee = (quote.paidOpenFee === null ? BigInt.zero() : quote.paidOpenFee!).plus(hint.paidOpenFee!)
+	if (hint.paidCloseFee !== null) quote.paidCloseFee = (quote.paidCloseFee === null ? BigInt.zero() : quote.paidCloseFee!).plus(hint.paidCloseFee!)
+	quote.paidFeeAffiliate = hint.affiliate
+	quote.paidFeesTimestamp = hint.timestamp
+	quote.paidFeesBlockNumber = hint.blockNumber
+	quote.save()
+	store.remove("QuoteFeeHint", quote.id)
+}
 
 export function accumulateQuoteFees<T>(_event: ethereum.Event): void {
 	// @ts-ignore
 	const event = changetype<T>(_event)
 	let id = event.params.quoteId.toString() + "-" + event.address.toHexString()
-	let row = QuoteFeeTotals.load(id)
-	if (!row) {
-		row = new QuoteFeeTotals(id)
-		row.quote = id
+	let quote = Quote.load(id)
+	if (quote && quote.source.equals(event.address) && quote.partyA.equals(event.params.partyA)) {
+		consumeQuoteFeeHint(quote)
+		if (event.params._type == 0) quote.paidOpenFee = (quote.paidOpenFee === null ? BigInt.zero() : quote.paidOpenFee!).plus(event.params.amount)
+		else quote.paidCloseFee = (quote.paidCloseFee === null ? BigInt.zero() : quote.paidCloseFee!).plus(event.params.amount)
+		quote.paidFeeAffiliate = event.params.affiliate
+		quote.paidFeesTimestamp = event.block.timestamp
+		quote.paidFeesBlockNumber = event.block.number
+		quote.save()
+		return
 	}
+	// Retain charges without inventing the missing quote's required lifecycle fields.
+	let row = QuoteFeeHint.load(id)
+	if (!row) row = new QuoteFeeHint(id)
 	row.source = event.address
 	row.quoteId = event.params.quoteId
 	row.partyA = event.params.partyA
@@ -35,57 +57,32 @@ export function recordWithdrawFinalization<T>(_event: ethereum.Event, request: W
 		request.save()
 		return
 	}
-	let row = new WithdrawFinalization(event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
-	row.source = event.address
-	row.requestId = event.params.requestId
-	row.user = event.params.user
-	row.timestamp = event.block.timestamp
-	row.blockNumber = event.block.number
-	row.transaction = event.transaction.hash
-	row.logIndex = event.logIndex
-	row.save()
+	// Missing initiation or conflicting evidence is an indexing gap, not a second
+	// withdrawal model. Keep exact evidence for repair/reindex without guessing an owner.
+	let debug = new DebugEntity("WithdrawFinalized-unresolved-" + event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
+	debug.message = new JSONBuilder()
+		.add("source", event.address.toHexString())
+		.add("requestId", event.params.requestId.toString())
+		.add("signer", event.params.user.toHexString())
+		.add("transaction", event.transaction.hash.toHexString())
+		.add("logIndex", event.logIndex.toString())
+		.add("blockNumber", event.block.number.toString())
+		.add("timestamp", event.block.timestamp.toString())
+		.build()
+	debug.save()
 }
 
 export function recordLiquidationStart(event: ethereum.Event, deferred: boolean, version: Version): void {
+	// COTI's core versions emit the lifecycle ID. Leave legacy state-based linkage unchanged.
+	if (version < Version.v_0_8_3) return
 	let partyA = event.parameters[1].value.toAddress()
-	let detail: LiquidationDetail | null = null
-	if (version >= Version.v_0_8_3) {
-		let id = event.parameters[5].value.toBytes()
-		detail = LiquidationDetail.load(partyA.toHexString() + "-" + id.toHexString() + "-" + event.address.toHexString())
-	}
-	// Pre-v0.8.3 starts emit no lifecycle ID. Even a successful end-of-block
-	// state read can belong to a later same-block liquidation, so retain their
-	// exact start evidence instead of guessing a relation and collapsing starts.
-	if (detail !== null) {
-		detail.liquidationStartTransaction = event.transaction.hash
-		detail.startTimestamp = event.block.timestamp
-		detail.startBlockNumber = event.block.number
-		detail.startLogIndex = event.logIndex
-		detail.deferred = deferred
-		if (deferred) detail.liquidationBlockNumber = event.parameters[6].value.toBigInt()
-		detail.save()
-		return
-	}
-	let row = new LiquidationStart(event.transaction.hash.toHexString() + "-" + event.logIndex.toString())
-	row.source = event.address
-	row.liquidator = event.parameters[0].value.toAddress()
-	row.partyA = event.parameters[1].value.toAddress()
-	row.deferred = deferred
-	// Only preserve values actually emitted by this ABI version. In particular,
-	// old starts must survive when getLiquidationStateData is unavailable.
-	for (let i = 2; i < event.parameters.length; i++) {
-		let param = event.parameters[i]
-		if (param.name == "liquidationId") row.liquidationId = param.value.toBytes()
-		else if (param.name == "allocatedBalance") row.allocatedBalance = param.value.toBigInt()
-		else if (param.name == "upnl") row.upnl = param.value.toBigInt()
-		else if (param.name == "totalUnrealizedLoss") row.totalUnrealizedLoss = param.value.toBigInt()
-		else if (param.name == "liquidationBlockNumber") row.liquidationBlockNumber = param.value.toBigInt()
-		else if (param.name == "liquidationTimestamp") row.liquidationTimestamp = param.value.toBigInt()
-		else if (param.name == "liquidationAllocatedBalance") row.liquidationAllocatedBalance = param.value.toBigInt()
-	}
-	row.timestamp = event.block.timestamp
-	row.blockNumber = event.block.number
-	row.transaction = event.transaction.hash
-	row.logIndex = event.logIndex
-	row.save()
+	let liquidationId = event.parameters[5].value.toBytes()
+	let detail = LiquidationDetail.load(partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString())
+	if (!detail) return
+	detail.startTimestamp = event.block.timestamp
+	detail.startBlockNumber = event.block.number
+	detail.startLogIndex = event.logIndex
+	detail.deferred = deferred
+	if (deferred) detail.liquidationBlockNumber = event.parameters[6].value.toBigInt()
+	detail.save()
 }

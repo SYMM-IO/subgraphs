@@ -2,10 +2,13 @@ import { Address, BigInt, Bytes, store } from "@graphprotocol/graph-ts"
 import {
 	BalanceChange,
 	WithdrawCoreLifecycleHint,
+	WithdrawFinalizationHint,
 	WithdrawRequest,
 	WithdrawRequestAccountLookup,
 	WithdrawRequestLookup,
 } from "../../../generated/schema"
+
+const FINALIZE_WITHDRAW_REQUEST_SELECTOR = "0x1531b3c8"
 
 export function withdrawRequestId(user: Address, requestId: BigInt, source: Address): string {
 	return user.toHexString() + "-" + requestId.toString() + "-" + source.toHexString()
@@ -21,6 +24,10 @@ function withdrawRequestLookupId(requestId: BigInt, source: Address): string {
 
 function withdrawRequestAccountLookupId(account: Bytes, source: Bytes): string {
 	return account.toHexString() + "-" + source.toHexString()
+}
+
+function withdrawFinalizationHintId(source: Address, transaction: Bytes, sender: Address): string {
+	return source.toHexString() + "-" + transaction.toHexString() + "-" + sender.toHexString()
 }
 
 function withdrawCoreLifecycleHintId(source: Address, user: Address, requestId: BigInt, transaction: Bytes): string {
@@ -53,6 +60,10 @@ function isCompletableWithdrawRequest(wr: WithdrawRequest): boolean {
 // event would double-decrement the aggregates.
 export function isActiveWithdrawRequest(wr: WithdrawRequest): boolean {
 	return wr.status == "PENDING" || wr.status == "PROVIDER_ACCEPTED" || wr.status == "CANCEL_REQUESTED"
+}
+
+export function isFinalizeWithdrawRequestCall(input: Bytes): boolean {
+	return input.toHexString().startsWith(FINALIZE_WITHDRAW_REQUEST_SELECTOR)
 }
 
 export function loadWithdrawRequest(user: Address, requestId: BigInt, source: Address): WithdrawRequest | null {
@@ -188,13 +199,78 @@ export function loadWithdrawRequestAccountLookup(account: Bytes, source: Bytes):
 	return WithdrawRequestAccountLookup.load(withdrawRequestAccountLookupId(account, source))
 }
 
-export function resolveWithdrawRequest(eventUser: Address, requestId: BigInt, source: Address, transaction: Bytes, logIndex: BigInt): WithdrawRequest | null {
-	// The core emits Withdraw immediately before WithdrawFinalized. Match that
-	// exact log, including for provider/multicall transactions. The finalizing
-	// signer and a globally unique-looking request number do not prove ownership.
-	let balance = BalanceChange.load(transaction.toHexString() + "-" + logIndex.minus(BigInt.fromI32(1)).toString())
-	if (!balance || balance.type != "WITHDRAW" || !balance.source.equals(source) || balance.sender === null || !balance.sender!.equals(eventUser)) return null
-	let request = loadWithdrawRequest(changetype<Address>(balance.account), requestId, source)
-	if (!request || !isCompletableWithdrawRequest(request) || !request.user.equals(balance.account) || !request.source.equals(source) || !request.amount.equals(balance.amount)) return null
-	return request
+function loadSingleCompletableWithdrawRequest(requestId: BigInt, source: Address): WithdrawRequest | null {
+	let lookup = WithdrawRequestLookup.load(withdrawRequestLookupId(requestId, source))
+	if (!lookup) return null
+	if (lookup.activeRequestIds.length == 0) {
+		store.remove("WithdrawRequestLookup", lookup.id)
+		return null
+	}
+	let matched: WithdrawRequest | null = null
+	for (let i = 0; i < lookup.activeRequestIds.length; i++) {
+		let wr = WithdrawRequest.load(lookup.activeRequestIds[i])
+		if (!wr || !isCompletableWithdrawRequest(wr)) continue
+		if (matched !== null) return null
+		matched = wr
+	}
+	return matched
+}
+
+export function recordWithdrawFinalizationHint(
+	source: Address,
+	transaction: Bytes,
+	sender: Address,
+	user: Address,
+	amount: BigInt,
+	logIndex: BigInt,
+	timestamp: BigInt,
+): void {
+	let hint = new WithdrawFinalizationHint(withdrawFinalizationHintId(source, transaction, sender))
+	hint.source = source
+	hint.transaction = transaction
+	hint.sender = sender
+	hint.user = user
+	hint.amount = amount
+	hint.logIndex = logIndex
+	hint.timestamp = timestamp
+	hint.save()
+}
+
+export function resolveWithdrawRequest(
+	eventUser: Address,
+	requestId: BigInt,
+	source: Address,
+	transaction: Bytes,
+	logIndex: BigInt | null = null,
+): WithdrawRequest | null {
+	let hintId = withdrawFinalizationHintId(source, transaction, eventUser)
+	let hint = WithdrawFinalizationHint.load(hintId)
+	if (logIndex !== null) {
+		if (hint) store.remove("WithdrawFinalizationHint", hintId)
+		// A finalization log identifies the exact preceding Withdraw, including
+		// provider/multicall transactions. Its signer need not own the request.
+		let balance = BalanceChange.load(transaction.toHexString() + "-" + logIndex.minus(BigInt.fromI32(1)).toString())
+		if (!balance || balance.type != "WITHDRAW" || !balance.source.equals(source) || balance.sender === null || !balance.sender!.equals(eventUser))
+			return null
+		let request = loadWithdrawRequest(changetype<Address>(balance.account), requestId, source)
+		if (
+			!request ||
+			!isCompletableWithdrawRequest(request) ||
+			!request.user.equals(balance.account) ||
+			!request.source.equals(source) ||
+			!request.amount.equals(balance.amount)
+		)
+			return null
+		return request
+	}
+	if (hint) {
+		let hinted = loadWithdrawRequest(changetype<Address>(hint.user), requestId, source)
+		store.remove("WithdrawFinalizationHint", hintId)
+		if (hinted && isCompletableWithdrawRequest(hinted)) return hinted
+	}
+
+	let direct = loadWithdrawRequest(eventUser, requestId, source)
+	if (direct && isCompletableWithdrawRequest(direct)) return direct
+
+	return loadSingleCompletableWithdrawRequest(requestId, source)
 }

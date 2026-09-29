@@ -1,5 +1,4 @@
 {
-	"LiquidationStart": ["LiquidatePartyA"],
 	"UserActivity": [
 		"SendQuote",
 		"RequestToClosePosition",

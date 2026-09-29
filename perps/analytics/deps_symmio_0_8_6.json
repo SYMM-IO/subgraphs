@@ -1,7 +1,4 @@
 {
-	"LiquidationStart": ["LiquidatePartyA", "DeferredLiquidatePartyA"],
-	"QuoteFeeTotals": ["TradingFeeCharged"],
-	"WithdrawFinalization": ["WithdrawFinalized"],
 	"__extends": "deps_symmio_0_8_5.json",
 	"UserActivity": [
 		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",

@@ -364,22 +364,42 @@ type BalanceChange @entity(immutable: true) {
 	Account entity created or resolved for the Deposit/Withdraw sender.
 	"""
 	senderRef: Account
-	"""Registered bridge from TransferToBridge; null for other balance changes."""
-	bridgeAddress: Bytes
-	"""Protocol bridge transaction id, not the EVM transaction hash."""
-	bridgeTransactionId: BigInt
 	"""
 	Monotonic indexer-side ordering counter assigned when this row is created. Use for stable chronological sort across event sources.
 	"""
 	globalCounter: BigInt!
 }
 
-"""Cumulative exact platform fees for one quote, from v0.8.5+ fee charges; not a raw event log. Reindex from contract start for complete totals."""
-type QuoteFeeTotals @entity(immutable: false) {
+"""
+Bridge transaction initiation, keyed by the core's transaction id. Does not track later bridge settlement status.
+"""
+type BridgeTransaction @entity(immutable: true) {
+	"""
+	Protocol transaction id and SYMMIO core address joined with a hyphen.
+	"""
+	id: ID!
+	"""
+	SYMMIO core that accepted this bridge transfer.
+	"""
+	source: Bytes!
+	"""
+	Protocol bridge transaction id, not the EVM transaction hash.
+	"""
+	transactionId: BigInt!
+	"""
+	Registered bridge receiving this transfer.
+	"""
+	bridge: Bytes!
+	"""
+	Original BRIDGE balance movement, including user, amount, collateral and transaction provenance.
+	"""
+	balanceChange: BalanceChange!
+}
+
+"""Unmatched fee totals retained until their Quote is indexed. Consumed into Quote and removed; not a second fee model for indexed quotes."""
+type QuoteFeeHint @entity(immutable: false) {
 	"""Quote identifier and core address, matching Quote.id."""
 	id: ID!
-	"""Owning quote when indexed; fee evidence is retained even when that quote is unavailable."""
-	quote: Quote
 	"""SYMMIO core that emitted this fee."""
 	source: Bytes!
 	"""Quote identifier scoped to this core."""
@@ -398,68 +418,10 @@ type QuoteFeeTotals @entity(immutable: false) {
 	blockNumber: BigInt!
 }
 
-"""Unresolved finalization evidence only. Resolved finalizations live on WithdrawRequest; never guess a request owner from a signer."""
-type WithdrawFinalization @entity(immutable: true) {
-	"""Transaction hash and block-global log index joined with a hyphen."""
-	id: ID!
-	"""SYMMIO core that emitted finalization."""
-	source: Bytes!
-	"""Request identifier emitted by the core."""
-	requestId: BigInt!
-	"""Emitted user/finalizing signer; do not assume this is the request owner."""
-	user: Bytes!
-	"""Block timestamp of the finalization log."""
-	timestamp: BigInt!
-	"""Block number containing the finalization log."""
-	blockNumber: BigInt!
-	"""Hash of the EVM transaction containing finalization."""
-	transaction: Bytes!
-	"""Zero-based log index within the block for exact event matching."""
-	logIndex: BigInt!
-}
-
-"""Unresolved historical start evidence only, when no LiquidationDetail can be established. Resolved starts live on LiquidationDetail."""
-type LiquidationStart @entity(immutable: true) {
-	"""Transaction hash and block-global log index joined with a hyphen."""
-	id: ID!
-	"""SYMMIO core that emitted the liquidation start."""
-	source: Bytes!
-	"""PartyA account entering liquidation."""
-	partyA: Bytes!
-	"""Starter of liquidation, not the position-batch executor."""
-	liquidator: Bytes!
-	"""True for DeferredLiquidatePartyA, false for LiquidatePartyA."""
-	deferred: Boolean!
-	"""Only populated when emitted; absent in v0.8.0-v0.8.2."""
-	liquidationId: Bytes
-	"""Emitted allocated balance; absent before v0.8.2."""
-	allocatedBalance: BigInt
-	"""Emitted signed unrealized PnL; absent before v0.8.2."""
-	upnl: BigInt
-	"""Emitted signed total unrealized loss; absent before v0.8.2."""
-	totalUnrealizedLoss: BigInt
-	"""Original liquidation block emitted by the deferred-start event."""
-	liquidationBlockNumber: BigInt
-	"""Original liquidation timestamp emitted by the deferred-start event."""
-	liquidationTimestamp: BigInt
-	"""Original liquidation balance emitted by the deferred-start event."""
-	liquidationAllocatedBalance: BigInt
-	"""Block timestamp of this start log, including deferred starts."""
-	timestamp: BigInt!
-	"""Block number containing this start log."""
-	blockNumber: BigInt!
-	"""Hash of the EVM transaction containing this start log."""
-	transaction: Bytes!
-	"""Zero-based log index within the block."""
-	logIndex: BigInt!
-}
-
 """
 Immutable lifecycle event log attached to a normalized Quote entity.
 """
 type QuoteEvent @entity(immutable: true) {
-	"""Owning PartyA liquidation lifecycle for a position-batch close, when its protocol ID is known."""
-	liquidationDetail: LiquidationDetail
 	"""
 	Transaction hash, log index, and quote id joined as the lifecycle-event id.
 	"""
@@ -2954,8 +2916,10 @@ type LiquidationDetail @entity(immutable: false) {
 	Account-level lifecycle events attached to this liquidation.
 	"""
 	events: [LiquidationEvent!]! @derivedFrom(field: "liquidationDetail")
-	"""Per-position liquidation activity, including batch executors in metadata."""
-	positionEvents: [QuoteEvent!]! @derivedFrom(field: "liquidationDetail")
+	"""
+	Quotes closed by this PartyA liquidation, linked using an emitted lifecycle id. Their quoteEvents retain batch executor metadata.
+	"""
+	quotes: [Quote!]! @derivedFrom(field: "liquidationDetail")
 	"""
 	True once no PartyB settlement buckets remain, full liquidation is indexed, or takeover settlement completes.
 	"""
@@ -3526,7 +3490,7 @@ type WithdrawCoreLifecycleHint @entity(immutable: false) {
 }
 
 """
-Deprecated compatibility entity; finalization now matches the exact preceding BalanceChange and no longer writes these hints.
+Temporary hint row used to connect withdraw finalization side effects within a transaction.
 """
 type WithdrawFinalizationHint @entity(immutable: false) {
 	"""

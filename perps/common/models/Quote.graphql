@@ -12,8 +12,6 @@ Numeric enum fields mirror Solidity enum ordinals from `QuoteStorage.sol`:
 Unless a field says otherwise, BigInt values are raw contract values.
 """
 type Quote @entity(immutable: false) {
-	"""Exact cumulative open/close fees when TradingFeeCharged is available (v0.8.5+). Null is unknown, not zero; older quotes still require the legacy fee fallback."""
-	paidFees: QuoteFeeTotals @derivedFrom(field: "quote")
 	"""
 	Composite quote id `${quoteId}-${coreAddress}`.
 	"""
@@ -140,6 +138,26 @@ type Quote @entity(immutable: false) {
 	Close-fee rate in 1e18 precision, where 1e18 is 100%; zero for older core versions.
 	"""
 	closeFee: BigInt!
+	"""
+	Sum of emitted open fees in 18-decimal internal units (v0.8.5+). Null is unknown, not zero; pre-upgrade fees require the legacy fallback.
+	"""
+	paidOpenFee: BigInt
+	"""
+	Sum of emitted close fees in 18-decimal internal units, including partial closes. Null until a close charge is indexed; requires complete fee-event coverage.
+	"""
+	paidCloseFee: BigInt
+	"""
+	Raw affiliate emitted with the paid fees, distinct from account-source attribution in affiliate.
+	"""
+	paidFeeAffiliate: Bytes
+	"""
+	Block timestamp of the latest included fee charge.
+	"""
+	paidFeesTimestamp: BigInt
+	"""
+	Block number of the latest included fee charge.
+	"""
+	paidFeesBlockNumber: BigInt
 
 	"""
 	Creation/catch-up copy of the 1e18-scaled opened-price basis; not continuously synchronized.
@@ -216,6 +234,10 @@ type Quote @entity(immutable: false) {
 	Liquidation id from PartyA liquidation state when present.
 	"""
 	liquidationId: Bytes
+	"""
+	PartyA liquidation that closed this quote, when its emitted id resolves to an indexed lifecycle. Null for unproven legacy state ids.
+	"""
+	liquidationDetail: LiquidationDetail
 
 	"""
 	Indexer-derived cumulative PartyA funding debit in 18-decimal internal collateral precision.

@@ -1,7 +1,7 @@
 {
-	"LiquidationStart": ["LiquidatePartyA", "DeferredLiquidatePartyA"],
-	"QuoteFeeTotals": ["TradingFeeCharged"],
-	"WithdrawFinalization": ["WithdrawFinalized"],
+	"BridgeTransaction": ["TransferToBridge"],
+	"Quote": ["TradingFeeCharged"],
+	"QuoteFeeHint": ["TradingFeeCharged"],
 	"ClearingHouseLiquidationContext": [
 		"LiquidateCrossPartyB",
 		"TakeoverPartyALiquidation",

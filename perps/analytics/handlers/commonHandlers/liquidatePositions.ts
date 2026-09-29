@@ -76,17 +76,7 @@ export function handleLiquidatePosition<T>(
 		.add("closePrice", liquidPrice.toString())
 	// The position-batch executor can differ from the liquidation starter.
 	if (liquidator !== null) metadata.add("liquidator", liquidator.toHexString())
-	let liquidationDetail: string | null = null
-	if (closeType == "LIQUIDATE_PARTY_A" && quote.liquidationId !== null) {
-		liquidationDetail = quote.partyA.toHexString() + "-" + quote.liquidationId!.toHexString() + "-" + event.address.toHexString()
-	}
-	createQuoteEvent(
-		_event,
-		qId,
-		closeType,
-		metadata.build(),
-		liquidationDetail,
-	)
+	createQuoteEvent(_event, qId, closeType, metadata.build())
 
 	let account = Account.load(quote.partyA.toHexString())
 	if (!account) return

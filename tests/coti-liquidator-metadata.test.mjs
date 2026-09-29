@@ -74,7 +74,6 @@ test("liquidation quote events serialize each batch executor and retain per-quot
 	const source = bytes("core"),
 		executor = bytes("batch-executor");
 	const quote = {
-		liquidationId: bytes("liquidation"),
 		liquidateAmount: number(2),
 		liquidatePrice: number(3),
 		partyA: bytes("a"),
@@ -112,10 +111,15 @@ test("liquidation quote events serialize each batch executor and retain per-quot
 		"../../utils/common": {},
 		"../../utils/quoteEvent": quoteEvents,
 		"../../utils/aggregatedPosition": { onFundingSettlementAndPositionClose() {} },
-		"../../utils/fundingFeeState": {},
+		"../../utils/fundingFeeState": { syncFundingFeeState() {} },
 		"../../utils/fundingHistory": {},
 	});
-	const event = { address: source, transaction: { hash: bytes("tx") }, logIndex: number(9), block: { timestamp: number(10), number: number(100) } };
+	const event = {
+		address: source,
+		transaction: { hash: bytes("tx") },
+		logIndex: number(9),
+		block: { timestamp: number(10), number: number(100) },
+	};
 	for (const id of [21, 22]) mapping.handleLiquidatePosition(event, 4, number(id), "LIQUIDATE_PARTY_A", null, null, executor);
 	mapping.handleLiquidatePosition(event, 4, number(23), "LIQUIDATE_PARTY_B", null, null);
 	assert.deepEqual(
@@ -123,12 +127,90 @@ test("liquidation quote events serialize each batch executor and retain per-quot
 		["tx-9-21", "tx-9-22", "tx-9-23"],
 	);
 	for (const row of rows.slice(0, 2)) {
-		assert.equal(row.liquidationDetail, "a-liquidation-core");
+		assert.equal(row.liquidationDetail, undefined, "the relationship belongs to Quote, not QuoteEvent");
 		assert.deepEqual(JSON.parse(row.metadata), { amount: "2", openedPrice: "4", closePrice: "3", liquidator: "batch-executor" });
 	}
 	assert.deepEqual(JSON.parse(rows[2].metadata), { amount: "2", openedPrice: "4", closePrice: "3" });
 	assert.equal(rows[2].liquidationDetail, undefined);
-	quote.liquidationId = null;
-	mapping.handleLiquidatePosition(event, 0, number(24), "LIQUIDATE_PARTY_A", null, null, executor);
-	assert.equal(rows[3].liquidationDetail, undefined, "old unknown protocol IDs must not create invented relations");
+});
+
+test("PartyA liquidation links multiple Quotes to the emitted lifecycle independently of position metrics", () => {
+	const number = value => ({ toString: () => String(value) });
+	const bytes = value => ({ toHexString: () => value });
+	const Version = Object.fromEntries(Array.from({ length: 7 }, (_, version) => [`v_0_8_${version}`, version]));
+	for (const version of [0, 1, 2, 3, 4, 5, 6])
+		for (const missingDetail of [false, true]) {
+			const quotes = new Map();
+			for (const id of [21, 22])
+				quotes.set(`${id}-core`, {
+					id: `${id}-core`,
+					partyB: null,
+					liquidationId: bytes("stale-state-id"),
+					liquidatePrice: null,
+					save() {
+						quotes.set(this.id, this);
+					},
+				});
+			const detail = { id: "a-emitted-id-core", liquidationAllocatedBalance: null };
+			const closed = [];
+			class CommonHandler {
+				handle() {}
+				handleQuote() {}
+				handleSymbol() {}
+				handleAccount() {}
+			}
+			const dependencies = {
+				"../../../common/handlers/symmio/LiquidatePositionsPartyAHandler": { LiquidatePositionsPartyAHandler: CommonHandler },
+				"@graphprotocol/graph-ts": { BigInt: { zero: () => number(0) }, log: { error() {} } },
+				"../../../common/BaseHandler": { Version },
+				"../commonHandlers/liquidatePositions": { handleLiquidatePosition: (...args) => closed.push(args) },
+				"../../../../generated/schema": {
+					Quote: { load: id => quotes.get(id) ?? null },
+					LiquidationDetail: { load: id => (!missingDetail && id === detail.id ? detail : null) },
+				},
+				"../../utils/common": {},
+				"../../../common/VersionedQuoteLoader": {
+					getLiquidationStateData: () => (version < 3 ? { liquidationId: bytes("emitted-id") } : null),
+				},
+				"../../utils/latestAccountBalance": {
+					updatePartyALatestBalance() {},
+					updatePartyBLatestBalance() {
+						assert.fail("no PartyB");
+					},
+				},
+				"../../utils/fundingHistory": {
+					captureQuoteFundingContext: () => null,
+					getQuoteFundingSignedAmount: () => number(0),
+					getPartyALiquidationFundingSettlement: () => ({ found: false }),
+				},
+				"../../../common/utils/liquidationDetail": {},
+				"../../utils/liquidationEvent": { createPartyALiquidationEvent() {} },
+				"../../utils/partyALiquidation": { capturePartyALiquidationQuoteValues: () => ({}), loadActivePartyALiquidation: () => null },
+			};
+			for (const v of [3, 4, 5, 6]) dependencies[`../../../../generated/symmio_0_8_${v}/symmio_0_8_${v}`] = {};
+			const mapping = loadSource("perps/analytics/handlers/symmio/LiquidatePositionsPartyAHandler.ts", dependencies);
+			const executor = bytes("batch-executor");
+			new mapping.LiquidatePositionsPartyAHandler().handle(
+				{
+					address: bytes("core"),
+					params: { partyA: bytes("a"), liquidationId: bytes("emitted-id"), quoteIds: [21, 22, 999].map(number), liquidator: executor },
+				},
+				version,
+			);
+			for (const quote of quotes.values())
+				assert.equal(
+					quote.liquidationDetail,
+					version >= 3 && !missingDetail ? detail.id : undefined,
+					`v${version}: only emitted ids with existing lifecycles may link; price/RPC gaps must not prevent linkage`,
+				);
+			assert.equal(quotes.size, 2, "missing quotes must not be fabricated");
+			assert.deepEqual(
+				closed.map(args => args[2].toString()),
+				["21", "22", "999"],
+			);
+			assert.ok(
+				closed.every(args => args[6] === executor),
+				"every position batch keeps its executor, not the starter",
+			);
+		}
 });
