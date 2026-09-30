@@ -41,16 +41,20 @@ try:
     from scripts.fleet_identity import FLEET_HEALTH_PAYLOAD
     from scripts.pipeline_updater import (
         PipelineDependency,
+        extract_subgraph_versions,
+        load_managed_pipeline_paths,
         load_pipeline_dependencies,
-        parse_pipeline_definition_versions,
+        render_subgraph_versions,
         update_managed_pipelines,
     )
 except ModuleNotFoundError:  # Direct execution via `python scripts/fleet_web.py`.
     from fleet_identity import FLEET_HEALTH_PAYLOAD
     from pipeline_updater import (
         PipelineDependency,
+        extract_subgraph_versions,
+        load_managed_pipeline_paths,
         load_pipeline_dependencies,
-        parse_pipeline_definition_versions,
+        render_subgraph_versions,
         update_managed_pipelines,
     )
 
@@ -216,6 +220,7 @@ class GoldskyState:
     deployments: dict[str, Deployment] = field(default_factory=dict)
     tags: dict[str, dict[str, str]] = field(default_factory=dict)
     managed_pipeline_versions: dict[str, dict[str, tuple[str, ...]]] = field(default_factory=dict)
+    managed_pipeline_definitions: dict[str, dict[str, Any]] = field(default_factory=dict)
     verified_managed_pipelines: set[str] = field(default_factory=set)
 
     def for_base(self, base_name: str) -> list[Deployment]:
@@ -313,17 +318,17 @@ def _latest_deployed_version(state: GoldskyState, base: str) -> str:
 
 
 def fetch_managed_pipeline_versions(
-    dependencies: dict[str, list[PipelineDependency]],
-) -> tuple[dict[str, dict[str, tuple[str, ...]]], set[str]]:
-    """Read live source versions for repository-managed Goldsky pipelines."""
+    pipeline_paths: dict[str, Path],
+) -> tuple[dict[str, dict[str, tuple[str, ...]]], set[str], dict[str, dict[str, Any]]]:
+    """Read sources for every registered pipeline, including live-only dependencies."""
     goldsky = resolve_tool("goldsky")
     if not goldsky:
-        return {}, set()
+        return {}, set(), {}
 
     versions: dict[str, dict[str, tuple[str, ...]]] = {}
     verified: set[str] = set()
-    pipeline_names = sorted({dependency.pipeline for matches in dependencies.values() for dependency in matches})
-    for pipeline in pipeline_names:
+    definitions: dict[str, dict[str, Any]] = {}
+    for pipeline in sorted(pipeline_paths):
         try:
             result = subprocess.run(
                 [goldsky, "pipeline", "get", pipeline, "--definition", "--output", "yaml", "--color", "false"],
@@ -334,12 +339,16 @@ def fetch_managed_pipeline_versions(
             )
             if result.returncode != 0:
                 continue
-            versions[pipeline] = parse_pipeline_definition_versions(result.stdout)
+            definition = yaml.safe_load(result.stdout)
+            if not isinstance(definition, dict):
+                continue
+            definitions[pipeline] = definition
+            versions[pipeline] = extract_subgraph_versions(definition)
             verified.add(pipeline)
         except (OSError, subprocess.TimeoutExpired, ValueError, yaml.YAMLError):
             continue
 
-    return versions, verified
+    return versions, verified, definitions
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -409,8 +418,11 @@ class FleetStore:
                 self._last_error = msg
             return False, msg
         new_state = parse_goldsky_list(proc.stdout)
-        pipeline_dependencies = load_pipeline_dependencies()
-        new_state.managed_pipeline_versions, new_state.verified_managed_pipelines = fetch_managed_pipeline_versions(pipeline_dependencies)
+        (
+            new_state.managed_pipeline_versions,
+            new_state.verified_managed_pipelines,
+            new_state.managed_pipeline_definitions,
+        ) = fetch_managed_pipeline_versions(load_managed_pipeline_paths())
         with self._lock:
             self._state = new_state
             self._last_fetched_at = time.time()
@@ -446,12 +458,14 @@ class FleetStore:
 
     def apply_pipeline_versions(self, subgraph_versions: dict[str, str]) -> None:
         """Optimistically mirror successful pipeline updates in the UI cache."""
-        dependencies = load_pipeline_dependencies()
         with self._lock:
+            dependencies = load_pipeline_dependencies(live_definitions=self._state.managed_pipeline_definitions)
             for subgraph, version in subgraph_versions.items():
                 for dependency in dependencies.get(subgraph, []):
                     self._state.managed_pipeline_versions.setdefault(dependency.pipeline, {})[subgraph] = (version,)
                     self._state.verified_managed_pipelines.add(dependency.pipeline)
+            for pipeline, definition in self._state.managed_pipeline_definitions.items():
+                self._state.managed_pipeline_definitions[pipeline], _ = render_subgraph_versions(definition, subgraph_versions)
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -2619,7 +2633,7 @@ async def update_pipeline_to_version(base: str, version: str = "") -> tuple[str,
     if not base:
         raise HTTPException(400, "base required")
 
-    dependencies = load_pipeline_dependencies()
+    dependencies = load_pipeline_dependencies(live_definitions=_store.state.managed_pipeline_definitions)
     if base not in dependencies:
         raise HTTPException(400, f"{base} has no repository-managed pipeline")
 
@@ -2652,7 +2666,7 @@ def build_chain_groups(chains: list[ChainConfig], state: GoldskyState) -> list[d
     Any Goldsky subgraph not referenced by any local config is surfaced at the
     end as an "unmapped" group so operators can still inspect/manage it."""
     groups: list[dict[str, Any]] = []
-    pipeline_dependencies = load_pipeline_dependencies()
+    pipeline_dependencies = load_pipeline_dependencies(live_definitions=state.managed_pipeline_definitions)
     known_bases: set[str] = set()
     for c in chains:
         for base in c.deploy_urls.values():
@@ -3318,7 +3332,8 @@ async def update_pipeline(request: Request) -> HTMLResponse:
 @app.get("/row-promote-form", response_class=HTMLResponse)
 def row_promote_form(base: str, version: str) -> HTMLResponse:
     current_tags = _store.state.tags.get(base, {})
-    affected_pipelines = [dependency.pipeline for dependency in load_pipeline_dependencies().get(base, [])]
+    dependencies = load_pipeline_dependencies(live_definitions=_store.state.managed_pipeline_definitions)
+    affected_pipelines = [dependency.pipeline for dependency in dependencies.get(base, [])]
     html = _env.get_template("row_promote_modal").render(
         base=base,
         version=version,
@@ -3454,7 +3469,7 @@ async def _read_selections(request: Request) -> list[dict[str, Any]]:
 def _enrich_selections(sels: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Ensure selection dicts carry a 'base' resolved from the store if missing."""
     chain_by_key = _chain_lookup()
-    pipeline_dependencies = load_pipeline_dependencies()
+    pipeline_dependencies = load_pipeline_dependencies(live_definitions=_store.state.managed_pipeline_definitions)
     out = []
     for s in sels:
         if not s.get("base"):

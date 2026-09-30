@@ -8,6 +8,7 @@ import yaml
 
 from scripts.pipeline_updater import (
     extract_subgraph_versions,
+    load_managed_pipeline_paths,
     load_pipeline_dependencies,
     parse_pipeline_definition_versions,
     render_subgraph_version,
@@ -131,21 +132,124 @@ class PipelineRenderingTests(TestCase):
         self.assertEqual(extract_subgraph_versions(definition), {"base_analytics": ("v2",)})
         self.assertEqual(parse_pipeline_definition_versions(yaml.safe_dump(definition)), {"base_analytics": ("v2",)})
 
-    def test_dry_run_only_returns_related_pipelines(self) -> None:
+    def test_live_dependencies_replace_stale_local_references(self) -> None:
+        live = {
+            entity: {"type": "subgraph_entity", "subgraphs": [{"name": "arbitrum-vibe-mainnet-analytics", "version": "v0.0.1"}]}
+            for entity in ("funding", "position", "balance")
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            write_pipeline(config_dir / "related.yaml", "related", "old_analytics")
+            dependencies = load_pipeline_dependencies(config_dir, live_definitions={"related": live})
+
+        self.assertNotIn("old_analytics", dependencies)
+        dependency = dependencies["arbitrum-vibe-mainnet-analytics"][0]
+        self.assertEqual(dependency.pipeline, "related")
+        self.assertEqual(dependency.reference_count, 3)
+        self.assertEqual(dependency.configured_versions, ("v0.0.1",))
+
+    def test_registry_does_not_require_local_subgraph_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            config_path = config_dir / "related.yaml"
+            config_path.write_text("name: related\nsources: {}\n")
+            live = {"sources": {"funding": {"type": "subgraph_entity", "subgraphs": [{"name": "live_analytics", "version": "v1"}]}}}
+
+            self.assertEqual(load_managed_pipeline_paths(config_dir), {"related": config_path})
+            self.assertEqual(load_pipeline_dependencies(config_dir), {})
+            dependencies = load_pipeline_dependencies(config_dir, live_definitions={"related": live, "unmanaged": live})
+
+        self.assertEqual([dependency.pipeline for dependency in dependencies["live_analytics"]], ["related"])
+
+    def test_unverified_pipeline_dependencies_fall_back_to_local_config(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             config_dir = Path(temp_dir)
             write_pipeline(config_dir / "related.yaml", "related", "base_analytics")
-            write_pipeline(config_dir / "unrelated.yaml", "unrelated", "arbitrum_analytics")
+            dependencies = load_pipeline_dependencies(config_dir, live_definitions={})
 
-            results = update_related_pipelines("base_analytics", "v3", apply=False, config_dir=config_dir)
+        self.assertEqual(dependencies["base_analytics"][0].configured_versions, ("old",))
+
+    def test_dry_run_only_returns_related_pipelines(self) -> None:
+        calls = []
+
+        def runner(command, **_kwargs):
+            calls.append(command)
+            return live_response(command, configs[command[3]])
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            configs = {
+                "related": write_pipeline(config_dir / "related.yaml", "related", "base_analytics"),
+                "unrelated": write_pipeline(config_dir / "unrelated.yaml", "unrelated", "arbitrum_analytics"),
+            }
+
+            results = update_related_pipelines("base_analytics", "v3", apply=False, config_dir=config_dir, runner=runner)
 
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].pipeline, "related")
         self.assertEqual(results[0].status, "planned")
         self.assertIn("2 source reference(s)", results[0].message)
+        self.assertEqual([command[2] for command in calls], ["get", "get"])
 
 
 class PipelineApplyTests(TestCase):
+    def test_confirmed_absent_unrelated_pipeline_does_not_block_live_dependency_discovery(self) -> None:
+        calls = []
+
+        def runner(command, **_kwargs):
+            calls.append(command)
+            if command[1:3] == ["pipeline", "get"]:
+                if command[3] == "deleted":
+                    return subprocess.CompletedProcess(command, 1, stdout="", stderr="Pipeline with name:deleted not found")
+                return live_response(command, live)
+            return subprocess.CompletedProcess(command, 0, stdout="ok", stderr="")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            write_pipeline(config_dir / "deleted.yaml", "deleted", "another_analytics")
+            local = write_pipeline(config_dir / "related.yaml", "related", "old_analytics")
+            live = deepcopy(local)
+            for source in live["sources"].values():
+                source["subgraphs"][0]["name"] = "live_analytics"
+            results = update_related_pipelines("live_analytics", "v3", apply=True, config_dir=config_dir, runner=runner)
+
+        self.assertEqual([(result.pipeline, result.status) for result in results], [("related", "updated")])
+        self.assertEqual([command[3] for command in calls if command[2] == "get"], ["deleted", "related", "related"])
+
+    def test_unreadable_unrelated_pipeline_fails_discovery_instead_of_silently_skipping_it(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            write_pipeline(config_dir / "unknown.yaml", "unknown", "another_analytics")
+            for error in ("access denied", "connection failed", "Pipeline with name:another-pipeline not found"):
+                with self.subTest(error=error):
+                    calls = []
+
+                    def runner(command, **_kwargs):
+                        calls.append(command)
+                        return subprocess.CompletedProcess(command, 1, stdout="", stderr=error)
+
+                    results = update_related_pipelines("live_analytics", "v3", apply=True, config_dir=config_dir, runner=runner)
+
+                    self.assertEqual(len(results), 1)
+                    self.assertTrue(results[0].failed)
+                    self.assertEqual([command[2] for command in calls], ["get"])
+
+    def test_confirmed_absent_locally_related_pipeline_fails_without_creating_it(self) -> None:
+        calls = []
+
+        def runner(command, **_kwargs):
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 1, stdout="", stderr="Pipeline with name:related not found")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            write_pipeline(config_dir / "related.yaml", "related", "base_analytics")
+            results = update_related_pipelines("base_analytics", "v3", apply=True, config_dir=config_dir, runner=runner)
+
+        self.assertTrue(results[0].failed)
+        self.assertIn("does not exist", results[0].message)
+        self.assertEqual([command[2] for command in calls], ["get"])
+
     def test_batch_apply_keeps_every_requested_subgraph_version(self) -> None:
         rendered_references: list[list[dict[str, str]]] = []
 
@@ -244,7 +348,7 @@ class PipelineApplyTests(TestCase):
         self.assertEqual([(result.pipeline, result.status) for result in results], [("broken", "failed"), ("working", "updated")])
         self.assertIn("not found", results[0].message)
 
-    def test_stale_repository_config_preserves_all_18_live_sinks(self) -> None:
+    def test_stale_repository_config_discovers_live_only_branch_and_preserves_all_18_sinks(self) -> None:
         live = {
             "name": "arbitrum-solvency-engine",
             "apiVersion": 3,
@@ -278,11 +382,11 @@ class PipelineApplyTests(TestCase):
         stale["sinks"] = {name: value for name, value in stale["sinks"].items() if "vibe_stage_to_prod" not in name}
         self.assertEqual(len(stale["sinks"]), 9)
         self.assertEqual(len(live["sinks"]), 18)
-        expected, count = render_subgraph_version(live, "arbitrum-vibe-analytics", "v0.0.6")
-        self.assertEqual(count, 3)
         applied = []
+        calls = []
 
         def runner(command, **_kwargs):
+            calls.append(command)
             if command[1:3] == ["pipeline", "get"]:
                 return live_response(command, live, version=23)
             if command[1:3] == ["pipeline", "apply"]:
@@ -292,10 +396,20 @@ class PipelineApplyTests(TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             config_dir = Path(temp_dir)
             (config_dir / "arbitrum.yaml").write_text(yaml.safe_dump(stale))
-            results = update_related_pipelines("arbitrum-vibe-analytics", "v0.0.6", apply=True, config_dir=config_dir, runner=runner)
-
-        self.assertEqual(results[0].status, "updated")
-        self.assertEqual(applied, [expected])
+            for subgraph, version in (("arbitrum-vibe-analytics", "v0.0.6"), ("arbitrum-vibe-mainnet-analytics", "v0.0.4")):
+                for apply in (False, True):
+                    with self.subTest(subgraph=subgraph, apply=apply):
+                        applied.clear()
+                        calls.clear()
+                        expected, count = render_subgraph_version(live, subgraph, version)
+                        self.assertEqual(count, 3)
+                        results = update_related_pipelines(subgraph, version, apply=apply, config_dir=config_dir, runner=runner)
+                        self.assertEqual(len(results), 1)
+                        self.assertEqual(results[0].status, "updated" if apply else "planned")
+                        self.assertIn("3 source reference(s)", results[0].message)
+                        self.assertEqual(applied, [expected] if apply else [])
+                        if not apply:
+                            self.assertEqual([command[2] for command in calls], ["get"])
         self.assertEqual(live["sources"]["funding_vibe_stage"]["subgraphs"][0]["version"], "old-vibe_stage")
 
     def test_invalid_live_config_never_falls_back_to_repository(self) -> None:

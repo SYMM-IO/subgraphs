@@ -84,16 +84,7 @@ class ToolResolutionTests(TestCase):
 
 class ManagedPipelineStateTests(TestCase):
     def test_fetch_reads_live_pipeline_subgraph_versions(self) -> None:
-        dependencies = {
-            "base_analytics": [
-                fleet_web.PipelineDependency(
-                    pipeline="base-solvency-engine",
-                    config_path=Path("pipelines/base-solvency-engine.yaml"),
-                    reference_count=1,
-                    configured_versions=("v1",),
-                )
-            ]
-        }
+        pipeline_paths = {"base-solvency-engine": Path("pipelines/base-solvency-engine.yaml")}
         definition = """
 funding:
   type: subgraph_entity
@@ -106,11 +97,24 @@ funding:
             patch.object(fleet_web, "resolve_tool", return_value="/usr/local/bin/goldsky"),
             patch.object(fleet_web.subprocess, "run", return_value=completed) as run,
         ):
-            versions, verified = fleet_web.fetch_managed_pipeline_versions(dependencies)
+            versions, verified, definitions = fleet_web.fetch_managed_pipeline_versions(pipeline_paths)
 
         self.assertEqual(versions, {"base-solvency-engine": {"base_analytics": ("v2",)}})
         self.assertEqual(verified, {"base-solvency-engine"})
+        self.assertEqual(definitions["base-solvency-engine"]["funding"]["subgraphs"], [{"name": "base_analytics", "version": "v2"}])
         self.assertIn("--definition", run.call_args.args[0])
+
+    def test_unreadable_definitions_are_not_cached_as_verified(self) -> None:
+        for response in (
+            subprocess.CompletedProcess(["goldsky"], 1, stdout="", stderr="unavailable"),
+            subprocess.CompletedProcess(["goldsky"], 0, stdout="not a definition", stderr=""),
+        ):
+            with (
+                self.subTest(response=response),
+                patch.object(fleet_web, "resolve_tool", return_value="/usr/local/bin/goldsky"),
+                patch.object(fleet_web.subprocess, "run", return_value=response),
+            ):
+                self.assertEqual(fleet_web.fetch_managed_pipeline_versions({"related": Path("related.yaml")}), ({}, set(), {}))
 
     def test_version_sort_is_natural(self) -> None:
         versions = ["v0.2.9", "v0.2.11", "v0.2.10"]
@@ -428,6 +432,59 @@ class ReactApiTests(TestCase):
             ],
         )
         self.assertIn("last fetched", data["lastFetchedLabel"])
+
+    def test_live_only_mainnet_dependency_is_displayed_and_can_be_updated(self) -> None:
+        base = "arbitrum-vibe-mainnet-analytics"
+        pipeline = "arbitrum-solvency-engine"
+        fleet_web._store._chains = [
+            fleet_web.ChainConfig(
+                key="arbitrum_vibe_mainnet",
+                path=Path("configs/perps/arbitrum_vibe_mainnet.json"),
+                network="arbitrum",
+                deploy_urls={"perps/analytics": base},
+            )
+        ]
+        definition = {
+            entity: {"type": "subgraph_entity", "subgraphs": [{"name": base, "version": "v0.0.1"}]} for entity in ("funding", "position", "balance")
+        }
+        fleet_web._store._state = fleet_web.GoldskyState(
+            deployments={f"{base}/v0.0.4": fleet_web.Deployment(base_name=base, version="v0.0.4")},
+            tags={base: {"latest": "v0.0.4"}},
+            managed_pipeline_versions={pipeline: {base: ("v0.0.1",)}},
+            managed_pipeline_definitions={pipeline: definition},
+            verified_managed_pipelines={pipeline},
+        )
+        load_dependencies = fleet_web.load_pipeline_dependencies
+        with tempfile.TemporaryDirectory() as temp_dir:
+            config_dir = Path(temp_dir)
+            (config_dir / "arbitrum.yaml").write_text(f"name: {pipeline}\nsources: {{}}\n")
+            with (
+                patch.object(fleet_web, "load_pipeline_dependencies", side_effect=lambda **kwargs: load_dependencies(config_dir, **kwargs)),
+                patch.object(fleet_web.asyncio, "to_thread", new=run_inline),
+                patch.object(fleet_web, "do_pipeline_update", return_value=(True, ["pipeline updated"])) as update_pipeline,
+                patch.object(fleet_web, "do_tag_create") as create_tag,
+                patch.object(fleet_web, "do_tag_delete") as delete_tag,
+            ):
+                data = fleet_web.build_fleet_payload(fleet_web._store)
+                managed = data["groups"][0]["modules"][0]["managed_pipelines"]
+                self.assertEqual([item["name"] for item in managed], [pipeline])
+                self.assertEqual(managed[0]["reference_count"], 3)
+                self.assertEqual(managed[0]["configured_versions"], ["v0.0.1"])
+                self.assertEqual(managed[0]["status"], "outdated")
+                self.assertIn(pipeline, fleet_web.row_promote_form(base, "v0.0.4").body.decode())
+                selection = fleet_web._enrich_selections([{"chain": "arbitrum_vibe_mainnet", "module": "perps/analytics", "base": base}])
+                self.assertEqual(selection[0]["managed_pipelines"], managed)
+
+                response = asyncio.run(fleet_web.api_update_pipeline(JsonRequest({"base": base, "version": "v0.0.4"})))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response_json(response)
+        self.assertEqual(payload["toast"]["kind"], "ok")
+        self.assertEqual(payload["fleet"]["groups"][0]["modules"][0]["managed_pipelines"][0]["status"], "current")
+        self.assertEqual(fleet_web.extract_subgraph_versions(fleet_web._store.state.managed_pipeline_definitions[pipeline]), {base: ("v0.0.4",)})
+        update_pipeline.assert_called_once_with({base: "v0.0.4"})
+        create_tag.assert_not_called()
+        delete_tag.assert_not_called()
 
     def test_row_pipeline_action_updates_to_latest_deployed_version_without_tags(self) -> None:
         dependencies = {

@@ -1,8 +1,8 @@
 """Promotion-gated updates for repository-managed Goldsky pipelines.
 
-Pipeline definitions under ``pipelines/`` identify managed pipelines and their
-dependencies. Updates change subgraph versions in the complete live Goldsky
-configuration, preserving its other sources, transforms, sinks, and settings.
+Pipeline definitions under ``pipelines/`` identify managed pipelines. Their
+live sources identify dependencies. Updates change versions in the complete
+live configuration, preserving other sources, transforms, sinks, and settings.
 
 This module deliberately reports failures instead of raising them so callers
 can report tag promotion and pipeline maintenance as separate outcomes.
@@ -18,7 +18,7 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Iterator, Mapping
 
 import yaml
 
@@ -52,6 +52,10 @@ PIPELINE_METADATA_FIELDS = {
 CommandRunner = Callable[..., subprocess.CompletedProcess[str]]
 
 
+class PipelineNotFoundError(ValueError):
+    """Goldsky explicitly confirmed that a registered pipeline does not exist."""
+
+
 @dataclass(frozen=True)
 class PipelineUpdateResult:
     pipeline: str
@@ -72,17 +76,10 @@ class PipelineDependency:
     configured_versions: tuple[str, ...] = ()
 
 
-def extract_subgraph_versions(definition: dict[str, Any]) -> dict[str, tuple[str, ...]]:
-    """Collect subgraph versions from a repository or Goldsky definition.
-
-    Repository configs nest source definitions under ``sources``. Goldsky's
-    ``pipeline get --definition`` output is the flattened source/transform/sink
-    mapping, so both shapes are accepted.
-    """
+def _subgraph_references(definition: dict[str, Any]) -> Iterator[dict[str, Any]]:
+    """Yield source references from nested configs or flattened CLI definitions."""
     sources = definition.get("sources")
     candidates = sources.values() if isinstance(sources, dict) else definition.values()
-    versions: dict[str, set[str]] = defaultdict(set)
-
     for source in candidates:
         if not isinstance(source, dict) or source.get("type") not in {"subgraph_entity", "subgraphEntity"}:
             continue
@@ -90,12 +87,17 @@ def extract_subgraph_versions(definition: dict[str, Any]) -> dict[str, tuple[str
         if not isinstance(references, list):
             continue
         for reference in references:
-            if not isinstance(reference, dict):
-                continue
-            subgraph = reference.get("name")
-            version = reference.get("version")
-            if isinstance(subgraph, str) and subgraph and isinstance(version, str) and version:
-                versions[subgraph].add(version)
+            if isinstance(reference, dict) and isinstance(reference.get("name"), str) and reference["name"]:
+                yield reference
+
+
+def extract_subgraph_versions(definition: dict[str, Any]) -> dict[str, tuple[str, ...]]:
+    """Collect subgraph versions from a repository or Goldsky definition."""
+    versions: dict[str, set[str]] = defaultdict(set)
+    for reference in _subgraph_references(definition):
+        version = reference.get("version")
+        if isinstance(version, str) and version:
+            versions[reference["name"]].add(version)
 
     return {subgraph: tuple(sorted(found_versions)) for subgraph, found_versions in sorted(versions.items())}
 
@@ -108,11 +110,11 @@ def parse_pipeline_definition_versions(text: str) -> dict[str, tuple[str, ...]]:
     return extract_subgraph_versions(definition)
 
 
-def load_pipeline_dependencies(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[str, list[PipelineDependency]]:
-    """Index valid managed pipeline definitions by referenced subgraph name."""
-    dependencies: dict[str, list[PipelineDependency]] = {}
+def load_managed_pipeline_paths(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[str, Path]:
+    """Use repository YAML names as the registry, independent of source contents."""
+    paths: dict[str, Path] = {}
     if not config_dir.exists():
-        return dependencies
+        return paths
 
     for config_path in sorted((*config_dir.glob("*.yaml"), *config_dir.glob("*.yml"))):
         try:
@@ -124,25 +126,37 @@ def load_pipeline_dependencies(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[st
             continue
 
         pipeline = config.get("name")
-        sources = config.get("sources")
-        if not isinstance(pipeline, str) or not pipeline or not isinstance(sources, dict):
+        if isinstance(pipeline, str) and pipeline:
+            paths[pipeline] = config_path
+    return paths
+
+
+def load_pipeline_dependencies(
+    config_dir: Path = DEFAULT_CONFIG_DIR,
+    *,
+    live_definitions: Mapping[str, dict[str, Any]] | None = None,
+) -> dict[str, list[PipelineDependency]]:
+    """Index live sources, falling back to local references only for unverified pipelines."""
+    dependencies: dict[str, list[PipelineDependency]] = {}
+    for pipeline, config_path in load_managed_pipeline_paths(config_dir).items():
+        if live_definitions is not None and pipeline in live_definitions:
+            definition = live_definitions[pipeline]
+        else:
+            try:
+                definition = yaml.safe_load(config_path.read_text())
+            except (OSError, yaml.YAMLError):
+                continue
+        if not isinstance(definition, dict):
             continue
 
         reference_counts: Counter[str] = Counter()
         configured_versions: dict[str, set[str]] = defaultdict(set)
-        for source in sources.values():
-            if not isinstance(source, dict) or source.get("type") not in {"subgraph_entity", "subgraphEntity"}:
-                continue
-            references = source.get("subgraphs")
-            if not isinstance(references, list):
-                continue
-            for reference in references:
-                if isinstance(reference, dict) and isinstance(reference.get("name"), str) and reference["name"]:
-                    subgraph = reference["name"]
-                    reference_counts[subgraph] += 1
-                    version = reference.get("version")
-                    if isinstance(version, str) and version:
-                        configured_versions[subgraph].add(version)
+        for reference in _subgraph_references(definition):
+            subgraph = reference["name"]
+            reference_counts[subgraph] += 1
+            version = reference.get("version")
+            if isinstance(version, str) and version:
+                configured_versions[subgraph].add(version)
 
         for subgraph, reference_count in sorted(reference_counts.items()):
             dependencies.setdefault(subgraph, []).append(
@@ -162,23 +176,11 @@ def render_subgraph_versions(config: dict[str, Any], subgraph_versions: Mapping[
     rendered = deepcopy(config)
     updated_references = 0
 
-    sources = rendered.get("sources")
-    if not isinstance(sources, dict):
-        return rendered, updated_references
-
-    for source in sources.values():
-        if not isinstance(source, dict) or source.get("type") not in {"subgraph_entity", "subgraphEntity"}:
-            continue
-        references = source.get("subgraphs")
-        if not isinstance(references, list):
-            continue
-        for reference in references:
-            if not isinstance(reference, dict):
-                continue
-            subgraph = reference.get("name")
-            if isinstance(subgraph, str) and subgraph in subgraph_versions:
-                reference["version"] = subgraph_versions[subgraph]
-                updated_references += 1
+    for reference in _subgraph_references(rendered):
+        subgraph = reference["name"]
+        if subgraph in subgraph_versions:
+            reference["version"] = subgraph_versions[subgraph]
+            updated_references += 1
 
     return rendered, updated_references
 
@@ -235,6 +237,8 @@ def parse_live_pipeline_config(text: str, pipeline: str) -> tuple[dict[str, Any]
 def _read_live_pipeline(pipeline: str, runner: CommandRunner, timeout: int) -> tuple[dict[str, Any], int]:
     result = _run_goldsky(runner, ["pipeline", "get", pipeline, "--output", "yaml", "--color", "false"], timeout)
     if result.returncode != 0:
+        if f"Pipeline with name:{pipeline} not found" in (result.stderr or "") + (result.stdout or ""):
+            raise PipelineNotFoundError(f"pipeline does not exist: {pipeline}")
         raise ValueError(f"pipeline does not exist or could not be read: {_command_error(result)}")
     return parse_live_pipeline_config(result.stdout, pipeline)
 
@@ -272,12 +276,23 @@ def update_managed_pipelines(
                 raise ValueError("pipeline config is missing a non-empty 'name'")
             pipeline = configured_name
 
-            _, updated_references = render_subgraph_versions(config, subgraph_versions)
+            # Inspect every registered pipeline before deciding whether it is
+            # related. Local sources may omit branches added in Goldsky.
+            expected_subgraphs = set(extract_subgraph_versions(config)) & set(subgraph_versions)
+            try:
+                live_config, revision = _read_live_pipeline(pipeline, runner, command_timeout)
+            except PipelineNotFoundError:
+                if not expected_subgraphs:
+                    continue
+                raise
+            live_subgraphs = extract_subgraph_versions(live_config)
+            missing = expected_subgraphs - set(live_subgraphs)
+            if missing:
+                raise ValueError(f"live pipeline no longer references {', '.join(sorted(missing))}; refresh the managed dependencies")
+            rendered, updated_references = render_subgraph_versions(live_config, subgraph_versions)
             if updated_references == 0:
                 continue
-
-            matched_subgraphs = sorted(set(extract_subgraph_versions(config)) & set(subgraph_versions))
-            targets = ", ".join(f"{subgraph}/{subgraph_versions[subgraph]}" for subgraph in matched_subgraphs)
+            targets = ", ".join(f"{subgraph}/{subgraph_versions[subgraph]}" for subgraph in sorted(set(live_subgraphs) & set(subgraph_versions)))
 
             if not apply:
                 results.append(
@@ -289,16 +304,6 @@ def update_managed_pipelines(
                     )
                 )
                 continue
-
-            # Read the complete live config, not just its existence. Applying
-            # stale repository YAML would remove any live-only components.
-            live_config, revision = _read_live_pipeline(pipeline, runner, command_timeout)
-            live_subgraphs = extract_subgraph_versions(live_config)
-            missing = set(matched_subgraphs) - set(live_subgraphs)
-            if missing:
-                raise ValueError(f"live pipeline no longer references {', '.join(sorted(missing))}; refresh the managed dependencies")
-            rendered, updated_references = render_subgraph_versions(live_config, subgraph_versions)
-            targets = ", ".join(f"{subgraph}/{subgraph_versions[subgraph]}" for subgraph in sorted(set(live_subgraphs) & set(subgraph_versions)))
 
             with tempfile.TemporaryDirectory(prefix="goldsky-pipeline-") as temp_dir:
                 rendered_path = Path(temp_dir) / config_path.name
