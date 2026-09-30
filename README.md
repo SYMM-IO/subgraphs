@@ -257,19 +257,20 @@ Deploying a subgraph does not change a managed Goldsky pipeline. The release gat
 
 The Fleet list also shows each associated managed pipeline and the subgraph version read from its live Goldsky definition. Rows whose pipeline reference does not match the newest deployed version expose an **Update to _version_** action. The expanded deployment details show which retained deployment is currently used and provide a **Switch here** action for intentionally moving the pipeline back to any deployed version. These actions update the pipeline from a fresh snapshot without moving `stage`, `latest`, or any other subgraph tag. If the live definition cannot be read, Fleet shows the repository-configured version as unverified and still allows an explicit update.
 
-Pipeline definitions under `pipelines/` are the source of truth and define the dependency relationship. After all requested tag moves succeed, Fleet renders every matching `subgraph_entity` reference with the promoted immutable version. For every related pipeline it:
+Pipeline definitions under `pipelines/` identify managed pipelines and their subgraph dependencies. After all requested tag moves succeed, Fleet reads the **complete live Goldsky configuration** and changes only the matching subgraph versions. It preserves all other sources, transforms, sinks, unrelated subgraph versions, and pipeline settings, including components added outside this repository. For every related pipeline it:
 
-1. Confirms the pipeline already exists, so the promotion flow cannot accidentally create one.
-2. Renders all matching source references with the promoted version.
+1. Reads the existing pipeline configuration and revision, so the promotion flow cannot accidentally create one. An unreadable or incomplete response fails the update; Fleet never falls back to applying the repository YAML.
+2. Renders all matching live source references with the promoted version. If an expected subgraph dependency is missing from the live pipeline, the update fails for review.
 3. Validates the rendered definition.
-4. Applies it with `--from-snapshot new --force`, continuing the pipeline from a fresh snapshot.
+4. Reads the live configuration again and stops if its revision or configuration changed during validation; refresh and retry in that case.
+5. Applies it with `--from-snapshot new --force`, continuing the pipeline from a fresh snapshot.
 
 Bulk Promote collects the version chosen for each selected subgraph and renders them together. It updates pipelines only when every selected subgraph was promoted successfully; a skipped or failed target prevents the pipeline update. This keeps multiple subgraphs consumed by the same pipeline on one intentional release boundary.
 
 Pipeline validation or apply failures happen after the tag promotion, so tags are not rolled back. Fleet marks the Activity as failed and shows a specific error toast for the pipeline follow-up. Uncheck the option when a pipeline should be updated manually.
 
 ```bash
-# Preview which managed pipelines consume a subgraph (no Goldsky writes)
+# Preview repository-configured dependencies (offline; no Goldsky writes)
 python3 scripts/pipeline_updater.py --subgraph hyperevm_mainnet_analytics --version v0.2.18
 
 # Validate and apply the related pipeline definitions

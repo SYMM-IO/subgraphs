@@ -1,8 +1,8 @@
 """Promotion-gated updates for repository-managed Goldsky pipelines.
 
-Pipeline definitions under ``pipelines/`` are the source of truth. When a
-subgraph is promoted, every matching ``subgraph_entity`` reference is rendered
-with the promoted immutable version and applied to the existing pipeline.
+Pipeline definitions under ``pipelines/`` identify managed pipelines and their
+dependencies. Updates change subgraph versions in the complete live Goldsky
+configuration, preserving its other sources, transforms, sinks, and settings.
 
 This module deliberately reports failures instead of raising them so callers
 can report tag promotion and pipeline maintenance as separate outcomes.
@@ -26,6 +26,28 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG_DIR = REPO_ROOT / "pipelines"
 DEFAULT_COMMAND_TIMEOUT = int(os.environ.get("GOLDSKY_PIPELINE_TIMEOUT_SECONDS", "900"))
+PIPELINE_CONFIG_FIELDS = {
+    "name",
+    "apiVersion",
+    "description",
+    "resource_size",
+    "sources",
+    "transforms",
+    "sinks",
+    "use_dedicated_ip",
+    "job",
+}
+PIPELINE_METADATA_FIELDS = {
+    "version",
+    "status",
+    "is_deleted",
+    "created_at",
+    "updated_at",
+    "updated_by_user_id",
+    "from_snapshot",
+    "project_id",
+    "runtime_details",
+}
 
 CommandRunner = Callable[..., subprocess.CompletedProcess[str]]
 
@@ -109,7 +131,7 @@ def load_pipeline_dependencies(config_dir: Path = DEFAULT_CONFIG_DIR) -> dict[st
         reference_counts: Counter[str] = Counter()
         configured_versions: dict[str, set[str]] = defaultdict(set)
         for source in sources.values():
-            if not isinstance(source, dict) or source.get("type") != "subgraph_entity":
+            if not isinstance(source, dict) or source.get("type") not in {"subgraph_entity", "subgraphEntity"}:
                 continue
             references = source.get("subgraphs")
             if not isinstance(references, list):
@@ -145,7 +167,7 @@ def render_subgraph_versions(config: dict[str, Any], subgraph_versions: Mapping[
         return rendered, updated_references
 
     for source in sources.values():
-        if not isinstance(source, dict) or source.get("type") != "subgraph_entity":
+        if not isinstance(source, dict) or source.get("type") not in {"subgraph_entity", "subgraphEntity"}:
             continue
         references = source.get("subgraphs")
         if not isinstance(references, list):
@@ -186,6 +208,37 @@ def _run_goldsky(
     )
 
 
+def parse_live_pipeline_config(text: str, pipeline: str) -> tuple[dict[str, Any], int]:
+    """Extract a deployable config and revision from full CLI output.
+
+    A flattened ``--definition`` response is insufficient: it omits pipeline
+    settings. Never fill missing live data with repository defaults.
+    """
+    live = yaml.safe_load(text)
+    if not isinstance(live, dict) or live.get("name") != pipeline:
+        raise ValueError(f"could not read the complete live configuration for {pipeline}")
+    for section in ("sources", "transforms", "sinks"):
+        if not isinstance(live.get(section), dict):
+            raise ValueError(f"live configuration for {pipeline} is missing '{section}'")
+    for field in ("apiVersion", "resource_size", "use_dedicated_ip"):
+        if field not in live or live[field] is None:
+            raise ValueError(f"live configuration for {pipeline} is missing '{field}'")
+    revision = live.get("version")
+    if type(revision) is not int or revision < 1:
+        raise ValueError(f"live configuration for {pipeline} is missing a valid revision")
+    unknown = set(live) - PIPELINE_CONFIG_FIELDS - PIPELINE_METADATA_FIELDS
+    if unknown:
+        raise ValueError(f"live configuration for {pipeline} has unsupported fields: {', '.join(sorted(unknown))}")
+    return {field: deepcopy(value) for field, value in live.items() if field in PIPELINE_CONFIG_FIELDS}, revision
+
+
+def _read_live_pipeline(pipeline: str, runner: CommandRunner, timeout: int) -> tuple[dict[str, Any], int]:
+    result = _run_goldsky(runner, ["pipeline", "get", pipeline, "--output", "yaml", "--color", "false"], timeout)
+    if result.returncode != 0:
+        raise ValueError(f"pipeline does not exist or could not be read: {_command_error(result)}")
+    return parse_live_pipeline_config(result.stdout, pipeline)
+
+
 def update_managed_pipelines(
     subgraph_versions: Mapping[str, str],
     *,
@@ -207,29 +260,23 @@ def update_managed_pipelines(
 
     results: list[PipelineUpdateResult] = []
     for config_path in sorted((*config_dir.glob("*.yaml"), *config_dir.glob("*.yml"))):
+        pipeline = config_path.stem
         try:
             with config_path.open() as config_file:
                 config = yaml.safe_load(config_file)
             if not isinstance(config, dict):
                 raise ValueError("pipeline config must be a YAML object")
 
-            pipeline = config.get("name")
-            if not isinstance(pipeline, str) or not pipeline:
+            configured_name = config.get("name")
+            if not isinstance(configured_name, str) or not configured_name:
                 raise ValueError("pipeline config is missing a non-empty 'name'")
+            pipeline = configured_name
 
-            rendered, updated_references = render_subgraph_versions(config, subgraph_versions)
+            _, updated_references = render_subgraph_versions(config, subgraph_versions)
             if updated_references == 0:
                 continue
 
-            matched_subgraphs = sorted(
-                {
-                    reference.get("name")
-                    for source in config.get("sources", {}).values()
-                    if isinstance(source, dict) and isinstance(source.get("subgraphs"), list)
-                    for reference in source["subgraphs"]
-                    if isinstance(reference, dict) and reference.get("name") in subgraph_versions
-                }
-            )
+            matched_subgraphs = sorted(set(extract_subgraph_versions(config)) & set(subgraph_versions))
             targets = ", ".join(f"{subgraph}/{subgraph_versions[subgraph]}" for subgraph in matched_subgraphs)
 
             if not apply:
@@ -243,19 +290,15 @@ def update_managed_pipelines(
                 )
                 continue
 
-            # Applying a config can create a missing pipeline. Automatic updates
-            # must only modify an existing pipeline, so guard against creation.
-            existing = _run_goldsky(runner, ["pipeline", "get", pipeline, "--definition"], command_timeout)
-            if existing.returncode != 0:
-                results.append(
-                    PipelineUpdateResult(
-                        pipeline=pipeline,
-                        config_path=config_path,
-                        status="failed",
-                        message=f"pipeline does not exist or could not be read: {_command_error(existing)}",
-                    )
-                )
-                continue
+            # Read the complete live config, not just its existence. Applying
+            # stale repository YAML would remove any live-only components.
+            live_config, revision = _read_live_pipeline(pipeline, runner, command_timeout)
+            live_subgraphs = extract_subgraph_versions(live_config)
+            missing = set(matched_subgraphs) - set(live_subgraphs)
+            if missing:
+                raise ValueError(f"live pipeline no longer references {', '.join(sorted(missing))}; refresh the managed dependencies")
+            rendered, updated_references = render_subgraph_versions(live_config, subgraph_versions)
+            targets = ", ".join(f"{subgraph}/{subgraph_versions[subgraph]}" for subgraph in sorted(set(live_subgraphs) & set(subgraph_versions)))
 
             with tempfile.TemporaryDirectory(prefix="goldsky-pipeline-") as temp_dir:
                 rendered_path = Path(temp_dir) / config_path.name
@@ -273,6 +316,12 @@ def update_managed_pipelines(
                         )
                     )
                     continue
+
+                # Validation can take time. Refuse to overwrite an intervening
+                # edit, including another Fleet promotion of this pipeline.
+                current_config, current_revision = _read_live_pipeline(pipeline, runner, command_timeout)
+                if current_revision != revision or current_config != live_config:
+                    raise ValueError("live pipeline changed during validation; refresh and retry the update")
 
                 applied = _run_goldsky(
                     runner,
@@ -299,10 +348,9 @@ def update_managed_pipelines(
                 )
             )
         except subprocess.TimeoutExpired as exc:
-            pipeline_name = config_path.stem
             results.append(
                 PipelineUpdateResult(
-                    pipeline=pipeline_name,
+                    pipeline=pipeline,
                     config_path=config_path,
                     status="failed",
                     message=f"Goldsky command timed out after {exc.timeout}s; check the pipeline update status in Goldsky",
@@ -311,7 +359,7 @@ def update_managed_pipelines(
         except OSError as exc:
             results.append(
                 PipelineUpdateResult(
-                    pipeline=config_path.stem,
+                    pipeline=pipeline,
                     config_path=config_path,
                     status="failed",
                     message=f"pipeline update could not run: {exc}",
@@ -320,10 +368,10 @@ def update_managed_pipelines(
         except (ValueError, yaml.YAMLError) as exc:
             results.append(
                 PipelineUpdateResult(
-                    pipeline=config_path.stem,
+                    pipeline=pipeline,
                     config_path=config_path,
                     status="failed",
-                    message=f"could not load pipeline config: {exc}",
+                    message=f"pipeline update could not be prepared: {exc}",
                 )
             )
 
