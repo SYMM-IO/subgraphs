@@ -1,4 +1,5 @@
 {
+	"LiquidationExecution": ["LiquidatePartyA", "DeferredLiquidatePartyA", "LiquidatePositionsPartyA"],
 	"BridgeTransaction": ["TransferToBridge"],
 	"UserActivity": [
 		"SendQuote",

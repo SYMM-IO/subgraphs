@@ -27,6 +27,7 @@ import {
 	upsertSettlementSnapshot,
 } from "../../../common/utils/liquidationDetail"
 import { createPartyALiquidationEvent } from "../../utils/liquidationEvent"
+import { recordLiquidationBatch } from "../../utils/execution"
 import {
 	accumulatePartyALiquidationLockedValues,
 	capturePartyALiquidationQuoteValues,
@@ -146,6 +147,7 @@ function resolvePartyALiquidationSettlementTerms(
 
 export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositionsPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
+		recordLiquidationBatch<T>(_event, version)
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
@@ -180,20 +182,10 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 			}
 		}
 
-		// The lifecycle owns its affected quotes, not every entry in their event histories.
-		let detailId: string | null =
-			version >= Version.v_0_8_3 && liquidationId !== null
-				? event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString()
-				: null
-		let detail: LiquidationDetail | null = detailId === null ? null : LiquidationDetail.load(detailId)
 		let fundingAmounts: Array<BigInt> = []
 		for (let i = 0, lenQ = event.params.quoteIds.length; i < lenQ; i++) {
 			let quoteId = event.params.quoteIds[i]
 			let quote = Quote.load(quoteId.toString() + "-" + event.address.toHexString())
-			if (quote !== null && detail !== null) {
-				quote.liquidationDetail = detail.id
-				quote.save()
-			}
 			let fundingAmount = quote ? getQuoteFundingSignedAmount(quote, fundingContexts[i]) : BigInt.zero()
 			let fundingOverride: BigInt | null = null
 			if (quote !== null && liquidationId !== null) {
@@ -205,7 +197,7 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 				}
 			}
 			fundingAmounts.push(fundingAmount)
-			handleLiquidatePosition<T>(_event, version, quoteId, "LIQUIDATE_PARTY_A", fundingContexts[i], fundingOverride, event.params.liquidator)
+			handleLiquidatePosition<T>(_event, version, quoteId, "LIQUIDATE_PARTY_A", fundingContexts[i], fundingOverride)
 		}
 
 		updatePartyALatestBalance(_event, version, event.params.partyA)

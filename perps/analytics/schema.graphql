@@ -371,15 +371,15 @@ type BalanceChange @entity(immutable: true) {
 }
 
 """
-Bridge transaction initiation, keyed by the core's transaction id. Does not track later bridge settlement status.
+Bridge initiation, keyed by protocol transaction id and core. Settlement is not tracked here.
 """
 type BridgeTransaction @entity(immutable: true) {
 	"""
-	Protocol transaction id and SYMMIO core address joined with a hyphen.
+	Protocol transaction id and core address joined with a hyphen.
 	"""
 	id: ID!
 	"""
-	SYMMIO core that accepted this bridge transfer.
+	SYMMIO core accepting the transfer.
 	"""
 	source: Bytes!
 	"""
@@ -391,31 +391,70 @@ type BridgeTransaction @entity(immutable: true) {
 	"""
 	bridge: Bytes!
 	"""
-	Original BRIDGE balance movement, including user, amount, collateral and transaction provenance.
+	Original balance movement owns the account, amount, collateral and EVM provenance.
 	"""
 	balanceChange: BalanceChange!
 }
 
-"""Unmatched fee totals retained until their Quote is indexed. Consumed into Quote and removed; not a second fee model for indexed quotes."""
-type QuoteFeeHint @entity(immutable: false) {
-	"""Quote identifier and core address, matching Quote.id."""
+enum LiquidationExecutionType {
+	START
+	DEFERRED_START
+	POSITIONS
+}
+
+"""
+PartyA liquidation execution provenance, one immutable row per start or position batch.
+Does not replace LiquidationDetail's accounting or infer lifecycle IDs from end-of-block state.
+"""
+type LiquidationExecution @entity(immutable: true) {
+	"""
+	EVM transaction hash and block log index, joined with a hyphen.
+	"""
 	id: ID!
-	"""SYMMIO core that emitted this fee."""
+	"""
+	SYMMIO core performing this operation.
+	"""
 	source: Bytes!
-	"""Quote identifier scoped to this core."""
-	quoteId: BigInt!
-	"""PartyA account charged by the execution."""
+	"""
+	PartyA account being liquidated.
+	"""
 	partyA: Bytes!
-	"""Affiliate emitted with this fee."""
-	affiliate: Bytes!
-	"""Sum of emitted open fees in 18-decimal internal units; null until an open charge is indexed, not a claim of zero for pre-upgrade opens."""
-	paidOpenFee: BigInt
-	"""Sum of emitted close fees in 18-decimal internal units, including partial closes; null until a close charge is indexed."""
-	paidCloseFee: BigInt
-	"""Block timestamp of the latest included fee charge."""
+	"""
+	Emitted lifecycle ID; null on pre-v0.8.3 batches.
+	"""
+	liquidationId: Bytes
+	"""
+	Immediate start, deferred start, or position-batch execution; not lifecycle completion status.
+	"""
+	type: LiquidationExecutionType!
+	"""
+	Executor of this operation. A position-batch executor is not necessarily the starter.
+	"""
+	liquidator: Bytes!
+	"""
+	Only this batch's emitted quote IDs, scoped to source; empty for starts. Never a growing lifecycle array.
+	"""
+	quoteIds: [BigInt!]!
+	"""
+	Original liquidation block, only for deferred starts.
+	"""
+	liquidationBlockNumber: BigInt
+	"""
+	Block timestamp of execution, not the liquidation signature time.
+	"""
 	timestamp: BigInt!
-	"""Block number of the latest included fee charge."""
+	"""
+	Block containing the execution log.
+	"""
 	blockNumber: BigInt!
+	"""
+	Hash of the EVM transaction containing this execution.
+	"""
+	transaction: Bytes!
+	"""
+	Zero-based log index within the block.
+	"""
+	logIndex: BigInt!
 }
 
 """
@@ -2827,7 +2866,7 @@ type LiquidationDetail @entity(immutable: false) {
 	"""
 	liquidationFee: BigInt!
 	"""
-	Muon liquidation-signature timestamp when matching state is available; v0.8.3+ starts use event block time when that read is unavailable or belongs to another lifecycle.
+	Muon liquidation-signature timestamp; recovered v0.8.6 same-block rows use event block time as fallback.
 	"""
 	timestamp: BigInt
 	"""
@@ -2843,7 +2882,7 @@ type LiquidationDetail @entity(immutable: false) {
 	"""
 	disputed: Boolean!
 	"""
-	Time PartyA became insolvent; equal to timestamp for immediate liquidation and historical for deferred liquidation. Immediate starts without matching state use event block time.
+	Time PartyA became insolvent; equal to timestamp for immediate liquidation and historical for deferred liquidation.
 	"""
 	liquidationTimestamp: BigInt!
 	"""
@@ -2862,16 +2901,6 @@ type LiquidationDetail @entity(immutable: false) {
 	Transaction containing LiquidatePartyA or DeferredLiquidatePartyA; null for rows recovered from later events.
 	"""
 	liquidationStartTransaction: Bytes
-	"""Block timestamp of the indexed start event, independent of signature time."""
-	startTimestamp: BigInt
-	"""Block containing the indexed start event."""
-	startBlockNumber: BigInt
-	"""Exact start log index within its block."""
-	startLogIndex: BigInt
-	"""Whether the indexed start was deferred; null on recovered rows without a start."""
-	deferred: Boolean
-	"""Original liquidation block emitted by a deferred start."""
-	liquidationBlockNumber: BigInt
 	"""
 	Withdrawable free balance of PartyA captured when the liquidation row is created.
 	"""
@@ -2916,10 +2945,6 @@ type LiquidationDetail @entity(immutable: false) {
 	Account-level lifecycle events attached to this liquidation.
 	"""
 	events: [LiquidationEvent!]! @derivedFrom(field: "liquidationDetail")
-	"""
-	Quotes closed by this PartyA liquidation, linked using an emitted lifecycle id. Their quoteEvents retain batch executor metadata.
-	"""
-	quotes: [Quote!]! @derivedFrom(field: "liquidationDetail")
 	"""
 	True once no PartyB settlement buckets remain, full liquidation is indexed, or takeover settlement completes.
 	"""
@@ -3118,18 +3143,6 @@ type PartyALiquidationDeferredBalanceHint @entity(immutable: false) {
 Mutable withdraw request state across classic, express, virtual, and advanced flows.
 """
 type WithdrawRequest @entity(immutable: false) {
-	"""Exact preceding core withdrawal balance change matched to finalization."""
-	finalizedBalanceChange: BalanceChange
-	"""Core finalization transaction, distinct from initiation and provider processing."""
-	finalizedTransaction: Bytes
-	"""Exact core WithdrawFinalized log index within its block."""
-	finalizedLogIndex: BigInt
-	"""Block containing core finalization."""
-	finalizedBlockNumber: BigInt
-	"""Block timestamp of core finalization."""
-	finalizedTimestamp: BigInt
-	"""Signer emitted at finalization; not necessarily the request owner."""
-	finalizedBy: Bytes
 	"""
 	Composite `{user}-{requestId}-{SYMMIO core}` identifier.
 	"""
@@ -3314,6 +3327,30 @@ type WithdrawRequest @entity(immutable: false) {
 	Transaction hash of the core WithdrawInitiated event.
 	"""
 	transaction: Bytes!
+	"""
+	Verified core finalization time, not provider processing. Null when exact finalization evidence is unavailable.
+	"""
+	finalizedAt: BigInt
+	"""
+	Block containing the matched core WithdrawFinalized event.
+	"""
+	finalizedBlockNumber: BigInt
+	"""
+	Transaction containing the matched core WithdrawFinalized event; transaction above remains the initiation hash.
+	"""
+	finalizedTransaction: Bytes
+	"""
+	Zero-based block log index of the matched core WithdrawFinalized event.
+	"""
+	finalizedLogIndex: BigInt
+	"""
+	Finalizing signer, not necessarily the request owner.
+	"""
+	finalizedBy: Bytes
+	"""
+	Exact preceding core WITHDRAW movement, verified against this request's owner, source and amount.
+	"""
+	finalizedBalanceChange: BalanceChange
 }
 
 """

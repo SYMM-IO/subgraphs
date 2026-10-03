@@ -31,6 +31,24 @@ This structure addresses the following challenges:
 - **Module Configuration**: Incorporates `subgraph_config.json` for module-specific settings, allowing for flexible and
   targeted subgraph configurations.
 
+## Explorer Analytics data
+
+- `Quote.paidOpenFee` and `paidCloseFee` contain emitted v0.8.5+ fees in 18-decimal
+  units, including partial closes. Null means unknown, not zero; pre-upgrade fees
+  are unavailable. `feeAffiliate` is separate from account-source `affiliate`.
+- `WithdrawRequest.finalized*` fields describe verified core completion, separate
+  from initiation and provider processing. The finalizing signer may differ from the owner.
+- `BridgeTransaction` identifies a bridge transfer and references its `BalanceChange`.
+- `LiquidationExecution` records each PartyA start or position batch, including its
+  executor. A batch executor is not necessarily the liquidation starter. Its ID is
+  `transactionHash-logIndex`, matching `QuoteEvent.id` without the final quote-ID component.
+
+Build COTI with `python3 scripts/manager.py configs/perps/coti.json perps/analytics`.
+Deploy a fresh version and reindex from the configured contract starts before
+switching Explorer. Resolve missing-quote or unmatched-finalization warnings before
+cutover; resetting backend checkpoints cannot restore missing upstream history.
+COTI does not require an Events deployment.
+
 ## Deployment Steps
 
 1. **Prepare Configuration File**: Create a JSON configuration file that defines your contracts, ABIs, and deployment

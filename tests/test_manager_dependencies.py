@@ -72,7 +72,7 @@ class DependencyInheritanceTests(TestCase):
         previous_cwd = Path.cwd()
         try:
             os.chdir(REPO_ROOT)
-            events = manager.get_needed_events_for(["Quote", "QuoteFeeHint", "User"], "perps/analytics", contract)
+            events = manager.get_needed_events_for(["Quote", "User"], "perps/analytics", contract)
         finally:
             os.chdir(previous_cwd)
 

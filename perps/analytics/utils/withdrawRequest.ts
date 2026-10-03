@@ -1,6 +1,5 @@
 import { Address, BigInt, Bytes, store } from "@graphprotocol/graph-ts"
 import {
-	BalanceChange,
 	WithdrawCoreLifecycleHint,
 	WithdrawFinalizationHint,
 	WithdrawRequest,
@@ -236,33 +235,9 @@ export function recordWithdrawFinalizationHint(
 	hint.save()
 }
 
-export function resolveWithdrawRequest(
-	eventUser: Address,
-	requestId: BigInt,
-	source: Address,
-	transaction: Bytes,
-	logIndex: BigInt | null = null,
-): WithdrawRequest | null {
+export function resolveWithdrawRequest(eventUser: Address, requestId: BigInt, source: Address, transaction: Bytes): WithdrawRequest | null {
 	let hintId = withdrawFinalizationHintId(source, transaction, eventUser)
 	let hint = WithdrawFinalizationHint.load(hintId)
-	if (logIndex !== null) {
-		if (hint) store.remove("WithdrawFinalizationHint", hintId)
-		// A finalization log identifies the exact preceding Withdraw, including
-		// provider/multicall transactions. Its signer need not own the request.
-		let balance = BalanceChange.load(transaction.toHexString() + "-" + logIndex.minus(BigInt.fromI32(1)).toString())
-		if (!balance || balance.type != "WITHDRAW" || !balance.source.equals(source) || balance.sender === null || !balance.sender!.equals(eventUser))
-			return null
-		let request = loadWithdrawRequest(changetype<Address>(balance.account), requestId, source)
-		if (
-			!request ||
-			!isCompletableWithdrawRequest(request) ||
-			!request.user.equals(balance.account) ||
-			!request.source.equals(source) ||
-			!request.amount.equals(balance.amount)
-		)
-			return null
-		return request
-	}
 	if (hint) {
 		let hinted = loadWithdrawRequest(changetype<Address>(hint.user), requestId, source)
 		store.remove("WithdrawFinalizationHint", hintId)

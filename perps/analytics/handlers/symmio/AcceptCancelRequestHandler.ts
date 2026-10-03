@@ -5,7 +5,6 @@ import { Quote } from "../../../../generated/schema"
 import { createQuoteEvent } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { markSymbolRestatementMutation } from "../../utils/symbolAdjustment"
-import { consumeQuoteFeeHint } from "../../utils/explorerEvents"
 
 export class AcceptCancelRequestHandler<T> extends CommonAcceptCancelRequestHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -17,7 +16,6 @@ export class AcceptCancelRequestHandler<T> extends CommonAcceptCancelRequestHand
 		super.handleAccount(_event, version)
 		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return
-		consumeQuoteFeeHint(quote)
 		if (quote.symbolId !== null) markSymbolRestatementMutation(_event, quote.symbolId!)
 		createQuoteEvent(_event, event.params.quoteId, "ACCEPT_CANCEL_QUOTE", null)
 		updatePartyALatestBalance(_event, version, changetype<Address>(quote.partyA))

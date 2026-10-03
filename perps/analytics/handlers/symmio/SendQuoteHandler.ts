@@ -8,7 +8,6 @@ import { updateActivityTimestamps } from "../../utils/activityHelpers"
 import { catchUpHistories } from "../../utils/openInterestHelpers"
 import { createQuoteEvent, JSONBuilder } from "../../utils/quoteEvent"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
-import { consumeQuoteFeeHint } from "../../utils/explorerEvents"
 
 export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
@@ -18,8 +17,6 @@ export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 		super.handleAccount(_event, version)
 		super.handleQuote(_event, version)
 		super.handleSymbol(_event, version)
-		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
-		if (quote) consumeQuoteFeeHint(quote)
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 
 		let account = Account.load(event.params.partyA.toHexString())
@@ -29,6 +26,7 @@ export class SendQuoteHandler<T> extends CommonSendQuoteHandler<T> {
 		updateHistories(new UpdateHistoriesParams(version, account, null, event).quotesCount(BigInt.fromString("1")))
 		catchUpHistories(_event.block.timestamp, event.address)
 
+		let quote = Quote.load(event.params.quoteId.toString() + "-" + event.address.toHexString())
 		if (!quote) return
 		let builder = new JSONBuilder()
 		if (quote.symbolId) builder.add("symbolId", quote.symbolId!.toString())

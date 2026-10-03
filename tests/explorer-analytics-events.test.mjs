@@ -25,876 +25,504 @@ function load(path, dependencies) {
 	);
 }
 
-function harness(liquidationState = null) {
-	const rows = [];
-	const quotes = new Map();
-	const hints = new Map();
-	const details = new Map();
-	const model = kind =>
-		class {
-			constructor(id) {
-				this.id = id;
-				this.kind = kind;
-			}
-			save() {
-				rows.push(this);
-			}
-		};
-	const quoteEvents = load("perps/analytics/utils/quoteEvent.ts", {
-		"@graphprotocol/graph-ts": {},
-		"../../../generated/schema": {},
-		"../../common/utils": {},
-	});
-	const liquidationEvents = load("perps/analytics/utils/liquidationEvent.ts", {
-		"@graphprotocol/graph-ts": {},
-		"../../../generated/schema": {
-			LiquidationDetail: { load: id => details.get(id) ?? null },
-			LiquidationEvent: model("liquidation"),
-		},
-		"../../common/BaseHandler": { Version: { v_0_8_3: 3 } },
-		"../../common/VersionedQuoteLoader": { getLiquidationStateData: () => liquidationState },
-		"../../common/utils": { getGlobalCounterAndInc: () => number(rows.length) },
-		"./quoteEvent": quoteEvents,
-	});
-	const feesAndWithdrawals = load("perps/analytics/utils/explorerEvents.ts", {
-		"../../common/BaseHandler": { Version: { v_0_8_3: 3 } },
-		"@graphprotocol/graph-ts": {
-			BigInt: { zero: () => number(0), fromI32: number },
-			store: {
-				remove: (entity, id) => {
-					assert.equal(entity, "QuoteFeeHint");
-					hints.delete(id);
-				},
-			},
-		},
-		"./quoteEvent": quoteEvents,
-		"../../../generated/schema": {
-			LiquidationDetail: { load: id => details.get(id) ?? null },
-			Quote: { load: id => quotes.get(id) ?? null },
-			QuoteFeeHint: class {
-				constructor(id) {
-					this.id = id;
-					this.paidOpenFee = null;
-					this.paidCloseFee = null;
-				}
-				static load(id) {
-					return hints.get(id) ?? null;
-				}
-				save() {
-					hints.set(this.id, this);
-				}
-			},
-			DebugEntity: model("debug"),
-		},
-	});
-	const event = log => ({
-		address: bytes("core"),
-		transaction: { hash: { toHexString: () => "tx" } },
-		logIndex: log,
-		block: { timestamp: 123, number: 456 },
-	});
-	const createQuote = (id, source = "core", partyA = "a") => {
-		const quote = {
-			id: `${id}-${source}`,
-			source: bytes(source),
-			partyA: bytes(partyA),
-			affiliate: bytes("account-source"),
-			paidOpenFee: null,
-			paidCloseFee: null,
-			save() {
-				quotes.set(this.id, this);
-			},
-		};
-		quote.save();
-		return quote;
-	};
-	return { rows, quotes, hints, details, mapping: { ...feesAndWithdrawals, ...liquidationEvents }, event, createQuote };
-}
-
 const bytes = value => ({ toHexString: () => value, equals: other => other.toHexString() === value });
 const number = value => ({
 	toString: () => String(value),
 	plus: other => number(BigInt(value) + BigInt(other.toString())),
 	minus: other => number(BigInt(value) - BigInt(other.toString())),
-	equals: other => BigInt(value) === BigInt(other.toString()),
 	neg: () => number(-BigInt(value)),
+	equals: other => BigInt(value) === BigInt(other.toString()),
 });
+const Version = Object.fromEntries(Array.from({ length: 7 }, (_, v) => [`v_0_8_${v}`, v]));
 
-test("paid fee totals live on Quote and preserve partial closes, attribution and source isolation", () => {
-	const { rows, quotes, hints, mapping, event, createQuote } = harness();
-	createQuote(1);
-	createQuote(2);
-	for (const [quoteId, log, amount, type] of [
-		[1, 3, "100000000000000000001", 0],
-		[2, 4, "7", 1],
-		[1, 5, "9", 1],
-		[1, 6, "11", 1],
+function harness() {
+	const tables = {},
+		saves = [],
+		warnings = [];
+	const schema = {};
+	for (const name of [
+		"Quote",
+		"LiquidationExecution",
+		"WithdrawRequest",
+		"BalanceChange",
+		"BridgeTransaction",
+		"WithdrawFinalizationHint",
+		"WithdrawCoreLifecycleHint",
+		"WithdrawRequestLookup",
+		"WithdrawRequestAccountLookup",
 	]) {
-		mapping.accumulateQuoteFees({
-			...event(log),
-			params: { quoteId, amount: number(amount), _type: type, partyA: bytes("a"), affiliate: bytes("fee-affiliate") },
+		const table = (tables[name] = new Map());
+		schema[name] = class {
+			constructor(id) {
+				this.id = id;
+				if (name === "Quote") {
+					this.paidOpenFee = null;
+					this.paidCloseFee = null;
+				}
+			}
+			static load(id) {
+				return table.get(id) ?? null;
+			}
+			save() {
+				if (["LiquidationExecution", "BridgeTransaction"].includes(name)) assert.ok(!table.has(this.id), "immutable overwrite");
+				table.set(this.id, this);
+				saves.push(name);
+			}
+		};
+	}
+	const graph = {
+		BigInt: { zero: () => number(0), fromI32: number },
+		Address: { fromBytes: value => value },
+		store: { remove: (name, id) => tables[name].delete(id) },
+		log: { warning: (...args) => warnings.push(args) },
+	};
+	const mapping = load("perps/analytics/utils/execution.ts", {
+		"@graphprotocol/graph-ts": graph,
+		"../../../generated/schema": schema,
+		"../../common/BaseHandler": { Version },
+	});
+	const event = (params = {}, log = 8, source = "core") => ({
+		address: bytes(source),
+		params,
+		transaction: { hash: bytes("tx") },
+		logIndex: number(log),
+		block: { timestamp: number(123), number: number(456) },
+	});
+	return { mapping, tables, schema, graph, event, saves, warnings };
+}
+
+test("quote fees accumulate partial closes without changing existing rates, attribution or ordering", () => {
+	const h = harness();
+	const originals = new Map();
+	for (const id of ["1-core", "2-core", "1-other"]) {
+		const quote = new h.schema.Quote(id);
+		Object.assign(quote, {
+			partyA: bytes("owner"),
+			affiliate: bytes("account-source"),
+			tradingFee: number(15),
+			closeFee: number(20),
+			timestamp: number(50),
+			blockNumber: number(60),
+			globalCounter: number(70),
+			action: "OpenPosition",
 		});
+		h.tables.Quote.set(id, quote);
+		originals.set(id, { ...quote });
+	}
+	for (const [quoteId, amount, type, source] of [
+		[1, "100000000000000000001", 0, "core"],
+		[1, "9", 1, "core"],
+		[1, "11", 1, "core"],
+		[2, "7", 1, "core"],
+		[1, "0", 0, "other"],
+	]) {
+		h.mapping.accumulateQuoteFees(
+			h.event(
+				{ quoteId: number(quoteId), amount: number(amount), _type: type, partyA: bytes("owner"), affiliate: bytes("fee-affiliate") },
+				8,
+				source,
+			),
+		);
 	}
 	assert.deepEqual(
-		[...quotes.values()].map(row => [row.id, row.paidOpenFee?.toString() ?? null, row.paidCloseFee?.toString() ?? null]),
+		[...h.tables.Quote.values()].map(f => [f.id, f.paidOpenFee?.toString() ?? null, f.paidCloseFee?.toString() ?? null]),
 		[
 			["1-core", "100000000000000000001", "20"],
 			["2-core", null, "7"],
+			["1-other", "0", null],
 		],
 	);
-	assert.equal(rows.length, 0, "normal fee flow must not emit raw rows");
-	assert.equal(hints.size, 0, "indexed quotes must not have a second fee entity");
-	assert.equal(quotes.get("1-core").affiliate.toHexString(), "account-source");
-	assert.equal(quotes.get("1-core").paidFeeAffiliate.toHexString(), "fee-affiliate");
-	assert.equal(quotes.get("1-core").paidFeesTimestamp, 123);
-	assert.equal(quotes.get("1-core").paidFeesBlockNumber, 456);
-	createQuote(1, "other-core");
-	mapping.accumulateQuoteFees({
-		...event(7),
-		address: bytes("other-core"),
-		params: { quoteId: 1, amount: number(0), _type: 0, partyA: bytes("a"), affiliate: bytes("fee-affiliate") },
-	});
-	assert.equal(quotes.size, 3, "same quote ID on another core must remain separate");
-	assert.equal(quotes.get("1-other-core").paidOpenFee.toString(), "0", "emitted zero differs from absent fee coverage");
-	assert.equal(quotes.get("1-other-core").paidCloseFee, null);
+	for (const [id, original] of originals) {
+		const { paidOpenFee, paidCloseFee, feeAffiliate, ...unchanged } = h.tables.Quote.get(id);
+		const { paidOpenFee: oldOpen, paidCloseFee: oldClose, ...expected } = original;
+		assert.deepEqual(unchanged, expected);
+		assert.equal(feeAffiliate.toHexString(), "fee-affiliate");
+	}
+	assert.deepEqual(h.saves, Array(5).fill("Quote"));
+	assert.deepEqual(h.warnings, []);
 });
 
-test("unmatched fees are consumed once when their quote appears, without inventing a quote", () => {
-	for (const consumeOnNextCharge of [false, true]) {
-		const { quotes, hints, mapping, event, createQuote } = harness();
-		for (const [amount, type] of [
-			[0, 0],
-			[9, 1],
-			[11, 1],
+test("missing quote history is reported without creating a fabricated quote", () => {
+	const h = harness();
+	h.mapping.accumulateQuoteFees(h.event({ quoteId: number(1), amount: number(9), _type: 0, affiliate: bytes("fee-affiliate") }));
+	assert.deepEqual(h.saves, []);
+	assert.equal(h.tables.Quote.size, 0);
+	assert.match(h.warnings[0][0], /missing quote.*reindex/);
+	assert.deepEqual(h.warnings[0][1], ["1-core", "tx", "8"]);
+});
+
+for (const quoteAvailable of [false, true]) {
+	test(`fee enrichment preserves existing history updates (quote available: ${quoteAvailable})`, () => {
+		const h = harness(),
+			histories = [];
+		if (quoteAvailable) h.tables.Quote.set("1-core", new h.schema.Quote("1-core"));
+		class Params {
+			symbolId(value) {
+				this.symbol = value.toString();
+				return this;
+			}
+			symbolTradesCount(value) {
+				this.trades = value.toString();
+				return this;
+			}
+			openFee(value) {
+				this.open = value.toString();
+				return this;
+			}
+			closeFee(value) {
+				this.close = value.toString();
+				return this;
+			}
+		}
+		const { TradingFeeChargedHandler } = load("perps/analytics/handlers/symmio/TradingFeeChargedHandler.ts", {
+			"../../../common/handlers/symmio/TradingFeeChargedHandler": {
+				TradingFeeChargedHandler: class {
+					handle() {}
+				},
+			},
+			"../../../../generated/schema": { Account: { load: id => ({ id }) } },
+			"@graphprotocol/graph-ts": h.graph,
+			"../../../common/BaseHandler": { Version },
+			"../../utils/execution": h.mapping,
+			"../../utils/historyHelpers": { UpdateHistoriesParams: Params, updateHistories: params => histories.push({ ...params }) },
+		});
+		for (const [type, amount] of [
+			[0, 11],
+			[1, 2],
+			[1, 3],
 		]) {
-			mapping.accumulateQuoteFees({
-				...event(1),
-				params: { quoteId: 1, amount: number(amount), _type: type, partyA: bytes("a"), affiliate: bytes("fee-affiliate") },
-			});
+			new TradingFeeChargedHandler().handle(
+				h.event({
+					quoteId: number(1),
+					symbolId: number(7),
+					partyA: bytes("owner"),
+					partyB: bytes("solver"),
+					affiliate: bytes("fee-affiliate"),
+					_type: type,
+					amount: number(amount),
+				}),
+				5,
+			);
 		}
-		assert.equal(quotes.size, 0);
-		assert.equal(hints.size, 1);
-		assert.equal(hints.get("1-core").paidCloseFee.toString(), "20");
-		const quote = createQuote(1);
-		if (consumeOnNextCharge) {
-			mapping.accumulateQuoteFees({
-				...event(2),
-				params: { quoteId: 1, amount: number(3), _type: 1, partyA: bytes("a"), affiliate: bytes("fee-affiliate") },
-			});
-		} else {
-			mapping.consumeQuoteFeeHint(quote);
-		}
-		mapping.consumeQuoteFeeHint(quote);
-		assert.equal(hints.size, 0, "consumed hints must be removed");
-		assert.equal(quote.paidOpenFee.toString(), "0");
-		assert.equal(quote.paidCloseFee.toString(), consumeOnNextCharge ? "23" : "20");
-		assert.equal(quote.affiliate.toHexString(), "account-source");
-	}
-});
-
-test("fee hints never attach to a quote with unproven PartyA or source", () => {
-	const { hints, mapping, event, createQuote } = harness();
-	const quote = createQuote(1, "core", "wrong-owner");
-	mapping.accumulateQuoteFees({
-		...event(1),
-		params: { quoteId: 1, amount: number(8), _type: 0, partyA: bytes("a"), affiliate: bytes("fee-affiliate") },
+		assert.deepEqual(histories, [
+			{ symbol: "7", trades: "0", open: "11" },
+			{ symbol: "7", trades: "0", close: "2" },
+			{ symbol: "7", trades: "0", close: "3" },
+		]);
+		assert.equal(h.tables.Quote.get("1-core")?.paidCloseFee.toString(), quoteAvailable ? "5" : undefined);
+		assert.equal(h.warnings.length, quoteAvailable ? 0 : 3);
 	});
-	assert.equal(quote.paidOpenFee, null);
-	mapping.consumeQuoteFeeHint(quote);
-	assert.equal(hints.size, 1);
-	quote.partyA = bytes("a");
-	quote.source = bytes("wrong-core");
-	mapping.consumeQuoteFeeHint(quote);
-	assert.equal(hints.size, 1);
-	quote.source = bytes("core");
-	mapping.consumeQuoteFeeHint(quote);
-	assert.equal(quote.paidOpenFee.toString(), "8");
-	assert.equal(quote.paidCloseFee, null);
-	assert.equal(hints.size, 0);
-});
+}
 
-test("quote schema owns nullable fee totals and the old normal fee entity is removed", () => {
-	const document = parse(read("perps/common/models/Quote.graphql"));
-	const quote = document.definitions.find(type => type.name.value === "Quote");
-	for (const name of ["paidOpenFee", "paidCloseFee", "paidFeeAffiliate", "paidFeesTimestamp", "paidFeesBlockNumber"]) {
-		const field = quote.fields.find(field => field.name.value === name);
-		assert.ok(field, name);
-		assert.equal(field.type.kind, "NamedType", `${name} must remain nullable for historical quotes`);
-	}
-	assert.ok(!quote.fields.some(field => field.name.value === "paidFees"));
-	assert.doesNotMatch(read("perps/analytics/schema.graphql"), /type QuoteFeeTotals\b/);
-});
-
-test("both quote creation paths consume pending fees before unrelated account lookups", () => {
-	for (const name of ["SendQuote", "AcceptCancelRequest"]) {
-		const { quotes, hints, mapping, event, createQuote } = harness();
-		mapping.accumulateQuoteFees({
-			...event(1),
-			params: { quoteId: 1, amount: number(6), _type: 1, partyA: bytes("a"), affiliate: bytes("fee-affiliate") },
-		});
-		class CommonHandler {
-			handle() {}
-			handleQuote() {
-				createQuote(1);
-			}
-			handleSymbol() {}
-			handleAccount() {}
-		}
-		const parent = name === "SendQuote" ? "SendQuoteHandlerWithAccount" : "AcceptCancelRequestHandler";
-		const handler = load(`perps/analytics/handlers/symmio/${name}Handler.ts`, {
-			[`../../../common/handlers/symmio/${parent}`]: { [parent]: CommonHandler },
-			"../../../../generated/schema": { Account: { load: () => null }, Quote: { load: id => quotes.get(id) ?? null } },
-			"@graphprotocol/graph-ts": {},
-			"../../../common/BaseHandler": {},
-			"../../utils/historyHelpers": {},
-			"../../utils/activityHelpers": {},
-			"../../utils/openInterestHelpers": {},
-			"../../utils/quoteEvent": { createQuoteEvent() {} },
-			"../../utils/latestAccountBalance": { updatePartyALatestBalance() {} },
-			"../../utils/symbolAdjustment": { markSymbolRestatementMutation() {} },
-			"../../utils/explorerEvents": mapping,
-		});
-		new handler[`${name}Handler`]().handle({ ...event(2), params: { quoteId: 1, partyA: bytes("a") } }, 5);
-		assert.equal(quotes.get("1-core").paidCloseFee.toString(), "6", name);
-		assert.equal(hints.size, 0, name);
-	}
-});
-
-test("SendQuote preserves paid fees when an existing quote is initialized again", () => {
-	const { quotes, mapping, event, createQuote } = harness();
-	createQuote(1);
-	mapping.accumulateQuoteFees({
-		...event(1),
-		params: { quoteId: 1, amount: number(7), _type: 0, partyA: bytes("a"), affiliate: bytes("fee-affiliate") },
-	});
-	const account = { accountSource: bytes("account-source"), save() {} };
-	const handler = load("perps/common/handlers/symmio/SendQuoteHandler.ts", {
-		"../../../../generated/schema": {
-			Account: { load: () => account },
-			Quote: class {
-				constructor(id) {
-					this.id = id;
-				}
-				static load(id) {
-					return quotes.get(id) ?? null;
-				}
-				save() {
-					// Graph store.set merges supplied fields; an unset property does not erase stored data.
-					quotes.set(this.id, { ...quotes.get(this.id), ...this });
-				}
+function liquidationEvent(h, version, name, log = 8) {
+	const abi = JSON.parse(read(`configs/abis/symmio_0_8_${version}.json`));
+	const definition = abi.filter(e => e.type === "event" && e.name === name).at(-1);
+	const params = {
+		liquidator: bytes(name === "LiquidatePositionsPartyA" ? "executor" : "starter"),
+		partyA: bytes("owner"),
+		liquidationId: bytes("emitted-lifecycle"),
+		quoteIds: [number(21), number(22)],
+		allocatedBalance: number(100),
+		upnl: number(-5),
+		totalUnrealizedLoss: number(-5),
+		liquidationBlockNumber: number(99),
+		liquidationTimestamp: number(88),
+		liquidationAllocatedBalance: number(50),
+		liquidatedAmounts: [number(3), number(5)],
+		closeIds: [number(1), number(2)],
+		averageClosedPrices: [number(20), number(30)],
+	};
+	const e = h.event(params, log);
+	e.parameters = definition.inputs.map(input => ({
+		value: {
+			toAddress: () => {
+				assert.equal(input.type, "address");
+				return params[input.name];
+			},
+			toBytes: () => {
+				assert.equal(input.type, "bytes");
+				return params[input.name];
+			},
+			toBigInt: () => {
+				assert.equal(input.type, "uint256");
+				return params[input.name];
 			},
 		},
-		"@graphprotocol/graph-ts": { BigInt: { zero: () => number(0), fromI32: number } },
-		"../../BaseHandler": {
-			BaseHandler: class {
-				handleGlobalCounter() {
-					return number(1);
-				}
-			},
-			Version: { v_0_8_0: 0, v_0_8_3: 3 },
-		},
-		"../../VersionedQuoteLoader": {
-			getQuoteData: () => ({ maxFundingRate: number(1), closeFee: number(2), affiliate: bytes("raw-affiliate") }),
-			getSymbolName: () => "BTC",
-		},
-		"../../utils/quote": { addQuoteToPendingList() {}, setEventTimestampAndTransactionHashAndAction() {} },
-		"../../../analytics/utils/constants": {},
-		"../../utils/builders": {},
-		"../../utils/profile": { updateQuoteHierarchyCounters() {} },
-		"../../../analytics/utils/historyHelpers": { updateQuoteBucketHierarchyHistoriesForQuote() {} },
+	}));
+	return e;
+}
+
+for (const version of [0, 1, 2, 3, 4, 5, 6]) {
+	test(`v0.8.${version} stores one immutable batch regardless of quote count or missing quote/state`, () => {
+		const h = harness();
+		const e = liquidationEvent(h, version, "LiquidatePositionsPartyA");
+		e.params.quoteIds = Array.from({ length: 1000 }, (_, i) => number(i));
+		h.mapping.recordLiquidationBatch(e, version);
+		const row = h.tables.LiquidationExecution.get("tx-8");
+		assert.equal(row.type, "POSITIONS");
+		assert.equal(row.liquidator.toHexString(), "executor");
+		assert.equal(row.quoteIds.length, 1000);
+		assert.equal(row.liquidationId?.toHexString(), version >= 3 ? "emitted-lifecycle" : undefined);
+		assert.deepEqual(h.saves, ["LiquidationExecution"]);
+		h.mapping.recordLiquidationBatch(liquidationEvent(h, version, "LiquidatePositionsPartyA", 9), version);
+		assert.equal(h.tables.LiquidationExecution.size, 2, "two batches in one transaction remain distinct");
 	});
-	new handler.SendQuoteHandler().handleQuote(
-		{
-			...event(2),
-			params: { quoteId: 1, partyA: bytes("a"), partyBsWhiteList: [] },
-			parameters: Array.from({ length: 16 }, () => ({ value: { toBigInt: () => number(1), toI32: () => 0 } })),
-		},
-		5,
-	);
-	assert.equal(quotes.get("1-core").paidOpenFee.toString(), "7");
-	assert.equal(quotes.get("1-core").paidFeeAffiliate.toHexString(), "fee-affiliate");
-	assert.equal(quotes.get("1-core").affiliate.toHexString(), "account-source");
+}
+
+for (const version of [3, 4, 5, 6]) {
+	test(`v0.8.${version} starts survive missing historical state without changing LiquidationDetail`, () => {
+		const h = harness();
+		for (const [deferred, log] of [
+			[false, 8],
+			[true, 9],
+		]) {
+			h.mapping.recordLiquidationStart(
+				liquidationEvent(h, version, deferred ? "DeferredLiquidatePartyA" : "LiquidatePartyA", log),
+				deferred,
+				version,
+			);
+			const row = h.tables.LiquidationExecution.get(`tx-${log}`);
+			assert.equal(row.liquidator.toHexString(), "starter");
+			assert.equal(row.type, deferred ? "DEFERRED_START" : "START");
+			assert.deepEqual(row.quoteIds, []);
+			assert.equal(row.liquidationId.toHexString(), "emitted-lifecycle");
+			assert.equal(row.liquidationBlockNumber?.toString(), deferred ? "99" : undefined);
+			assert.equal(row.timestamp.toString(), "123", "block time, not signature time");
+		}
+		assert.deepEqual(h.saves, ["LiquidationExecution", "LiquidationExecution"]);
+	});
+}
+
+test("legacy starts are not linked using guessed end-of-block state", () => {
+	const h = harness();
+	for (const version of [0, 1, 2]) h.mapping.recordLiquidationStart(h.event(), false, version);
+	assert.deepEqual(h.saves, []);
 });
 
-test("unresolved finalizations retain exact diagnostic evidence without inventing a request", () => {
-	const { rows, mapping, event } = harness();
-	for (const log of [10, 12])
-		mapping.recordWithdrawFinalization({ ...event(log), params: { requestId: 5, user: bytes("finalizer-not-owner") } }, null);
-	assert.deepEqual(
-		rows.map(row => [row.id, row.kind, JSON.parse(row.message)]),
-		[10, 12].map(log => [
-			`WithdrawFinalized-unresolved-tx-${log}`,
-			"debug",
-			{
-				source: "core",
-				requestId: "5",
-				signer: "finalizer-not-owner",
-				transaction: "tx",
-				logIndex: String(log),
-				blockNumber: "456",
-				timestamp: "123",
-			},
-		]),
-	);
-});
+function withdrawal(h) {
+	const balance = { id: "tx-7", type: "WITHDRAW", source: bytes("core"), account: bytes("owner"), sender: bytes("signer"), amount: number(100) };
+	const request = new h.schema.WithdrawRequest("owner-1-core");
+	Object.assign(request, {
+		requestId: number(1),
+		source: bytes("core"),
+		user: bytes("owner"),
+		amount: number(100),
+		status: "PROVIDER_ACCEPTED",
+		transaction: bytes("initiation"),
+		timestamp: number(10),
+		updateTimestamp: number(20),
+		blockNumber: number(30),
+		globalCounter: number(40),
+		providerStatus: "PROCESSED",
+		providerProcessedTransaction: bytes("provider-processing"),
+	});
+	h.tables.BalanceChange.set(balance.id, balance);
+	h.tables.WithdrawRequest.set(request.id, request);
+	return { balance, request, event: h.event({ requestId: number(1), user: bytes("signer") }) };
+}
 
-test("resolved finalization enriches its request without creating a raw row", () => {
-	const { rows, mapping, event } = harness();
-	const request = { user: "owner", transaction: "initiation", save() {} };
-	mapping.recordWithdrawFinalization({ ...event(number(12)), params: { requestId: 5, user: "signer" } }, request);
-	assert.equal(rows.length, 0);
-	assert.equal(request.user, "owner");
-	assert.equal(request.transaction, "initiation");
+test("withdrawal completion enriches the verified request without changing existing lifecycle fields", () => {
+	const h = harness(),
+		{ request, event } = withdrawal(h);
+	const original = { ...request };
+	h.tables.WithdrawRequest.set("signer-1-core", { id: "signer-1-core", user: bytes("signer") });
+	h.mapping.recordWithdrawFinalization(event);
+	assert.equal(request.finalizedBalanceChange, "tx-7");
+	assert.equal(request.finalizedBy.toHexString(), "signer");
 	assert.equal(request.finalizedTransaction.toHexString(), "tx");
-	assert.equal(request.finalizedBy, "signer");
-	assert.equal(request.finalizedLogIndex.toString(), "12");
-	assert.equal(request.finalizedBalanceChange, "tx-11");
-	assert.equal(request.finalizedTimestamp, 123);
-	assert.equal(request.finalizedBlockNumber, 456);
+	assert.equal(request.finalizedLogIndex.toString(), "8");
+	assert.equal(request.finalizedBlockNumber.toString(), "456");
+	assert.equal(request.finalizedAt.toString(), "123");
+	for (const [field, value] of Object.entries(original)) assert.deepEqual(request[field], value, field);
+	assert.equal(h.tables.WithdrawRequest.get("signer-1-core").finalizedTransaction, undefined);
+	assert.deepEqual(h.saves, ["WithdrawRequest"]);
+	assert.deepEqual(h.warnings, []);
 });
 
-test("withdraw resolution matches exact preceding log, not signer or ambiguous request IDs", () => {
-	const source = bytes("core"),
-		signer = bytes("provider"),
-		transaction = bytes("tx");
-	const balances = new Map(),
-		requests = new Map();
-	const mapping = load("perps/analytics/utils/withdrawRequest.ts", {
-		"@graphprotocol/graph-ts": { BigInt: { fromI32: number }, store: {} },
-		"../../../generated/schema": {
-			BalanceChange: { load: id => balances.get(id) ?? null },
-			WithdrawFinalizationHint: { load: () => null },
-			WithdrawRequest: { load: id => requests.get(id) ?? null },
-		},
+for (const fault of [
+	"missing-movement",
+	"wrong-log",
+	"wrong-core",
+	"wrong-sender",
+	"null-sender",
+	"wrong-type",
+	"missing-request",
+	"wrong-owner",
+	"wrong-amount",
+	"wrong-request-core",
+]) {
+	test(`withdrawal ${fault} reports unmatched evidence without guessing or changing a request`, () => {
+		const h = harness(),
+			{ balance, request, event } = withdrawal(h);
+		if (fault === "missing-movement") h.tables.BalanceChange.clear();
+		if (fault === "wrong-log") event.logIndex = number(9);
+		if (fault === "wrong-core") balance.source = bytes("other");
+		if (fault === "wrong-sender") balance.sender = bytes("other");
+		if (fault === "null-sender") balance.sender = null;
+		if (fault === "wrong-type") balance.type = "DEPOSIT";
+		if (fault === "missing-request") h.tables.WithdrawRequest.clear();
+		if (fault === "wrong-owner") request.user = bytes("other");
+		if (fault === "wrong-amount") request.amount = number(99);
+		if (fault === "wrong-request-core") request.source = bytes("other");
+		const original = { ...request };
+		h.mapping.recordWithdrawFinalization(event);
+		assert.deepEqual({ ...request }, original);
+		assert.deepEqual(h.saves, []);
+		assert.match(h.warnings[0][0], /Cannot match withdrawal finalization/);
+		assert.equal(h.warnings[0][1][0], "1");
 	});
-	const first = { user: bytes("owner1"), source, amount: number(10), status: "PENDING" };
-	const second = { user: bytes("owner2"), source, amount: number(20), status: "PROVIDER_ACCEPTED" };
-	requests.set("owner1-1-core", first);
-	requests.set("owner2-1-core", second);
-	requests.set("provider-1-core", { user: signer, source, amount: number(10), status: "PENDING" });
-	balances.set("tx-10", { type: "WITHDRAW", source, sender: signer, account: first.user, amount: first.amount });
-	balances.set("tx-12", { type: "WITHDRAW", source, sender: signer, account: second.user, amount: second.amount });
-	const resolve = log => mapping.resolveWithdrawRequest(signer, number(1), source, transaction, number(log));
-	assert.equal(resolve(11), first);
-	assert.equal(resolve(13), second, "same signer/request ID/transaction must still select exact owner");
-	assert.equal(resolve(14), null, "non-adjacent log is not proof");
-	for (const change of [
-		{ source: bytes("other-core") },
-		{ sender: bytes("someone-else") },
-		{ type: "DEPOSIT" },
-		{ amount: number(999) },
-		{ account: bytes("unknown") },
-	]) {
-		balances.set("tx-10", { type: "WITHDRAW", source, sender: signer, account: first.user, amount: first.amount, ...change });
-		assert.equal(resolve(11), null);
-	}
-	balances.set("tx-10", { type: "WITHDRAW", source, sender: signer, account: first.user, amount: first.amount });
-	for (const status of ["PENDING", "PROVIDER_ACCEPTED", "CANCEL_REQUESTED"]) {
-		first.status = status;
-		assert.equal(resolve(11), first);
-	}
-	for (const status of ["COMPLETED", "CANCELLED", "PROVIDER_REJECTED", "SUSPENDED"]) {
-		first.status = status;
-		assert.equal(resolve(11), null, "terminal requests must not decrement pending aggregates twice");
-	}
+}
+
+test("multiple finalized requests sharing a transaction, signer and request ID use their exact preceding log", () => {
+	const h = harness();
+	const first = withdrawal(h);
+	h.mapping.recordWithdrawFinalization(first.event);
+	h.tables.BalanceChange.set("tx-9", { ...first.balance, id: "tx-9", account: bytes("second-owner") });
+	const second = new h.schema.WithdrawRequest("second-owner-1-core");
+	Object.assign(second, { source: bytes("core"), user: bytes("second-owner"), amount: number(100) });
+	h.tables.WithdrawRequest.set(second.id, second);
+	h.mapping.recordWithdrawFinalization(h.event(first.event.params, 10));
+	assert.deepEqual(
+		[...h.tables.WithdrawRequest.values()].map(r => [r.id, r.finalizedBalanceChange, r.finalizedLogIndex.toString()]),
+		[
+			["owner-1-core", "tx-7", "8"],
+			["second-owner-1-core", "tx-9", "10"],
+		],
+	);
 });
 
-test("existing withdrawal hints and resolver calls remain compatible with exact log matching", () => {
-	const hints = new Map(),
-		requests = new Map(),
-		balances = new Map();
-	const source = bytes("core"),
-		transaction = bytes("tx"),
-		signer = bytes("signer");
-	const owner = { user: bytes("owner"), source, amount: number(10), status: "PENDING" };
-	const signerRequest = { user: signer, source, amount: number(10), status: "PENDING" };
-	requests.set("owner-1-core", owner);
-	requests.set("signer-1-core", signerRequest);
-	const mapping = load("perps/analytics/utils/withdrawRequest.ts", {
-		"@graphprotocol/graph-ts": {
-			BigInt: { fromI32: number },
-			store: {
-				remove: (type, id) => {
-					assert.equal(type, "WithdrawFinalizationHint");
-					hints.delete(id);
-				},
-			},
-		},
-		"../../../generated/schema": {
-			BalanceChange: { load: id => balances.get(id) ?? null },
-			WithdrawRequest: { load: id => requests.get(id) ?? null },
-			WithdrawFinalizationHint: class {
-				constructor(id) {
-					this.id = id;
-				}
-				static load(id) {
-					return hints.get(id) ?? null;
-				}
-				save() {
-					hints.set(this.id, this);
-				}
-			},
-		},
-	});
-	assert.ok(mapping.isFinalizeWithdrawRequestCall(bytes("0x1531b3c80000")));
-	assert.equal(mapping.isFinalizeWithdrawRequestCall(bytes("0x12345678")), false);
-	mapping.recordWithdrawFinalizationHint(source, transaction, signer, owner.user, owner.amount, number(10), number(123));
-	assert.equal(hints.get("core-tx-signer").logIndex.toString(), "10");
-	assert.equal(mapping.resolveWithdrawRequest(signer, number(1), source, transaction), owner);
-	assert.equal(hints.size, 0, "the original resolver still consumes its hint");
-	assert.equal(mapping.resolveWithdrawRequest(signer, number(1), source, transaction), signerRequest);
-	balances.set("tx-10", { type: "WITHDRAW", source, sender: signer, account: owner.user, amount: owner.amount });
-	for (const log of [11, 12]) {
-		mapping.recordWithdrawFinalizationHint(source, transaction, signer, signer, owner.amount, number(9), number(123));
-		assert.equal(mapping.resolveWithdrawRequest(signer, number(1), source, transaction, number(log)), log === 11 ? owner : null);
-		assert.equal(hints.size, 0, "exact finalization also clears the original transaction hint");
-	}
-});
-
-test("finalization handler preserves normalized status and accounting with exact provenance", () => {
-	const { mapping, rows, event } = harness();
-	const request = { user: bytes("owner"), amount: number(10), status: "PENDING", save() {} };
-	const accounting = [],
-		removed = [];
-	const handler = load("perps/analytics/handlers/symmio/WithdrawFinalizedHandler.ts", {
-		"../../../common/handlers/symmio/WithdrawFinalizedHandler": {
-			WithdrawFinalizedHandler: class {
-				handle() {}
-			},
-		},
-		"../../../../generated/schema": { Account: { load: () => ({ id: "owner" }) } },
-		"@graphprotocol/graph-ts": { BigInt: { zero: () => number(0), fromI32: number }, Address: { fromBytes: value => value } },
-		"../../../common/BaseHandler": {},
-		"../../utils/latestAccountBalance": { updatePartyALatestBalance() {} },
-		"../../utils/historyHelpers": { updateWithdrawHierarchyHistories: (...args) => accounting.push(args.slice(2).map(x => x.toString())) },
-		"../../utils/withdrawRequest": {
-			resolveWithdrawRequest: () => (request.status === "PENDING" ? request : null),
-			removeWithdrawRequestFromLookup: row => removed.push(row),
-		},
-		"../../utils/affiliateExpressWithdrawComponents": { removeWithdrawRequestFromAffiliateExpressWithdrawComponents() {} },
-		"../../utils/explorerEvents": mapping,
-	});
-	const log = { ...event(number(12)), params: { requestId: number(1), user: bytes("provider") } };
-	new handler.WithdrawFinalizedHandler().handle(log, 5);
-	assert.equal(request.status, "COMPLETED");
-	assert.equal(request.finalizedBalanceChange, "tx-11");
-	assert.deepEqual(accounting, [["0", "-1", "1", "-10"]]);
-	assert.deepEqual(removed, [request]);
-	assert.equal(rows.length, 0);
-	new handler.WithdrawFinalizedHandler().handle(log, 5);
-	assert.equal(accounting.length, 1, "unresolved/terminal requests must not change aggregates");
-	assert.equal(rows.length, 1, "unresolved evidence remains available without guessing ownership");
-});
-
-test("COTI start provenance enriches LiquidationDetail without a separate event model", () => {
-	const { rows, details, mapping, event } = harness();
-	for (const v of [4, 5]) {
-		const abi = JSON.parse(read(`configs/abis/symmio_0_8_${v}.json`));
-		for (const definition of abi.filter(item => item.type === "event" && ["LiquidatePartyA", "DeferredLiquidatePartyA"].includes(item.name))) {
-			const detail = { id: "partyA-liquidationId-core", settled: false, save() {} };
-			details.set("partyA-liquidationId-core", detail);
-			const parameters = definition.inputs.map(input => ({
-				name: input.name,
-				value: { toAddress: () => bytes(input.name), toBytes: () => bytes(input.name), toBigInt: () => number(99) },
-			}));
-			mapping.recordLiquidationStart({ ...event(10), parameters }, definition.name === "DeferredLiquidatePartyA", v);
-			assert.equal(detail.startLogIndex, 10);
-			assert.equal(detail.startTimestamp, 123);
-			assert.equal(detail.startBlockNumber, 456);
-			assert.equal(detail.deferred, definition.name === "DeferredLiquidatePartyA");
-			if (detail.deferred) assert.equal(detail.liquidationBlockNumber.toString(), "99");
-			details.clear();
-			mapping.recordLiquidationStart({ ...event(11), parameters }, definition.name === "DeferredLiquidatePartyA", v);
-			assert.equal(details.size, 0, "do not invent a second lifecycle when its detail is unavailable");
-		}
-	}
-	assert.equal(rows.length, 0, "start provenance belongs to the existing aggregate");
-});
-
-test("immediate and deferred start handlers each append one lifecycle entry across modern versions", () => {
-	for (const version of [3, 4, 5, 6])
-		for (const deferred of [false, true]) {
-			const { rows, details, mapping, event } = harness();
-			const name = deferred ? "DeferredLiquidatePartyA" : "LiquidatePartyA";
-			const parent = deferred ? `${name}Handler` : "LiquidatePartyAHandlerWithAccount";
-			const detail = { id: "partyA-liquidationId-core", save() {} };
-			class CommonHandler {
-				handle() {
-					details.set(detail.id, detail);
-				}
-				handleQuote() {}
-				handleSymbol() {}
-				handleAccount() {}
+for (const version of [5, 6]) {
+	for (const missingMovement of [false, true]) {
+		test(`v0.8.${version} finalization keeps legacy status, lookup and aggregate behavior (missing movement: ${missingMovement})`, () => {
+			const results = [];
+			for (const enriched of [false, true]) {
+				const h = harness();
+				const { request, event } = withdrawal(h);
+				if (missingMovement) h.tables.BalanceChange.clear();
+				const legacy = load("perps/analytics/utils/withdrawRequest.ts", {
+					"@graphprotocol/graph-ts": h.graph,
+					"../../../generated/schema": h.schema,
+				});
+				legacy.addWithdrawRequestToLookup(request);
+				legacy.recordWithdrawFinalizationHint(
+					event.address,
+					event.transaction.hash,
+					event.params.user,
+					request.user,
+					request.amount,
+					number(7),
+					number(123),
+				);
+				const effects = [];
+				const { WithdrawFinalizedHandler } = load("perps/analytics/handlers/symmio/WithdrawFinalizedHandler.ts", {
+					"../../../common/handlers/symmio/WithdrawFinalizedHandler": {
+						WithdrawFinalizedHandler: class {
+							handle() {}
+						},
+					},
+					"../../../../generated/schema": { Account: { load: () => ({ id: "owner" }) } },
+					"@graphprotocol/graph-ts": h.graph,
+					"../../../common/BaseHandler": { Version },
+					"../../utils/withdrawRequest": legacy,
+					"../../utils/execution": { recordWithdrawFinalization: enriched ? h.mapping.recordWithdrawFinalization : () => {} },
+					"../../utils/latestAccountBalance": { updatePartyALatestBalance: () => effects.push("balance") },
+					"../../utils/historyHelpers": {
+						updateWithdrawHierarchyHistories: (_account, ...values) => effects.push(values.map(value => value.toString())),
+					},
+					"../../utils/affiliateExpressWithdrawComponents": {
+						removeWithdrawRequestFromAffiliateExpressWithdrawComponents: () => effects.push("components"),
+					},
+				});
+				new WithdrawFinalizedHandler().handle(event, version);
+				assert.equal(request.status, "COMPLETED");
+				assert.equal(request.updateTimestamp.toString(), "123");
+				assert.equal(request.transaction.toHexString(), "initiation");
+				assert.equal(request.providerProcessedTransaction.toHexString(), "provider-processing");
+				assert.equal(request.blockNumber.toString(), "30");
+				assert.equal(request.globalCounter.toString(), "40");
+				assert.equal(request.finalizedTransaction?.toHexString(), enriched && !missingMovement ? "tx" : undefined);
+				assert.equal(h.tables.WithdrawFinalizationHint.size, 0);
+				assert.equal(h.tables.WithdrawRequestLookup.size, 0);
+				assert.equal(h.tables.WithdrawRequestAccountLookup.size, 0);
+				results.push(effects);
 			}
-			const handler = load(`perps/analytics/handlers/symmio/${name}Handler.ts`, {
-				[`../../../common/handlers/symmio/${parent}`]: { [parent]: CommonHandler },
-				"@graphprotocol/graph-ts": {},
-				"../../../common/BaseHandler": { Version: { v_0_8_3: 3, v_0_8_6: 6 } },
-				"../../utils/liquidationEvent": mapping,
-				"../../utils/explorerEvents": mapping,
-				"../../utils/latestAccountBalance": { updatePartyALatestBalance() {} },
-				"../../utils/partyALiquidation": { startPartyALiquidationTracking() {}, applyPartyALiquidationDeferredBalance() {} },
-			});
-			const definition = JSON.parse(read(`configs/abis/symmio_0_8_${version}.json`)).find(
-				entry => entry.type === "event" && entry.name === name,
-			);
-			const parameters = definition.inputs.map(input => ({
-				name: input.name,
-				value: { toAddress: () => bytes(input.name), toBytes: () => bytes(input.name), toBigInt: () => number(99) },
-			}));
-			new handler[`${name}Handler`]().handle(
-				{ ...event(1), parameters, params: { partyA: bytes("partyA"), liquidationId: bytes("liquidationId") } },
-				version,
-			);
-			assert.equal(rows.length, 1, `${name} v${version}: no duplicate immutable event writes`);
-			assert.equal(rows[0].liquidationDetail, detail.id);
-			assert.equal(rows[0].type, "LIQUIDATE_PARTY_A");
-			assert.equal(rows[0].metadata, null, "preserve the existing lifecycle event payload");
-			assert.equal(detail.deferred, deferred);
-		}
-});
-
-test("COTI enrichment leaves legacy state-based liquidation history unchanged", () => {
-	for (const version of [1, 2]) {
-		const state = { liquidationId: bytes("legacy-id"), timestamp: number(99), upnl: number(-5), totalUnrealizedLoss: number(-7) };
-		const { rows, details, mapping, event } = harness(state);
-		const schema = {
-			Account: { load: () => null },
-			LiquidationDetail: class {
-				constructor(id) {
-					this.id = id;
-				}
-				static load(id) {
-					return details.get(id) ?? null;
-				}
-				save() {
-					details.set(this.id, this);
-				}
-			},
-		};
-		const graph = { BigInt: { zero: () => number(0) } };
-		const base = {
-			BaseHandler: class {
-				handleQuote() {}
-				handleSymbol() {}
-				handleAccount() {}
-			},
-			Version: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [`v_0_8_${i}`, i])),
-		};
-		const deps = {
-			"../../BaseHandler": base,
-			"@graphprotocol/graph-ts": graph,
-			"../../utils/builders": { AccountType: {}, createNewAccountIfNotExists: () => ({ save() {} }) },
-			"../../utils": { getGlobalCounterAndInc: () => number(1) },
-			"../../../../generated/schema": schema,
-			"../../VersionedQuoteLoader": { getLiquidationStateData: () => state, getPartyABalanceInfoData: () => null },
-			"../../utils/profile": { setLiquidationDetailProfileRefs() {} },
-			"../../utils/liquidationDetail": {},
-		};
-		for (let i = 2; i <= 6; i++) deps[`../../../../generated/symmio_0_8_${i}/symmio_0_8_${i}`] = {};
-		const common = load("perps/common/handlers/symmio/LiquidatePartyAHandlerWithAccount.ts", deps);
-		const handler = load("perps/analytics/handlers/symmio/LiquidatePartyAHandler.ts", {
-			"../../../common/handlers/symmio/LiquidatePartyAHandlerWithAccount": common,
-			"@graphprotocol/graph-ts": graph,
-			"../../../common/BaseHandler": base,
-			"../../utils/latestAccountBalance": { updatePartyALatestBalance() {} },
-			"../../utils/liquidationEvent": mapping,
-			"../../utils/explorerEvents": mapping,
-			"../../utils/partyALiquidation": {},
+			assert.deepEqual(results[0], results[1]);
+			assert.deepEqual(results[0], [["123", "0", "-1", "1", "-100"], "components", "balance"]);
 		});
-		for (const log of [1, 2]) {
-			new handler.LiquidatePartyAHandler().handle(
-				{
-					...event(log),
-					params: {
-						partyA: bytes("a"),
-						liquidator: bytes("starter"),
-						upnl: number(-5),
-						totalUnrealizedLoss: number(-7),
-						allocatedBalance: number(10),
-					},
-					parameters: ["starter", "a"].map(value => ({ value: { toAddress: () => bytes(value) } })),
-				},
-				version,
-			);
-		}
-		assert.equal(rows.length, 2);
-		assert.ok(
-			rows.every(row => row.type === "LIQUIDATE_PARTY_A" && row.liquidationDetail === "a-legacy-id-core"),
-			"retain the original state-based relationship for legacy networks",
-		);
-		const detail = details.get("a-legacy-id-core");
-		assert.equal(detail.liquidator.toHexString(), "starter");
-		assert.equal(detail.liquidationStartTransaction.toHexString(), "tx");
-		assert.equal(detail.startLogIndex, undefined, "new provenance requires an emitted lifecycle ID");
 	}
-});
+}
 
-test("modern liquidation lifecycle survives unavailable or mismatched historical state", () => {
-	for (const v of [3, 4, 5, 6]) {
-		for (const state of [null, { liquidationId: bytes("different-id") }]) {
-			const saved = new Map();
-			const schema = {
-				Account: { load: () => null },
-				LiquidationDetail: class {
-					constructor(id) {
-						this.id = id;
-					}
-					save() {
-						saved.set(this.id, this);
-					}
-				},
-			};
-			const graph = { BigInt: { zero: () => number(0) } };
-			const deps = {
-				"../../BaseHandler": { BaseHandler: class {}, Version: Object.fromEntries(Array.from({ length: 7 }, (_, i) => [`v_0_8_${i}`, i])) },
-				"@graphprotocol/graph-ts": graph,
-				"../../utils/builders": {},
-				"../../utils": { getGlobalCounterAndInc: () => number(1) },
-				"../../../../generated/schema": schema,
-				"../../VersionedQuoteLoader": { getLiquidationStateData: () => state, getPartyABalanceInfoData: () => null },
-				"../../utils/profile": { setLiquidationDetailProfileRefs() {} },
-				"../../utils/liquidationDetail": {},
-			};
-			for (let i = 2; i <= 6; i++) deps[`../../../../generated/symmio_0_8_${i}/symmio_0_8_${i}`] = {};
-			const mapping = load("perps/common/handlers/symmio/LiquidatePartyAHandlerWithAccount.ts", deps);
-			new mapping.LiquidatePartyAHandlerWithAccount().handle(
-				{
-					address: bytes("core"),
-					transaction: { hash: bytes("tx") },
-					block: { timestamp: number(123) },
-					params: {
-						partyA: bytes("a"),
-						liquidationId: bytes("id"),
-						liquidator: bytes("starter"),
-						upnl: number(-5),
-						totalUnrealizedLoss: number(-7),
-						allocatedBalance: number(10),
-					},
-				},
-				v,
-			);
-			const detail = saved.get("a-id-core");
-			assert.ok(detail, `v${v} start must create the normalized lifecycle without state`);
-			assert.equal(detail.liquidationId.toHexString(), "id");
-			assert.equal(detail.upnl.toString(), "-5");
-			assert.equal(detail.liquidator.toHexString(), "starter");
-			assert.equal(detail.timestamp.toString(), "123");
-			assert.equal(detail.liquidationTimestamp.toString(), "123");
-		}
-	}
-});
-
-test("bridge transactions own bridge identity and link to unchanged balance movements", () => {
-	const balances = new Map(),
-		transactions = new Map();
+test("bridge stores protocol identity separately and preserves the original balance movement", () => {
+	const h = harness();
+	const balances = [];
 	const mapping = load("perps/analytics/handlers/symmio/TransferToBridgeHandler.ts", {
-		"@graphprotocol/graph-ts": {},
-		"../../../common/BaseHandler": { BaseHandler: class {}, Version: {} },
-		"../../../../generated/schema": {
-			Account: { load: () => null },
-			BridgeTransaction: class {
-				constructor(id) {
-					this.id = id;
-				}
-				save() {
-					transactions.set(this.id, this);
-				}
-			},
-		},
+		"@graphprotocol/graph-ts": h.graph,
+		"../../../common/BaseHandler": { BaseHandler: class {}, Version },
+		"../../../../generated/schema": { ...h.schema, Account: { load: () => ({ id: "owner" }) } },
 		"../../../../generated/symmio_0_8_3/symmio_0_8_3": {},
-		"../../utils/builders": { getConfiguration: () => ({ collateral: "token" }) },
+		"../../utils/builders": { getConfiguration: () => ({ collateral: bytes("collateral") }) },
 		"../../utils/balanceChange": {
-			newBalanceChange: event => ({
-				id: event.transaction.hash.toHexString() + "-" + event.logIndex,
+			newBalanceChange: e => ({
+				id: `tx-${e.logIndex}`,
 				save() {
-					balances.set(this.id, this);
+					balances.push(this);
 				},
 			}),
 			setBalanceChangeContext() {},
 		},
 		"../../utils/latestAccountBalance": { updatePartyALatestBalance() {} },
 	});
-	for (const [source, log] of [
-		["core", 1],
-		["other-core", 2],
-	])
+	for (const source of ["core", "other"]) {
 		new mapping.TransferToBridgeHandler().handle(
-			{
-				address: bytes(source),
-				logIndex: log,
-				block: { timestamp: 1, number: 2 },
-				transaction: { hash: bytes("tx"), input: "input" },
-				params: { user: { toHexString: () => "account" }, amount: "1000000", bridgeAddress: "bridge", transactionId: "9007199254740993" },
-			},
+			h.event(
+				{ user: bytes("owner"), amount: number(123), bridgeAddress: bytes("bridge"), transactionId: number("999999999999999999999") },
+				8,
+				source,
+			),
 			4,
 		);
-	assert.equal(transactions.size, 2, "protocol ids are core-scoped and retain BigInt precision");
-	for (const [source, log] of [
-		["core", 1],
-		["other-core", 2],
-	]) {
-		const transaction = transactions.get(`9007199254740993-${source}`);
-		assert.equal(transaction.bridge, "bridge");
-		assert.equal(transaction.transactionId, "9007199254740993");
-		assert.equal(transaction.source.toHexString(), source);
-		assert.equal(transaction.balanceChange, `tx-${log}`);
-		const balance = balances.get(transaction.balanceChange);
-		assert.equal(balance.type, "BRIDGE");
-		assert.equal(balance.account.toHexString(), "account");
-		assert.equal(balance.amount, "1000000");
-		assert.equal(balance.collateral, "token");
-		assert.equal(balance.transaction.toHexString(), "tx");
-		assert.equal(balance.bridgeAddress, undefined);
-		assert.equal(balance.bridgeTransactionId, undefined);
 	}
+	assert.deepEqual(
+		[...h.tables.BridgeTransaction.values()].map(r => r.id),
+		["999999999999999999999-core", "999999999999999999999-other"],
+	);
+	assert.equal(balances.length, 2);
+	assert.equal(balances[0].type, "BRIDGE");
+	assert.equal(balances[0].amount.toString(), "123");
+	assert.equal(balances[0].bridgeAddress, undefined);
 });
 
-test("new records are wired for every ABI that emits them, before nullable entity lookups", () => {
-	for (let v = 0; v <= 6; v++) {
-		const deps = {
-			...(v === 6 ? JSON.parse(read("perps/analytics/deps_symmio_0_8_5.json")) : {}),
-			...JSON.parse(read(`perps/analytics/deps_symmio_0_8_${v}.json`)),
-		};
-		assert.equal(deps.LiquidationStart, undefined);
-		assert.equal(deps.WithdrawFinalization, undefined);
-		const entry = read(`perps/analytics/src_symmio_0_8_${v}.ts`);
-		if (v > 0) assert.match(entry, /export function handleLiquidatePartyA\(/);
-		else assert.doesNotMatch(entry, /export function handleLiquidatePartyA\(/, "do not add legacy v0.8.0 behavior for COTI");
-		if (v >= 3) {
-			assert.ok(deps.LiquidationDetail.includes("DeferredLiquidatePartyA"));
-			assert.deepEqual(deps.BridgeTransaction, ["TransferToBridge"]);
-		}
-		if (v >= 5) {
-			assert.deepEqual(deps.Quote, ["TradingFeeCharged"]);
-			assert.deepEqual(deps.QuoteFeeHint, ["TradingFeeCharged"]);
-			assert.ok(deps.WithdrawRequest.includes("WithdrawFinalized"));
+test("existing models receive only optional owned data; bridge and liquidation stay separate", () => {
+	const definitions = new Map(
+		parse(read("perps/analytics/schema.graphql") + read("perps/common/models/Quote.graphql")).definitions.map(d => [d.name.value, d]),
+	);
+	for (const [model, absent] of [
+		["Quote", ["paidFees", "liquidationDetail"]],
+		["QuoteEvent", ["liquidationDetail"]],
+		["BalanceChange", ["bridgeAddress", "bridgeTransactionId"]],
+		["LiquidationDetail", ["startTimestamp", "startBlockNumber", "startLogIndex", "quotes"]],
+	]) {
+		const fields = definitions.get(model).fields.map(f => f.name.value);
+		for (const field of absent) assert.ok(!fields.includes(field), `${model}.${field}`);
+	}
+	for (const [model, added] of [
+		["Quote", ["paidOpenFee", "paidCloseFee", "feeAffiliate"]],
+		[
+			"WithdrawRequest",
+			["finalizedAt", "finalizedBlockNumber", "finalizedTransaction", "finalizedLogIndex", "finalizedBy", "finalizedBalanceChange"],
+		],
+	]) {
+		for (const name of added) {
+			const field = definitions.get(model).fields.find(f => f.name.value === name);
+			assert.ok(field, `${model}.${name}`);
+			assert.equal(field.type.kind, "NamedType", `${model}.${name} must be nullable`);
 		}
 	}
-	for (const [handler, record, lookup] of [
-		["TradingFeeCharged", "accumulateQuoteFees<T>(_event)", "Account.load("],
-		["WithdrawFinalized", "recordWithdrawFinalization<T>(_event, wr)", "if (!wr) return"],
-	]) {
-		const source = read(`perps/analytics/handlers/symmio/${handler}Handler.ts`);
-		assert.ok(source.indexOf(record) > 0 && source.indexOf(record) < source.indexOf(lookup), handler);
+	assert.ok(definitions.has("WithdrawFinalizationHint"), "original hint model remains");
+	assert.ok(!definitions.has("QuoteFeeHint"), "no temporary fee/hint lifecycle");
+	assert.ok(!definitions.has("QuoteFeeSummary"));
+	assert.ok(!definitions.has("WithdrawFinalization"));
+	for (const model of ["BridgeTransaction", "LiquidationExecution"]) {
+		assert.equal(definitions.get(model).directives[0].arguments[0].value.value, true);
 	}
-	for (const [handler, deferred] of [
-		["LiquidatePartyA", false],
-		["DeferredLiquidatePartyA", true],
-	]) {
-		const source = read(`perps/analytics/handlers/symmio/${handler}Handler.ts`);
-		assert.ok(source.indexOf(`recordLiquidationStart(_event, ${deferred}, version)`) > source.indexOf("super.handle(_event, version)"));
-	}
-});
-
-test("analytics schema keeps liquidation, withdrawal, fee and bridge data on their owning models", () => {
-	const schema = parse(read("perps/analytics/schema.graphql") + read("perps/common/models/Quote.graphql"));
-	const models = new Map(schema.definitions.map(type => [type.name.value, type]));
-	const field = (model, name) => models.get(model).fields.find(field => field.name.value === name);
-	for (const removed of ["LiquidationStart", "WithdrawFinalization", "QuoteFeeTotals"]) assert.ok(!models.has(removed), removed);
-	assert.ok(models.has("WithdrawFinalizationHint"), "preserve the pre-COTI helper model");
-	assert.equal(field("QuoteEvent", "liquidationDetail"), undefined);
-	assert.equal(field("LiquidationDetail", "positionEvents"), undefined);
-	assert.equal(field("Quote", "liquidationDetail").type.name.value, "LiquidationDetail");
-	assert.equal(field("LiquidationDetail", "quotes").directives[0].arguments[0].value.value, "liquidationDetail");
-	for (const name of ["liquidationDetail", "liquidationId"]) assert.equal(field("LiquidationEvent", name).type.kind, "NonNullType");
-	for (const name of ["bridgeAddress", "bridgeTransactionId"]) assert.equal(field("BalanceChange", name), undefined);
-	assert.equal(field("BridgeTransaction", "balanceChange").type.type.name.value, "BalanceChange");
-	for (const name of [
-		"finalizedTransaction",
-		"finalizedLogIndex",
-		"finalizedBy",
-		"finalizedTimestamp",
-		"finalizedBlockNumber",
-		"finalizedBalanceChange",
-	])
-		assert.ok(field("WithdrawRequest", name), name);
-});
-
-test("historical SEND_QUOTE remains mapped for every supported version", () => {
-	const saved = [];
-	const quoteEvents = load("perps/analytics/utils/quoteEvent.ts", {
-		"@graphprotocol/graph-ts": {},
-		"../../../generated/schema": {
-			QuoteEvent: class {
-				constructor(id) {
-					this.id = id;
-				}
-				save() {
-					saved.push(this);
-				}
-			},
-		},
-		"../../common/utils": { getGlobalCounterAndInc: () => saved.length },
-	});
-	class CommonHandler {
-		handle() {}
-		handleAccount() {}
-		handleQuote() {}
-		handleSymbol() {}
-	}
-	const params = {
-		quotesCount() {
-			return this;
-		},
-	};
-	const quote = {
-		symbolId: 1,
-		quantity: 2,
-		requestedOpenPrice: 3,
-		positionType: 0,
-		orderTypeOpen: 1,
-		cva: 4,
-		lf: 5,
-		partyAmm: 6,
-		partyBmm: 7,
-		openDeadline: 8,
-	};
-	const handler = load("perps/analytics/handlers/symmio/SendQuoteHandler.ts", {
-		"../../../common/handlers/symmio/SendQuoteHandlerWithAccount": { SendQuoteHandlerWithAccount: CommonHandler },
-		"../../../../generated/schema": { Account: { load: () => ({}) }, Quote: { load: () => quote } },
-		"@graphprotocol/graph-ts": { BigInt: { fromString: value => value } },
-		"../../../common/BaseHandler": {},
-		"../../utils/historyHelpers": {
-			UpdateHistoriesParams: class {
-				constructor() {
-					return params;
-				}
-			},
-			updateHistories() {},
-		},
-		"../../utils/activityHelpers": { updateActivityTimestamps() {} },
-		"../../utils/openInterestHelpers": { catchUpHistories() {} },
-		"../../utils/quoteEvent": quoteEvents,
-		"../../utils/latestAccountBalance": { updatePartyALatestBalance() {} },
-		"../../utils/explorerEvents": { consumeQuoteFeeHint() {} },
-	});
-	for (let v = 0; v <= 6; v++) {
-		const deps = JSON.parse(read(`perps/analytics/deps_symmio_0_8_${v}.json`));
-		assert.ok(deps.QuoteEvent.some(event => event === "SendQuote" || event.startsWith("SendQuote(")));
-		new handler.SendQuoteHandler().handle(
-			{
-				address: { toHexString: () => "core" },
-				block: { timestamp: 1600000000, number: 1 },
-				transaction: { hash: { toHexString: () => "tx" } },
-				logIndex: v,
-				params: { quoteId: v + 1, partyA: { toHexString: () => "party-a" } },
-			},
-			v,
-		);
-	}
-	assert.equal(saved.length, 7);
-	assert.ok(saved.every(row => row.type === "SEND_QUOTE" && row.timestamp === 1600000000));
-	assert.deepEqual(JSON.parse(saved[0].metadata), {
-		symbolId: "1",
-		quantity: "2",
-		requestedOpenPrice: "3",
-		positionType: "0",
-		orderType: "1",
-		cva: "4",
-		lf: "5",
-		partyAmm: "6",
-		partyBmm: "7",
-		deadline: "8",
-	});
 });

@@ -6,16 +6,16 @@ import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
 import { removeWithdrawRequestFromLookup, resolveWithdrawRequest } from "../../utils/withdrawRequest"
 import { removeWithdrawRequestFromAffiliateExpressWithdrawComponents } from "../../utils/affiliateExpressWithdrawComponents"
-import { recordWithdrawFinalization } from "../../utils/explorerEvents"
+import { recordWithdrawFinalization } from "../../utils/execution"
 
 export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
+		recordWithdrawFinalization<T>(_event)
 
-		let wr = resolveWithdrawRequest(event.params.user, event.params.requestId, _event.address, _event.transaction.hash, _event.logIndex)
-		recordWithdrawFinalization<T>(_event, wr)
+		let wr = resolveWithdrawRequest(event.params.user, event.params.requestId, _event.address, _event.transaction.hash)
 		if (!wr) return
 		wr.status = "COMPLETED"
 		wr.updateTimestamp = _event.block.timestamp

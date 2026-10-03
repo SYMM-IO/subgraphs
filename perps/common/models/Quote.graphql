@@ -139,25 +139,17 @@ type Quote @entity(immutable: false) {
 	"""
 	closeFee: BigInt!
 	"""
-	Sum of emitted open fees in 18-decimal internal units (v0.8.5+). Null is unknown, not zero; pre-upgrade fees require the legacy fallback.
+	Exact emitted open fee in 18-decimal internal units, indexed by Analytics from v0.8.5. Null means no indexed charge, not zero.
 	"""
 	paidOpenFee: BigInt
 	"""
-	Sum of emitted close fees in 18-decimal internal units, including partial closes. Null until a close charge is indexed; requires complete fee-event coverage.
+	Exact emitted close fees summed across partial closes, in 18-decimal internal units. Null means no indexed charge.
 	"""
 	paidCloseFee: BigInt
 	"""
-	Raw affiliate emitted with the paid fees, distinct from account-source attribution in affiliate.
+	Raw affiliate from the indexed fee charge; separate from account-source attribution in affiliate.
 	"""
-	paidFeeAffiliate: Bytes
-	"""
-	Block timestamp of the latest included fee charge.
-	"""
-	paidFeesTimestamp: BigInt
-	"""
-	Block number of the latest included fee charge.
-	"""
-	paidFeesBlockNumber: BigInt
+	feeAffiliate: Bytes
 
 	"""
 	Creation/catch-up copy of the 1e18-scaled opened-price basis; not continuously synchronized.
@@ -234,10 +226,6 @@ type Quote @entity(immutable: false) {
 	Liquidation id from PartyA liquidation state when present.
 	"""
 	liquidationId: Bytes
-	"""
-	PartyA liquidation that closed this quote, when its emitted id resolves to an indexed lifecycle. Null for unproven legacy state ids.
-	"""
-	liquidationDetail: LiquidationDetail
 
 	"""
 	Indexer-derived cumulative PartyA funding debit in 18-decimal internal collateral precision.

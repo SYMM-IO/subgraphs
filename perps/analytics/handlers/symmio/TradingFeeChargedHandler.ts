@@ -3,7 +3,7 @@ import { Account } from "../../../../generated/schema"
 import { BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { updateHistories, UpdateHistoriesParams } from "../../utils/historyHelpers"
-import { accumulateQuoteFees } from "../../utils/explorerEvents"
+import { accumulateQuoteFees } from "../../utils/execution"
 
 export class TradingFeeChargedHandler<T> extends CommonTradingFeeChargedHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
