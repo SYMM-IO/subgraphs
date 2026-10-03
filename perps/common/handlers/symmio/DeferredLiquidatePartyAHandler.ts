@@ -33,6 +33,7 @@ export class DeferredLiquidatePartyAHandler<T> extends BaseHandler {
 		entity.partyAAccumulatedUpnl = BigInt.zero()
 		entity.disputed = false
 		entity.liquidationTimestamp = event.params.liquidationTimestamp
+		entity.liquidationBlockNumber = event.params.liquidationBlockNumber
 		entity.liquidator = event.params.liquidator
 		entity.allocatedBalance = event.params.allocatedBalance
 		entity.liquidationAllocatedBalance = event.params.liquidationAllocatedBalance

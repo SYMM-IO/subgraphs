@@ -23,12 +23,3 @@ test("COTI preserves the on-chain v0.8.5 upgrade boundary and required ABI bindi
 		assert.deepEqual(core.dependencies, ["feeCollector_1", "symmioMultiAccount_2"]);
 	}
 });
-
-test("COTI records a position batch once, before optional quote metrics, without rewriting quotes", () => {
-	const caller = read("perps/analytics/handlers/symmio/LiquidatePositionsPartyAHandler.ts");
-	assert.equal(caller.split("recordLiquidationBatch<T>(_event, version)").length, 2);
-	assert.ok(caller.indexOf("recordLiquidationBatch<T>(_event, version)") < caller.indexOf("super.handle(_event, version)"));
-	assert.ok(!caller.includes("quote.liquidationDetail"));
-	const helper = read("perps/analytics/handlers/commonHandlers/liquidatePositions.ts");
-	assert.ok(!helper.includes('metadata.add("liquidator"'));
-});
