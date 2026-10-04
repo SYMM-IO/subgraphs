@@ -1,5 +1,5 @@
 {
-	"LiquidationExecution": ["LiquidatePartyA", "DeferredLiquidatePartyA", "LiquidatePositionsPartyA"],
+	"LiquidationEvent": ["LiquidatePartyA", "DeferredLiquidatePartyA", "LiquidatePositionsPartyA"],
 	"BridgeTransaction": ["TransferToBridge"],
 	"Quote": ["TradingFeeCharged"],
 	"ClearingHouseLiquidationContext": [

@@ -371,15 +371,15 @@ type BalanceChange @entity(immutable: true) {
 }
 
 """
-Bridge initiation, keyed by protocol transaction id and core. Settlement is not tracked here.
+Bridge transfer initiated by TransferToBridge; settlement is not tracked here.
 """
 type BridgeTransaction @entity(immutable: true) {
 	"""
-	Protocol transaction id and core address joined with a hyphen.
+	Composite `{transactionId}-{SYMMIO core}` identifier.
 	"""
 	id: ID!
 	"""
-	SYMMIO core accepting the transfer.
+	SYMMIO core contract that emitted TransferToBridge.
 	"""
 	source: Bytes!
 	"""
@@ -391,70 +391,9 @@ type BridgeTransaction @entity(immutable: true) {
 	"""
 	bridge: Bytes!
 	"""
-	Original balance movement owns the account, amount, collateral and EVM provenance.
+	BRIDGE balance movement carrying the account, amount, collateral, and EVM provenance.
 	"""
 	balanceChange: BalanceChange!
-}
-
-enum LiquidationExecutionType {
-	START
-	DEFERRED_START
-	POSITIONS
-}
-
-"""
-PartyA liquidation execution provenance, one immutable row per start or position batch.
-Does not replace LiquidationDetail's accounting or infer lifecycle IDs from end-of-block state.
-"""
-type LiquidationExecution @entity(immutable: true) {
-	"""
-	EVM transaction hash and block log index, joined with a hyphen.
-	"""
-	id: ID!
-	"""
-	SYMMIO core performing this operation.
-	"""
-	source: Bytes!
-	"""
-	PartyA account being liquidated.
-	"""
-	partyA: Bytes!
-	"""
-	Emitted lifecycle ID; null on pre-v0.8.3 batches.
-	"""
-	liquidationId: Bytes
-	"""
-	Immediate start, deferred start, or position-batch execution; not lifecycle completion status.
-	"""
-	type: LiquidationExecutionType!
-	"""
-	Executor of this operation. A position-batch executor is not necessarily the starter.
-	"""
-	liquidator: Bytes!
-	"""
-	Only this batch's emitted quote IDs, scoped to source; empty for starts. Never a growing lifecycle array.
-	"""
-	quoteIds: [BigInt!]!
-	"""
-	Original liquidation block, only for deferred starts.
-	"""
-	liquidationBlockNumber: BigInt
-	"""
-	Block timestamp of execution, not the liquidation signature time.
-	"""
-	timestamp: BigInt!
-	"""
-	Block containing the execution log.
-	"""
-	blockNumber: BigInt!
-	"""
-	Hash of the EVM transaction containing this execution.
-	"""
-	transaction: Bytes!
-	"""
-	Zero-based log index within the block.
-	"""
-	logIndex: BigInt!
 }
 
 """
@@ -535,6 +474,10 @@ type LiquidationEvent @entity(immutable: true) {
 	Optional handler-built metadata serialized as a string.
 	"""
 	metadata: String
+	"""
+	Caller that executed a LIQUIDATE_PARTY_A start or LIQUIDATE_POSITIONS batch; null for other types. A batch executor is not necessarily the starter in `LiquidationDetail.liquidator`.
+	"""
+	liquidator: Bytes
 	"""
 	Block timestamp of the lifecycle trigger event.
 	"""
@@ -2886,6 +2829,10 @@ type LiquidationDetail @entity(immutable: false) {
 	"""
 	liquidationTimestamp: BigInt!
 	"""
+	Historical block in which PartyA became insolvent, emitted by DeferredLiquidatePartyA; null for immediate liquidations, which start in that block.
+	"""
+	liquidationBlockNumber: BigInt
+	"""
 	Liquidator address associated with this liquidation row when present.
 	"""
 	liquidator: Bytes
@@ -3328,27 +3275,7 @@ type WithdrawRequest @entity(immutable: false) {
 	"""
 	transaction: Bytes!
 	"""
-	Verified core finalization time, not provider processing. Null when exact finalization evidence is unavailable.
-	"""
-	finalizedAt: BigInt
-	"""
-	Block containing the matched core WithdrawFinalized event.
-	"""
-	finalizedBlockNumber: BigInt
-	"""
-	Transaction containing the matched core WithdrawFinalized event; transaction above remains the initiation hash.
-	"""
-	finalizedTransaction: Bytes
-	"""
-	Zero-based block log index of the matched core WithdrawFinalized event.
-	"""
-	finalizedLogIndex: BigInt
-	"""
-	Finalizing signer, not necessarily the request owner.
-	"""
-	finalizedBy: Bytes
-	"""
-	Exact preceding core WITHDRAW movement, verified against this request's owner, source and amount.
+	Core WITHDRAW movement emitted with WithdrawFinalized, verified against this request's owner, core, and amount; its timestamp, block, transaction, and sender (the finalizing signer) describe completion. Null when unmatched.
 	"""
 	finalizedBalanceChange: BalanceChange
 }

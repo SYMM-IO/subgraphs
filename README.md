@@ -9,45 +9,49 @@ event handlers, manage multiple contract versions, and support seamless deployme
 The complexity of managing multiple contract versions and networks necessitates a scalable and maintainable solution.
 This structure addresses the following challenges:
 
-- **Version Management**: Automates the handling of multiple versions of contracts, ensuring consistent event processing
-  across different deployments.
-- **Cross-Network Deployments**: Simplifies deploying subgraphs to multiple blockchain networks by centralizing
-  configurations and automating repetitive tasks.
-- **Event Handling**: Dynamically generates event handlers based on schema dependencies, reducing the need for manual
-  intervention and minimizing errors.
-- **Modular Configurations**: Allows for module-specific customizations via `subgraph_config.json`, making the system
-  adaptable to various use cases.
+-   **Version Management**: Automates the handling of multiple versions of contracts, ensuring consistent event processing
+    across different deployments.
+-   **Cross-Network Deployments**: Simplifies deploying subgraphs to multiple blockchain networks by centralizing
+    configurations and automating repetitive tasks.
+-   **Event Handling**: Dynamically generates event handlers based on schema dependencies, reducing the need for manual
+    intervention and minimizing errors.
+-   **Modular Configurations**: Allows for module-specific customizations via `subgraph_config.json`, making the system
+    adaptable to various use cases.
 
 ## Key Components
 
-- **Event Handling**: Dynamically generates event handlers based on the schema and dependencies specified in the
-  configuration files.
-- **Version Management**: Handles multiple versions of contracts and ABIs, creating "fake" contracts where necessary to
-  ensure all versions are covered.
-- **Flexible Deployment**: Supports deployment to different networks, including specialized configurations for networks
-  like Mantle.
-- **Dependency Resolution**: Utilizes dependency files to map entity models to the required events, ensuring that all
-  necessary event handlers are generated.
-- **Module Configuration**: Incorporates `subgraph_config.json` for module-specific settings, allowing for flexible and
-  targeted subgraph configurations.
+-   **Event Handling**: Dynamically generates event handlers based on the schema and dependencies specified in the
+    configuration files.
+-   **Version Management**: Handles multiple versions of contracts and ABIs, creating "fake" contracts where necessary to
+    ensure all versions are covered.
+-   **Flexible Deployment**: Supports deployment to different networks, including specialized configurations for networks
+    like Mantle.
+-   **Dependency Resolution**: Utilizes dependency files to map entity models to the required events, ensuring that all
+    necessary event handlers are generated.
+-   **Module Configuration**: Incorporates `subgraph_config.json` for module-specific settings, allowing for flexible and
+    targeted subgraph configurations.
 
-## Explorer Analytics data
+## Analytics fee, withdrawal, bridge and liquidation data
 
-- `Quote.paidOpenFee` and `paidCloseFee` contain emitted v0.8.5+ fees in 18-decimal
-  units, including partial closes. Null means unknown, not zero; pre-upgrade fees
-  are unavailable. `feeAffiliate` is separate from account-source `affiliate`.
-- `WithdrawRequest.finalized*` fields describe verified core completion, separate
-  from initiation and provider processing. The finalizing signer may differ from the owner.
-- `BridgeTransaction` identifies a bridge transfer and references its `BalanceChange`.
-- `LiquidationExecution` records each PartyA start or position batch, including its
-  executor. A batch executor is not necessarily the liquidation starter. Its ID is
-  `transactionHash-logIndex`, matching `QuoteEvent.id` without the final quote-ID component.
+Each fact is stored once; follow the reference instead of expecting a copy.
 
-Build COTI with `python3 scripts/manager.py configs/perps/coti.json perps/analytics`.
-Deploy a fresh version and reindex from the configured contract starts before
-switching Explorer. Resolve missing-quote or unmatched-finalization warnings before
-cutover; resetting backend checkpoints cannot restore missing upstream history.
-COTI does not require an Events deployment.
+-   `Quote.paidOpenFee` / `paidCloseFee` hold `TradingFeeCharged` amounts (v0.8.5+, 18-decimal units).
+    `paidCloseFee` sums partial closes. A non-null value is complete; null means no charge was indexed
+    or the sum is unknown because part of the quote closed before fee events existed. `feeAffiliate` is
+    the raw core quote affiliate, which can differ from account-source `affiliate`.
+-   `WithdrawRequest.finalizedBalanceChange` links the core `WITHDRAW` movement emitted with
+    `WithdrawFinalized`. Its timestamp, block and transaction describe completion; its `sender` is the
+    finalizing signer, who may differ from the request owner.
+-   `BridgeTransaction` keys a bridge transfer by protocol transaction ID and links its `BRIDGE`
+    `BalanceChange`, which holds the account, amount and EVM provenance.
+-   `LiquidationEvent.liquidator` is the caller of each `LIQUIDATE_PARTY_A` start and
+    `LIQUIDATE_POSITIONS` batch; a batch executor is not necessarily the starter in
+    `LiquidationDetail.liquidator`. A batch's quotes are the `QuoteEvent` rows sharing its
+    `transactionHash-logIndex` ID prefix. `LiquidationDetail.liquidationBlockNumber` is set only for deferred
+    liquidations.
+
+These fields fill only during indexing, so existing deployments need a fresh version reindexed from the
+configured contract start blocks (for COTI: `python3 scripts/manager.py configs/perps/coti.json perps/analytics`).
 
 ## Deployment Steps
 
@@ -58,14 +62,15 @@ COTI does not require an Events deployment.
 3. **Prepare Dependency Files**: Place dependency files in the appropriate directories to map entity models to events.
 4. **Run the Script**:
 
-   ```bash
-   python scripts/manager.py config_file.json module_name [--create-src] [--deploy]
-   ```
+    ```bash
+    python scripts/manager.py config_file.json module_name [--create-src] [--deploy]
+    ```
 
-   - `config_file.json`: Path to your configuration file.
-   - `module_name`: Name of the target module.
-   - `--create-src`: (Optional) Generates the source TypeScript files for event handling.
-   - `--deploy`: (Optional) Deploys the subgraph after preparation.
+    - `config_file.json`: Path to your configuration file.
+    - `module_name`: Name of the target module.
+    - `--create-src`: (Optional) Generates the source TypeScript files for event handling.
+    - `--deploy`: (Optional) Deploys the subgraph after preparation.
+
 5. **Review Output**: The script will generate necessary files and output the deployment status. It's important to
    review the generated files, especially `subgraph.yaml` and `schema.graphql`, to ensure they are correctly configured.
 
@@ -76,11 +81,11 @@ the Core or MultiAccount sources that belong to the declared AccountLayer deploy
 
 ```json
 {
-  "address": "0xCore",
-  "abi": "symmio",
-  "version": "0_8_5",
-  "startBlock": "123",
-  "accountLayerSource": "0xAccountLayer"
+	"address": "0xCore",
+	"abi": "symmio",
+	"version": "0_8_5",
+	"startBlock": "123",
+	"accountLayerSource": "0xAccountLayer"
 }
 ```
 
@@ -92,53 +97,53 @@ ambiguous config with multiple AccountLayer contracts must use explicit pairings
 
 1. **Configuration Loading**:
 
-   - The script loads the configuration from a specified JSON file and initializes the deployment process.
+    - The script loads the configuration from a specified JSON file and initializes the deployment process.
+
 2. **Module Preparation**:
 
-   - Combines common models and target module schema into a unified `schema.graphql`.
-   - Identifies the events required by the models in the schema based on the dependency files.
-   - Copies necessary ABI files to the appropriate locations.
+    - Combines common models and target module schema into a unified `schema.graphql`.
+    - Identifies the events required by the models in the schema based on the dependency files.
+    - Copies necessary ABI files to the appropriate locations.
+
 3. **Contract Processing**:
 
-   - Processes each contract, including generating "fake" contracts for missing versions to ensure all versions are
-     accounted for.
+    - Processes each contract, including generating "fake" contracts for missing versions to ensure all versions are
+      accounted for.
+
 4. **Subgraph Configuration**:
 
-   - Generates a `subgraph.yaml` file, configuring data sources, event handlers, and mappings for each contract.
+    - Generates a `subgraph.yaml` file, configuring data sources, event handlers, and mappings for each contract.
+
 5. **Code Generation**:
 
-   - If the `--create-src` flag is used, generates TypeScript source files to handle the events specified in the
-     configuration.
+    - If the `--create-src` flag is used, generates TypeScript source files to handle the events specified in the
+      configuration.
+
 6. **Build and Deploy**:
 
-   - Executes `graph codegen` to generate AssemblyScript types and `graph build` to compile the subgraph.
-   - If the `--deploy` flag is used, deploys the subgraph to the specified network, with additional options for Mantle
-     deployment.
+    - Executes `graph codegen` to generate AssemblyScript types and `graph build` to compile the subgraph.
+    - If the `--deploy` flag is used, deploys the subgraph to the specified network, with additional options for Mantle
+      deployment.
+
 7. **Network-Specific Handling**:
 
-   - The `--mantle` flag enables specialized deployment configurations for the Mantle network, including custom node
-     and IPFS endpoints.
+    - The `--mantle` flag enables specialized deployment configurations for the Mantle network, including custom node
+      and IPFS endpoints.
 
 ## Dependency Files
 
 The script uses dependency files to map entity models to the events they depend on. These files are crucial for ensuring
 that all necessary events are captured and processed.
 
-- **Common Dependencies**: Located at `./common/deps_{abi}_{version}.json`.
-- **Target Module Dependencies**: Located at `./{target_module}/deps_{abi}_{version}.json`.
+-   **Common Dependencies**: Located at `./common/deps_{abi}_{version}.json`.
+-   **Target Module Dependencies**: Located at `./{target_module}/deps_{abi}_{version}.json`.
 
 ### Example of Dependency File:
 
 ```json
 {
-  "Account": [
-    "AccountCreated",
-    "Deposited"
-  ],
-  "Position": [
-    "PositionOpened",
-    "PositionClosed"
-  ]
+	"Account": ["AccountCreated", "Deposited"],
+	"Position": ["PositionOpened", "PositionClosed"]
 }
 ```
 
@@ -157,10 +162,7 @@ This file is central to module-specific configurations and should be placed in t
 
 ```json
 {
-  "importModels": [
-    "ModelName1",
-    "ModelName2"
-  ]
+	"importModels": ["ModelName1", "ModelName2"]
 }
 ```
 
@@ -168,49 +170,58 @@ This file is central to module-specific configurations and should be placed in t
 
 1. **Model Imports**:
 
-   - The `importModels` array specifies which models should be imported from the common directory into the module's
-     schema.
-   - These models are included in the final `schema.graphql` file.
+    - The `importModels` array specifies which models should be imported from the common directory into the module's
+      schema.
+    - These models are included in the final `schema.graphql` file.
+
 2. **Schema Generation**:
 
-   - The script first incorporates the imported models into the `schema.graphql`.
-   - Then, it appends the module-specific schema.
+    - The script first incorporates the imported models into the `schema.graphql`.
+    - Then, it appends the module-specific schema.
+
 3. **Custom Configurations**:
 
-   - The file can be extended to include other settings that customize the subgraph preparation process.
+    - The file can be extended to include other settings that customize the subgraph preparation process.
 
 ## Detailed Script Workflow
 
 1. **Clean Up**:
 
-   - The script begins by running a cleanup process to remove any old generated files.
+    - The script begins by running a cleanup process to remove any old generated files.
+
 2. **Load Configuration**:
 
-   - The JSON configuration file is parsed, and a `Config` object is created to manage the deployment.
+    - The JSON configuration file is parsed, and a `Config` object is created to manage the deployment.
+
 3. **Prepare Module**:
 
-   - The `schema.graphql` is generated by combining common models and the target module’s schema.
-   - The script identifies all models in the schema and determines the necessary events using the dependency files.
+    - The `schema.graphql` is generated by combining common models and the target module’s schema.
+    - The script identifies all models in the schema and determines the necessary events using the dependency files.
+
 4. **Process Contracts**:
 
-   - Each contract is processed to handle multiple versions, creating "fake" contracts as needed.
-   - Event signatures and handler names are generated for each event.
+    - Each contract is processed to handle multiple versions, creating "fake" contracts as needed.
+    - Event signatures and handler names are generated for each event.
+
 5. **Generate Subgraph Configuration**:
 
-   - A `subgraph.yaml` file is created, detailing the data sources, event handlers, ABIs, and file paths for each
-     contract.
+    - A `subgraph.yaml` file is created, detailing the data sources, event handlers, ABIs, and file paths for each
+      contract.
+
 6. **Generate Source Files** (if `--create-src` flag is used):
 
-   - TypeScript files (`src_{abi}_{version}.ts`) are generated for each contract version.
-   - Import statements and handler functions for each event are created.
+    - TypeScript files (`src_{abi}_{version}.ts`) are generated for each contract version.
+    - Import statements and handler functions for each event are created.
+
 7. **Build Subgraph**:
 
-   - `graph codegen` is executed to generate AssemblyScript types.
-   - `graph build` compiles the subgraph.
+    - `graph codegen` is executed to generate AssemblyScript types.
+    - `graph build` compiles the subgraph.
+
 8. **Deploy Subgraph** (if `--deploy` flag is used):
 
-   - The script constructs the deployment command based on the network (including Mantle if specified) and executes the
-     `graph deploy` command.
+    - The script constructs the deployment command based on the network (including Mantle if specified) and executes the
+      `graph deploy` command.
 
 ## Legacy PartyA liquidation completion
 
@@ -309,9 +320,9 @@ Each Goldsky command has a default timeout of 900 seconds. Override it with `GOL
 
 ## Troubleshooting
 
-- **Missing Events**: If certain events are not indexed, ensure the dependency files correctly map the events to the
-  relevant entities.
-- **Schema Errors**: Verify that all models specified in `subgraph_config.json` exist in the common models directory.
-- **Deployment Failures**: Double-check network configurations and ensure that the necessary permissions are in place
-  for deployment.
-- **Version Mismatches**: Confirm that all required contract versions are included in the configuration file.
+-   **Missing Events**: If certain events are not indexed, ensure the dependency files correctly map the events to the
+    relevant entities.
+-   **Schema Errors**: Verify that all models specified in `subgraph_config.json` exist in the common models directory.
+-   **Deployment Failures**: Double-check network configurations and ensure that the necessary permissions are in place
+    for deployment.
+-   **Version Mismatches**: Confirm that all required contract versions are included in the configuration file.

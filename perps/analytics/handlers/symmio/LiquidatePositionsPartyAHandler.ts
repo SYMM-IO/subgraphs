@@ -27,7 +27,6 @@ import {
 	upsertSettlementSnapshot,
 } from "../../../common/utils/liquidationDetail"
 import { createPartyALiquidationEvent } from "../../utils/liquidationEvent"
-import { recordLiquidationBatch } from "../../utils/execution"
 import {
 	accumulatePartyALiquidationLockedValues,
 	capturePartyALiquidationQuoteValues,
@@ -147,7 +146,6 @@ function resolvePartyALiquidationSettlementTerms(
 
 export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositionsPartyAHandler<T> {
 	handle(_event: ethereum.Event, version: Version): void {
-		recordLiquidationBatch<T>(_event, version)
 		// @ts-ignore
 		const event = changetype<T>(_event)
 		super.handle(_event, version)
@@ -236,7 +234,7 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 		let entityId = event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString()
 		let entity = LiquidationDetail.load(entityId)
 		if (!entity) return
-		createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "LIQUIDATE_POSITIONS", null)
+		createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "LIQUIDATE_POSITIONS", null, event.params.liquidator)
 		let settlementTerms = resolvePartyALiquidationSettlementTerms(_event, version, liquidationId, liqState, entity)
 		if (settlementTerms === null) return
 

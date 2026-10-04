@@ -21,12 +21,12 @@ export class TransferToBridgeHandler<T> extends BaseHandler {
 		bridge.blockNumber = event.block.number
 		bridge.transaction = event.transaction.hash
 		bridge.save()
-		let transaction = new BridgeTransaction(event.params.transactionId.toString() + "-" + event.address.toHexString())
-		transaction.source = event.address
-		transaction.transactionId = event.params.transactionId
-		transaction.bridge = event.params.bridgeAddress
-		transaction.balanceChange = bridge.id
-		transaction.save()
+		let bridgeTransaction = new BridgeTransaction(event.params.transactionId.toString() + "-" + event.address.toHexString())
+		bridgeTransaction.source = event.address
+		bridgeTransaction.transactionId = event.params.transactionId
+		bridgeTransaction.bridge = event.params.bridgeAddress
+		bridgeTransaction.balanceChange = bridge.id
+		bridgeTransaction.save()
 		updatePartyALatestBalance(_event, version, event.params.user)
 	}
 }
