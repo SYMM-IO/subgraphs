@@ -14,6 +14,7 @@ export function createLiquidationEvent(
 	liquidationId: Bytes,
 	type: string,
 	metadata: string | null,
+	liquidator: Bytes | null = null,
 ): void {
 	let detail = LiquidationDetail.load(liquidationDetailId)
 	if (!detail) return
@@ -26,6 +27,7 @@ export function createLiquidationEvent(
 	entity.liquidationDetail = liquidationDetailId
 	entity.type = type
 	entity.metadata = metadata
+	entity.liquidator = liquidator
 	entity.timestamp = event.block.timestamp
 	entity.blockNumber = event.block.number
 	entity.transaction = event.transaction.hash
@@ -38,8 +40,9 @@ export function createPartyALiquidationEvent(
 	liquidationId: Bytes,
 	type: string,
 	metadata: string | null,
+	liquidator: Bytes | null = null,
 ): void {
-	createLiquidationEvent(event, getLiquidationDetailId(partyA, liquidationId, event.address), liquidationId, type, metadata)
+	createLiquidationEvent(event, getLiquidationDetailId(partyA, liquidationId, event.address), liquidationId, type, metadata, liquidator)
 }
 
 export function createPartyALiquidationEventFromState(
@@ -48,8 +51,9 @@ export function createPartyALiquidationEventFromState(
 	partyA: Address,
 	type: string,
 	metadata: string | null,
+	liquidator: Bytes | null = null,
 ): void {
 	let liqState = getLiquidationStateData(version, event.address, partyA)
 	if (!liqState) return
-	createPartyALiquidationEvent(event, partyA, liqState.liquidationId, type, metadata)
+	createPartyALiquidationEvent(event, partyA, liqState.liquidationId, type, metadata, liquidator)
 }

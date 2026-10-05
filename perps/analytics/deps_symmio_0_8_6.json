@@ -1,5 +1,10 @@
 {
 	"__extends": "deps_symmio_0_8_5.json",
+	"LiquidationEvent": [
+		"LiquidatePartyA",
+		"DeferredLiquidatePartyA",
+		"LiquidatePositionsPartyA(address,address,uint256[],uint256[],uint256[],bytes)"
+	],
 	"UserActivity": [
 		"SendQuote(address,uint256,address[],uint256,uint8,uint8,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
 		"RequestToClosePosition",
@@ -602,6 +607,7 @@
 		"WithdrawInitiated"
 	],
 	"WithdrawRequest": [
+		"Withdraw",
 		"WithdrawInitiated",
 		"WithdrawAccepted",
 		"WithdrawFinalized",

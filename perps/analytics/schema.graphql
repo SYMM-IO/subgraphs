@@ -371,6 +371,32 @@ type BalanceChange @entity(immutable: true) {
 }
 
 """
+Bridge transfer initiated by TransferToBridge; settlement is not tracked here.
+"""
+type BridgeTransaction @entity(immutable: true) {
+	"""
+	Composite `{transactionId}-{SYMMIO core}` identifier.
+	"""
+	id: ID!
+	"""
+	SYMMIO core contract that emitted TransferToBridge.
+	"""
+	source: Bytes!
+	"""
+	Protocol bridge transaction id, not the EVM transaction hash.
+	"""
+	transactionId: BigInt!
+	"""
+	Registered bridge receiving this transfer.
+	"""
+	bridge: Bytes!
+	"""
+	BRIDGE balance movement carrying the account, amount, collateral, and EVM provenance.
+	"""
+	balanceChange: BalanceChange!
+}
+
+"""
 Immutable lifecycle event log attached to a normalized Quote entity.
 """
 type QuoteEvent @entity(immutable: true) {
@@ -453,6 +479,10 @@ type LiquidationEvent @entity(immutable: true) {
 	Optional handler-built metadata serialized as a string.
 	"""
 	metadata: String
+	"""
+	Caller that executed a LIQUIDATE_PARTY_A start or LIQUIDATE_POSITIONS batch; null for other types. A batch executor is not necessarily the starter in `LiquidationDetail.liquidator`.
+	"""
+	liquidator: Bytes
 	"""
 	Block timestamp of the lifecycle trigger event.
 	"""
@@ -2804,6 +2834,10 @@ type LiquidationDetail @entity(immutable: false) {
 	"""
 	liquidationTimestamp: BigInt!
 	"""
+	Historical block in which PartyA became insolvent, emitted by DeferredLiquidatePartyA; null for immediate liquidations, which start in that block.
+	"""
+	liquidationBlockNumber: BigInt
+	"""
 	Liquidator address associated with this liquidation row when present.
 	"""
 	liquidator: Bytes
@@ -3245,6 +3279,10 @@ type WithdrawRequest @entity(immutable: false) {
 	Transaction hash of the core WithdrawInitiated event.
 	"""
 	transaction: Bytes!
+	"""
+	Core WITHDRAW movement emitted with WithdrawFinalized, verified against this request's owner, core, and amount; its timestamp, block, transaction, and sender (the finalizing signer) describe completion. Null when unmatched.
+	"""
+	finalizedBalanceChange: BalanceChange
 }
 
 """

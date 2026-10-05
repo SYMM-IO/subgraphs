@@ -16,7 +16,7 @@ export class DeferredLiquidatePartyAHandler<T> extends CommonDeferredLiquidatePa
 			applyPartyALiquidationDeferredBalance(_event, event.params.partyA, event.params.liquidationId)
 		}
 
-		createPartyALiquidationEvent(_event, event.params.partyA, event.params.liquidationId, "LIQUIDATE_PARTY_A", null)
+		createPartyALiquidationEvent(_event, event.params.partyA, event.params.liquidationId, "LIQUIDATE_PARTY_A", null, event.params.liquidator)
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 	}
 }

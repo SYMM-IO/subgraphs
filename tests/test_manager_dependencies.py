@@ -80,7 +80,7 @@ class DependencyInheritanceTests(TestCase):
         finally:
             os.chdir(previous_cwd)
 
-        self.assertEqual(events, [*quote_events, "AddAccount"])
+        self.assertEqual(events, [*quote_events, "TradingFeeCharged", "AddAccount"])
 
     def test_ordered_unique_preserves_first_seen_order(self) -> None:
         self.assertEqual(manager.ordered_unique(["B", "A", "B", "C", "A"]), ["B", "A", "C"])

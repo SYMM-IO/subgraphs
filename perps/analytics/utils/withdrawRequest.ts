@@ -1,5 +1,6 @@
-import { Address, BigInt, Bytes, store } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, ethereum, log, store } from "@graphprotocol/graph-ts"
 import {
+	BalanceChange,
 	WithdrawCoreLifecycleHint,
 	WithdrawFinalizationHint,
 	WithdrawRequest,
@@ -248,4 +249,25 @@ export function resolveWithdrawRequest(eventUser: Address, requestId: BigInt, so
 	if (direct && isCompletableWithdrawRequest(direct)) return direct
 
 	return loadSingleCompletableWithdrawRequest(requestId, source)
+}
+
+// The core emits Withdraw(signer, user, totalAmount) immediately before WithdrawFinalized(requestId, signer).
+export function linkWithdrawFinalization(wr: WithdrawRequest, event: ethereum.Event, signer: Address): void {
+	let id = event.transaction.hash.toHexString() + "-" + event.logIndex.minus(BigInt.fromI32(1)).toString()
+	let movement = BalanceChange.load(id)
+	if (movement) {
+		let sender = movement.sender
+		if (
+			movement.type == "WITHDRAW" &&
+			movement.source.equals(event.address) &&
+			sender !== null &&
+			sender.equals(signer) &&
+			movement.account.equals(wr.user) &&
+			movement.amount.equals(wr.amount)
+		) {
+			wr.finalizedBalanceChange = movement.id
+			return
+		}
+	}
+	log.warning("Cannot match withdraw request {} finalization to its Withdraw movement {}", [wr.id, id])
 }

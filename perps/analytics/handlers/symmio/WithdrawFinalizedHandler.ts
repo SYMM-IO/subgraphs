@@ -4,7 +4,7 @@ import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts"
 import { Version } from "../../../common/BaseHandler"
 import { updatePartyALatestBalance } from "../../utils/latestAccountBalance"
 import { updateWithdrawHierarchyHistories } from "../../utils/historyHelpers"
-import { removeWithdrawRequestFromLookup, resolveWithdrawRequest } from "../../utils/withdrawRequest"
+import { linkWithdrawFinalization, removeWithdrawRequestFromLookup, resolveWithdrawRequest } from "../../utils/withdrawRequest"
 import { removeWithdrawRequestFromAffiliateExpressWithdrawComponents } from "../../utils/affiliateExpressWithdrawComponents"
 
 export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<T> {
@@ -17,6 +17,7 @@ export class WithdrawFinalizedHandler<T> extends CommonWithdrawFinalizedHandler<
 		if (!wr) return
 		wr.status = "COMPLETED"
 		wr.updateTimestamp = _event.block.timestamp
+		linkWithdrawFinalization(wr, _event, event.params.user)
 		let account = Account.load(wr.user.toHexString())
 		if (account) {
 			updateWithdrawHierarchyHistories(account, _event.block.timestamp, BigInt.zero(), BigInt.fromI32(-1), BigInt.fromI32(1), wr.amount.neg())

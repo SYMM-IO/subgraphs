@@ -16,9 +16,9 @@ export class LiquidatePartyAHandler<T> extends CommonLiquidatePartyAHandler<T> {
 		if (version >= Version.v_0_8_3) {
 			let liquidationId = _event.parameters[5].value.toBytes()
 			if (version == Version.v_0_8_6) startPartyALiquidationTracking(_event, event.params.partyA, liquidationId)
-			createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "LIQUIDATE_PARTY_A", null)
+			createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "LIQUIDATE_PARTY_A", null, event.params.liquidator)
 		} else {
-			createPartyALiquidationEventFromState(_event, version, event.params.partyA, "LIQUIDATE_PARTY_A", null)
+			createPartyALiquidationEventFromState(_event, version, event.params.partyA, "LIQUIDATE_PARTY_A", null, event.params.liquidator)
 		}
 		updatePartyALatestBalance(_event, version, event.params.partyA)
 	}

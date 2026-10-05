@@ -234,7 +234,7 @@ export class LiquidatePositionsPartyAHandler<T> extends CommonLiquidatePositions
 		let entityId = event.params.partyA.toHexString() + "-" + liquidationId.toHexString() + "-" + event.address.toHexString()
 		let entity = LiquidationDetail.load(entityId)
 		if (!entity) return
-		createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "LIQUIDATE_POSITIONS", null)
+		createPartyALiquidationEvent(_event, event.params.partyA, liquidationId, "LIQUIDATE_POSITIONS", null, event.params.liquidator)
 		let settlementTerms = resolvePartyALiquidationSettlementTerms(_event, version, liquidationId, liqState, entity)
 		if (settlementTerms === null) return
 

@@ -138,6 +138,18 @@ type Quote @entity(immutable: false) {
 	Close-fee rate in 1e18 precision, where 1e18 is 100%; zero for older core versions.
 	"""
 	closeFee: BigInt!
+	"""
+	Open fee charged by TradingFeeCharged (v0.8.5+), in 18-decimal internal units; analytics only. Null when the quote never opened or opened before fee events were emitted.
+	"""
+	paidOpenFee: BigInt
+	"""
+	Close fees charged by TradingFeeCharged (v0.8.5+), summed across partial closes, in 18-decimal internal units; analytics only. Non-null values are complete; null before the first charge, and permanently when the quote was partly closed before fee events were emitted.
+	"""
+	paidCloseFee: BigInt
+	"""
+	Raw core quote affiliate carried by TradingFeeCharged; can differ from the account-source attribution in `affiliate`. Analytics only.
+	"""
+	feeAffiliate: Bytes
 
 	"""
 	Creation/catch-up copy of the 1e18-scaled opened-price basis; not continuously synchronized.
