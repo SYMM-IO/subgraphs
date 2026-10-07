@@ -76,6 +76,8 @@ import {SetCollateralHandler} from './handlers/symmio/SetCollateralHandler'
 import {SetCollateral} from '../../generated/symmio_0_8_4/symmio_0_8_4'
 import {SetFeeCollectorHandler} from './handlers/symmio/SetFeeCollectorHandler'
 import {SetFeeCollector} from '../../generated/symmio_0_8_4/symmio_0_8_4'
+import {SetSuspendedAddressHandler} from './handlers/symmio/SetSuspendedAddressHandler'
+import {SetSuspendedAddress} from '../../generated/symmio_0_8_4/symmio_0_8_4'
 import {SetSymbolFundingStateHandler} from './handlers/symmio/SetSymbolFundingStateHandler'
 import {SetSymbolFundingState} from '../../generated/symmio_0_8_4/symmio_0_8_4'
 import {SetSymbolTradingFeeHandler} from './handlers/symmio/SetSymbolTradingFeeHandler'
@@ -369,6 +371,13 @@ export function handleSetCollateral(event: SetCollateral): void {
 export function handleSetFeeCollector(event: SetFeeCollector): void {
     ensureSyncMeta(event.block)
     let handler = new SetFeeCollectorHandler<SetFeeCollector>()
+    handler.handle(event, Version.v_0_8_4)
+}
+
+
+export function handleSetSuspendedAddress(event: SetSuspendedAddress): void {
+    ensureSyncMeta(event.block)
+    let handler = new SetSuspendedAddressHandler<SetSuspendedAddress>()
     handler.handle(event, Version.v_0_8_4)
 }
 

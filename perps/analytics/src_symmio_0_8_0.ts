@@ -54,6 +54,8 @@ import {SendQuoteHandler} from './handlers/symmio/SendQuoteHandler'
 import {SendQuote} from '../../generated/symmio_0_8_0/symmio_0_8_0'
 import {SetCollateralHandler} from './handlers/symmio/SetCollateralHandler'
 import {SetCollateral} from '../../generated/symmio_0_8_0/symmio_0_8_0'
+import {SetSuspendedAddressHandler} from './handlers/symmio/SetSuspendedAddressHandler'
+import {SetSuspendedAddress} from '../../generated/symmio_0_8_0/symmio_0_8_0'
 import {SetSymbolTradingFeeHandler} from './handlers/symmio/SetSymbolTradingFeeHandler'
 import {SetSymbolTradingFee} from '../../generated/symmio_0_8_0/symmio_0_8_0'
 import {SetSymbolValidationStateHandler} from './handlers/symmio/SetSymbolValidationStateHandler'
@@ -251,6 +253,13 @@ export function handleSendQuote(event: SendQuote): void {
 export function handleSetCollateral(event: SetCollateral): void {
 	ensureSyncMeta(event.block)
     let handler = new SetCollateralHandler<SetCollateral>()
+    handler.handle(event, Version.v_0_8_0)
+}
+
+
+export function handleSetSuspendedAddress(event: SetSuspendedAddress): void {
+    ensureSyncMeta(event.block)
+    let handler = new SetSuspendedAddressHandler<SetSuspendedAddress>()
     handler.handle(event, Version.v_0_8_0)
 }
 

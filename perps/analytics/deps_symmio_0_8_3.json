@@ -1,4 +1,6 @@
 {
+	"AccountSuspension": ["SetSuspendedAddress"],
+	"AccountSuspensionLookup": ["SetSuspendedAddress"],
 	"LiquidationEvent": ["LiquidatePartyA", "DeferredLiquidatePartyA", "LiquidatePositionsPartyA"],
 	"BridgeTransaction": ["TransferToBridge"],
 	"UserActivity": [

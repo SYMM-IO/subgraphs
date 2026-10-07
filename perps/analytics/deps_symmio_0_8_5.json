@@ -1,4 +1,7 @@
 {
+	"AccountSuspension": ["SetSuspendedAddress", "WithdrawSuspendedUser"],
+	"AccountSuspensionLookup": ["SetSuspendedAddress", "WithdrawSuspendedUser"],
+	"SuspendedWithdrawal": ["WithdrawSuspendedUser"],
 	"LiquidationEvent": ["LiquidatePartyA", "DeferredLiquidatePartyA", "LiquidatePositionsPartyA"],
 	"BridgeTransaction": ["TransferToBridge"],
 	"Quote": ["TradingFeeCharged"],

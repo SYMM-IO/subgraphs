@@ -124,6 +124,8 @@ import {SetPartyALiquidationSnapshotHandler} from './handlers/symmio/SetPartyALi
 import {SetPartyALiquidationSnapshot} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetShortFundingFeeHandler} from './handlers/symmio/SetShortFundingFeeHandler'
 import {SetShortFundingFee} from '../../generated/symmio_0_8_6/symmio_0_8_6'
+import {SetSuspendedAddressHandler} from './handlers/symmio/SetSuspendedAddressHandler'
+import {SetSuspendedAddress} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSymbolFundingStateHandler} from './handlers/symmio/SetSymbolFundingStateHandler'
 import {SetSymbolFundingState} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {SetSymbolTradingFeeHandler} from './handlers/symmio/SetSymbolTradingFeeHandler'
@@ -177,6 +179,8 @@ import {WithdrawRejected} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {WithdrawSpeedUpAcceptedHandler} from './handlers/symmio/WithdrawSpeedUpAcceptedHandler'
 import {WithdrawSpeedUpAccepted} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {WithdrawSuspendedHandler} from './handlers/symmio/WithdrawSuspendedHandler'
+import {WithdrawSuspendedUserHandler} from './handlers/symmio/WithdrawSuspendedUserHandler'
+import {WithdrawSuspendedUser} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {WithdrawSuspended} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {Withdraw} from '../../generated/symmio_0_8_6/symmio_0_8_6'
 import {ensureSyncMeta} from './src_sync_meta'
@@ -625,6 +629,13 @@ export function handleSetShortFundingFee(event: SetShortFundingFee): void {
 }
 
 
+export function handleSetSuspendedAddress(event: SetSuspendedAddress): void {
+    ensureSyncMeta(event.block)
+    let handler = new SetSuspendedAddressHandler<SetSuspendedAddress>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
 export function handleSetSymbolFundingState(event: SetSymbolFundingState): void {
     ensureSyncMeta(event.block)
     let handler = new SetSymbolFundingStateHandler<SetSymbolFundingState>()
@@ -810,6 +821,13 @@ export function handleWithdrawSpeedUpAccepted(event: WithdrawSpeedUpAccepted): v
 export function handleWithdrawSuspended(event: WithdrawSuspended): void {
     ensureSyncMeta(event.block)
     let handler = new WithdrawSuspendedHandler<WithdrawSuspended>()
+    handler.handle(event, Version.v_0_8_6)
+}
+
+
+export function handleWithdrawSuspendedUser(event: WithdrawSuspendedUser): void {
+    ensureSyncMeta(event.block)
+    let handler = new WithdrawSuspendedUserHandler<WithdrawSuspendedUser>()
     handler.handle(event, Version.v_0_8_6)
 }
 
