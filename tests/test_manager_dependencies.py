@@ -287,6 +287,24 @@ class GeneratedSourceParityTests(TestCase):
         finally:
             os.chdir(previous_cwd)
 
+    def test_suspension_handlers_cover_all_core_versions(self) -> None:
+        for minor in range(7):
+            version = f"0_8_{minor}"
+            with self.subTest(version=version):
+                contract = manager.Contract(address="0x1", abi="symmio", version=version, startBlock="0")
+                event_refs = manager.get_needed_events_for(
+                    ["AccountSuspension", "AccountSuspensionLookup", "SuspendedWithdrawal"], "perps/analytics", contract
+                )
+                expected = ["SetSuspendedAddress"]
+                if minor >= 5:
+                    expected.append("WithdrawSuspendedUser")
+                self.assertEqual(event_refs, expected)
+                events = manager.get_events_with_signatures(event_refs, contract)
+                self.assertEqual({event.name for event in events}, set(expected))
+                source = (REPO_ROOT / "perps/analytics" / f"src_symmio_{version}.ts").read_text()
+                for event in events:
+                    self.assertIn(f"export function {event.handler_name}(", source)
+
 
 class HandlerAbiDependencyTests(TestCase):
     def test_versioned_shared_handler_bindings_are_declared(self) -> None:

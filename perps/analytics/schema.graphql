@@ -2444,6 +2444,136 @@ type GrantedRole @entity(immutable: false) {
 }
 
 """
+One suspension period for a Core/user pair. Unsuspending closes this row; suspending again creates another. Repeated flags preserve the original start/end. A null start means indexing first observed an unsuspend or suspended withdrawal without its earlier suspension event.
+"""
+type AccountSuspension @entity(immutable: false) {
+	"""
+	Transaction hash and block-global log index of the event that first created this period, separated by a hyphen.
+	"""
+	id: ID!
+	"""
+	Core contract whose suspension state is tracked; the same user on another Core has independent periods.
+	"""
+	source: Bytes!
+	"""
+	Exact suspended address from the event, independent of Account/profile existence or parent/child relationships.
+	"""
+	user: Bytes!
+	"""
+	Whether this period remains open at the indexed block. At most one period is open per Core/user pair.
+	"""
+	isSuspended: Boolean!
+	"""
+	Transaction that began this period; null when the starting suspension event was not observed.
+	"""
+	suspendTransaction: Bytes
+	"""
+	Unix timestamp in seconds of the starting suspension event; null when its start was not observed.
+	"""
+	suspendTimestamp: BigInt
+	"""
+	Block containing the starting suspension event; null when its start was not observed.
+	"""
+	suspendBlockNumber: BigInt
+	"""
+	Block-global log index of the starting suspension event; null when its start was not observed.
+	"""
+	suspendLogIndex: BigInt
+	"""
+	Transaction that closed this period; null while it remains suspended.
+	"""
+	unsuspendTransaction: Bytes
+	"""
+	Unix timestamp in seconds of the event that closed this period; null while it remains suspended.
+	"""
+	unsuspendTimestamp: BigInt
+	"""
+	Block containing the event that closed this period; null while it remains suspended.
+	"""
+	unsuspendBlockNumber: BigInt
+	"""
+	Block-global log index of the event that closed this period; null while it remains suspended.
+	"""
+	unsuspendLogIndex: BigInt
+	"""
+	Sum of observed WithdrawSuspendedUser amounts during this period, in collateral token smallest units. Sum all periods for the Core/user lifetime total; the accompanying Withdraw event is not counted again.
+	"""
+	withdrawnSuspendedAmount: BigInt!
+	"""
+	Individual suspended-funds movements linked to this period. Paginate this relation or query SuspendedWithdrawal directly for complete history.
+	"""
+	withdrawals: [SuspendedWithdrawal!]! @derivedFrom(field: "suspension")
+	"""
+	Unix timestamp in seconds of the latest suspension-state event or suspended withdrawal applied to this period.
+	"""
+	updateTimestamp: BigInt!
+}
+
+"""
+One WithdrawSuspendedUser event linked to its suspension period. This records internal Core balance moved to the recipient, not an ERC-20 payout from Core. Available from Core 0.8.5 onward.
+"""
+type SuspendedWithdrawal @entity(immutable: true) {
+	"""
+	Transaction hash and block-global log index of the withdrawal event, separated by a hyphen.
+	"""
+	id: ID!
+	"""
+	Suspension period open when this withdrawal was observed.
+	"""
+	suspension: AccountSuspension!
+	"""
+	Core contract that emitted WithdrawSuspendedUser.
+	"""
+	source: Bytes!
+	"""
+	Suspended address whose internal balance was debited.
+	"""
+	user: Bytes!
+	"""
+	Authorized caller reported by the event.
+	"""
+	admin: Bytes!
+	"""
+	Address whose internal Core balance was credited.
+	"""
+	recipient: Bytes!
+	"""
+	Moved amount in the collateral token's smallest units, preserved exactly from the event.
+	"""
+	amount: BigInt!
+	"""
+	Hash of the transaction containing this withdrawal event.
+	"""
+	transactionHash: Bytes!
+	"""
+	Unix timestamp in seconds of the block containing this withdrawal event.
+	"""
+	blockTimestamp: BigInt!
+	"""
+	Block number containing this withdrawal event.
+	"""
+	blockNumber: BigInt!
+	"""
+	Index of this withdrawal log within its block.
+	"""
+	logIndex: BigInt!
+}
+
+"""
+Internal mapping lookup for the latest suspension period per Core/user pair. Application queries should use AccountSuspension and SuspendedWithdrawal.
+"""
+type AccountSuspensionLookup @entity(immutable: false) {
+	"""
+	Lowercase Core address and user address separated by a hyphen.
+	"""
+	id: ID!
+	"""
+	Latest observed suspension period, retained after unsuspension so repeated flags do not create extra periods.
+	"""
+	suspension: AccountSuspension!
+}
+
+"""
 Singleton cursor used by open-interest history catch-up.
 """
 type OpenInterestSettleDay @entity(immutable: false) {

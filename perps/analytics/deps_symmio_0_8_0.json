@@ -1,4 +1,6 @@
 {
+	"AccountSuspension": ["SetSuspendedAddress"],
+	"AccountSuspensionLookup": ["SetSuspendedAddress"],
 	"UserActivity": [
 		"SendQuote",
 		"RequestToClosePosition",

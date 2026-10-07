@@ -1,4 +1,6 @@
 {
+	"AccountSuspension": ["SetSuspendedAddress"],
+	"AccountSuspensionLookup": ["SetSuspendedAddress"],
 	"LiquidationEvent": ["LiquidatePartyA", "LiquidatePositionsPartyA"],
 	"UserActivity": [
 		"SendQuote",
