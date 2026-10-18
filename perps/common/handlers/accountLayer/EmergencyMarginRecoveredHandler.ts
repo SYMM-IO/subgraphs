@@ -30,7 +30,6 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 			va.updateTimestamp = event.block.timestamp
 			va.totalPositions = BigInt.zero()
 			va.activePositions = BigInt.zero()
-			va.latestMarginBalance = BigInt.zero()
 			va.reuseCount = BigInt.zero()
 			initializeVirtualAccountCounters(va)
 			setVirtualAccountProfileDefaults(va, SubAccount.load(event.params.subAccount.toHexString()), coreSource, event.address)
@@ -64,7 +63,6 @@ export class EmergencyMarginRecoveredHandler<T> extends BaseAccountLayerHandler 
 		let sub = SubAccount.load(mt.subAccount)
 		if (sub) {
 			sub.lastMarginTransferTimestamp = event.block.timestamp
-			sub.latestMarginBalance = (sub.latestMarginBalance === null ? BigInt.zero() : sub.latestMarginBalance!).minus(event.params.amount)
 			sub.save()
 		}
 		refreshAccountLayerMarginLatestBalances(event, coreSource, event.params.subAccount, event.params.virtualAccount)

@@ -99,10 +99,6 @@ type SubAccount @entity(immutable: false) {
 	"""
 	legacyImportedTimestamp: BigInt
 	"""
-	Indexer-maintained net AddMargin minus RemoveMargin and EmergencyMarginRecovered amounts; not an authoritative core balance.
-	"""
-	latestMarginBalance: BigInt
-	"""
 	Latest trade timestamp routed through this sub-account.
 	"""
 	lastTradeTimestamp: BigInt

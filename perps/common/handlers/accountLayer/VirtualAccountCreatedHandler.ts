@@ -50,7 +50,6 @@ export class VirtualAccountCreatedHandler<T> extends BaseAccountLayerHandler {
 		va.updateTimestamp = event.block.timestamp
 		va.totalPositions = BigInt.zero()
 		va.activePositions = BigInt.zero()
-		va.latestMarginBalance = BigInt.zero()
 		va.reuseCount = BigInt.zero()
 		initializeVirtualAccountCounters(va)
 
