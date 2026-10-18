@@ -71,10 +71,6 @@ type VirtualAccount @entity(immutable: false) {
 	"""
 	isolationType: Int
 	"""
-	Indexer-maintained net AddMargin minus RemoveMargin while this VA existed; excludes emergency recovery and can miss pre-creation AddMargin.
-	"""
-	latestMarginBalance: BigInt
-	"""
 	Latest trade timestamp routed through this virtual account.
 	"""
 	lastTradeTimestamp: BigInt

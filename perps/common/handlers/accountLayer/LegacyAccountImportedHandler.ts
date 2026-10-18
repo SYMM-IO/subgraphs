@@ -46,7 +46,6 @@ export class LegacyAccountImportedHandler<T> extends BaseAccountLayerHandler {
 			sub.activeVirtualAccounts = BigInt.zero()
 			sub.activePositions = BigInt.zero()
 			sub.totalPositions = BigInt.zero()
-			sub.latestMarginBalance = BigInt.zero()
 			initializeSubAccountCounters(sub)
 		}
 

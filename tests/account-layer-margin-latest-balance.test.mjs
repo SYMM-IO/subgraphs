@@ -104,3 +104,23 @@ test("v0.8.6 analytics indexes core balance change events", () => {
 	assert.match(source, /BalanceChangePartyAHandler/, "v0.8.6 source must wire PartyA balance change handler")
 	assert.match(source, /BalanceChangePartyBHandler/, "v0.8.6 source must wire PartyB balance change handler")
 })
+
+test("account-layer entities no longer expose the margin-flow counter as a balance", () => {
+	for (const model of ["SubAccount", "VirtualAccount"]) {
+		assert.doesNotMatch(read(`perps/common/models/${model}.graphql`), /latestMarginBalance/)
+	}
+	for (const handler of [
+		"AddMargin",
+		"RemoveMargin",
+		"EmergencyMarginRecovered",
+		"SubAccountCreated",
+		"VirtualAccountCreated",
+		"LegacyAccountImported",
+	]) {
+		assert.doesNotMatch(read(`perps/common/handlers/accountLayer/${handler}Handler.ts`), /latestMarginBalance/)
+	}
+	const schema = read("perps/analytics/schema.graphql")
+	assert.match(schema, /type LatestAccountBalance @entity/)
+	assert.match(schema, /freeBalance: BigInt!/)
+	assert.match(schema, /totalBalance: BigInt!/)
+})

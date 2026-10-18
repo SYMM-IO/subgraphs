@@ -29,13 +29,11 @@ export class AddMarginHandler<T> extends BaseAccountLayerHandler {
 		let sub = SubAccount.load(mt.subAccount)
 		if (sub) {
 			sub.lastMarginTransferTimestamp = event.block.timestamp
-			sub.latestMarginBalance = (sub.latestMarginBalance === null ? BigInt.zero() : sub.latestMarginBalance!).plus(event.params.amount)
 			sub.save()
 		}
 		let va = VirtualAccount.load(mt.virtualAccount)
 		if (va) {
 			va.lastMarginTransferTimestamp = event.block.timestamp
-			va.latestMarginBalance = (va.latestMarginBalance === null ? BigInt.zero() : va.latestMarginBalance!).plus(event.params.amount)
 			va.save()
 		}
 		if (sub) {
